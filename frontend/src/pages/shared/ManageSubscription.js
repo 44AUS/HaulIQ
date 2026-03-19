@@ -100,7 +100,6 @@ export default function ManageSubscription() {
         {plans.map(plan => {
           const isCurrent = currentSub?.plan?.id === plan.id;
           const isUpgrade = TIER_ORDER[plan.tier] > TIER_ORDER[currentTier];
-          const isDowngrade = TIER_ORDER[plan.tier] < TIER_ORDER[currentTier];
 
           return (
             <div key={plan.id}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link, Navigate } from 'react-router-dom';
 import { Truck, Check, AlertCircle, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 

@@ -3,8 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Truck, ArrowRight, ArrowLeft, Check, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const STEPS = ['role', 'info', 'plan', 'done'];
-
 const CARRIER_PLANS_BRIEF = [
   { id: 'basic', name: 'Basic', price: '$0/mo', perks: ['20 loads/day', 'Basic calculator'] },
   { id: 'pro',   name: 'Pro',   price: '$49/mo', perks: ['Unlimited loads', 'Earnings Brain', 'Broker ratings'], popular: true },
@@ -30,6 +28,7 @@ export default function Signup() {
 
   const updateForm = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const plans = role === 'broker' ? BROKER_PLANS_BRIEF : CARRIER_PLANS_BRIEF;
   const selectedPlanObj = plans.find(p => p.id === plan);
   const isPaid = selectedPlanObj && selectedPlanObj.price !== '$0/mo';
 
@@ -37,15 +36,12 @@ export default function Signup() {
     const result = await signup({ ...form, role, plan });
     if (result) {
       if (isPaid && result.planId) {
-        // Redirect to Adyen checkout for paid plans
         navigate(`/checkout?plan_id=${result.planId}`);
       } else {
         setStep(3);
       }
     }
   };
-
-  const plans = role === 'broker' ? BROKER_PLANS_BRIEF : CARRIER_PLANS_BRIEF;
 
   return (
     <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4 py-12">
