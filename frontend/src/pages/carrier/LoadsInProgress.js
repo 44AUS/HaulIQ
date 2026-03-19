@@ -1,6 +1,8 @@
-import React from 'react';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw, FileText, CheckCircle } from 'lucide-react';
 import { CARRIER_ACTIVE_LOADS } from '../../data/sampleData';
+import { useMessaging } from '../../context/MessagingContext';
+import RateConfirmationModal from '../../components/shared/RateConfirmationModal';
 
 const STATUS_CONFIG = {
   quoted:     { label: 'Awaiting Response', cls: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
@@ -49,8 +51,9 @@ function StatusTimeline({ status }) {
   );
 }
 
-function LoadProgressCard({ load }) {
+function LoadProgressCard({ load, onOpenRC, getRCForLoad }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.quoted;
+  const rc = getRCForLoad(load.id);
 
   return (
     <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
@@ -99,6 +102,37 @@ function LoadProgressCard({ load }) {
         </div>
       </div>
 
+      {/* RC Status Banner */}
+      {(() => {
+        if (!rc) return null;
+        if (rc.status === 'pending_carrier') return (
+          <div className="mb-4 flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
+              <FileText size={14} className="text-yellow-400" />
+              <span className="text-yellow-400 text-sm font-medium">Rate Confirmation requires your signature</span>
+            </div>
+            <button onClick={() => onOpenRC(rc)} className="btn-primary text-xs py-1.5 px-3">Review & Sign</button>
+          </div>
+        );
+        if (rc.status === 'fully_signed') return (
+          <div className="mb-4 flex items-center justify-between bg-brand-500/5 border border-brand-500/20 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-brand-400" />
+              <span className="text-brand-400 text-sm">Rate Confirmation signed</span>
+            </div>
+            <button onClick={() => onOpenRC(rc)} className="text-brand-400 hover:text-brand-300 text-xs underline">View RC</button>
+          </div>
+        );
+        return null;
+      })()}
+
+      {/* Booked — RC pending note */}
+      {load.status === 'booked' && rc && rc.status === 'pending_carrier' && (
+        <div className="mb-4 bg-dark-700/40 border border-dark-400/20 rounded-lg px-3 py-2">
+          <p className="text-dark-400 text-xs">Sign the Rate Confirmation before pickup.</p>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
@@ -131,10 +165,21 @@ function LoadProgressCard({ load }) {
           {load.carrierNote && (
             <p className="text-xs text-dark-300 italic truncate flex-1 mr-3">"{load.carrierNote}"</p>
           )}
-          <button className="btn-secondary text-xs flex items-center gap-1.5 flex-shrink-0">
-            <RefreshCw size={12} />
-            Update Status
-          </button>
+          {(!rc || rc.status === 'fully_signed') ? (
+            <button className="btn-secondary text-xs flex items-center gap-1.5 flex-shrink-0">
+              <RefreshCw size={12} />
+              Update Status
+            </button>
+          ) : (
+            <button
+              disabled
+              title="Sign the Rate Confirmation first"
+              className="btn-secondary text-xs flex items-center gap-1.5 flex-shrink-0 opacity-40 cursor-not-allowed"
+            >
+              <RefreshCw size={12} />
+              Update Status
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -143,6 +188,8 @@ function LoadProgressCard({ load }) {
 
 export default function CarrierLoadsInProgress() {
   const loads = CARRIER_ACTIVE_LOADS;
+  const { getRCForLoad, carrierSignRC } = useMessaging();
+  const [rcModal, setRcModal] = useState(null);
 
   const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
   const bookedCount    = loads.filter(l => l.status === 'booked').length;
@@ -185,9 +232,23 @@ export default function CarrierLoadsInProgress() {
       ) : (
         <div className="space-y-4">
           {loads.map(load => (
-            <LoadProgressCard key={load.id} load={load} />
+            <LoadProgressCard
+              key={load.id}
+              load={load}
+              onOpenRC={setRcModal}
+              getRCForLoad={getRCForLoad}
+            />
           ))}
         </div>
+      )}
+
+      {rcModal && (
+        <RateConfirmationModal
+          rc={rcModal}
+          role="carrier"
+          onSign={(sig) => { carrierSignRC(rcModal.id, sig); }}
+          onClose={() => setRcModal(null)}
+        />
       )}
     </div>
   );

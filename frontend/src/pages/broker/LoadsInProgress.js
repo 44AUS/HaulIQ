@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle } from 'lucide-react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, FileText, CheckCircle } from 'lucide-react';
 import { BROKER_ACTIVE_LOADS } from '../../data/sampleData';
+import { useMessaging } from '../../context/MessagingContext';
+import RateConfirmationModal from '../../components/shared/RateConfirmationModal';
 
 const STATUS_CONFIG = {
   quoted:     { label: 'Awaiting Response', cls: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
@@ -52,8 +54,9 @@ function StatusTimeline({ status }) {
   );
 }
 
-function BrokerLoadCard({ load }) {
+function BrokerLoadCard({ load, onOpenRC, getRCForLoad }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.available;
+  const rc = getRCForLoad(load.id);
 
   return (
     <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
@@ -99,6 +102,30 @@ function BrokerLoadCard({ load }) {
           <span>Drop: <span className="text-dark-200">{load.delivery}</span></span>
         </div>
       </div>
+
+      {/* RC Status Banner */}
+      {(() => {
+        if (!rc) return null;
+        if (rc.status === 'pending_carrier') return (
+          <div className="mb-4 flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
+              <FileText size={14} className="text-yellow-400" />
+              <span className="text-yellow-400 text-sm">Awaiting carrier signature on Rate Confirmation</span>
+            </div>
+            <button onClick={() => onOpenRC(rc)} className="text-yellow-400 hover:text-yellow-300 text-xs underline">View RC</button>
+          </div>
+        );
+        if (rc.status === 'fully_signed') return (
+          <div className="mb-4 flex items-center justify-between bg-brand-500/5 border border-brand-500/20 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle size={14} className="text-brand-400" />
+              <span className="text-brand-400 text-sm">Rate Confirmation fully signed</span>
+            </div>
+            <button onClick={() => onOpenRC(rc)} className="text-brand-400 hover:text-brand-300 text-xs underline">View RC</button>
+          </div>
+        );
+        return null;
+      })()}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
@@ -159,6 +186,9 @@ function BrokerLoadCard({ load }) {
 }
 
 export default function BrokerLoadsInProgress() {
+  const { getRCForLoad } = useMessaging();
+  const [rcModal, setRcModal] = useState(null);
+
   const activeLoads    = BROKER_ACTIVE_LOADS.filter(l => l.status !== 'delivered');
   const deliveredLoads = BROKER_ACTIVE_LOADS.filter(l => l.status === 'delivered');
 
@@ -208,7 +238,12 @@ export default function BrokerLoadsInProgress() {
       ) : (
         <div className="space-y-4 mb-8">
           {activeLoads.map(load => (
-            <BrokerLoadCard key={load.id} load={load} />
+            <BrokerLoadCard
+              key={load.id}
+              load={load}
+              onOpenRC={setRcModal}
+              getRCForLoad={getRCForLoad}
+            />
           ))}
         </div>
       )}
@@ -219,10 +254,24 @@ export default function BrokerLoadsInProgress() {
           <h2 className="text-lg font-semibold text-dark-200 mb-4">Completed</h2>
           <div className="space-y-4">
             {deliveredLoads.map(load => (
-              <BrokerLoadCard key={load.id} load={load} />
+              <BrokerLoadCard
+                key={load.id}
+                load={load}
+                onOpenRC={setRcModal}
+                getRCForLoad={getRCForLoad}
+              />
             ))}
           </div>
         </div>
+      )}
+
+      {rcModal && (
+        <RateConfirmationModal
+          rc={rcModal}
+          role="broker"
+          onSign={() => {}}
+          onClose={() => setRcModal(null)}
+        />
       )}
     </div>
   );
