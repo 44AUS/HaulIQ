@@ -5,6 +5,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Checkout from './pages/Checkout';
+import ManageSubscription from './pages/shared/ManageSubscription';
 
 // Pages — Carrier
 import CarrierDashboard from './pages/carrier/Dashboard';
@@ -67,6 +69,7 @@ function CarrierRoutes() {
           <Route path="saved" element={<SavedLoads />} />
           <Route path="history" element={<LoadHistory />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
+          <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </DashboardLayout>
@@ -84,6 +87,7 @@ function BrokerRoutes() {
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
           <Route path="analytics" element={<BrokerAnalytics />} />
+          <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </DashboardLayout>
@@ -116,6 +120,7 @@ function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/carrier/*" element={<CarrierRoutes />} />
       <Route path="/broker/*" element={<BrokerRoutes />} />
       <Route path="/admin/*" element={<AdminRoutes />} />

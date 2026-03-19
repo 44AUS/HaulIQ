@@ -30,9 +30,19 @@ export default function Signup() {
 
   const updateForm = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  const selectedPlanObj = plans.find(p => p.id === plan);
+  const isPaid = selectedPlanObj && selectedPlanObj.price !== '$0/mo';
+
   const handleSignup = async () => {
-    const ok = await signup({ ...form, role, plan });
-    if (ok) setStep(3);
+    const result = await signup({ ...form, role, plan });
+    if (result) {
+      if (isPaid && result.planId) {
+        // Redirect to Adyen checkout for paid plans
+        navigate(`/checkout?plan_id=${result.planId}`);
+      } else {
+        setStep(3);
+      }
+    }
   };
 
   const plans = role === 'broker' ? BROKER_PLANS_BRIEF : CARRIER_PLANS_BRIEF;
@@ -192,7 +202,7 @@ export default function Signup() {
                 {loading ? (
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <><span>Create Account</span><ArrowRight size={16} /></>
+                  <><span>{isPaid ? 'Continue to Payment' : 'Create Account'}</span><ArrowRight size={16} /></>
                 )}
               </button>
               <p className="text-dark-400 text-xs text-center mt-4">By signing up, you agree to our Terms of Service and Privacy Policy.</p>

@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
+    # Adyen
+    adyen_api_key: str = ""
+    adyen_merchant_account: str = ""
+    adyen_client_key: str = ""          # Public key for Drop-in (starts with test_ or live_)
+    adyen_webhook_hmac_key: str = ""    # HMAC key from Adyen webhook config
+    adyen_environment: str = "TEST"     # TEST or LIVE
+
     # Profit calc defaults
     default_fuel_price: float = 3.85
     default_mpg: float = 7.2

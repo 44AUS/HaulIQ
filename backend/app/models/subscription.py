@@ -55,7 +55,8 @@ class Subscription(Base):
     status                = Column(SAEnum(SubStatus), default=SubStatus.active)
     current_period_start  = Column(DateTime, default=datetime.utcnow)
     current_period_end    = Column(DateTime, nullable=True)
-    stripe_subscription_id = Column(String(255), nullable=True)  # For future Stripe integration
+    adyen_subscription_id    = Column(String(255), nullable=True)  # Adyen PSP reference
+    adyen_shopper_reference  = Column(String(255), nullable=True)  # Adyen shopper reference (user ID)
     created_at            = Column(DateTime, default=datetime.utcnow)
     updated_at            = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
