@@ -34,6 +34,8 @@ class Broker(Base):
     pay_speed      = Column(SAEnum(PaySpeed), default=PaySpeed.net_30)
     badge          = Column(SAEnum(BrokerBadge), nullable=True)
     warning_count  = Column(Integer, default=0)
+    avg_payment_days   = Column(Float,   nullable=True)           # calculated from carrier reviews
+    pay_speed_verified = Column(Boolean, default=False)           # True once 5+ payment_days reports exist
     avg_rate_per_mile = Column(Float, default=0.0)
     is_active      = Column(Boolean, default=True)
     created_at     = Column(DateTime, default=datetime.utcnow)
@@ -56,6 +58,9 @@ class BrokerReview(Base):
     rating         = Column(Integer, nullable=False)          # 1–5
     comment        = Column(Text, nullable=True)
     payment_days   = Column(Integer, nullable=True)           # actual days to payment
+    communication  = Column(Integer, nullable=True)   # 1–5
+    accuracy       = Column(Integer, nullable=True)   # 1–5: was load as described?
+    would_work_again = Column(Boolean, nullable=True)
     is_anonymous   = Column(Boolean, default=False)
     created_at     = Column(DateTime, default=datetime.utcnow)
 

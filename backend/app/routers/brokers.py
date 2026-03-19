@@ -96,6 +96,9 @@ def submit_review(
         rating=payload.rating,
         comment=payload.comment,
         payment_days=payload.payment_days,
+        communication=payload.communication,
+        accuracy=payload.accuracy,
+        would_work_again=payload.would_work_again,
         is_anonymous=payload.is_anonymous,
     )
     db.add(review)
@@ -105,6 +108,14 @@ def submit_review(
     new_ratings = [r.rating for r in all_reviews] + [payload.rating]
     broker.avg_rating    = round(sum(new_ratings) / len(new_ratings), 1)
     broker.reviews_count = len(new_ratings)
+
+    # Recalculate avg payment days from reviews that include payment_days
+    payment_reports = [r.payment_days for r in all_reviews if r.payment_days]
+    if payload.payment_days:
+        payment_reports.append(payload.payment_days)
+    if payment_reports:
+        broker.avg_payment_days = round(sum(payment_reports) / len(payment_reports), 1)
+        broker.pay_speed_verified = len(payment_reports) >= 5
 
     # Auto-flag broker if avg drops below 2.5
     if broker.avg_rating < 2.5:

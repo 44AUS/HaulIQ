@@ -44,6 +44,8 @@ class User(Base):
     insights       = relationship("DriverInsight", back_populates="carrier")
     reviews_given  = relationship("BrokerReview", back_populates="carrier")
     broker_profile = relationship("Broker", back_populates="user", uselist=False)
+    carrier_reviews_received = relationship("CarrierReview", foreign_keys="CarrierReview.carrier_id", back_populates="carrier")
+    carrier_reviews_given    = relationship("CarrierReview", foreign_keys="CarrierReview.broker_id",  back_populates="broker_user")
     loads_posted   = relationship("Load", back_populates="broker_user")
 
     def __repr__(self):

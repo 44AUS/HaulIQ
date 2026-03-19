@@ -273,3 +273,30 @@ export const SAMPLE_BIDS = [
 export const SAMPLE_BOOKINGS = [
   { id: 'bk1', loadId: 'L002', carrierId: 'c1', status: 'pending', note: 'Ready to roll, fully loaded trailer available', createdAt: '2026-03-19T08:00:00Z' },
 ];
+
+// ─── SAMPLE BROKER REVIEWS ────────────────────────────────────────────────────
+export const SAMPLE_BROKER_REVIEWS = {
+  br4: [
+    { id: 'br4r1', brokerId: 'br4', carrierId: 'c1', carrierName: 'Mike R.', rating: 5, communication: 5, accuracy: 5, paymentDays: 7, wouldWorkAgain: true, comment: 'MoLo is the gold standard. Paid in 7 days, load was exactly as described. Will always take their loads.', isAnonymous: false, createdAt: '2026-03-01T10:00:00Z' },
+    { id: 'br4r2', brokerId: 'br4', carrierId: 'u3', carrierName: 'James W.', rating: 5, communication: 5, accuracy: 4, paymentDays: 8, wouldWorkAgain: true, comment: 'Great broker. Quick-pay is real — money was in my account in 8 days. Highly recommend.', isAnonymous: false, createdAt: '2026-02-20T14:00:00Z' },
+    { id: 'br4r3', brokerId: 'br4', carrierId: null, carrierName: 'Anonymous', rating: 4, communication: 4, accuracy: 5, paymentDays: 10, wouldWorkAgain: true, comment: 'Very professional. Minor communication issue on pickup time but resolved quickly.', isAnonymous: true, createdAt: '2026-02-10T09:00:00Z' },
+  ],
+  br5: [
+    { id: 'br5r1', brokerId: 'br5', carrierId: 'u6', carrierName: 'Lisa P.', rating: 1, communication: 1, accuracy: 2, paymentDays: 62, wouldWorkAgain: false, comment: 'AVOID. Said Net-45 but did not pay for 62 days. Had to threaten collections. Load weight was wrong by 4,000 lbs.', isAnonymous: false, createdAt: '2026-02-15T11:00:00Z' },
+    { id: 'br5r2', brokerId: 'br5', carrierId: null, carrierName: 'Anonymous', rating: 2, communication: 2, accuracy: 1, paymentDays: 55, wouldWorkAgain: false, comment: 'Slow pay. Load dimensions were off. They will argue about everything.', isAnonymous: true, createdAt: '2026-01-30T08:00:00Z' },
+    { id: 'br5r3', brokerId: 'br5', carrierId: 'u8', carrierName: 'Diana R.', rating: 2, communication: 1, accuracy: 2, paymentDays: 48, wouldWorkAgain: false, comment: 'Took 48 days to get paid. Unresponsive for 2 weeks. Not worth the headache.', isAnonymous: false, createdAt: '2026-01-10T15:00:00Z' },
+  ],
+  br1: [
+    { id: 'br1r1', brokerId: 'br1', carrierId: 'c1', carrierName: 'Mike R.', rating: 5, communication: 5, accuracy: 5, paymentDays: 21, wouldWorkAgain: true, comment: 'Echo always has solid loads. Net-21 is accurate to the day. Great communication.', isAnonymous: false, createdAt: '2026-03-05T10:00:00Z' },
+    { id: 'br1r2', brokerId: 'br1', carrierId: 'u3', carrierName: 'James W.', rating: 4, communication: 4, accuracy: 4, paymentDays: 23, wouldWorkAgain: true, comment: 'Good rates, paid on time. Load info was accurate. Solid operation.', isAnonymous: false, createdAt: '2026-02-25T12:00:00Z' },
+  ],
+};
+
+// ─── SAMPLE CARRIER REVIEWS ───────────────────────────────────────────────────
+export const SAMPLE_CARRIER_REVIEWS = {
+  c1: [
+    { id: 'cr1', carrierId: 'c1', brokerId: 'b1', brokerName: 'FastFreight Brokerage', rating: 5, communication: 5, onTimePickup: 5, onTimeDelivery: 5, loadCare: 5, wouldWorkAgain: true, comment: 'Mike is an outstanding carrier. On time every single time, load arrived in perfect condition, communicates proactively. Our top preferred carrier.', isAnonymous: false, createdAt: '2026-03-10T10:00:00Z' },
+    { id: 'cr2', carrierId: 'c1', brokerId: 'br4_user', brokerName: 'MoLo Solutions', rating: 5, communication: 4, onTimePickup: 5, onTimeDelivery: 5, loadCare: 5, wouldWorkAgain: true, comment: 'Excellent driver. Picked up early, delivered on time, zero damage. Will always book Mike first.', isAnonymous: false, createdAt: '2026-02-28T09:00:00Z' },
+    { id: 'cr3', carrierId: 'c1', brokerId: 'br1_user', brokerName: 'Echo Global', rating: 4, communication: 5, onTimePickup: 4, onTimeDelivery: 5, loadCare: 5, wouldWorkAgain: true, comment: 'Great carrier overall. Pickup was slightly late but communicated ahead of time. Delivery was perfect.', isAnonymous: false, createdAt: '2026-02-10T14:00:00Z' },
+  ],
+};

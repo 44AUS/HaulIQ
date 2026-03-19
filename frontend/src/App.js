@@ -29,6 +29,8 @@ import InstantBookSettings from './pages/broker/InstantBookSettings';
 
 // Pages — Shared
 import Messages from './pages/shared/Messages';
+import BrokerProfile from './pages/shared/BrokerProfile';
+import CarrierProfile from './pages/shared/CarrierProfile';
 
 // Pages — Admin
 import AdminOverview from './pages/admin/AdminOverview';
@@ -131,6 +133,16 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/broker-profile/:brokerId" element={
+        <ProtectedRoute>
+          <DashboardLayout><BrokerProfile /></DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/carrier-profile/:carrierId" element={
+        <ProtectedRoute>
+          <DashboardLayout><CarrierProfile /></DashboardLayout>
+        </ProtectedRoute>
+      } />
       <Route path="/carrier/*" element={<CarrierRoutes />} />
       <Route path="/broker/*" element={<BrokerRoutes />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
