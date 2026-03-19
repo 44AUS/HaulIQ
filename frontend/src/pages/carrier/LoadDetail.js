@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
-import { LOADS } from '../../data/sampleData';
+import { loadsApi } from '../../services/api';
+import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
 import { useAuth } from '../../context/AuthContext';
@@ -12,8 +13,10 @@ export default function LoadDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { sendMessage, placeBid, requestBooking, isOnAllowlist } = useMessaging();
-  const load = LOADS.find(l => l.id === id);
-  const [saved, setSaved] = useState(load?.saved || false);
+
+  const [load, setLoad] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(false);
 
   // Action state
   const [bidModalOpen, setBidModalOpen] = useState(false);
@@ -23,6 +26,24 @@ export default function LoadDetail() {
   const [messageText, setMessageText] = useState('');
   const [bookingStatus, setBookingStatus] = useState(null); // null | 'pending' | 'instant_booked'
 
+  useEffect(() => {
+    setLoading(true);
+    loadsApi.get(id)
+      .then(data => {
+        const adapted = adaptLoad(data);
+        setLoad(adapted);
+        setSaved(adapted?.saved || false);
+      })
+      .catch(() => setLoad(null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+    </div>
+  );
+
   if (!load) return (
     <div className="text-center py-20">
       <p className="text-dark-300">Load not found.</p>
@@ -31,7 +52,6 @@ export default function LoadDetail() {
   );
 
   // Check if this carrier is on the broker's instant book allowlist
-  // broker_user_id maps to the broker's user id — for demo we use 'b1' as the logged-in broker
   const DEMO_BROKER_ID = 'b1';
   const canInstantBook = load.instantBook && isOnAllowlist(user?.id, user?.email, DEMO_BROKER_ID);
 
@@ -63,8 +83,8 @@ export default function LoadDetail() {
     if (!messageText.trim()) return;
     sendMessage(
       load.id,
-      load.broker.id,
-      load.broker.name,
+      load.broker?.id,
+      load.broker?.name,
       `${load.origin} → ${load.dest}`,
       messageText.trim(),
       user
@@ -168,10 +188,12 @@ export default function LoadDetail() {
         {/* Right column */}
         <div className="space-y-5">
           {/* Broker */}
-          <div className="glass rounded-xl p-5 border border-dark-400/40">
-            <h2 className="text-white font-semibold text-sm mb-3">Broker</h2>
-            <BrokerRating broker={load.broker} />
-          </div>
+          {load.broker && (
+            <div className="glass rounded-xl p-5 border border-dark-400/40">
+              <h2 className="text-white font-semibold text-sm mb-3">Broker</h2>
+              <BrokerRating broker={load.broker} />
+            </div>
+          )}
 
           {/* Quick stats */}
           <div className="glass rounded-xl p-5 border border-dark-400/40 space-y-3">
@@ -255,7 +277,7 @@ export default function LoadDetail() {
             ) : (
               <div className="glass rounded-xl border border-dark-400/40 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-white text-sm font-medium">Message {load.broker.name}</p>
+                  <p className="text-white text-sm font-medium">Message {load.broker?.name}</p>
                   <button onClick={() => setMessageOpen(false)} className="text-dark-400 hover:text-white transition-colors">
                     <X size={15} />
                   </button>
@@ -276,7 +298,7 @@ export default function LoadDetail() {
           </div>
 
           {/* Warning if bad broker */}
-          {load.broker.warns > 0 && (
+          {load.broker?.warns > 0 && (
             <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle size={15} className="text-red-400" />

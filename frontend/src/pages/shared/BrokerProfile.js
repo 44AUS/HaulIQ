@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { BROKERS, SAMPLE_BROKER_REVIEWS } from '../../data/sampleData';
+import { brokersApi } from '../../services/api';
+import { adaptBroker, adaptReview } from '../../services/adapters';
 
 // Star rating input component
 function StarInput({ value, onChange, size = 20 }) {
@@ -77,11 +78,25 @@ export default function BrokerProfile() {
   const { brokerId } = useParams();
   const { user, updateUser } = useAuth();
 
-  const broker = BROKERS.find(b => b.id === brokerId);
-  const reviews = SAMPLE_BROKER_REVIEWS[brokerId] || [];
+  const [broker, setBroker] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loadingBroker, setLoadingBroker] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [brokerError, setBrokerError] = useState(null);
+
+  useEffect(() => {
+    brokersApi.get(brokerId)
+      .then(data => setBroker(adaptBroker(data)))
+      .catch(err => setBrokerError(err.message))
+      .finally(() => setLoadingBroker(false));
+
+    brokersApi.reviews(brokerId)
+      .then(data => setReviews(Array.isArray(data) ? data.map(adaptReview) : []))
+      .catch(() => setReviews([]))
+      .finally(() => setLoadingReviews(false));
+  }, [brokerId]);
 
   const isOwner = user?.id === brokerId;
-  // For own profile: live logo from user context; for others: broker's stored logo
   const logo = isOwner ? (user?.logo ?? broker?.logo) : broker?.logo;
   const handleLogoUpload = (dataUrl) => updateUser({ logo: dataUrl });
 
@@ -89,15 +104,20 @@ export default function BrokerProfile() {
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  // Review form state
   const [form, setForm] = useState({
     rating: 0, communication: 0, accuracy: 0,
     paymentDays: '', wouldWorkAgain: null, comment: '', isAnonymous: false,
   });
 
-  if (!broker) return (
+  if (loadingBroker) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+    </div>
+  );
+
+  if (brokerError || !broker) return (
     <div className="text-center py-20">
-      <p className="text-dark-300">Broker not found.</p>
+      <p className="text-dark-300">{brokerError || 'Broker not found.'}</p>
       <Link to="/carrier/loads" className="text-brand-400 mt-2 inline-block">Back to Load Board</Link>
     </div>
   );
@@ -114,13 +134,22 @@ export default function BrokerProfile() {
     verified: { label: 'Verified',       cls: 'bg-brand-500/10 text-brand-400 border-brand-500/20', Icon: Shield },
     warning:  { label: 'Warning',       cls: 'bg-red-500/10 text-red-400 border-red-500/20',      Icon: AlertTriangle },
   };
-  const badge = BADGE_MAP[broker.badge];
+  const badge = broker.badge ? BADGE_MAP[broker.badge] : null;
 
   const handleSubmitReview = () => {
     if (form.rating === 0) return;
-    // In real app: POST to /api/brokers/:id/reviews
-    setSubmitted(true);
-    setShowForm(false);
+    brokersApi.review(brokerId, {
+      broker_id: brokerId,
+      rating: form.rating,
+      communication: form.communication || null,
+      accuracy: form.accuracy || null,
+      payment_days: form.paymentDays ? parseInt(form.paymentDays) : null,
+      would_work_again: form.wouldWorkAgain,
+      comment: form.comment || null,
+      is_anonymous: form.isAnonymous,
+    })
+      .then(() => { setSubmitted(true); setShowForm(false); })
+      .catch(err => alert(err.message));
   };
 
   // Stats calculations
@@ -165,10 +194,10 @@ export default function BrokerProfile() {
             <div className="flex items-center gap-2 mb-3">
               <div className="flex gap-0.5">
                 {[1,2,3,4,5].map(i => (
-                  <Star key={i} size={16} className={i <= Math.round(broker.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-dark-600'} />
+                  <Star key={i} size={16} className={i <= Math.round(broker.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-dark-600'} />
                 ))}
               </div>
-              <span className="text-white font-bold">{broker.rating}</span>
+              <span className="text-white font-bold">{broker.rating || '—'}</span>
               <span className="text-dark-400 text-sm">({reviews.length} reviews)</span>
             </div>
             <div className="flex gap-6 text-sm">
@@ -183,8 +212,8 @@ export default function BrokerProfile() {
                 </div>
               )}
             </div>
-            </div>{/* end text column */}
-          </div>{/* end logo + text row */}
+            </div>
+          </div>
           {user?.role === 'carrier' && !submitted && (
             <button onClick={() => setShowForm(!showForm)}
               className="btn-primary flex items-center gap-2 text-sm py-2.5 px-4">
@@ -320,7 +349,11 @@ export default function BrokerProfile() {
       {/* Reviews tab */}
       {tab === 'reviews' && (
         <div className="space-y-4">
-          {reviews.length === 0 ? (
+          {loadingReviews ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+            </div>
+          ) : reviews.length === 0 ? (
             <div className="glass rounded-xl border border-dark-400/40 p-10 text-center">
               <MessageSquare size={32} className="text-dark-600 mx-auto mb-3" />
               <p className="text-dark-300">No reviews yet. Be the first to review this broker.</p>

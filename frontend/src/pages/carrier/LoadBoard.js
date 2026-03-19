@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Zap, X } from 'lucide-react';
-import { LOADS } from '../../data/sampleData';
+import { loadsApi } from '../../services/api';
+import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
 
 const TYPES = ['All Types', 'Dry Van', 'Reefer', 'Flatbed'];
@@ -17,40 +18,43 @@ export default function LoadBoard() {
   const [sort, setSort] = useState('profit');
   const [scoreFilter, setScoreFilter] = useState('all');
   const [hotOnly, setHotOnly] = useState(false);
+  const [loads, setLoads] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
 
+  useEffect(() => {
+    setLoading(true);
+    const params = {};
+    if (search) params.search = search;
+    if (type !== 'All Types') params.load_type = { 'Dry Van': 'dry_van', 'Reefer': 'reefer', 'Flatbed': 'flatbed' }[type];
+    if (scoreFilter !== 'all') params.profit_score = scoreFilter;
+    if (hotOnly) params.hot_only = true;
+    params.sort_by = { profit: 'profit', rate: 'rate_per_mile', recent: 'recent', miles: 'miles' }[sort] || 'profit';
 
-  const filtered = useMemo(() => {
-    let list = [...LOADS];
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(l => l.origin.toLowerCase().includes(q) || l.dest.toLowerCase().includes(q) || l.commodity.toLowerCase().includes(q));
-    }
-    if (type !== 'All Types') list = list.filter(l => l.type === type);
-    if (scoreFilter !== 'all') list = list.filter(l => l.profitScore === scoreFilter);
-    if (hotOnly) list = list.filter(l => l.hot);
-    list.sort((a, b) => {
-      if (sort === 'profit') return b.netProfit - a.netProfit;
-      if (sort === 'rate') return b.ratePerMile - a.ratePerMile;
-      if (sort === 'miles') return b.miles - a.miles;
-      return 0;
-    });
-    return list;
+    loadsApi.list(params)
+      .then(res => { setLoads(adaptLoadList(res)); setApiError(null); })
+      .catch(err => setApiError(err.message))
+      .finally(() => setLoading(false));
   }, [search, type, sort, scoreFilter, hotOnly]);
 
-  const counts = { green: LOADS.filter(l => l.profitScore === 'green').length, yellow: LOADS.filter(l => l.profitScore === 'yellow').length, red: LOADS.filter(l => l.profitScore === 'red').length };
+  const counts = {
+    green:  loads.filter(l => l.profitScore === 'green').length,
+    yellow: loads.filter(l => l.profitScore === 'yellow').length,
+    red:    loads.filter(l => l.profitScore === 'red').length,
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Load Board</h1>
-        <p className="text-dark-300 text-sm mt-1">{LOADS.length} loads available · Sorted by profitability</p>
+        <p className="text-dark-300 text-sm mt-1">{loads.length} loads available · Sorted by profitability</p>
       </div>
 
       {/* Profit score quick-filter pills */}
       <div className="flex flex-wrap gap-3">
         {[
-          { key: 'all', label: `All Loads (${LOADS.length})`, cls: 'border-dark-400/50 text-dark-200 hover:text-white hover:border-dark-300', active: 'border-white text-white bg-dark-600' },
+          { key: 'all', label: `All Loads (${loads.length})`, cls: 'border-dark-400/50 text-dark-200 hover:text-white hover:border-dark-300', active: 'border-white text-white bg-dark-600' },
           { key: 'green', label: `✅ High Profit (${counts.green})`, cls: 'border-brand-500/20 text-brand-400 hover:border-brand-500/40', active: 'border-brand-500 bg-brand-500/10 text-brand-400' },
           { key: 'yellow', label: `⚠️ Marginal (${counts.yellow})`, cls: 'border-yellow-500/20 text-yellow-400', active: 'border-yellow-500 bg-yellow-500/10 text-yellow-400' },
           { key: 'red', label: `❌ Loss Risk (${counts.red})`, cls: 'border-red-500/20 text-red-400', active: 'border-red-500 bg-red-500/10 text-red-400' },
@@ -93,7 +97,15 @@ export default function LoadBoard() {
       </div>
 
       {/* Results */}
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+        </div>
+      ) : apiError ? (
+        <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
+          <p className="text-red-400">{apiError}</p>
+        </div>
+      ) : loads.length === 0 ? (
         <div className="text-center py-20 glass rounded-xl">
           <p className="text-dark-300 text-lg">No loads match your filters</p>
           <button onClick={() => { setSearch(''); setType('All Types'); setScoreFilter('all'); setHotOnly(false); }}
@@ -101,7 +113,7 @@ export default function LoadBoard() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map(load => <LoadCard key={load.id} load={load} />)}
+          {loads.map(load => <LoadCard key={load.id} load={load} />)}
         </div>
       )}
     </div>

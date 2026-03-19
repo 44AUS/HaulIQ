@@ -1,6 +1,6 @@
-import React from 'react';
-import { Brain, ChevronRight, Lock } from 'lucide-react';
-import { BRAIN_INSIGHTS, LANE_PERFORMANCE } from '../../data/sampleData';
+import React, { useState, useEffect } from 'react';
+import { Brain, ChevronRight, Lock, RefreshCw } from 'lucide-react';
+import { analyticsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 
@@ -12,10 +12,12 @@ const TAG_COLORS = {
   'savings':     'badge-green',
 };
 
-
-function InsightCard({ insight, locked }) {
+function InsightCard({ insight, locked, onRead }) {
   return (
-    <div className={`glass rounded-xl p-5 border transition-all ${locked ? 'border-dark-400/20 opacity-60' : 'border-dark-400/40 hover:border-brand-500/20'} relative overflow-hidden`}>
+    <div
+      className={`glass rounded-xl p-5 border transition-all ${locked ? 'border-dark-400/20 opacity-60' : 'border-dark-400/40 hover:border-brand-500/20'} relative overflow-hidden`}
+      onClick={() => !locked && onRead && onRead(insight.id)}
+    >
       {locked && (
         <div className="absolute inset-0 flex items-center justify-center bg-dark-800/70 backdrop-blur-sm z-10 rounded-xl">
           <div className="text-center">
@@ -26,16 +28,18 @@ function InsightCard({ insight, locked }) {
         </div>
       )}
       <div className="flex items-start gap-4">
-        <div className="text-2xl flex-shrink-0">{insight.icon}</div>
+        <div className="text-2xl flex-shrink-0">{insight.icon || '💡'}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <h3 className="text-white font-semibold text-sm">{insight.title}</h3>
             <span className={TAG_COLORS[insight.tag] || 'badge-blue'}>{insight.tag}</span>
           </div>
           <p className="text-dark-200 text-sm leading-relaxed">{insight.body}</p>
-          <button className="text-brand-400 text-xs hover:text-brand-300 mt-2 flex items-center gap-1">
-            {insight.action} <ChevronRight size={12} />
-          </button>
+          {insight.action_label && (
+            <button className="text-brand-400 text-xs hover:text-brand-300 mt-2 flex items-center gap-1">
+              {insight.action_label} <ChevronRight size={12} />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -47,8 +51,35 @@ export default function EarningsBrain() {
   const isPro = user?.plan === 'pro' || user?.plan === 'elite';
   const isElite = user?.plan === 'elite';
 
-  const visibleInsights = isPro ? BRAIN_INSIGHTS : BRAIN_INSIGHTS.slice(0, 1);
-  const lockedInsights = isPro ? [] : BRAIN_INSIGHTS.slice(1);
+  const [insights, setInsights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchInsights = () => {
+    setLoading(true);
+    analyticsApi.insights()
+      .then(data => { setInsights(Array.isArray(data) ? data : []); setError(null); })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchInsights(); }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    analyticsApi.refresh()
+      .then(() => fetchInsights())
+      .catch(() => fetchInsights())
+      .finally(() => setRefreshing(false));
+  };
+
+  const handleMarkRead = (insightId) => {
+    analyticsApi.markRead(insightId).catch(() => {});
+  };
+
+  const visibleInsights = isPro ? insights : insights.slice(0, 1);
+  const lockedInsights  = isPro ? [] : insights.slice(1);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -60,20 +91,26 @@ export default function EarningsBrain() {
           </h1>
           <p className="text-dark-300 text-sm mt-1">AI-powered insights that learn your patterns and maximize your earnings</p>
         </div>
-        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-          isElite ? 'badge-blue' : isPro ? 'badge-green' : 'badge-yellow'
-        }`}>
-          {isElite ? '⚡ Elite — Full Access' : isPro ? '✅ Pro — Basic Insights' : '🔒 Basic — Limited'}
-        </span>
+        <div className="flex items-center gap-3">
+          <button onClick={handleRefresh} disabled={refreshing}
+            className="flex items-center gap-2 text-dark-300 hover:text-white text-sm border border-dark-400/40 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
+            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> Refresh
+          </button>
+          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+            isElite ? 'badge-blue' : isPro ? 'badge-green' : 'badge-yellow'
+          }`}>
+            {isElite ? '⚡ Elite — Full Access' : isPro ? '✅ Pro — Basic Insights' : '🔒 Basic — Limited'}
+          </span>
+        </div>
       </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Insights Generated', value: '24', sub: 'This month' },
-          { label: 'Estimated Savings', value: '$1,240', sub: 'From avoided bad loads' },
-          { label: 'Brokers Flagged', value: '3', sub: 'Based on your history' },
-          { label: 'Best Lane Found', value: 'CHI→ATL', sub: '$2,340 avg net' },
+          { label: 'Insights Generated', value: insights.length || '—', sub: 'Available now' },
+          { label: 'Estimated Savings', value: '$—', sub: 'From avoided bad loads' },
+          { label: 'Brokers Flagged', value: '—', sub: 'Based on your history' },
+          { label: 'Best Lane Found', value: '—', sub: 'Run more loads to unlock' },
         ].map(({ label, value, sub }) => (
           <div key={label} className="stat-card">
             <p className="text-dark-300 text-xs">{label}</p>
@@ -86,39 +123,25 @@ export default function EarningsBrain() {
       {/* Insights grid */}
       <div>
         <h2 className="text-white font-semibold mb-4">This Week's Insights</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {visibleInsights.map(i => <InsightCard key={i.id} insight={i} locked={false} />)}
-          {lockedInsights.map(i => <InsightCard key={i.id} insight={i} locked={true} />)}
-        </div>
-      </div>
-
-      {/* Lane performance */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">Your Lane Performance</h2>
-          {!isPro && <span className="badge-yellow text-xs">Pro+ required for full view</span>}
-        </div>
-        <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-          <div className="grid grid-cols-4 bg-dark-700/60 px-5 py-3 text-dark-300 text-xs font-medium uppercase tracking-wider">
-            <span>Lane</span><span className="text-center">Runs</span><span className="text-center">Avg Net</span><span className="text-center">Profitability</span>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
           </div>
-          {LANE_PERFORMANCE.map((lane, i) => (
-            <div key={lane.lane} className={`grid grid-cols-4 px-5 py-4 border-b border-dark-400/20 hover:bg-dark-700/20 transition-colors ${!isPro && i > 1 ? 'opacity-30 blur-sm pointer-events-none select-none' : ''}`}>
-              <span className="text-white font-medium text-sm">{lane.lane}</span>
-              <span className="text-dark-200 text-sm text-center">{lane.runs}x</span>
-              <span className="text-white font-semibold text-sm text-center">${lane.avgNet.toLocaleString()}</span>
-              <div className="flex items-center justify-center gap-2">
-                <div className="w-24 bg-dark-600 rounded-full h-1.5">
-                  <div className={`h-1.5 rounded-full ${lane.profitability >= 80 ? 'bg-brand-500' : lane.profitability >= 60 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                    style={{ width: `${lane.profitability}%` }} />
-                </div>
-                <span className={`text-xs font-semibold ${lane.profitability >= 80 ? 'text-brand-400' : lane.profitability >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                  {lane.profitability}%
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+        ) : error ? (
+          <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
+            <p className="text-red-400">{error}</p>
+          </div>
+        ) : insights.length === 0 ? (
+          <div className="glass rounded-xl border border-dark-400/40 p-10 text-center">
+            <Brain size={32} className="text-dark-500 mx-auto mb-3" />
+            <p className="text-dark-300">No insights yet. Complete more loads to generate personalized insights.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {visibleInsights.map(i => <InsightCard key={i.id} insight={i} locked={false} onRead={handleMarkRead} />)}
+            {lockedInsights.map(i => <InsightCard key={i.id} insight={i} locked={true} onRead={null} />)}
+          </div>
+        )}
       </div>
 
       {/* Upgrade CTA if not elite */}

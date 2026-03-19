@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
 import { PlusCircle, Check, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { loadsApi } from '../../services/api';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 
 export default function PostLoad() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
-    origin: '', dest: '', pickupDate: '', deliveryDate: '',
+    origin: '', dest: '', pickup: '', delivery: '',
     equipment: 'Dry Van', weight: '', dims: '48x102',
-    commodity: '', rate: '', notes: '',
+    commodity: '', rate: '', miles: '', deadhead: '', notes: '',
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const [posted, setPosted] = useState(false);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const handlePost = (e) => {
     e.preventDefault();
-    setPosted(true);
-    setTimeout(() => setPosted(false), 4000);
+    setSubmitting(true);
+    setError(null);
+    const payload = {
+      origin:         form.origin,
+      destination:    form.dest,
+      miles:          parseInt(form.miles) || 0,
+      deadhead_miles: parseInt(form.deadhead || 0),
+      load_type:      { 'Dry Van': 'dry_van', 'Reefer': 'reefer', 'Flatbed': 'flatbed' }[form.equipment] || 'dry_van',
+      weight_lbs:     form.weight ? parseInt(form.weight) : null,
+      commodity:      form.commodity,
+      pickup_date:    form.pickup,
+      delivery_date:  form.delivery,
+      rate:           parseFloat(form.rate),
+      notes:          form.notes || null,
+    };
+    loadsApi.post(payload)
+      .then(() => navigate('/broker/loads'))
+      .catch(err => { setError(err.message); setSubmitting(false); });
   };
 
   const Field = ({ label, id, type = 'text', placeholder, required, children }) => (
@@ -50,10 +71,16 @@ export default function PostLoad() {
           <Field label="Destination City, State" id="dest" placeholder="Atlanta, GA" required />
         </div>
 
+        {/* Miles */}
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Loaded Miles" id="miles" placeholder="716" required />
+          <Field label="Deadhead Miles" id="deadhead" placeholder="0" />
+        </div>
+
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Pickup Date" id="pickupDate" type="date" required />
-          <Field label="Delivery Date" id="deliveryDate" type="date" required />
+          <Field label="Pickup Date" id="pickup" type="date" required />
+          <Field label="Delivery Date" id="delivery" type="date" required />
         </div>
 
         {/* Equipment */}
@@ -97,8 +124,14 @@ export default function PostLoad() {
             className="input resize-none" rows={3} placeholder="Any special requirements, hazmat info, contact details..." />
         </Field>
 
-        <button type="submit" className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green">
-          Post Load Live <ArrowRight size={16} />
+        {error && (
+          <div className="glass rounded-xl border border-red-500/20 p-4 text-center">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
+        <button type="submit" disabled={submitting} className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
+          {submitting ? 'Posting...' : <><span>Post Load Live</span><ArrowRight size={16} /></>}
         </button>
       </form>
     </div>

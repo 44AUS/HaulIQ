@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { MOCK_CARRIERS, SAMPLE_CARRIER_REVIEWS } from '../../data/sampleData';
+import { carrierReviewsApi } from '../../services/api';
+import { adaptReview } from '../../services/adapters';
 
 function StarInput({ value, onChange, size = 20 }) {
   const [hover, setHover] = useState(0);
@@ -37,9 +38,9 @@ export default function CarrierProfile() {
   const { carrierId } = useParams();
   const { user } = useAuth();
 
-  const carrier = MOCK_CARRIERS.find(c => c.id === carrierId);
-  const reviews = SAMPLE_CARRIER_REVIEWS[carrierId] || [];
-
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -47,16 +48,20 @@ export default function CarrierProfile() {
     wouldWorkAgain: null, comment: '', isAnonymous: false,
   });
 
-  if (!carrier) return (
-    <div className="text-center py-20">
-      <p className="text-dark-300">Carrier not found.</p>
-      <Link to={-1} className="text-brand-400 mt-2 inline-block">Go back</Link>
-    </div>
-  );
+  useEffect(() => {
+    carrierReviewsApi.get(carrierId)
+      .then(data => setReviews(Array.isArray(data) ? data.map(adaptReview) : []))
+      .catch(() => setReviews([]))
+      .finally(() => setLoadingReviews(false));
+
+    carrierReviewsApi.stats(carrierId)
+      .then(data => setStats(data))
+      .catch(() => setStats(null));
+  }, [carrierId]);
 
   const avgOverall = reviews.length
     ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1)
-    : carrier.rating;
+    : (stats?.avg_rating ?? '—');
 
   const _avg = (key) => {
     const vals = reviews.filter(r => r[key]).map(r => r[key]);
@@ -70,11 +75,22 @@ export default function CarrierProfile() {
 
   const handleSubmit = () => {
     if (form.rating === 0) return;
-    setSubmitted(true);
-    setShowForm(false);
+    carrierReviewsApi.post({
+      carrier_id: carrierId,
+      rating: form.rating,
+      communication: form.communication || null,
+      on_time_pickup: form.onTimePickup || null,
+      on_time_delivery: form.onTimeDelivery || null,
+      load_care: form.loadCare || null,
+      would_work_again: form.wouldWorkAgain,
+      comment: form.comment || null,
+      is_anonymous: form.isAnonymous,
+    })
+      .then(() => { setSubmitted(true); setShowForm(false); })
+      .catch(err => alert(err.message));
   };
 
-  const planColors = { basic: 'text-dark-400', pro: 'text-brand-400', elite: 'text-purple-400' };
+  const displayName = stats?.carrier_name || `Carrier ${carrierId.slice(0, 8)}`;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
@@ -87,17 +103,16 @@ export default function CarrierProfile() {
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-brand-500/10 border-2 border-brand-500/30 flex items-center justify-center text-brand-400 text-xl font-black flex-shrink-0">
-              {carrier.name.charAt(0)}
+              {displayName.charAt(0)}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold text-white">{carrier.name}</h1>
-                <span className={`text-xs font-medium capitalize ${planColors[carrier.plan]}`}>{carrier.plan}</span>
+                <h1 className="text-xl font-bold text-white">{displayName}</h1>
               </div>
-              <p className="text-dark-300 text-sm">{carrier.company}</p>
+              {stats?.company_name && <p className="text-dark-300 text-sm">{stats.company_name}</p>}
               <div className="flex items-center gap-3 mt-1 text-xs text-dark-400">
-                <span className="flex items-center gap-1"><Truck size={11} />{carrier.mc}</span>
-                <span>{carrier.loadsCompleted} loads completed</span>
+                {stats?.mc_number && <span className="flex items-center gap-1"><Truck size={11} />{stats.mc_number}</span>}
+                {stats?.total_reviews != null && <span>{stats.total_reviews} reviews</span>}
               </div>
             </div>
           </div>
@@ -146,7 +161,7 @@ export default function CarrierProfile() {
       {/* Review form */}
       {showForm && (
         <div className="glass rounded-xl border border-brand-500/20 p-6">
-          <h3 className="text-white font-bold mb-5">Review {carrier.name}</h3>
+          <h3 className="text-white font-bold mb-5">Review {displayName}</h3>
           <div className="space-y-5">
             <div>
               <label className="block text-dark-100 text-sm font-medium mb-2">Overall Rating *</label>
@@ -203,7 +218,11 @@ export default function CarrierProfile() {
       {/* Reviews */}
       <div className="space-y-4">
         <h2 className="text-white font-semibold">Broker Reviews ({reviews.length})</h2>
-        {reviews.length === 0 ? (
+        {loadingReviews ? (
+          <div className="flex items-center justify-center py-10">
+            <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+          </div>
+        ) : reviews.length === 0 ? (
           <div className="glass rounded-xl border border-dark-400/40 p-10 text-center">
             <Users size={32} className="text-dark-600 mx-auto mb-3" />
             <p className="text-dark-300">No reviews yet for this carrier.</p>

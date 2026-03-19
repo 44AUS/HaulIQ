@@ -1,29 +1,65 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useMessaging } from '../../context/MessagingContext';
+import { messagesApi } from '../../services/api';
 
 export default function Messages() {
   const { user } = useAuth();
-  const { conversations, replyMessage } = useMessaging();
+  const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
+  const [activeMessages, setActiveMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
-  const myConvos = user.role === 'carrier'
-    ? conversations.filter(c => c.carrierId === user.id)
-    : conversations.filter(c => c.brokerId === user.id || true); // brokers see all for demo
+  useEffect(() => {
+    messagesApi.conversations()
+      .then(data => setConversations(Array.isArray(data) ? data : []))
+      .catch(() => setConversations([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const activeConvo = myConvos.find(c => c.id === activeConvoId);
+  useEffect(() => {
+    if (!activeConvoId) return;
+    messagesApi.conversation(activeConvoId)
+      .then(data => {
+        const msgs = data.messages || (Array.isArray(data) ? data : []);
+        setActiveMessages(msgs);
+      })
+      .catch(() => setActiveMessages([]));
+  }, [activeConvoId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeConvo?.messages?.length]);
+  }, [activeMessages.length]);
+
+  const activeConvo = conversations.find(c => c.id === activeConvoId);
 
   const handleSend = () => {
     if (!input.trim() || !activeConvo) return;
-    replyMessage(activeConvo.id, input.trim(), user);
-    setInput('');
+    const loadId = activeConvo.load_id;
+    const brokerId = activeConvo.broker_id;
+    messagesApi.send(loadId, brokerId, input.trim())
+      .then(msg => {
+        setActiveMessages(prev => [...prev, msg]);
+        setInput('');
+      })
+      .catch(() => {});
+  };
+
+  const getConvoLabel = (c) => {
+    if (user?.role === 'carrier') return `Broker ${c.broker_id ? c.broker_id.slice(0, 8) : ''}`;
+    return `Carrier ${c.carrier_id ? c.carrier_id.slice(0, 8) : ''}`;
+  };
+
+  const getLastMsg = (c) => {
+    const msgs = c.messages || [];
+    return msgs[msgs.length - 1] || null;
+  };
+
+  const hasUnread = (c) => {
+    const msgs = c.messages || [];
+    return msgs.some(m => m.sender_id !== user?.id && !m.is_read);
   };
 
   return (
@@ -37,34 +73,37 @@ export default function Messages() {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {myConvos.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+            </div>
+          ) : conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
               <MessageSquare size={32} className="text-dark-500 mb-3" />
               <p className="text-dark-300 text-sm">No conversations yet</p>
               <p className="text-dark-400 text-xs mt-1">Start a chat from a load detail page</p>
             </div>
           ) : (
-            myConvos.map(c => {
-              const lastMsg = c.messages[c.messages.length - 1];
-              const hasUnread = c.messages.some(m => m.senderId !== user.id && !m.isRead);
+            conversations.map(c => {
+              const lastMsg = getLastMsg(c);
+              const unread = hasUnread(c);
               return (
                 <button key={c.id} onClick={() => setActiveConvoId(c.id)}
                   className={`w-full text-left p-4 border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        {hasUnread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
-                        <p className={`text-sm font-medium truncate ${hasUnread ? 'text-white' : 'text-dark-100'}`}>
-                          {user.role === 'carrier' ? c.brokerName : c.carrierId}
+                        {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
+                        <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
+                          {getConvoLabel(c)}
                         </p>
                       </div>
-                      <p className="text-dark-400 text-xs truncate mt-0.5">{c.loadRoute}</p>
                       {lastMsg && (
                         <p className="text-dark-300 text-xs truncate mt-1">{lastMsg.body}</p>
                       )}
                     </div>
                     <p className="text-dark-500 text-xs flex-shrink-0">
-                      {lastMsg ? new Date(lastMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </p>
                   </div>
                 </button>
@@ -84,16 +123,16 @@ export default function Messages() {
             </button>
             <div>
               <p className="text-white font-semibold text-sm">
-                {user.role === 'carrier' ? activeConvo.brokerName : 'Carrier'}
+                {getConvoLabel(activeConvo)}
               </p>
-              <p className="text-dark-400 text-xs">{activeConvo.loadRoute}</p>
+              <p className="text-dark-400 text-xs">Load #{activeConvo.load_id?.slice(0, 8)}</p>
             </div>
           </div>
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {activeConvo.messages.map(msg => {
-              const isMe = msg.senderId === user.id;
+            {activeMessages.map(msg => {
+              const isMe = msg.sender_id === user?.id;
               return (
                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
@@ -101,7 +140,7 @@ export default function Messages() {
                   }`}>
                     <p className="text-sm leading-relaxed">{msg.body}</p>
                     <p className={`text-xs mt-1 ${isMe ? 'text-brand-200' : 'text-dark-400'}`}>
-                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>

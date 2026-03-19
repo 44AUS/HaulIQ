@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, DollarSign, Truck, MapPin, Zap, Brain, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { LOADS, BRAIN_INSIGHTS, WEEKLY_EARNINGS } from '../../data/sampleData';
+import { loadsApi, analyticsApi } from '../../services/api';
+import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 
@@ -32,9 +33,28 @@ const StatCard = ({ icon: Icon, label, value, sub, color = 'brand', trend }) => 
 
 export default function CarrierDashboard() {
   const { user } = useAuth();
-  const hotLoads = LOADS.filter(l => l.hot).slice(0, 3);
-  const insight = BRAIN_INSIGHTS[0];
-  const chartData = WEEKLY_EARNINGS.slice(-6);
+  const [hotLoads, setHotLoads] = useState([]);
+  const [summary, setSummary] = useState(null);
+
+  useEffect(() => {
+    loadsApi.list({ per_page: 3, sort_by: 'recent', hot_only: true })
+      .then(res => setHotLoads(adaptLoadList(res)))
+      .catch(() => {
+        // fallback: fetch without hot filter
+        loadsApi.list({ per_page: 3, sort_by: 'recent' })
+          .then(res => setHotLoads(adaptLoadList(res)))
+          .catch(() => setHotLoads([]));
+      });
+
+    analyticsApi.summary()
+      .then(data => setSummary(data))
+      .catch(() => setSummary(null));
+  }, []);
+
+  const weeklyData = (summary?.weekly_earnings || []).slice(-6);
+  const chartData = weeklyData.map(w => ({ week: w.week_label, net: w.net }));
+
+  const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : '—';
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -51,10 +71,10 @@ export default function CarrierDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={DollarSign} label="This Week" value="$4,200" sub="Net profit" color="brand" trend="+12%" />
-        <StatCard icon={TrendingUp} label="Avg Rate/Mile" value="$3.28" sub="Last 30 days" color="blue" />
-        <StatCard icon={Truck} label="Loads Completed" value="12" sub="This month" color="yellow" />
-        <StatCard icon={MapPin} label="Avg Deadhead" value="34 mi" sub="Below avg (67mi)" color="brand" trend="Good" />
+        <StatCard icon={DollarSign} label="Total Net" value={fmt(summary?.total_net)} sub="All time" color="brand" />
+        <StatCard icon={TrendingUp} label="Avg Rate/Mile" value={summary?.avg_rate_per_mile ? `$${Number(summary.avg_rate_per_mile).toFixed(2)}` : '—'} sub="All time" color="blue" />
+        <StatCard icon={Truck} label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" color="yellow" />
+        <StatCard icon={MapPin} label="Avg Deadhead" value={summary?.avg_deadhead_miles ? `${Math.round(summary.avg_deadhead_miles)} mi` : '—'} sub="Per load" color="brand" />
       </div>
 
       {/* Earnings chart + Brain insight */}
@@ -66,22 +86,28 @@ export default function CarrierDashboard() {
               Full analytics <ArrowRight size={12} />
             </Link>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="week" tick={{ fill: '#6e7681', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 }}
-                formatter={(v) => [`$${v.toLocaleString()}`, 'Net']}
-              />
-              <Area type="monotone" dataKey="net" stroke="#22c55e" strokeWidth={2} fill="url(#netGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={180}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="week" tick={{ fill: '#6e7681', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <Tooltip
+                  contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 }}
+                  formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Net']}
+                />
+                <Area type="monotone" dataKey="net" stroke="#22c55e" strokeWidth={2} fill="url(#netGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[180px]">
+              <p className="text-dark-400 text-sm">Complete loads to see your earnings trend</p>
+            </div>
+          )}
         </div>
 
         {/* Brain insight card */}
@@ -89,15 +115,9 @@ export default function CarrierDashboard() {
           <div className="flex items-center gap-2 mb-4">
             <Brain size={18} className="text-brand-400" />
             <h2 className="text-white font-semibold text-sm">Earnings Brain</h2>
-            <span className="badge-green text-xs">New</span>
           </div>
-          <div className="flex-1 space-y-4">
-            <div className="text-3xl">{insight.icon}</div>
-            <div>
-              <p className="text-white font-semibold text-sm">{insight.title}</p>
-              <p className="text-dark-200 text-xs mt-1 leading-relaxed">{insight.body}</p>
-            </div>
-            <span className="badge-green text-xs inline-block">{insight.tag}</span>
+          <div className="flex-1 flex items-center justify-center">
+            <p className="text-dark-400 text-sm text-center">Insights load on the Brain page</p>
           </div>
           <Link to="/carrier/brain" className="btn-primary text-sm py-2 text-center mt-4 flex items-center justify-center gap-1">
             See all insights <ArrowRight size={14} />
@@ -116,9 +136,15 @@ export default function CarrierDashboard() {
             View all <ArrowRight size={12} />
           </Link>
         </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {hotLoads.map(load => <LoadCard key={load.id} load={load} />)}
-        </div>
+        {hotLoads.length === 0 ? (
+          <div className="glass rounded-xl border border-dark-400/40 p-8 text-center">
+            <p className="text-dark-400 text-sm">No hot loads right now — check back soon</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-4">
+            {hotLoads.map(load => <LoadCard key={load.id} load={load} />)}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -107,6 +107,22 @@ def list_loads(
     )
 
 
+# ─── GET /api/loads/posted ────────────────────────────────────────────────────
+@router.get("/posted", response_model=list[LoadOut], summary="Broker's own posted loads (all statuses)")
+def my_posted_loads(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    loads = (
+        db.query(Load)
+        .options(joinedload(Load.broker))
+        .filter(Load.broker_user_id == current_user.id)
+        .order_by(desc(Load.posted_at))
+        .all()
+    )
+    return [_enrich_load(l) for l in loads]
+
+
 # ─── GET /api/loads/hot ────────────────────────────────────────────────────────
 @router.get("/hot", response_model=list[LoadOut], summary="Get hot loads feed")
 def hot_loads(
