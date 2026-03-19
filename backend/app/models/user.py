@@ -1,0 +1,50 @@
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, Boolean, DateTime, Enum as SAEnum
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from app.database import Base
+import enum
+
+
+class UserRole(str, enum.Enum):
+    carrier = "carrier"
+    broker  = "broker"
+    admin   = "admin"
+
+
+class UserPlan(str, enum.Enum):
+    basic = "basic"
+    pro   = "pro"
+    elite = "elite"
+    admin = "admin"
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id             = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    email          = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash  = Column(String(255), nullable=False)
+    name           = Column(String(255), nullable=False)
+    role           = Column(SAEnum(UserRole), nullable=False, default=UserRole.carrier)
+    plan           = Column(SAEnum(UserPlan), nullable=False, default=UserPlan.basic)
+    company        = Column(String(255), nullable=True)
+    mc_number      = Column(String(50), nullable=True)
+    dot_number     = Column(String(50), nullable=True)
+    is_active      = Column(Boolean, default=True)
+    is_verified    = Column(Boolean, default=False)
+    created_at     = Column(DateTime, default=datetime.utcnow)
+    updated_at     = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    subscription   = relationship("Subscription", back_populates="user", uselist=False)
+    saved_loads    = relationship("SavedLoad", back_populates="carrier")
+    load_history   = relationship("LoadHistory", back_populates="carrier")
+    insights       = relationship("DriverInsight", back_populates="carrier")
+    reviews_given  = relationship("BrokerReview", back_populates="carrier")
+    broker_profile = relationship("Broker", back_populates="user", uselist=False)
+    loads_posted   = relationship("Load", back_populates="broker_user")
+
+    def __repr__(self):
+        return f"<User {self.email} ({self.role})>"

@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #080c10;
+    color: #e6edf3;
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0d1117; }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+}
+
+@layer components {
+  .glass {
+    background: rgba(22, 27, 34, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(48, 54, 61, 0.6);
+  }
+  .glass-light {
+    background: rgba(30, 37, 47, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(48, 54, 61, 0.4);
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glow-green {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), 0 0 60px rgba(34, 197, 94, 0.1);
+  }
+  .glow-green-sm {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+  }
+  .card {
+    @apply glass rounded-xl p-6;
+  }
+  .btn-primary {
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/20 active:scale-95;
+  }
+  .btn-secondary {
+    @apply bg-dark-500 hover:bg-dark-400 text-white font-medium px-6 py-3 rounded-lg border border-dark-400 hover:border-dark-300 transition-all duration-200 active:scale-95;
+  }
+  .btn-ghost {
+    @apply text-dark-100 hover:text-white hover:bg-dark-500 font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+  .input {
+    @apply w-full bg-dark-700 border border-dark-400 text-white placeholder-dark-200 rounded-lg px-4 py-3 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-colors;
+  }
+  .badge-green {
+    @apply inline-flex items-center gap-1 bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+  .badge-yellow {
+    @apply inline-flex items-center gap-1 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+  .badge-red {
+    @apply inline-flex items-center gap-1 bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+  .badge-blue {
+    @apply inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg text-dark-100 hover:text-white hover:bg-dark-600 transition-all duration-150 font-medium text-sm;
+  }
+  .sidebar-link.active {
+    @apply text-brand-400 bg-brand-500/10 border border-brand-500/20;
+  }
+  .stat-card {
+    @apply glass rounded-xl p-5 flex flex-col gap-2;
+  }
+  .profit-green {
+    @apply text-brand-400 font-bold;
+  }
+  .profit-yellow {
+    @apply text-yellow-400 font-bold;
+  }
+  .profit-red {
+    @apply text-red-400 font-bold;
+  }
+}
