@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { CONVERSATIONS, SAMPLE_BIDS, SAMPLE_BOOKINGS } from '../data/sampleData';
+import { CONVERSATIONS, SAMPLE_BIDS, SAMPLE_BOOKINGS, SAMPLE_ALLOWLIST } from '../data/sampleData';
 
 const MessagingContext = createContext(null);
 
@@ -7,6 +7,7 @@ export function MessagingProvider({ children }) {
   const [conversations, setConversations] = useState(CONVERSATIONS);
   const [bids, setBids] = useState(SAMPLE_BIDS);
   const [bookings, setBookings] = useState(SAMPLE_BOOKINGS);
+  const [allowlist, setAllowlist] = useState(SAMPLE_ALLOWLIST);
 
   const sendMessage = useCallback((loadId, brokerId, brokerName, loadRoute, body, currentUser) => {
     setConversations(prev => {
@@ -99,6 +100,32 @@ export function MessagingProvider({ children }) {
     ));
   }, []);
 
+  const addToAllowlist = useCallback((carrier, brokerId) => {
+    const entry = {
+      id: 'al_' + Date.now(),
+      brokerId,
+      carrierId: carrier.id || null,
+      carrierEmail: carrier.email,
+      carrierName: carrier.name,
+      carrierMc: carrier.mc || null,
+      source: carrier.source || 'search',
+      addedAt: new Date().toISOString(),
+    };
+    setAllowlist(prev => [...prev, entry]);
+    return entry;
+  }, []);
+
+  const removeFromAllowlist = useCallback((entryId) => {
+    setAllowlist(prev => prev.filter(e => e.id !== entryId));
+  }, []);
+
+  const isOnAllowlist = useCallback((carrierId, carrierEmail, brokerId) => {
+    return allowlist.some(e =>
+      e.brokerId === brokerId &&
+      (e.carrierId === carrierId || e.carrierEmail === carrierEmail)
+    );
+  }, [allowlist]);
+
   const unreadCount = (userId) => {
     return conversations.reduce((acc, c) => {
       return acc + c.messages.filter(m => m.senderId !== userId && !m.isRead).length;
@@ -110,10 +137,11 @@ export function MessagingProvider({ children }) {
 
   return (
     <MessagingContext.Provider value={{
-      conversations, bids, bookings,
+      conversations, bids, bookings, allowlist,
       sendMessage, replyMessage,
       placeBid, respondBid,
       requestBooking, reviewBooking,
+      addToAllowlist, removeFromAllowlist, isOnAllowlist,
       unreadCount, pendingBookingsCount, pendingBidsCount,
     }}>
       {children}

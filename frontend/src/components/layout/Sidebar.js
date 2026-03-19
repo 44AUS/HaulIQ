@@ -4,7 +4,7 @@ import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
   CreditCard, DollarSign, Shield, Settings, LogOut, Bell, ChevronLeft, ChevronRight, Menu,
-  MessageSquare, Calendar
+  MessageSquare, Calendar, Zap
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
@@ -27,6 +27,7 @@ const BROKER_LINKS = [
   { icon: BarChart2,       label: 'Analytics',          path: '/broker/analytics' },
   { icon: MessageSquare,   label: 'Messages',           path: '/broker/messages', badge: 'unread' },
   { icon: Calendar,        label: 'Booking Requests',   path: '/broker/bookings', badge: 'bookings' },
+  { icon: Zap,             label: 'Instant Book',       path: '/broker/instant-book' },
 ];
 
 const ADMIN_LINKS = [

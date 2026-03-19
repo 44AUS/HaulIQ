@@ -25,6 +25,7 @@ import PostLoad from './pages/broker/PostLoad';
 import ManageLoads from './pages/broker/ManageLoads';
 import BrokerAnalytics from './pages/broker/BrokerAnalytics';
 import BookingRequests from './pages/broker/BookingRequests';
+import InstantBookSettings from './pages/broker/InstantBookSettings';
 
 // Pages — Shared
 import Messages from './pages/shared/Messages';
@@ -95,6 +96,7 @@ function BrokerRoutes() {
           <Route path="analytics" element={<BrokerAnalytics />} />
           <Route path="messages" element={<Messages />} />
           <Route path="bookings" element={<BookingRequests />} />
+          <Route path="instant-book" element={<InstantBookSettings />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>

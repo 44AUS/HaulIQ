@@ -11,7 +11,7 @@ export default function LoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { sendMessage, placeBid, requestBooking } = useMessaging();
+  const { sendMessage, placeBid, requestBooking, isOnAllowlist } = useMessaging();
   const load = LOADS.find(l => l.id === id);
   const [saved, setSaved] = useState(load?.saved || false);
 
@@ -29,6 +29,11 @@ export default function LoadDetail() {
       <Link to="/carrier/loads" className="text-brand-400 mt-2 inline-block">Back to Load Board</Link>
     </div>
   );
+
+  // Check if this carrier is on the broker's instant book allowlist
+  // broker_user_id maps to the broker's user id — for demo we use 'b1' as the logged-in broker
+  const DEMO_BROKER_ID = 'b1';
+  const canInstantBook = load.instantBook && isOnAllowlist(user?.id, user?.email, DEMO_BROKER_ID);
 
   const fuelCostEst = load.fuel;
   const deadheadCost = Math.round(load.deadhead * 0.62);
@@ -209,12 +214,20 @@ export default function LoadDetail() {
 
             {!bookingStatus && (
               <>
-                {/* Instant Book */}
-                {load.instantBook && (
+                {/* Instant Book — only shown if carrier is on allowlist */}
+                {load.instantBook && canInstantBook && (
                   <button onClick={handleInstantBook}
                     className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white transition-colors shadow-lg shadow-emerald-500/20">
                     <Zap size={16} /> Instant Book
                   </button>
+                )}
+
+                {/* Instant Book locked — carrier not on allowlist */}
+                {load.instantBook && !canInstantBook && (
+                  <div className="w-full py-3 rounded-xl bg-dark-700/50 border border-dark-400/30 flex items-center justify-center gap-2 text-dark-400 text-sm cursor-not-allowed">
+                    <Zap size={16} className="opacity-40" />
+                    Instant Book · Not on allowlist
+                  </div>
                 )}
 
                 {/* Book Now (broker approval) */}

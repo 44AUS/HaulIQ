@@ -227,6 +227,25 @@ export const MOCK_USERS_LIST = [
   { id: 'u8', name: 'Diana Ross',     email: 'dross@mail.com',   role: 'carrier', plan: 'elite', status: 'active', joined: '2024-02-05', revenue: 99 },
 ];
 
+// ─── MOCK CARRIER LIST (for broker search) ───────────────────────────────────
+export const MOCK_CARRIERS = [
+  { id: 'c1',  name: 'Mike Rodriguez', email: 'carrier@demo.com', company: 'Rodriguez Trucking',  mc: 'MC-123456', dot: 'DOT-789012', plan: 'pro',   loadsCompleted: 94,  rating: 4.9 },
+  { id: 'u3',  name: 'James Wilson',   email: 'jwilson@mail.com', company: 'Wilson Transport',    mc: 'MC-234567', dot: 'DOT-890123', plan: 'elite',  loadsCompleted: 187, rating: 4.7 },
+  { id: 'u4',  name: 'Maria Garcia',   email: 'mgarcia@mail.com', company: 'Garcia Logistics',    mc: 'MC-345678', dot: 'DOT-901234', plan: 'basic',  loadsCompleted: 12,  rating: 4.5 },
+  { id: 'u6',  name: 'Lisa Park',      email: 'lpark@mail.com',   company: 'Park Freight',        mc: 'MC-456789', dot: 'DOT-012345', plan: 'pro',   loadsCompleted: 63,  rating: 4.8 },
+  { id: 'u8',  name: 'Diana Ross',     email: 'dross@mail.com',   company: 'Ross Carriers',       mc: 'MC-567890', dot: 'DOT-123456', plan: 'elite',  loadsCompleted: 211, rating: 4.6 },
+  { id: 'u9',  name: 'Carlos Mendez',  email: 'cmendez@road.com', company: 'Mendez Hauling',      mc: 'MC-678901', dot: 'DOT-234567', plan: 'pro',   loadsCompleted: 48,  rating: 4.7 },
+  { id: 'u10', name: 'Tracy Brown',    email: 'tbrown@road.com',  company: 'Brown Expedited',     mc: 'MC-789012', dot: 'DOT-345678', plan: 'pro',   loadsCompleted: 77,  rating: 4.4 },
+  { id: 'u11', name: 'Derek Nguyen',   email: 'dnguyen@haul.com', company: 'Nguyen Trucking LLC', mc: 'MC-890123', dot: 'DOT-456789', plan: 'elite',  loadsCompleted: 155, rating: 5.0 },
+];
+
+// ─── SAMPLE INSTANT BOOK ALLOWLIST ───────────────────────────────────────────
+export const SAMPLE_ALLOWLIST = [
+  { id: 'al1', brokerId: 'b1', carrierId: 'c1',  carrierEmail: 'carrier@demo.com', carrierName: 'Mike Rodriguez', carrierMc: 'MC-123456', source: 'search', addedAt: '2026-03-10T09:00:00Z' },
+  { id: 'al2', brokerId: 'b1', carrierId: 'u3',  carrierEmail: 'jwilson@mail.com', carrierName: 'James Wilson',   carrierMc: 'MC-234567', source: 'search', addedAt: '2026-03-12T14:00:00Z' },
+  { id: 'al3', brokerId: 'b1', carrierId: null,  carrierEmail: 'partner@fleet.com', carrierName: 'Apex Freight LLC', carrierMc: 'MC-999001', source: 'upload', addedAt: '2026-03-15T10:00:00Z' },
+];
+
 // ─── SAMPLE CONVERSATIONS ─────────────────────────────────────────────────────
 export const CONVERSATIONS = [
   {
