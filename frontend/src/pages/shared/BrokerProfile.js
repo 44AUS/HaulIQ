@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare } from 'lucide-react';
+import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { BROKERS, SAMPLE_BROKER_REVIEWS } from '../../data/sampleData';
 
@@ -39,12 +39,51 @@ function SubRating({ label, value }) {
   );
 }
 
+// Logo circle — shows image if available, falls back to initials
+function BrokerLogoCircle({ logo, name, size = 'lg', isOwner = false, onUpload }) {
+  const ref = useRef();
+  const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const dim = size === 'lg' ? 'w-16 h-16 text-xl' : 'w-8 h-8 text-xs';
+
+  const handleFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onUpload(ev.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className={`relative flex-shrink-0 ${dim} rounded-full`}>
+      {logo
+        ? <img src={logo} alt={name} className={`${dim} rounded-full object-cover border-2 border-dark-400/40`} />
+        : <div className={`${dim} rounded-full bg-brand-500/10 border-2 border-brand-500/30 flex items-center justify-center text-brand-400 font-black`}>{initials}</div>
+      }
+      {isOwner && (
+        <>
+          <button onClick={() => ref.current.click()}
+            className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
+            title="Upload logo">
+            <Camera size={size === 'lg' ? 18 : 12} className="text-white" />
+          </button>
+          <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function BrokerProfile() {
   const { brokerId } = useParams();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const broker = BROKERS.find(b => b.id === brokerId);
   const reviews = SAMPLE_BROKER_REVIEWS[brokerId] || [];
+
+  const isOwner = user?.id === brokerId;
+  // For own profile: live logo from user context; for others: broker's stored logo
+  const logo = isOwner ? (user?.logo ?? broker?.logo) : broker?.logo;
+  const handleLogoUpload = (dataUrl) => updateUser({ logo: dataUrl });
 
   const [tab, setTab] = useState('reviews');
   const [showForm, setShowForm] = useState(false);
@@ -103,7 +142,18 @@ export default function BrokerProfile() {
       {/* Hero */}
       <div className="glass rounded-xl border border-dark-400/40 p-6">
         <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
+          <div className="flex items-start gap-4">
+            <BrokerLogoCircle
+              logo={logo}
+              name={broker.name}
+              size="lg"
+              isOwner={isOwner}
+              onUpload={handleLogoUpload}
+            />
+            <div>
+            {isOwner && !logo && (
+              <p className="text-dark-500 text-xs mb-1.5 flex items-center gap-1"><Camera size={10} /> Click the circle to upload your company logo</p>
+            )}
             <div className="flex items-center gap-3 mb-2 flex-wrap">
               <h1 className="text-2xl font-bold text-white">{broker.name}</h1>
               {badge && (
@@ -133,7 +183,8 @@ export default function BrokerProfile() {
                 </div>
               )}
             </div>
-          </div>
+            </div>{/* end text column */}
+          </div>{/* end logo + text row */}
           {user?.role === 'carrier' && !submitted && (
             <button onClick={() => setShowForm(!showForm)}
               className="btn-primary flex items-center gap-2 text-sm py-2.5 px-4">

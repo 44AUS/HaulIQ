@@ -1,13 +1,14 @@
 // ─── BROKERS ────────────────────────────────────────────────────────────────
 export const BROKERS = [
-  { id: 'br1', name: 'Echo Global Logistics', rating: 4.8, reviews: 312, paySpeed: 'Net-21', badge: 'trusted', warns: 0, avgRate: 3.20 },
-  { id: 'br2', name: 'Coyote Logistics',      rating: 4.5, reviews: 891, paySpeed: 'Net-30', badge: 'verified', warns: 0, avgRate: 2.95 },
-  { id: 'br3', name: 'XPO Logistics',         rating: 4.6, reviews: 540, paySpeed: 'Net-14', badge: 'trusted', warns: 0, avgRate: 3.10 },
-  { id: 'br4', name: 'MoLo Solutions',        rating: 4.9, reviews: 178, paySpeed: 'Quick-Pay', badge: 'elite', warns: 0, avgRate: 3.40 },
-  { id: 'br5', name: 'Freight Broker LLC',    rating: 2.1, reviews: 44,  paySpeed: 'Net-45', badge: 'warning', warns: 3, avgRate: 2.10 },
-  { id: 'br6', name: 'BlueSky Transport',     rating: 3.2, reviews: 89,  paySpeed: 'Net-30', badge: null, warns: 1, avgRate: 2.60 },
-  { id: 'br7', name: 'Arrive Logistics',      rating: 4.7, reviews: 423, paySpeed: 'Net-21', badge: 'verified', warns: 0, avgRate: 3.15 },
-  { id: 'br8', name: 'GlobalTranz',           rating: 4.3, reviews: 267, paySpeed: 'Net-21', badge: 'verified', warns: 0, avgRate: 2.90 },
+  { id: 'b1',  name: 'FastFreight Brokerage', rating: 4.7, reviews: 58,  paySpeed: 'Net-21',    badge: 'trusted',  warns: 0, avgRate: 3.10, logo: null },
+  { id: 'br1', name: 'Echo Global Logistics', rating: 4.8, reviews: 312, paySpeed: 'Net-21',    badge: 'trusted',  warns: 0, avgRate: 3.20, logo: null },
+  { id: 'br2', name: 'Coyote Logistics',      rating: 4.5, reviews: 891, paySpeed: 'Net-30',    badge: 'verified', warns: 0, avgRate: 2.95, logo: null },
+  { id: 'br3', name: 'XPO Logistics',         rating: 4.6, reviews: 540, paySpeed: 'Net-14',    badge: 'trusted',  warns: 0, avgRate: 3.10, logo: null },
+  { id: 'br4', name: 'MoLo Solutions',        rating: 4.9, reviews: 178, paySpeed: 'Quick-Pay', badge: 'elite',    warns: 0, avgRate: 3.40, logo: null },
+  { id: 'br5', name: 'Freight Broker LLC',    rating: 2.1, reviews: 44,  paySpeed: 'Net-45',    badge: 'warning',  warns: 3, avgRate: 2.10, logo: null },
+  { id: 'br6', name: 'BlueSky Transport',     rating: 3.2, reviews: 89,  paySpeed: 'Net-30',    badge: null,       warns: 1, avgRate: 2.60, logo: null },
+  { id: 'br7', name: 'Arrive Logistics',      rating: 4.7, reviews: 423, paySpeed: 'Net-21',    badge: 'verified', warns: 0, avgRate: 3.15, logo: null },
+  { id: 'br8', name: 'GlobalTranz',           rating: 4.3, reviews: 267, paySpeed: 'Net-21',    badge: 'verified', warns: 0, avgRate: 2.90, logo: null },
 ];
 
 // ─── LOADS ───────────────────────────────────────────────────────────────────

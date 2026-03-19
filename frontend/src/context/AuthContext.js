@@ -62,8 +62,12 @@ export function AuthProvider({ children }) {
     setUser(u => ({ ...u, plan }));
   }, []);
 
+  const updateUser = useCallback((fields) => {
+    setUser(u => ({ ...u, ...fields }));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, signup, logout, updatePlan, setError }}>
+    <AuthContext.Provider value={{ user, loading, error, login, signup, logout, updatePlan, updateUser, setError }}>
       {children}
     </AuthContext.Provider>
   );
