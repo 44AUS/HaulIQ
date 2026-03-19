@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from functools import lru_cache
 
 
@@ -9,11 +10,11 @@ class Settings(BaseSettings):
     debug: bool = False
     allowed_origins: str = "http://localhost:3000"
 
-    # Database
-    database_url: str
+    # Database — Railway injects as postgres://, SQLAlchemy needs postgresql://
+    database_url: str = ""
 
     # JWT
-    secret_key: str
+    secret_key: str = "change-me-in-production-use-openssl-rand-hex-32"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
@@ -22,13 +23,19 @@ class Settings(BaseSettings):
     default_fuel_price: float = 3.85
     default_mpg: float = 7.2
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def fix_postgres_url(cls, v: str) -> str:
+        """Railway provides postgres:// — SQLAlchemy 2.x requires postgresql://"""
+        if v and v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        return v
+
     @property
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = {"env_file": ".env", "case_sensitive": False}
 
 
 @lru_cache()
