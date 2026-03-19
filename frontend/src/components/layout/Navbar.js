@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Truck, Menu, X, ChevronDown, LogOut, User, Settings, BarChart2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Truck, Menu, X, ChevronDown, LogOut, Settings, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Navbar() {
@@ -8,7 +8,6 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {

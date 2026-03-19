@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Zap, Search, Upload, X, Check, UserPlus, Trash2, AlertCircle, FileText, Users } from 'lucide-react';
+import { Zap, Search, Upload, Check, UserPlus, Trash2, AlertCircle, FileText, Users } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
 import { MOCK_CARRIERS } from '../../data/sampleData';
@@ -11,7 +11,7 @@ export default function InstantBookSettings() {
 
   // Search tab state
   const [query, setQuery] = useState('');
-  const [addedIds, setAddedIds] = useState(new Set());
+  const [, setAddedIds] = useState(new Set());
 
   // Upload tab state
   const [uploadText, setUploadText] = useState('');
@@ -249,7 +249,6 @@ export default function InstantBookSettings() {
             <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
               {searchResults.map(carrier => {
                 const already = isAlreadyAdded(carrier);
-                const justAdded = addedIds.has(carrier.id);
                 return (
                   <div key={carrier.id}
                     className="flex items-center gap-4 px-5 py-4 border-b border-dark-400/20 last:border-0 hover:bg-dark-700/30 transition-colors">

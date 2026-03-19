@@ -24,6 +24,7 @@ export default function Signup() {
   const { signup, loading, error, setError } = useAuth();
   const navigate = useNavigate();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setError && setError(null); }, [step]);
 
   const updateForm = (k, v) => setForm(f => ({ ...f, [k]: v }));

@@ -1,18 +1,13 @@
 import React from 'react';
 import { DollarSign, Users, Package, TrendingUp, ArrowUpRight, Shield } from 'lucide-react';
 import { ADMIN_STATS } from '../../data/sampleData';
-import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-const COLORS = { Basic: '#30363d', Pro: '#22c55e', Elite: '#a855f7' };
 const PIE_COLORS = ['#30363d', '#22c55e', '#a855f7'];
 
 const ChartTooltipStyle = { contentStyle: { background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 } };
 
 export default function AdminOverview() {
-  const pieData = [
-    ...ADMIN_STATS.carrierDist.map(d => ({ name: `C-${d.plan}`, value: d.count })),
-  ];
-
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-start justify-between flex-wrap gap-4">

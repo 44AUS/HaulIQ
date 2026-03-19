@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ArrowRight, Calendar, Package, Weight, DollarSign, TrendingUp, Activity, RefreshCw } from 'lucide-react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw } from 'lucide-react';
 import { CARRIER_ACTIVE_LOADS } from '../../data/sampleData';
 
 const STATUS_CONFIG = {

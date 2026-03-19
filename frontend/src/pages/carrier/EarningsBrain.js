@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, TrendingUp, AlertTriangle, Clock, BarChart2, MapPin, ChevronRight, Lock } from 'lucide-react';
+import { Brain, ChevronRight, Lock } from 'lucide-react';
 import { BRAIN_INSIGHTS, LANE_PERFORMANCE } from '../../data/sampleData';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -12,16 +12,8 @@ const TAG_COLORS = {
   'savings':     'badge-green',
 };
 
-const TYPE_ICONS = {
-  lane:    TrendingUp,
-  broker:  AlertTriangle,
-  timing:  Clock,
-  pattern: BarChart2,
-  deadhead: MapPin,
-};
 
 function InsightCard({ insight, locked }) {
-  const Icon = TYPE_ICONS[insight.type] || Brain;
   return (
     <div className={`glass rounded-xl p-5 border transition-all ${locked ? 'border-dark-400/20 opacity-60' : 'border-dark-400/40 hover:border-brand-500/20'} relative overflow-hidden`}>
       {locked && (

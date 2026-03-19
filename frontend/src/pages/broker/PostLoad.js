@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, Check, ArrowRight, MapPin } from 'lucide-react';
+import { PlusCircle, Check, ArrowRight } from 'lucide-react';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 

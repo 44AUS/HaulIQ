@@ -1,7 +1,7 @@
 import React from 'react';
-import { DollarSign, TrendingUp, ArrowUpRight } from 'lucide-react';
+import { DollarSign, ArrowUpRight } from 'lucide-react';
 import { ADMIN_STATS } from '../../data/sampleData';
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const PLAN_REVENUE = [
   { plan: 'Carrier Basic', subs: 680, price: 0, mrr: 0 },

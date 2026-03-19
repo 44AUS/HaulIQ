@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart2, Eye, TrendingUp, Users, Clock } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const CONVERSION_DATA = [
   { week: 'W1', views: 120, bids: 31, filled: 8 },

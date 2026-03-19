@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, ArrowRight, Bookmark, BookmarkCheck, Zap, TrendingUp, Minus, TrendingDown, Clock, Weight, Truck, Calendar } from 'lucide-react';
+import { MapPin, ArrowRight, Bookmark, BookmarkCheck, Zap, TrendingUp, Minus, TrendingDown, Truck, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BrokerRating from '../shared/BrokerRating';
 

@@ -5,7 +5,7 @@ import { useMessaging } from '../../context/MessagingContext';
 
 export default function Messages() {
   const { user } = useAuth();
-  const { conversations, sendMessage, replyMessage, unreadCount } = useMessaging();
+  const { conversations, replyMessage } = useMessaging();
   const [activeConvoId, setActiveConvoId] = useState(null);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);

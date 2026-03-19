@@ -13,6 +13,7 @@ export default function Login() {
   const { login, loading, error, setError } = useAuth();
   const navigate = useNavigate();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setError && setError(null); }, []);
 
   const handleSubmit = async (e) => {

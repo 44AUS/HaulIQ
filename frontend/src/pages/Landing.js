@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Truck, Brain, Calculator, Star, TrendingUp, Shield, Zap, ArrowRight,
-  Check, X, ChevronRight, BarChart2, DollarSign, Clock, Users, Flame,
-  AlertTriangle, Award, Target, MapPin
+  Check, X, ChevronRight, BarChart2, Users, Flame,
+  AlertTriangle
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 
@@ -508,6 +508,7 @@ function Footer() {
             <div key={title}>
               <h4 className="text-white font-semibold text-sm mb-4">{title}</h4>
               <ul className="space-y-2.5">
+                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                 {links.map(l => <li key={l}><a href="#" className="text-dark-300 hover:text-white text-sm transition-colors">{l}</a></li>)}
               </ul>
             </div>

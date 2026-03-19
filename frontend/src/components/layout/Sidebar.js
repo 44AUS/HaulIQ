@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
-  CreditCard, DollarSign, Shield, Settings, LogOut, Bell, ChevronLeft, ChevronRight, Menu,
+  CreditCard, DollarSign, Settings, LogOut, ChevronLeft, ChevronRight, Menu,
   MessageSquare, Calendar, Zap, Activity
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

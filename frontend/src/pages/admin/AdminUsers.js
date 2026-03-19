@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Search, UserCheck, UserX, MoreHorizontal, Shield, X } from 'lucide-react';
+import { Users, Search, UserCheck, UserX, MoreHorizontal, X } from 'lucide-react';
 import { MOCK_USERS_LIST } from '../../data/sampleData';
 
 export default function AdminUsers() {

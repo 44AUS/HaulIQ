@@ -6,7 +6,7 @@ import { useMessaging } from '../../context/MessagingContext';
 import { LOADS, MOCK_CARRIERS } from '../../data/sampleData';
 
 export default function BookingRequests() {
-  const { user } = useAuth();
+  useAuth();
   const { bookings, bids, reviewBooking, respondBid } = useMessaging();
   const [activeTab, setActiveTab] = useState('bookings');
   const [reviewModal, setReviewModal] = useState(null); // { type: 'booking'|'bid', item }
