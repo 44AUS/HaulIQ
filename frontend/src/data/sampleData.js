@@ -20,7 +20,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-21',
     fuel: 520, netProfit: 1890, profitScore: 'green',
     commodity: 'Consumer Electronics', dims: '48x102', posted: '2 min ago', hot: true, saved: false,
-    instantBook: true, bookNow: true,
+    instantBook: true, bookNow: true, status: 'available',
   },
   {
     id: 'L002', broker: BROKERS[0], type: 'Reefer', weight: '38,500 lbs',
@@ -29,7 +29,7 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-22',
     fuel: 740, netProfit: 1890, profitScore: 'green',
     commodity: 'Fresh Produce', dims: '48x102', posted: '15 min ago', hot: true, saved: false,
-    instantBook: false, bookNow: true,
+    instantBook: false, bookNow: true, status: 'available',
   },
   {
     id: 'L003', broker: BROKERS[1], type: 'Flatbed', weight: '44,000 lbs',
@@ -38,7 +38,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-20',
     fuel: 295, netProfit: 520, profitScore: 'yellow',
     commodity: 'Steel Coils', dims: '48x102', posted: '1 hr ago', hot: false, saved: true,
-    instantBook: false, bookNow: true,
+    instantBook: false, bookNow: true, status: 'available',
   },
   {
     id: 'L004', broker: BROKERS[4], type: 'Dry Van', weight: '35,000 lbs',
@@ -47,7 +47,7 @@ export const LOADS = [
     pickup: '2026-03-22', delivery: '2026-03-22',
     fuel: 198, netProfit: -85, profitScore: 'red',
     commodity: 'General Freight', dims: '48x102', posted: '3 hr ago', hot: false, saved: false,
-    instantBook: false, bookNow: false,
+    instantBook: false, bookNow: false, status: 'available',
   },
   {
     id: 'L005', broker: BROKERS[6], type: 'Dry Van', weight: '41,000 lbs',
@@ -56,7 +56,7 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-23',
     fuel: 928, netProfit: 2340, profitScore: 'green',
     commodity: 'Apparel', dims: '48x102', posted: '5 min ago', hot: true, saved: false,
-    instantBook: true, bookNow: true,
+    instantBook: true, bookNow: true, status: 'available',
   },
   {
     id: 'L006', broker: BROKERS[2], type: 'Reefer', weight: '36,000 lbs',
@@ -65,7 +65,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-20',
     fuel: 130, netProfit: 340, profitScore: 'yellow',
     commodity: 'Dairy', dims: '48x102', posted: '2 hr ago', hot: false, saved: false,
-    instantBook: false, bookNow: true,
+    instantBook: false, bookNow: true, status: 'available',
   },
   {
     id: 'L007', broker: BROKERS[7], type: 'Flatbed', weight: '43,000 lbs',
@@ -74,7 +74,7 @@ export const LOADS = [
     pickup: '2026-03-22', delivery: '2026-03-22',
     fuel: 410, netProfit: 1120, profitScore: 'green',
     commodity: 'Lumber', dims: '53x102', posted: '30 min ago', hot: false, saved: false,
-    instantBook: false, bookNow: true,
+    instantBook: false, bookNow: true, status: 'available',
   },
   {
     id: 'L008', broker: BROKERS[5], type: 'Dry Van', weight: '28,000 lbs',
@@ -83,7 +83,77 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-22',
     fuel: 435, netProfit: 210, profitScore: 'red',
     commodity: 'Auto Parts', dims: '48x102', posted: '4 hr ago', hot: false, saved: false,
-    instantBook: false, bookNow: false,
+    instantBook: false, bookNow: false, status: 'available',
+  },
+];
+
+// ─── LOADS IN PROGRESS ────────────────────────────────────────────────────────
+export const CARRIER_ACTIVE_LOADS = [
+  {
+    id: 'CA001', broker: BROKERS[3], type: 'Dry Van', weight: '42,000 lbs',
+    origin: 'Chicago, IL', dest: 'Atlanta, GA', miles: 716,
+    rate: 2850, ratePerMile: 3.98, netProfit: 1890,
+    pickup: '2026-03-20', delivery: '2026-03-21',
+    commodity: 'Consumer Electronics', status: 'in_transit',
+    bookedAt: '2026-03-19T08:00:00Z', pickedUpAt: '2026-03-20T07:45:00Z',
+    carrierNote: 'Load picked up, heading south on I-65',
+  },
+  {
+    id: 'CA002', broker: BROKERS[0], type: 'Reefer', weight: '38,500 lbs',
+    origin: 'Dallas, TX', dest: 'Phoenix, AZ', miles: 1015,
+    rate: 3400, ratePerMile: 3.35, netProfit: 1890,
+    pickup: '2026-03-21', delivery: '2026-03-22',
+    commodity: 'Fresh Produce', status: 'booked',
+    bookedAt: '2026-03-19T10:00:00Z', pickedUpAt: null,
+    carrierNote: '',
+  },
+  {
+    id: 'CA003', broker: BROKERS[6], type: 'Flatbed', weight: '44,000 lbs',
+    origin: 'Houston, TX', dest: 'Memphis, TN', miles: 568,
+    rate: 1980, ratePerMile: 3.49, netProfit: 1120,
+    pickup: '2026-03-22', delivery: '2026-03-22',
+    commodity: 'Lumber', status: 'quoted',
+    bookedAt: null, pickedUpAt: null,
+    carrierNote: '',
+  },
+];
+
+export const BROKER_ACTIVE_LOADS = [
+  {
+    id: 'BA001', carrierId: 'c1', carrierName: 'Mike Rodriguez', carrierMc: 'MC-123456',
+    type: 'Dry Van', weight: '42,000 lbs',
+    origin: 'Chicago, IL', dest: 'Atlanta, GA', miles: 716,
+    rate: 2850, ratePerMile: 3.98,
+    pickup: '2026-03-20', delivery: '2026-03-21',
+    commodity: 'Consumer Electronics', status: 'in_transit',
+    bookedAt: '2026-03-19T08:00:00Z', pickedUpAt: '2026-03-20T07:45:00Z',
+  },
+  {
+    id: 'BA002', carrierId: 'u3', carrierName: 'James Wilson', carrierMc: 'MC-234567',
+    type: 'Reefer', weight: '38,500 lbs',
+    origin: 'Dallas, TX', dest: 'Phoenix, AZ', miles: 1015,
+    rate: 3400, ratePerMile: 3.35,
+    pickup: '2026-03-21', delivery: '2026-03-22',
+    commodity: 'Fresh Produce', status: 'booked',
+    bookedAt: '2026-03-19T10:00:00Z', pickedUpAt: null,
+  },
+  {
+    id: 'BA003', carrierId: null, carrierName: null, carrierMc: null,
+    type: 'Flatbed', weight: '41,000 lbs',
+    origin: 'Miami, FL', dest: 'New York, NY', miles: 1280,
+    rate: 4200, ratePerMile: 3.28,
+    pickup: '2026-03-21', delivery: '2026-03-23',
+    commodity: 'Apparel', status: 'available',
+    bookedAt: null, pickedUpAt: null,
+  },
+  {
+    id: 'BA004', carrierId: 'c1', carrierName: 'Mike Rodriguez', carrierMc: 'MC-123456',
+    type: 'Dry Van', weight: '35,000 lbs',
+    origin: 'Nashville, TN', dest: 'Charlotte, NC', miles: 408,
+    rate: 1200, ratePerMile: 2.94,
+    pickup: '2026-03-19', delivery: '2026-03-19',
+    commodity: 'Steel Coils', status: 'delivered',
+    bookedAt: '2026-03-18T09:00:00Z', pickedUpAt: '2026-03-19T06:00:00Z',
   },
 ];
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, ArrowRight, Bookmark, BookmarkCheck, Zap, TrendingUp, Minus, TrendingDown, Clock, Weight, Truck } from 'lucide-react';
+import { MapPin, ArrowRight, Bookmark, BookmarkCheck, Zap, TrendingUp, Minus, TrendingDown, Clock, Weight, Truck, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import BrokerRating from '../shared/BrokerRating';
 
@@ -58,6 +58,18 @@ export default function LoadCard({ load, onSave }) {
             <MapPin size={10} /> Dest
           </div>
           <p className="text-white font-semibold text-sm truncate">{load.dest}</p>
+        </div>
+      </div>
+
+      {/* Dates */}
+      <div className="flex items-center justify-between mb-4 text-xs text-dark-400">
+        <div className="flex items-center gap-1">
+          <Calendar size={10} />
+          <span>Pickup: <span className="text-dark-200">{load.pickup}</span></span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Calendar size={10} />
+          <span>Drop: <span className="text-dark-200">{load.delivery}</span></span>
         </div>
       </div>
 

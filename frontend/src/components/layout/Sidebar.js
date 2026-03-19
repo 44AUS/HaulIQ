@@ -4,7 +4,7 @@ import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
   CreditCard, DollarSign, Shield, Settings, LogOut, Bell, ChevronLeft, ChevronRight, Menu,
-  MessageSquare, Calendar, Zap
+  MessageSquare, Calendar, Zap, Activity
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
@@ -16,6 +16,7 @@ const CARRIER_LINKS = [
   { icon: Brain,           label: 'Earnings Brain',     path: '/carrier/brain' },
   { icon: BookmarkCheck,   label: 'Saved Loads',        path: '/carrier/saved' },
   { icon: History,         label: 'Load History',       path: '/carrier/history' },
+  { icon: Activity,        label: 'Loads in Progress',  path: '/carrier/active' },
   { icon: TrendingUp,      label: 'Analytics',          path: '/carrier/analytics' },
   { icon: MessageSquare,   label: 'Messages',           path: '/carrier/messages', badge: 'unread' },
 ];
@@ -24,6 +25,7 @@ const BROKER_LINKS = [
   { icon: LayoutDashboard, label: 'Dashboard',          path: '/broker/dashboard' },
   { icon: PlusCircle,      label: 'Post Load',          path: '/broker/post' },
   { icon: Package,         label: 'Manage Loads',       path: '/broker/loads' },
+  { icon: Activity,        label: 'Loads in Progress',  path: '/broker/active' },
   { icon: BarChart2,       label: 'Analytics',          path: '/broker/analytics' },
   { icon: MessageSquare,   label: 'Messages',           path: '/broker/messages', badge: 'unread' },
   { icon: Calendar,        label: 'Booking Requests',   path: '/broker/bookings', badge: 'bookings' },
