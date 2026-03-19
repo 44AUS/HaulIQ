@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Check, X, DollarSign, Clock } from 'lucide-react';
+import { Check, X, DollarSign, Clock, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
-import { LOADS } from '../../data/sampleData';
+import { LOADS, MOCK_CARRIERS } from '../../data/sampleData';
 
 export default function BookingRequests() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export default function BookingRequests() {
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   const getLoad = (loadId) => LOADS.find(l => l.id === loadId);
+  const getCarrier = (carrierId) => MOCK_CARRIERS.find(c => c.id === carrierId);
 
   const handleReviewBooking = (approved) => {
     reviewBooking(reviewModal.item.id, approved, brokerNote);
@@ -76,11 +78,20 @@ export default function BookingRequests() {
             </div>
           ) : pendingBookings.map(booking => {
             const load = getLoad(booking.loadId);
+            const carrier = getCarrier(booking.carrierId);
             return (
               <div key={booking.id} className="glass rounded-xl border border-dark-400/40 p-5 flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold">{load ? `${load.origin} → ${load.dest}` : booking.loadId}</p>
-                  <p className="text-dark-300 text-sm mt-0.5">{load?.type} · {load ? `$${load.rate.toLocaleString()}` : ''} · {load?.miles} mi</p>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-white font-semibold">{load ? `${load.origin} → ${load.dest}` : booking.loadId}</p>
+                    <span className="text-dark-500 text-xs">·</span>
+                    {carrier ? (
+                      <Link to={`/carrier-profile/${carrier.id}`} className="text-brand-400 hover:text-brand-300 text-sm font-medium flex items-center gap-1 transition-colors">
+                        {carrier.name} <ExternalLink size={11} />
+                      </Link>
+                    ) : <span className="text-dark-400 text-sm">Unknown Carrier</span>}
+                  </div>
+                  <p className="text-dark-300 text-sm">{load?.type} · {load ? `$${load.rate.toLocaleString()}` : ''} · {load?.miles} mi</p>
                   {booking.note && <p className="text-dark-400 text-xs mt-1 italic">"{booking.note}"</p>}
                   <p className="text-dark-500 text-xs mt-1">{new Date(booking.createdAt).toLocaleString()}</p>
                 </div>
@@ -105,11 +116,20 @@ export default function BookingRequests() {
             </div>
           ) : pendingBids.map(bid => {
             const load = getLoad(bid.loadId);
+            const carrier = getCarrier(bid.carrierId);
             return (
               <div key={bid.id} className="glass rounded-xl border border-dark-400/40 p-5 flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-semibold">{load ? `${load.origin} → ${load.dest}` : bid.loadId}</p>
-                  <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="text-white font-semibold">{load ? `${load.origin} → ${load.dest}` : bid.loadId}</p>
+                    <span className="text-dark-500 text-xs">·</span>
+                    {carrier ? (
+                      <Link to={`/carrier-profile/${carrier.id}`} className="text-brand-400 hover:text-brand-300 text-sm font-medium flex items-center gap-1 transition-colors">
+                        {carrier.name} <ExternalLink size={11} />
+                      </Link>
+                    ) : <span className="text-dark-400 text-sm">Unknown Carrier</span>}
+                  </div>
+                  <div className="flex items-center gap-3">
                     <span className="text-dark-300 text-sm">Listed: <span className="text-white">${load?.rate.toLocaleString()}</span></span>
                     <span className="text-dark-400">→</span>
                     <span className="text-dark-300 text-sm">Bid: <span className="text-brand-400 font-bold">${bid.amount.toLocaleString()}</span></span>
@@ -138,9 +158,17 @@ export default function BookingRequests() {
             {reviewModal.type === 'booking' ? (
               <>
                 <h3 className="text-white font-bold text-lg mb-1">Review Booking Request</h3>
-                <p className="text-dark-300 text-sm mb-5">
-                  {(() => { const load = getLoad(reviewModal.item.loadId); return load ? `${load.origin} → ${load.dest}` : ''; })()}
-                </p>
+                <div className="flex items-center justify-between mb-5">
+                  <p className="text-dark-300 text-sm">
+                    {(() => { const load = getLoad(reviewModal.item.loadId); return load ? `${load.origin} → ${load.dest}` : ''; })()}
+                  </p>
+                  {(() => { const c = getCarrier(reviewModal.item.carrierId); return c ? (
+                    <Link to={`/carrier-profile/${c.id}`} onClick={() => setReviewModal(null)}
+                      className="text-brand-400 hover:text-brand-300 text-xs flex items-center gap-1 transition-colors">
+                      {c.name}'s profile <ExternalLink size={10} />
+                    </Link>
+                  ) : null; })()}
+                </div>
                 {reviewModal.item.note && (
                   <div className="bg-dark-700/50 rounded-lg p-3 mb-5">
                     <p className="text-dark-300 text-xs">Carrier note:</p>
@@ -166,7 +194,15 @@ export default function BookingRequests() {
               </>
             ) : (
               <>
-                <h3 className="text-white font-bold text-lg mb-1">Review Bid</h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-white font-bold text-lg">Review Bid</h3>
+                  {(() => { const c = getCarrier(reviewModal.item.carrierId); return c ? (
+                    <Link to={`/carrier-profile/${c.id}`} onClick={() => setReviewModal(null)}
+                      className="text-brand-400 hover:text-brand-300 text-xs flex items-center gap-1 transition-colors">
+                      {c.name}'s profile <ExternalLink size={10} />
+                    </Link>
+                  ) : null; })()}
+                </div>
                 <div className="flex gap-4 mb-5 mt-3">
                   <div className="bg-dark-700/50 rounded-lg p-3 flex-1 text-center">
                     <p className="text-dark-400 text-xs mb-1">Listed Rate</p>
