@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
-  CreditCard, DollarSign, Shield, Settings, LogOut, Bell, ChevronLeft, ChevronRight, Menu
+  CreditCard, DollarSign, Shield, Settings, LogOut, Bell, ChevronLeft, ChevronRight, Menu,
+  MessageSquare, Calendar
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useMessaging } from '../../context/MessagingContext';
 
 const CARRIER_LINKS = [
   { icon: LayoutDashboard, label: 'Dashboard',         path: '/carrier/dashboard' },
@@ -15,6 +17,7 @@ const CARRIER_LINKS = [
   { icon: BookmarkCheck,   label: 'Saved Loads',        path: '/carrier/saved' },
   { icon: History,         label: 'Load History',       path: '/carrier/history' },
   { icon: TrendingUp,      label: 'Analytics',          path: '/carrier/analytics' },
+  { icon: MessageSquare,   label: 'Messages',           path: '/carrier/messages', badge: 'unread' },
 ];
 
 const BROKER_LINKS = [
@@ -22,6 +25,8 @@ const BROKER_LINKS = [
   { icon: PlusCircle,      label: 'Post Load',          path: '/broker/post' },
   { icon: Package,         label: 'Manage Loads',       path: '/broker/loads' },
   { icon: BarChart2,       label: 'Analytics',          path: '/broker/analytics' },
+  { icon: MessageSquare,   label: 'Messages',           path: '/broker/messages', badge: 'unread' },
+  { icon: Calendar,        label: 'Booking Requests',   path: '/broker/bookings', badge: 'bookings' },
 ];
 
 const ADMIN_LINKS = [
@@ -38,12 +43,19 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const messaging = useMessaging();
 
   if (!user) return null;
 
   const links = user.role === 'carrier' ? CARRIER_LINKS
               : user.role === 'broker'  ? BROKER_LINKS
               : ADMIN_LINKS;
+
+  const getBadgeCount = (badge) => {
+    if (badge === 'unread') return messaging.unreadCount(user.id);
+    if (badge === 'bookings') return messaging.pendingBookingsCount(user.id) + messaging.pendingBidsCount(user.id);
+    return 0;
+  };
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -78,15 +90,28 @@ export default function Sidebar() {
 
       {/* Nav links */}
       <nav className="flex-1 px-3 mt-4 space-y-0.5 overflow-y-auto">
-        {links.map(({ icon: Icon, label, path }) => {
+        {links.map(({ icon: Icon, label, path, badge }) => {
           const active = location.pathname === path || (path !== '/admin' && location.pathname.startsWith(path));
+          const badgeCount = badge ? getBadgeCount(badge) : 0;
           return (
             <Link key={path} to={path}
               onClick={() => setMobileOpen(false)}
               className={`sidebar-link ${active ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? label : undefined}>
-              <Icon size={18} className="flex-shrink-0" />
-              {!collapsed && <span>{label}</span>}
+              <div className="relative flex-shrink-0">
+                <Icon size={18} />
+                {badgeCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-brand-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                    {badgeCount > 9 ? '9+' : badgeCount}
+                  </span>
+                )}
+              </div>
+              {!collapsed && <span className="flex-1">{label}</span>}
+              {!collapsed && badgeCount > 0 && (
+                <span className="ml-auto bg-brand-500/20 text-brand-400 text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                  {badgeCount}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -67,6 +67,8 @@ class Load(Base):
     # Status
     status           = Column(SAEnum(LoadStatus), default=LoadStatus.active)
     is_hot           = Column(Boolean, default=False)
+    instant_book     = Column(Boolean, default=False)   # carrier can book instantly, no approval
+    book_now         = Column(Boolean, default=True)    # broker must approve booking request
     view_count       = Column(Integer, default=0)
     notes            = Column(Text, nullable=True)
     posted_at        = Column(DateTime, default=datetime.utcnow)

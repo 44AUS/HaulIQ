@@ -19,6 +19,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-21',
     fuel: 520, netProfit: 1890, profitScore: 'green',
     commodity: 'Consumer Electronics', dims: '48x102', posted: '2 min ago', hot: true, saved: false,
+    instantBook: true, bookNow: true,
   },
   {
     id: 'L002', broker: BROKERS[0], type: 'Reefer', weight: '38,500 lbs',
@@ -27,6 +28,7 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-22',
     fuel: 740, netProfit: 1890, profitScore: 'green',
     commodity: 'Fresh Produce', dims: '48x102', posted: '15 min ago', hot: true, saved: false,
+    instantBook: false, bookNow: true,
   },
   {
     id: 'L003', broker: BROKERS[1], type: 'Flatbed', weight: '44,000 lbs',
@@ -35,6 +37,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-20',
     fuel: 295, netProfit: 520, profitScore: 'yellow',
     commodity: 'Steel Coils', dims: '48x102', posted: '1 hr ago', hot: false, saved: true,
+    instantBook: false, bookNow: true,
   },
   {
     id: 'L004', broker: BROKERS[4], type: 'Dry Van', weight: '35,000 lbs',
@@ -43,6 +46,7 @@ export const LOADS = [
     pickup: '2026-03-22', delivery: '2026-03-22',
     fuel: 198, netProfit: -85, profitScore: 'red',
     commodity: 'General Freight', dims: '48x102', posted: '3 hr ago', hot: false, saved: false,
+    instantBook: false, bookNow: false,
   },
   {
     id: 'L005', broker: BROKERS[6], type: 'Dry Van', weight: '41,000 lbs',
@@ -51,6 +55,7 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-23',
     fuel: 928, netProfit: 2340, profitScore: 'green',
     commodity: 'Apparel', dims: '48x102', posted: '5 min ago', hot: true, saved: false,
+    instantBook: true, bookNow: true,
   },
   {
     id: 'L006', broker: BROKERS[2], type: 'Reefer', weight: '36,000 lbs',
@@ -59,6 +64,7 @@ export const LOADS = [
     pickup: '2026-03-20', delivery: '2026-03-20',
     fuel: 130, netProfit: 340, profitScore: 'yellow',
     commodity: 'Dairy', dims: '48x102', posted: '2 hr ago', hot: false, saved: false,
+    instantBook: false, bookNow: true,
   },
   {
     id: 'L007', broker: BROKERS[7], type: 'Flatbed', weight: '43,000 lbs',
@@ -67,6 +73,7 @@ export const LOADS = [
     pickup: '2026-03-22', delivery: '2026-03-22',
     fuel: 410, netProfit: 1120, profitScore: 'green',
     commodity: 'Lumber', dims: '53x102', posted: '30 min ago', hot: false, saved: false,
+    instantBook: false, bookNow: true,
   },
   {
     id: 'L008', broker: BROKERS[5], type: 'Dry Van', weight: '28,000 lbs',
@@ -75,6 +82,7 @@ export const LOADS = [
     pickup: '2026-03-21', delivery: '2026-03-22',
     fuel: 435, netProfit: 210, profitScore: 'red',
     commodity: 'Auto Parts', dims: '48x102', posted: '4 hr ago', hot: false, saved: false,
+    instantBook: false, bookNow: false,
   },
 ];
 
@@ -217,4 +225,32 @@ export const MOCK_USERS_LIST = [
   { id: 'u6', name: 'Lisa Park',      email: 'lpark@mail.com',   role: 'carrier', plan: 'pro',  status: 'active', joined: '2024-01-28', revenue: 49 },
   { id: 'u7', name: 'Kevin Hart',     email: 'khart@freight.com', role: 'broker', plan: 'basic', status: 'active', joined: '2024-03-10', revenue: 0 },
   { id: 'u8', name: 'Diana Ross',     email: 'dross@mail.com',   role: 'carrier', plan: 'elite', status: 'active', joined: '2024-02-05', revenue: 99 },
+];
+
+// ─── SAMPLE CONVERSATIONS ─────────────────────────────────────────────────────
+export const CONVERSATIONS = [
+  {
+    id: 'conv1',
+    loadId: 'L001',
+    carrierId: 'c1',
+    brokerId: 'br4_user',
+    brokerName: 'MoLo Solutions',
+    loadRoute: 'Chicago, IL → Atlanta, GA',
+    updatedAt: '2026-03-19T10:30:00Z',
+    messages: [
+      { id: 'm1', senderId: 'br4_user', senderName: 'MoLo Solutions', body: 'Hi! Are you available for this load on the 20th?', createdAt: '2026-03-19T10:00:00Z', isRead: true },
+      { id: 'm2', senderId: 'c1', senderName: 'Mike Rodriguez', body: 'Yes, I can do it. Is there any flex on the rate?', createdAt: '2026-03-19T10:15:00Z', isRead: true },
+      { id: 'm3', senderId: 'br4_user', senderName: 'MoLo Solutions', body: 'We can go up to $2,950 if you can confirm today.', createdAt: '2026-03-19T10:30:00Z', isRead: false },
+    ],
+  },
+];
+
+// ─── SAMPLE BIDS ──────────────────────────────────────────────────────────────
+export const SAMPLE_BIDS = [
+  { id: 'bid1', loadId: 'L003', carrierId: 'c1', amount: 1350, note: 'I can pickup first thing in the morning', status: 'pending', createdAt: '2026-03-19T09:00:00Z' },
+];
+
+// ─── SAMPLE BOOKINGS ──────────────────────────────────────────────────────────
+export const SAMPLE_BOOKINGS = [
+  { id: 'bk1', loadId: 'L002', carrierId: 'c1', status: 'pending', note: 'Ready to roll, fully loaded trailer available', createdAt: '2026-03-19T08:00:00Z' },
 ];

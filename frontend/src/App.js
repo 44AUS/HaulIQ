@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { MessagingProvider } from './context/MessagingContext';
 
 // Pages — Public
 import Landing from './pages/Landing';
@@ -23,6 +24,10 @@ import BrokerDashboard from './pages/broker/Dashboard';
 import PostLoad from './pages/broker/PostLoad';
 import ManageLoads from './pages/broker/ManageLoads';
 import BrokerAnalytics from './pages/broker/BrokerAnalytics';
+import BookingRequests from './pages/broker/BookingRequests';
+
+// Pages — Shared
+import Messages from './pages/shared/Messages';
 
 // Pages — Admin
 import AdminOverview from './pages/admin/AdminOverview';
@@ -69,6 +74,7 @@ function CarrierRoutes() {
           <Route path="saved" element={<SavedLoads />} />
           <Route path="history" element={<LoadHistory />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
+          <Route path="messages" element={<Messages />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
@@ -87,6 +93,8 @@ function BrokerRoutes() {
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
           <Route path="analytics" element={<BrokerAnalytics />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="bookings" element={<BookingRequests />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
@@ -132,11 +140,13 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <div className="dark">
-          <AppRoutes />
-        </div>
-      </BrowserRouter>
+      <MessagingProvider>
+        <BrowserRouter>
+          <div className="dark">
+            <AppRoutes />
+          </div>
+        </BrowserRouter>
+      </MessagingProvider>
     </AuthProvider>
   );
 }

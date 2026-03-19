@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings
 
 settings = get_settings()
 
@@ -59,6 +59,9 @@ app.include_router(subscriptions.router, prefix="/api/subscriptions", tags=["Sub
 app.include_router(analytics.router,     prefix="/api/analytics",     tags=["Analytics"])
 app.include_router(admin.router,         prefix="/api/admin",         tags=["Admin"])
 app.include_router(payments.router,      prefix="/api/payments",      tags=["Payments"])
+app.include_router(messages.router,  prefix="/api/messages",  tags=["Messages"])
+app.include_router(bids.router,      prefix="/api/bids",      tags=["Bids"])
+app.include_router(bookings.router,  prefix="/api/bookings",  tags=["Bookings"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────
