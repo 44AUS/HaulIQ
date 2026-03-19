@@ -20,8 +20,9 @@ export default function Login() {
     e.preventDefault();
     const ok = await login(email, password, role || undefined);
     if (ok) {
-      if (role === ROLES.ADMIN || email === 'admin@hauliq.com') navigate('/admin');
-      else if (role === ROLES.BROKER || email === 'broker@demo.com') navigate('/broker/dashboard');
+      const resolvedRole = role || (email === 'admin@hauliq.com' ? 'admin' : 'carrier');
+      if (resolvedRole === ROLES.ADMIN) navigate('/admin');
+      else if (resolvedRole === ROLES.BROKER) navigate('/broker/dashboard');
       else navigate('/carrier/dashboard');
     }
   };

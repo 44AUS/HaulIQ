@@ -46,7 +46,8 @@ import DashboardLayout from './components/layout/DashboardLayout';
 
 // ─── Route guards ─────────────────────────────────────────────────────────────
 function ProtectedRoute({ children, requiredRole }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen bg-dark-900 flex items-center justify-center"><div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>;
   if (!user) return <Navigate to="/login" replace />;
   if (requiredRole && user.role !== requiredRole) {
     if (user.role === 'admin') return <Navigate to="/admin" replace />;
@@ -56,7 +57,8 @@ function ProtectedRoute({ children, requiredRole }) {
 }
 
 function PublicRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  if (loading) return null;
   if (user) {
     if (user.role === 'admin')  return <Navigate to="/admin" replace />;
     if (user.role === 'broker') return <Navigate to="/broker/dashboard" replace />;
