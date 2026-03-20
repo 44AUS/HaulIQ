@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
+import { messagesApi } from '../../services/api';
 
 const CARRIER_LINKS = [
   { icon: LayoutDashboard, label: 'Dashboard',         path: '/carrier/dashboard' },
@@ -47,6 +48,14 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const messaging = useMessaging();
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    messagesApi.unreadCount()
+      .then(data => setUnreadMessages(data.unread || 0))
+      .catch(() => setUnreadMessages(0));
+  }, [user, location.pathname]);
 
   if (!user) return null;
 
@@ -55,7 +64,7 @@ export default function Sidebar() {
               : ADMIN_LINKS;
 
   const getBadgeCount = (badge) => {
-    if (badge === 'unread') return messaging.unreadCount(user.id);
+    if (badge === 'unread') return unreadMessages;
     if (badge === 'bookings') return messaging.pendingBookingsCount(user.id) + messaging.pendingBidsCount(user.id);
     return 0;
   };

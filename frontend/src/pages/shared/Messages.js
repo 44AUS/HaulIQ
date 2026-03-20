@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Send, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi } from '../../services/api';
 
@@ -25,6 +25,13 @@ export default function Messages() {
       .then(data => {
         const msgs = data.messages || (Array.isArray(data) ? data : []);
         setActiveMessages(msgs);
+        // Refresh conversation list so unread dots update
+        setConversations(prev =>
+          prev.map(c => c.id === activeConvoId
+            ? { ...c, messages: (c.messages || []).map(m => m.sender_id !== undefined ? { ...m, is_read: true } : m) }
+            : c
+          )
+        );
       })
       .catch(() => setActiveMessages([]));
   }, [activeConvoId]);
@@ -139,8 +146,12 @@ export default function Messages() {
                     isMe ? 'bg-brand-500 text-white rounded-br-sm' : 'bg-dark-700 text-dark-100 rounded-bl-sm'
                   }`}>
                     <p className="text-sm leading-relaxed">{msg.body}</p>
-                    <p className={`text-xs mt-1 ${isMe ? 'text-brand-200' : 'text-dark-400'}`}>
+                    <p className={`text-xs mt-1 flex items-center gap-1 ${isMe ? 'text-brand-200' : 'text-dark-400'}`}>
                       {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {isMe && (msg.is_read
+                        ? <CheckCheck size={12} className="text-brand-300" />
+                        : <Check size={12} className="text-brand-400/60" />
+                      )}
                     </p>
                   </div>
                 </div>
