@@ -35,6 +35,13 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    # Auto-create Broker profile for broker accounts
+    if user.role == UserRole.broker:
+        from app.models.broker import Broker
+        broker = Broker(user_id=user.id, name=user.company or user.name, mc_number=user.mc_number)
+        db.add(broker)
+        db.commit()
+
     token = create_access_token({"sub": str(user.id), "role": user.role.value})
     return Token(access_token=token, user=UserOut.model_validate(user))
 
