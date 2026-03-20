@@ -69,7 +69,11 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    for field, value in payload.model_dump(exclude_none=True).items():
+    from app.utils.password import hash_password
+    data = payload.model_dump(exclude_none=True)
+    if "password" in data:
+        current_user.password_hash = hash_password(data.pop("password"))
+    for field, value in data.items():
         setattr(current_user, field, value)
     db.commit()
     db.refresh(current_user)

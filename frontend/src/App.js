@@ -33,6 +33,7 @@ import BrokerLoadsInProgress from './pages/broker/LoadsInProgress';
 import Messages from './pages/shared/Messages';
 import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
+import Settings from './pages/shared/Settings';
 
 // Pages — Admin
 import AdminOverview from './pages/admin/AdminOverview';
@@ -147,6 +148,11 @@ function AppRoutes() {
       <Route path="/carrier-profile/:carrierId" element={
         <ProtectedRoute>
           <DashboardLayout><CarrierProfile /></DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <DashboardLayout><Settings /></DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/carrier/*" element={<CarrierRoutes />} />

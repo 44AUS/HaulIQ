@@ -32,6 +32,7 @@ class UserUpdate(BaseModel):
     company: Optional[str] = None
     mc_number: Optional[str] = None
     dot_number: Optional[str] = None
+    password: Optional[str] = None
 
 
 class UserOut(BaseModel):
