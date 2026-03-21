@@ -1,94 +1,100 @@
-import React, { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Zap, Search, Upload, Check, UserPlus, Trash2, AlertCircle, FileText, Users } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useMessaging } from '../../context/MessagingContext';
-import { MOCK_CARRIERS } from '../../data/sampleData';
+import { instantBookApi } from '../../services/api';
 
 export default function InstantBookSettings() {
-  const { user } = useAuth();
-  const { allowlist, addToAllowlist, removeFromAllowlist } = useMessaging();
-  const [tab, setTab] = useState('list'); // 'list' | 'search' | 'upload'
+  const [tab, setTab] = useState('list');
+
+  // Allowlist state
+  const [allowlist, setAllowlist] = useState([]);
+  const [listLoading, setListLoading] = useState(true);
+  const [listError, setListError] = useState(null);
 
   // Search tab state
   const [query, setQuery] = useState('');
-  const [, setAddedIds] = useState(new Set());
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [addingId, setAddingId] = useState(null);
 
   // Upload tab state
   const [uploadText, setUploadText] = useState('');
-  const [uploadResult, setUploadResult] = useState(null); // { added, skipped, rows }
+  const [uploadResult, setUploadResult] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
   // Remove confirm
   const [confirmRemove, setConfirmRemove] = useState(null);
 
-  const myAllowlist = allowlist.filter(e => e.brokerId === user.id);
+  // Load allowlist on mount
+  useEffect(() => {
+    instantBookApi.allowlist()
+      .then(data => setAllowlist(Array.isArray(data) ? data : []))
+      .catch(err => setListError(err.message))
+      .finally(() => setListLoading(false));
+  }, []);
 
-  // Check if a carrier is already on the list
+  // Search carriers with debounce
+  useEffect(() => {
+    if (query.length < 2) { setSearchResults([]); return; }
+    const timer = setTimeout(() => {
+      setSearching(true);
+      instantBookApi.searchCarriers(query)
+        .then(data => setSearchResults(Array.isArray(data) ? data : []))
+        .catch(() => setSearchResults([]))
+        .finally(() => setSearching(false));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const isAlreadyAdded = (carrier) =>
-    myAllowlist.some(e => e.carrierId === carrier.id || e.carrierEmail === carrier.email);
+    allowlist.some(e => e.carrier_id === carrier.id || e.carrier_email === carrier.email);
 
-  // Search results
-  const searchResults = query.length >= 2
-    ? MOCK_CARRIERS.filter(c =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.email.toLowerCase().includes(query.toLowerCase()) ||
-        c.mc.toLowerCase().includes(query.toLowerCase())
-      )
-    : [];
-
-  const handleAddCarrier = (carrier) => {
-    if (isAlreadyAdded(carrier)) return;
-    addToAllowlist({ ...carrier, source: 'search' }, user.id);
-    setAddedIds(prev => new Set([...prev, carrier.id]));
+  const handleAdd = (carrier) => {
+    if (isAlreadyAdded(carrier) || addingId) return;
+    setAddingId(carrier.id);
+    instantBookApi.add(carrier.id)
+      .then(entry => {
+        setAllowlist(prev => [entry, ...prev]);
+      })
+      .catch(() => {})
+      .finally(() => setAddingId(null));
   };
 
   const handleRemove = (entryId) => {
-    removeFromAllowlist(entryId);
-    setConfirmRemove(null);
+    instantBookApi.remove(entryId)
+      .then(() => {
+        setAllowlist(prev => prev.filter(e => e.id !== entryId));
+        setConfirmRemove(null);
+      })
+      .catch(() => setConfirmRemove(null));
   };
 
-  // Parse pasted CSV/text input
+  // Parse pasted CSV/text
   const parseUploadText = (text) => {
     const lines = text.trim().split('\n').filter(l => l.trim());
-    const rows = [];
-    let added = 0;
-    let skipped = 0;
-
-    for (const line of lines) {
-      // Support: email only, or "name,email,MC" CSV format
+    return lines.map(line => {
       const parts = line.split(',').map(p => p.trim());
-      let email = '', name = '', mc = '';
-
-      if (parts.length === 1) {
-        // Just email
-        email = parts[0];
-      } else if (parts.length >= 2) {
-        name = parts[0];
-        email = parts[1];
-        mc = parts[2] || '';
-      }
-
-      if (!email) { skipped++; continue; }
-
-      const alreadyOnList = myAllowlist.some(e => e.carrierEmail === email);
-      if (alreadyOnList) { skipped++; continue; }
-
-      rows.push({ email, name: name || email.split('@')[0], mc });
-      added++;
-    }
-
-    return { rows, added, skipped };
+      if (parts.length === 1) return { email: parts[0] };
+      return { name: parts[0], email: parts[1] || '', mc: parts[2] || '' };
+    }).filter(r => r.email);
   };
 
   const handleUploadSubmit = () => {
     if (!uploadText.trim()) return;
-    const { rows, added, skipped } = parseUploadText(uploadText);
-    rows.forEach(row => {
-      addToAllowlist({ ...row, source: 'upload' }, user.id);
-    });
-    setUploadResult({ added, skipped });
-    setUploadText('');
+    const rows = parseUploadText(uploadText);
+    if (!rows.length) return;
+    setUploading(true);
+    instantBookApi.bulkUpload(rows)
+      .then(result => {
+        setUploadResult(result);
+        setUploadText('');
+        // Refresh the allowlist
+        return instantBookApi.allowlist();
+      })
+      .then(data => setAllowlist(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setUploading(false));
   };
 
   const handleFileDrop = (e) => {
@@ -99,11 +105,6 @@ export default function InstantBookSettings() {
     const reader = new FileReader();
     reader.onload = (ev) => setUploadText(ev.target.result);
     reader.readAsText(file);
-  };
-
-  const PlanBadge = ({ plan }) => {
-    const colors = { basic: 'text-dark-400', pro: 'text-brand-400', elite: 'text-purple-400' };
-    return <span className={`text-xs capitalize font-medium ${colors[plan] || 'text-dark-400'}`}>{plan}</span>;
   };
 
   return (
@@ -120,7 +121,7 @@ export default function InstantBookSettings() {
           </p>
         </div>
         <div className="glass border border-dark-400/40 rounded-xl px-4 py-3 text-center">
-          <p className="text-white font-bold text-2xl">{myAllowlist.length}</p>
+          <p className="text-white font-bold text-2xl">{allowlist.length}</p>
           <p className="text-dark-400 text-xs">Approved carriers</p>
         </div>
       </div>
@@ -136,9 +137,9 @@ export default function InstantBookSettings() {
       {/* Tabs */}
       <div className="flex gap-1 p-1 bg-dark-800 rounded-xl border border-dark-400/40 w-fit">
         {[
-          { key: 'list',   label: `Allowlist (${myAllowlist.length})`, icon: Users },
-          { key: 'search', label: 'Add from HaulIQ',                   icon: Search },
-          { key: 'upload', label: 'Upload a list',                     icon: Upload },
+          { key: 'list',   label: `Allowlist (${allowlist.length})`, icon: Users },
+          { key: 'search', label: 'Add from HaulIQ',                 icon: Search },
+          { key: 'upload', label: 'Upload a list',                   icon: Upload },
         ].map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -153,7 +154,15 @@ export default function InstantBookSettings() {
       {/* ── Allowlist tab ── */}
       {tab === 'list' && (
         <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-          {myAllowlist.length === 0 ? (
+          {listLoading ? (
+            <div className="py-16 flex justify-center">
+              <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+            </div>
+          ) : listError ? (
+            <div className="py-16 text-center">
+              <p className="text-red-400 text-sm">{listError}</p>
+            </div>
+          ) : allowlist.length === 0 ? (
             <div className="py-16 text-center">
               <Users size={36} className="text-dark-600 mx-auto mb-3" />
               <p className="text-dark-300 text-sm">No carriers on your allowlist yet</p>
@@ -171,21 +180,21 @@ export default function InstantBookSettings() {
                 </tr>
               </thead>
               <tbody>
-                {myAllowlist.map(entry => (
+                {allowlist.map(entry => (
                   <tr key={entry.id} className="border-b border-dark-400/20 hover:bg-dark-700/30 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
-                          {(entry.carrierName || entry.carrierEmail || '?').charAt(0).toUpperCase()}
+                          {(entry.carrier_name || entry.carrier_email || '?').charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-white text-sm font-medium">{entry.carrierName || '—'}</p>
-                          <p className="text-dark-400 text-xs">{entry.carrierEmail}</p>
+                          <p className="text-white text-sm font-medium">{entry.carrier_name || '—'}</p>
+                          <p className="text-dark-400 text-xs">{entry.carrier_email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <span className="text-dark-300 text-sm">{entry.carrierMc || '—'}</span>
+                      <span className="text-dark-300 text-sm">{entry.carrier_mc || '—'}</span>
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
                       <span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${
@@ -198,7 +207,7 @@ export default function InstantBookSettings() {
                     </td>
                     <td className="px-5 py-3.5 hidden md:table-cell">
                       <span className="text-dark-400 text-xs">
-                        {new Date(entry.addedAt).toLocaleDateString()}
+                        {new Date(entry.added_at).toLocaleDateString()}
                       </span>
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -237,11 +246,15 @@ export default function InstantBookSettings() {
               onChange={e => setQuery(e.target.value)}
               autoFocus
             />
+            {searching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+            )}
           </div>
 
-          {query.length >= 2 && searchResults.length === 0 && (
+          {query.length >= 2 && !searching && searchResults.length === 0 && (
             <div className="glass rounded-xl border border-dark-400/40 p-8 text-center">
               <p className="text-dark-300 text-sm">No carriers found matching "{query}"</p>
+              <p className="text-dark-500 text-xs mt-1">Only registered HaulIQ carriers appear here</p>
             </div>
           )}
 
@@ -249,6 +262,7 @@ export default function InstantBookSettings() {
             <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
               {searchResults.map(carrier => {
                 const already = isAlreadyAdded(carrier);
+                const adding = addingId === carrier.id;
                 return (
                   <div key={carrier.id}
                     className="flex items-center gap-4 px-5 py-4 border-b border-dark-400/20 last:border-0 hover:bg-dark-700/30 transition-colors">
@@ -256,36 +270,27 @@ export default function InstantBookSettings() {
                       {carrier.name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-white font-medium text-sm">{carrier.name}</p>
-                        <PlanBadge plan={carrier.plan} />
-                      </div>
+                      <p className="text-white font-medium text-sm">{carrier.name}</p>
                       <div className="flex items-center gap-3 mt-0.5">
                         <p className="text-dark-400 text-xs">{carrier.email}</p>
-                        <span className="text-dark-600">·</span>
-                        <p className="text-dark-400 text-xs">{carrier.mc}</p>
+                        {carrier.mc_number && (
+                          <>
+                            <span className="text-dark-600">·</span>
+                            <p className="text-dark-400 text-xs">{carrier.mc_number}</p>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 text-right flex-shrink-0">
-                      <div className="hidden sm:block text-right">
-                        <p className="text-white text-sm font-semibold">{carrier.loadsCompleted}</p>
-                        <p className="text-dark-500 text-xs">loads</p>
-                      </div>
-                      <div className="hidden sm:block text-right">
-                        <p className="text-white text-sm font-semibold">★ {carrier.rating}</p>
-                        <p className="text-dark-500 text-xs">rating</p>
-                      </div>
-                      <button
-                        onClick={() => handleAddCarrier(carrier)}
-                        disabled={already}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                          already
-                            ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 cursor-default'
-                            : 'bg-brand-500 hover:bg-brand-600 text-white'
-                        }`}>
-                        {already ? <><Check size={12} /> Added</> : <><UserPlus size={12} /> Add</>}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleAdd(carrier)}
+                      disabled={already || adding}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        already
+                          ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 cursor-default'
+                          : 'bg-brand-500 hover:bg-brand-600 text-white disabled:opacity-60'
+                      }`}>
+                      {already ? <><Check size={12} /> Added</> : adding ? 'Adding…' : <><UserPlus size={12} /> Add</>}
+                    </button>
                   </div>
                 );
               })}
@@ -312,7 +317,7 @@ export default function InstantBookSettings() {
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               {[
-                { label: 'Email only', example: 'driver@company.com' },
+                { label: 'Email only',        example: 'driver@company.com' },
                 { label: 'CSV (Name, Email)', example: 'John Smith, john@co.com' },
                 { label: 'CSV (Name, Email, MC)', example: 'John Smith, john@co.com, MC-123' },
               ].map(({ label, example }) => (
@@ -324,7 +329,6 @@ export default function InstantBookSettings() {
             </div>
           </div>
 
-          {/* Drag-drop file zone */}
           <div
             onDrop={handleFileDrop}
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -339,7 +343,6 @@ export default function InstantBookSettings() {
             <input ref={fileInputRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFileDrop} />
           </div>
 
-          {/* Or paste manually */}
           <div>
             <label className="block text-dark-100 text-sm font-medium mb-2">Or paste your list</label>
             <textarea
@@ -366,9 +369,9 @@ export default function InstantBookSettings() {
 
           <button
             onClick={handleUploadSubmit}
-            disabled={!uploadText.trim()}
+            disabled={!uploadText.trim() || uploading}
             className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-40">
-            <Upload size={16} /> Import Carriers
+            <Upload size={16} /> {uploading ? 'Importing…' : 'Import Carriers'}
           </button>
         </div>
       )}

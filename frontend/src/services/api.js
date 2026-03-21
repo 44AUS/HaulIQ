@@ -96,5 +96,14 @@ export const carrierReviewsApi = {
   stats: (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/stats`),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi };
+// ─── Instant Book ─────────────────────────────────────────────────────────────
+export const instantBookApi = {
+  allowlist:     ()         => request('/api/instant-book/allowlist'),
+  add:           (carrierId) => request('/api/instant-book/allowlist', { method: 'POST', body: JSON.stringify({ carrier_id: carrierId }) }),
+  remove:        (entryId)  => request(`/api/instant-book/allowlist/${entryId}`, { method: 'DELETE' }),
+  bulkUpload:    (rows)     => request('/api/instant-book/allowlist/upload', { method: 'POST', body: JSON.stringify({ rows }) }),
+  searchCarriers:(q)        => request(`/api/instant-book/carriers/search?q=${encodeURIComponent(q)}`),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi };
 export default api;
