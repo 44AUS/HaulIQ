@@ -7,8 +7,7 @@ import {
   MessageSquare, Calendar, Zap, Activity
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useMessaging } from '../../context/MessagingContext';
-import { messagesApi } from '../../services/api';
+import { messagesApi, bookingsApi } from '../../services/api';
 
 const CARRIER_LINKS = [
   { icon: LayoutDashboard, label: 'Dashboard',         path: '/carrier/dashboard' },
@@ -47,14 +46,21 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const messaging = useMessaging();
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [pendingBookings, setPendingBookings] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     messagesApi.unreadCount()
       .then(data => setUnreadMessages(data.unread || 0))
       .catch(() => setUnreadMessages(0));
+  }, [user, location.pathname]);
+
+  useEffect(() => {
+    if (!user || user.role !== 'broker') return;
+    bookingsApi.pending()
+      .then(data => setPendingBookings(Array.isArray(data) ? data.filter(b => b.status === 'pending').length : 0))
+      .catch(() => setPendingBookings(0));
   }, [user, location.pathname]);
 
   if (!user) return null;
@@ -65,7 +71,7 @@ export default function Sidebar() {
 
   const getBadgeCount = (badge) => {
     if (badge === 'unread') return unreadMessages;
-    if (badge === 'bookings') return messaging.pendingBookingsCount(user.id) + messaging.pendingBidsCount(user.id);
+    if (badge === 'bookings') return pendingBookings;
     return 0;
   };
 
