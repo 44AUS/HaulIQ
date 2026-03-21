@@ -61,6 +61,14 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
             detail="Your account has been suspended. Contact support.",
         )
 
+    # Auto-create Broker profile if missing (handles accounts created before this fix)
+    if user.role == UserRole.broker:
+        from app.models.broker import Broker
+        if not db.query(Broker).filter(Broker.user_id == user.id).first():
+            broker = Broker(user_id=user.id, name=user.company or user.name, mc_number=user.mc_number)
+            db.add(broker)
+            db.commit()
+
     token = create_access_token({"sub": str(user.id), "role": user.role.value})
     return Token(access_token=token, user=UserOut.model_validate(user))
 
