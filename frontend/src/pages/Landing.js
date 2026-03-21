@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Truck, Brain, Calculator, Star, TrendingUp, Shield, Zap, ArrowRight,
@@ -7,17 +7,149 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 
+// ─── TRUCK MAP ANIMATION ────────────────────────────────────────────────────────
+function TruckMap() {
+  const routes = [
+    // I-90: Seattle → Minneapolis → Chicago → Detroit → Boston
+    { id: 'r1', d: 'M 108,108 C 240,98 368,108 456,116 C 512,122 536,172 600,184 C 665,192 728,166 786,156' },
+    // I-80: SF → Salt Lake → Denver → Chicago
+    { id: 'r2', d: 'M 84,278 C 155,268 222,244 296,246 C 388,246 462,216 536,190' },
+    // I-40: LA → Albuquerque → Memphis → Charlotte
+    { id: 'r3', d: 'M 114,368 C 196,354 272,338 312,362 C 396,376 468,354 546,332 C 598,314 652,296 700,293' },
+    // I-10: LA → Houston → New Orleans → Jacksonville
+    { id: 'r4', d: 'M 114,372 C 198,362 280,378 312,378 C 400,378 464,412 526,414 C 572,414 622,398 666,388' },
+    // I-75: Detroit → Atlanta → Miami
+    { id: 'r5', d: 'M 600,182 C 598,215 592,244 588,248 C 582,272 562,302 556,334 C 578,344 645,344 646,346 C 654,372 664,388 666,390 C 674,414 684,440 690,460' },
+    // I-35: Minneapolis → Kansas City → Dallas
+    { id: 'r6', d: 'M 456,114 C 462,166 464,212 464,252 C 464,304 456,344 446,370' },
+    // I-95: Boston → NYC → Charlotte → Miami
+    { id: 'r7', d: 'M 786,154 C 770,170 754,188 750,200 C 742,218 734,236 722,256 C 710,274 702,293 700,295 C 686,326 672,360 666,390 C 672,416 682,440 690,460' },
+    // I-70: Denver → Kansas City → St Louis
+    { id: 'r8', d: 'M 296,246 C 362,246 430,254 478,268 C 510,270 538,270 562,268' },
+    // I-20: Dallas → Atlanta
+    { id: 'r9', d: 'M 446,370 C 498,374 548,364 590,350 C 618,342 638,344 646,344' },
+  ];
+
+  const cities = [
+    { x: 108, y: 108, label: 'Seattle' },
+    { x: 84, y: 278, label: 'San Francisco' },
+    { x: 114, y: 370, label: 'Los Angeles' },
+    { x: 456, y: 114, label: 'Minneapolis' },
+    { x: 536, y: 190, label: 'Chicago' },
+    { x: 600, y: 182, label: 'Detroit' },
+    { x: 786, y: 154, label: 'Boston' },
+    { x: 750, y: 200, label: 'New York' },
+    { x: 700, y: 293, label: 'Charlotte' },
+    { x: 446, y: 370, label: 'Dallas' },
+    { x: 464, y: 412, label: 'Houston' },
+    { x: 646, y: 344, label: 'Atlanta' },
+    { x: 690, y: 460, label: 'Miami' },
+    { x: 296, y: 246, label: 'Denver' },
+    { x: 562, y: 268, label: 'St. Louis' },
+  ];
+
+  const trucks = routes.flatMap((r, i) => [
+    { rid: r.id, dur: `${10 + i * 1.4}s`, begin: `${i * 1.1}s`, rev: false },
+    { rid: r.id, dur: `${13 + i * 1.1}s`, begin: `${4 + i * 0.9}s`, rev: true },
+  ]);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <svg viewBox="0 0 900 520" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="cglow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="tglow" x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        {/* Route glow halos */}
+        {routes.map(r => (
+          <path key={`halo-${r.id}`} d={r.d} fill="none"
+            stroke="#22c55e" strokeWidth="6" strokeOpacity="0.04" strokeLinecap="round"/>
+        ))}
+
+        {/* Route path definitions (referenced by mpath) */}
+        {routes.map(r => (
+          <path key={r.id} id={r.id} d={r.d} fill="none"
+            stroke="#22c55e" strokeWidth="0.8" strokeOpacity="0.28"
+            strokeDasharray="6 10" strokeLinecap="round"/>
+        ))}
+
+        {/* Trucks */}
+        {trucks.map((t, i) => (
+          <g key={i} filter="url(#tglow)">
+            {/* Trailer */}
+            <rect x="-10" y="-2.8" width="10" height="5.6" rx="0.6" fill="#14532d" opacity="0.95"/>
+            <line x1="-9" y1="-2.8" x2="-9" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.4"/>
+            <line x1="-6" y1="-2.8" x2="-6" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.3"/>
+            <line x1="-3" y1="-2.8" x2="-3" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.3"/>
+            {/* Cab */}
+            <rect x="0" y="-3.8" width="6" height="7.6" rx="1.2" fill="#166534" opacity="0.95"/>
+            {/* Windshield */}
+            <rect x="0.8" y="-2.8" width="3.2" height="2.8" rx="0.4" fill="#4ade80" opacity="0.5"/>
+            {/* Headlight */}
+            <circle cx="6" cy="-0.6" r="0.9" fill="#fef08a" opacity="0.95"/>
+            <circle cx="6" cy="0.6" r="0.6" fill="#fde68a" opacity="0.7"/>
+            {/* Light beam */}
+            <line x1="6.5" y1="-0.6" x2="18" y2="-2" stroke="#fef08a" strokeWidth="0.4" opacity="0.25"/>
+            <line x1="6.5" y1="0.5" x2="18" y2="1.5" stroke="#fef08a" strokeWidth="0.3" opacity="0.15"/>
+            {/* Wheels */}
+            <circle cx="-7" cy="2.8" r="1.6" fill="#0f172a" stroke="#22c55e" strokeWidth="0.4"/>
+            <circle cx="-2" cy="2.8" r="1.6" fill="#0f172a" stroke="#22c55e" strokeWidth="0.4"/>
+            <circle cx="3.5" cy="3.8" r="1.6" fill="#0f172a" stroke="#166534" strokeWidth="0.4"/>
+            <animateMotion dur={t.dur} repeatCount="indefinite" begin={t.begin}
+              rotate="auto"
+              keyPoints={t.rev ? '1;0' : '0;1'}
+              keyTimes="0;1" calcMode="linear">
+              <mpath href={`#${t.rid}`}/>
+            </animateMotion>
+          </g>
+        ))}
+
+        {/* City dots */}
+        {cities.map((c, i) => (
+          <g key={c.label}>
+            {/* Outer pulse */}
+            <circle cx={c.x} cy={c.y} r="3" fill="none" stroke="#22c55e" strokeWidth="0.5">
+              <animate attributeName="r" values="3;10;3"
+                dur={`${2.8 + (i % 4) * 0.6}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
+              <animate attributeName="opacity" values="0.5;0;0.5"
+                dur={`${2.8 + (i % 4) * 0.6}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
+            </circle>
+            {/* Core dot */}
+            <circle cx={c.x} cy={c.y} r="2.2" fill="#22c55e" opacity="0.85" filter="url(#cglow)"/>
+            {/* City label */}
+            <text x={c.x + 4} y={c.y - 4} fill="#4ade80" fontSize="6" opacity="0.55"
+              fontFamily="monospace" letterSpacing="0.3">{c.label}</text>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 // ─── HERO ──────────────────────────────────────────────────────────────────────
 function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Background effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.08)_0%,transparent_60%)]" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-500/3 rounded-full blur-3xl pointer-events-none" />
+      {/* Dark base gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-dark-900 via-dark-900 to-dark-800" />
 
-      {/* Grid overlay */}
-      <div className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: 'linear-gradient(#22c55e 1px, transparent 1px), linear-gradient(90deg, #22c55e 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+      {/* Animated truck map */}
+      <TruckMap />
+
+      {/* Radial green glow over map */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_60%,rgba(34,197,94,0.07)_0%,transparent_70%)] pointer-events-none" />
+
+      {/* Top vignette so text stays crisp */}
+      <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-dark-900 via-dark-900/80 to-transparent pointer-events-none" />
+      {/* Bottom vignette */}
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-dark-900 to-transparent pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-6 text-center">
         {/* Badge */}
@@ -48,74 +180,13 @@ function Hero() {
         </div>
 
         {/* Social proof */}
-        <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-dark-200 mb-16">
+        <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-dark-200 mb-8">
           {[['2,100+', 'Active Drivers'], ['$48K+', 'Monthly Savings'], ['4.9★', 'App Rating'], ['No CC', 'Required']].map(([val, label]) => (
             <div key={label} className="text-center">
               <p className="text-white font-bold text-lg">{val}</p>
               <p className="text-dark-300 text-xs mt-0.5">{label}</p>
             </div>
           ))}
-        </div>
-
-        {/* Dashboard preview mockup */}
-        <div className="relative max-w-5xl mx-auto animate-fade-in">
-          <div className="glass rounded-2xl border border-dark-400/40 p-4 shadow-2xl shadow-black/40">
-            {/* Fake browser chrome */}
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-dark-400/50">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                <div className="w-3 h-3 rounded-full bg-brand-500/60" />
-              </div>
-              <div className="flex-1 mx-4 bg-dark-700 rounded-md px-3 py-1 text-dark-300 text-xs text-left">
-                app.hauliq.io/carrier/loads
-              </div>
-            </div>
-            {/* Mock dashboard */}
-            <div className="grid grid-cols-12 gap-3 text-left">
-              {/* Sidebar mock */}
-              <div className="col-span-2 space-y-1.5">
-                {['Dashboard', 'Load Board', 'Calculator', 'Brain', 'Saved'].map((item, i) => (
-                  <div key={item} className={`px-2 py-1.5 rounded-lg text-xs ${i === 1 ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20' : 'text-dark-300'}`}>
-                    {item}
-                  </div>
-                ))}
-              </div>
-              {/* Main content mock */}
-              <div className="col-span-10 space-y-3">
-                {/* Stats row */}
-                <div className="grid grid-cols-4 gap-2">
-                  {[['$4,200', 'This Week', 'green'], ['3.28', '$/Mile Avg', 'white'], ['92%', 'Profit Rate', 'green'], ['18mi', 'Avg Deadhead', 'yellow']].map(([val, label, color]) => (
-                    <div key={label} className="bg-dark-700/60 rounded-lg p-2.5">
-                      <p className={`font-bold text-sm ${color === 'green' ? 'text-brand-400' : color === 'yellow' ? 'text-yellow-400' : 'text-white'}`}>{val}</p>
-                      <p className="text-dark-300 text-xs mt-0.5">{label}</p>
-                    </div>
-                  ))}
-                </div>
-                {/* Load cards mock */}
-                {[
-                  { o: 'Chicago, IL', d: 'Atlanta, GA', rate: '$2,850', net: '$1,890', score: 'green', hot: true },
-                  { o: 'Dallas, TX',  d: 'Phoenix, AZ', rate: '$3,400', net: '$1,890', score: 'green', hot: true },
-                  { o: 'Miami, FL',   d: 'New York, NY', rate: '$4,200', net: '$2,340', score: 'green', hot: false },
-                ].map((l, i) => (
-                  <div key={i} className={`glass-light rounded-lg p-2.5 border ${l.score === 'green' ? 'border-brand-500/20' : 'border-dark-400/30'}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {l.hot && <span className="badge-red text-xs px-1.5 py-0.5">🔥 Hot</span>}
-                        <span className="text-white text-xs font-medium">{l.o} → {l.d}</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="text-dark-300">{l.rate}</span>
-                        <span className="text-brand-400 font-bold">{l.net} net</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          {/* Glow effect */}
-          <div className="absolute -bottom-px left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent" />
         </div>
       </div>
     </section>

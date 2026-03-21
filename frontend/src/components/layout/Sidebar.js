@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
@@ -71,7 +71,8 @@ export default function Sidebar() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  const SidebarContent = () => (
+  // eslint-disable-next-line no-shadow
+  const SidebarContent = ({ onNavigate = () => {} }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className={`flex items-center gap-2 px-4 py-5 border-b border-dark-400/50 ${collapsed ? 'justify-center' : ''}`}>
@@ -107,7 +108,7 @@ export default function Sidebar() {
           const badgeCount = badge ? getBadgeCount(badge) : 0;
           return (
             <Link key={path} to={path}
-              onClick={() => setMobileOpen(false)}
+              onClick={onNavigate}
               className={`sidebar-link ${active ? 'active' : ''} ${collapsed ? 'justify-center px-2' : ''}`}
               title={collapsed ? label : undefined}>
               <div className="relative flex-shrink-0">
@@ -131,13 +132,13 @@ export default function Sidebar() {
 
       {/* Bottom actions */}
       <div className="px-3 pb-4 space-y-0.5 border-t border-dark-400/50 pt-3 mt-2">
-        <Link to="/settings"
+        <Link to="/settings" onClick={onNavigate}
           className={`sidebar-link ${collapsed ? 'justify-center px-2' : ''}`}
           title={collapsed ? 'Settings' : undefined}>
           <Settings size={18} className="flex-shrink-0" />
           {!collapsed && <span>Settings</span>}
         </Link>
-        <button onClick={handleLogout}
+        <button onClick={() => { onNavigate(); handleLogout(); }}
           className={`sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/5 ${collapsed ? 'justify-center px-2' : ''}`}>
           <LogOut size={18} className="flex-shrink-0" />
           {!collapsed && <span>Sign out</span>}
@@ -160,7 +161,7 @@ export default function Sidebar() {
         <div className="lg:hidden fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
           <div className="relative w-64 h-full bg-dark-800 border-r border-dark-400/50">
-            <SidebarContent />
+            <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </div>
         </div>
       )}
