@@ -1,14 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import UUID
+from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models.analytics import LoadHistory, DriverInsight, LaneStats
+from app.models.load import Load, LoadStatus
+from app.models.booking import Bid, Booking, BookingStatus
+from app.models.broker import Broker
 from app.models.user import User
 from app.schemas.analytics import (
     LoadHistoryOut, InsightOut, LaneStatsOut, EarningsSummary, WeeklyEarning
 )
-from app.middleware.auth import get_current_user, require_carrier, require_plan
+from app.middleware.auth import get_current_user, require_carrier, require_broker, require_plan
 from app.services.earnings_brain import run_brain, compute_weekly_earnings
 
 router = APIRouter()
@@ -181,3 +186,95 @@ def get_lane_stats(
         .order_by(LaneStats.avg_net_profit.desc())
         .all()
     )
+
+
+# ─── GET /api/analytics/broker ────────────────────────────────────────────────
+@router.get("/broker", summary="Broker analytics: KPIs, weekly chart, top carriers")
+def get_broker_analytics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    broker = db.query(Broker).filter(Broker.user_id == current_user.id).first()
+    if not broker:
+        return {
+            "total_views": 0, "total_bids": 0, "fill_rate": 0,
+            "avg_time_to_fill_hours": None, "weekly": [], "top_carriers": [],
+        }
+
+    # All loads posted by this broker
+    loads = db.query(Load).filter(Load.broker_id == broker.id).all()
+    load_ids = [l.id for l in loads]
+
+    if not load_ids:
+        return {
+            "total_views": 0, "total_bids": 0, "fill_rate": 0,
+            "avg_time_to_fill_hours": None, "weekly": [], "top_carriers": [],
+        }
+
+    total_views = sum(l.view_count or 0 for l in loads)
+    total_bids  = db.query(Bid).filter(Bid.load_id.in_(load_ids)).count()
+    filled_count = sum(1 for l in loads if l.status == LoadStatus.filled)
+    fill_rate = round(filled_count / len(loads) * 100, 1) if loads else 0
+
+    # Avg time-to-fill: from posted_at to booking approved updated_at
+    approved_bookings = (
+        db.query(Booking)
+        .filter(Booking.load_id.in_(load_ids), Booking.status == BookingStatus.approved)
+        .all()
+    )
+    load_posted_at = {l.id: l.posted_at for l in loads}
+    fill_times = []
+    for bk in approved_bookings:
+        if bk.load_id in load_posted_at and load_posted_at[bk.load_id] and bk.updated_at:
+            delta = (bk.updated_at - load_posted_at[bk.load_id]).total_seconds() / 3600
+            if delta >= 0:
+                fill_times.append(delta)
+    avg_time_to_fill = round(sum(fill_times) / len(fill_times), 1) if fill_times else None
+
+    # Weekly data: last 6 weeks
+    now = datetime.utcnow()
+    weekly = []
+    for week_offset in range(5, -1, -1):
+        week_start = now - timedelta(weeks=week_offset + 1)
+        week_end   = now - timedelta(weeks=week_offset)
+        week_loads = [l for l in loads if l.posted_at and week_start <= l.posted_at < week_end]
+        week_load_ids = [l.id for l in week_loads]
+        week_views  = sum(l.view_count or 0 for l in week_loads)
+        week_bids   = db.query(Bid).filter(Bid.load_id.in_(week_load_ids)).count() if week_load_ids else 0
+        week_filled = sum(1 for l in week_loads if l.status == LoadStatus.filled)
+        week_label  = f"W{6 - week_offset}"
+        weekly.append({"week": week_label, "views": week_views, "bids": week_bids, "filled": week_filled})
+
+    # Top carriers by number of approved bookings
+    top_carriers_query = (
+        db.query(
+            User.name,
+            User.company,
+            User.mc_number,
+            func.count(Booking.id).label("loads_count"),
+        )
+        .join(Booking, Booking.carrier_id == User.id)
+        .filter(Booking.load_id.in_(load_ids), Booking.status == BookingStatus.approved)
+        .group_by(User.id, User.name, User.company, User.mc_number)
+        .order_by(func.count(Booking.id).desc())
+        .limit(5)
+        .all()
+    )
+
+    top_carriers = [
+        {
+            "name": r.company or r.name,
+            "mc_number": r.mc_number,
+            "loads": r.loads_count,
+        }
+        for r in top_carriers_query
+    ]
+
+    return {
+        "total_views": total_views,
+        "total_bids": total_bids,
+        "fill_rate": fill_rate,
+        "avg_time_to_fill_hours": avg_time_to_fill,
+        "weekly": weekly,
+        "top_carriers": top_carriers,
+    }

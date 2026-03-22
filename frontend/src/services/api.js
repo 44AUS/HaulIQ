@@ -81,6 +81,7 @@ export const analyticsApi = {
   lanes:    () => request('/api/analytics/lanes'),
   markRead: (id) => request(`/api/analytics/insights/${id}/read`, { method: 'PATCH' }),
   refresh:  () => request('/api/analytics/insights/refresh', { method: 'POST' }),
+  broker:   () => request('/api/analytics/broker'),
 };
 
 // ─── Subscriptions ────────────────────────────────────────────────────────────
