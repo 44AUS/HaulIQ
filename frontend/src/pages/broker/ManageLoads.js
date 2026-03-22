@@ -85,7 +85,11 @@ export default function ManageLoads() {
                   </tr>
                 ) : filtered.map(load => (
                   <tr key={load.id} className="hover:bg-dark-700/20 transition-colors">
-                    <td className="px-5 py-4 text-white font-medium whitespace-nowrap">{load.origin} → {load.dest}</td>
+                    <td className="px-5 py-4 whitespace-nowrap">
+                      <Link to={`/broker/loads/${load._raw.id}`} className="text-white font-medium hover:text-brand-400 transition-colors">
+                        {load.origin} → {load.dest}
+                      </Link>
+                    </td>
                     <td className="px-5 py-4 text-dark-300 whitespace-nowrap">{load.type}</td>
                     <td className="px-5 py-4 text-white font-semibold">${(load.rate || 0).toLocaleString()}</td>
                     <td className="px-5 py-4 text-dark-300 text-xs whitespace-nowrap">{load.pickup}</td>

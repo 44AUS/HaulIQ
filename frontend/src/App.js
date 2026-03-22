@@ -28,6 +28,7 @@ import BrokerAnalytics from './pages/broker/BrokerAnalytics';
 import BookingRequests from './pages/broker/BookingRequests';
 import InstantBookSettings from './pages/broker/InstantBookSettings';
 import BrokerLoadsInProgress from './pages/broker/LoadsInProgress';
+import BrokerLoadDetail from './pages/broker/LoadDetail';
 
 // Pages — Shared
 import Messages from './pages/shared/Messages';
@@ -101,6 +102,7 @@ function BrokerRoutes() {
           <Route path="dashboard" element={<BrokerDashboard />} />
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
+          <Route path="loads/:id" element={<BrokerLoadDetail />} />
           <Route path="analytics" element={<BrokerAnalytics />} />
           <Route path="messages" element={<Messages />} />
           <Route path="bookings" element={<BookingRequests />} />

@@ -29,6 +29,8 @@ class BidOut(BaseModel):
     id: UUID
     load_id: UUID
     carrier_id: UUID
+    carrier_name: Optional[str] = None
+    carrier_mc: Optional[str] = None
     amount: float
     note: Optional[str]
     status: BidStatus
@@ -69,7 +71,24 @@ def get_bids_for_load(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return db.query(Bid).filter(Bid.load_id == load_id).order_by(Bid.created_at.desc()).all()
+    bids = db.query(Bid).filter(Bid.load_id == load_id).order_by(Bid.created_at.desc()).all()
+    result = []
+    for bid in bids:
+        carrier = db.query(User).filter(User.id == bid.carrier_id).first()
+        result.append(BidOut(
+            id=bid.id,
+            load_id=bid.load_id,
+            carrier_id=bid.carrier_id,
+            carrier_name=carrier.company or carrier.name if carrier else None,
+            carrier_mc=carrier.mc_number if carrier else None,
+            amount=bid.amount,
+            note=bid.note,
+            status=bid.status,
+            counter_amount=bid.counter_amount,
+            counter_note=bid.counter_note,
+            created_at=bid.created_at,
+        ))
+    return result
 
 
 @router.get("/my", response_model=list[BidOut])
