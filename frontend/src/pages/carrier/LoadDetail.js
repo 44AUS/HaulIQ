@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
-import { loadsApi } from '../../services/api';
+import { loadsApi, messagesApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
@@ -81,14 +81,10 @@ export default function LoadDetail() {
 
   const handleSendMessage = () => {
     if (!messageText.trim()) return;
-    sendMessage(
-      load.id,
-      load.broker?.id,
-      load.broker?.name,
-      `${load.origin} → ${load.dest}`,
-      messageText.trim(),
-      user
-    );
+    const brokerUserId = load._raw?.broker_user_id;
+    if (!brokerUserId) return;
+    messagesApi.send(load._raw.id, brokerUserId, messageText.trim())
+      .catch(() => {});
     setMessageText('');
     setMessageOpen(false);
   };

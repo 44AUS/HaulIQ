@@ -56,8 +56,9 @@ export default function Messages() {
   const handleSend = () => {
     if (!input.trim() || !activeConvo) return;
     const loadId = activeConvo.load_id || null;
-    const brokerId = activeConvo.broker_id;
-    messagesApi.send(loadId, brokerId, input.trim())
+    // backend's broker_id field = "the other party's user_id"
+    const otherPartyId = user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id;
+    messagesApi.send(loadId, otherPartyId, input.trim())
       .then(msg => {
         setActiveMessages(prev => [...prev, msg]);
         setInput('');

@@ -57,7 +57,7 @@ def _enrich(c: Conversation) -> ConversationOut:
         broker_name=c.broker.name if c.broker else None,
         created_at=c.created_at,
         updated_at=c.updated_at,
-        messages=c.messages,
+        messages=[MessageOut.model_validate(m, from_attributes=True) for m in c.messages],
     )
 
 
