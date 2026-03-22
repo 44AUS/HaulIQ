@@ -5,7 +5,7 @@ from typing import Optional
 from uuid import UUID
 
 from app.database import get_db
-from app.models.load import Load, SavedLoad, LoadStatus, ProfitScore
+from app.models.load import Load, SavedLoad, LoadView, LoadStatus, ProfitScore
 from app.models.user import User, UserPlan
 from app.schemas.load import LoadCreate, LoadOut, LoadListOut
 from app.middleware.auth import get_current_user, require_broker, require_carrier
@@ -175,8 +175,16 @@ def get_load(
     if not load:
         raise HTTPException(status_code=404, detail="Load not found")
 
-    # Increment view count
-    load.view_count = (load.view_count or 0) + 1
+    # Unique view tracking: skip broker who posted, skip repeat viewers
+    is_poster = (load.broker_user_id and str(current_user.id) == str(load.broker_user_id))
+    if not is_poster:
+        already_viewed = db.query(LoadView).filter(
+            LoadView.load_id == load.id,
+            LoadView.viewer_id == current_user.id,
+        ).first()
+        if not already_viewed:
+            db.add(LoadView(load_id=load.id, viewer_id=current_user.id))
+            load.view_count = (load.view_count or 0) + 1
     db.commit()
 
     return _enrich_load(load)

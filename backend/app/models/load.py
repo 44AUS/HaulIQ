@@ -94,3 +94,12 @@ class SavedLoad(Base):
 
     carrier    = relationship("User", back_populates="saved_loads")
     load       = relationship("Load", back_populates="saved_by")
+
+
+class LoadView(Base):
+    __tablename__ = "load_views"
+
+    id        = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    load_id   = Column(UUID(as_uuid=True), ForeignKey("loads.id", ondelete="CASCADE"), nullable=False, index=True)
+    viewer_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    viewed_at = Column(DateTime, default=datetime.utcnow)
