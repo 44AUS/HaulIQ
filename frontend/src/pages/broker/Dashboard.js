@@ -2,14 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, TrendingUp, Eye, Users, PlusCircle, ArrowRight, Star } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { loadsApi, bookingsApi } from '../../services/api';
+import { loadsApi, bookingsApi, analyticsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-
-const WEEKLY_VIEWS = [
-  { day: 'Mon', views: 42 }, { day: 'Tue', views: 67 }, { day: 'Wed', views: 55 },
-  { day: 'Thu', views: 88 }, { day: 'Fri', views: 103 }, { day: 'Sat', views: 71 }, { day: 'Sun', views: 39 },
-];
 
 const StatusBadge = ({ status }) => {
   if (status === 'active')  return <span className="badge-green">Active</span>;
@@ -21,6 +16,7 @@ export default function BrokerDashboard() {
   const { user } = useAuth();
   const [loads, setLoads] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
+  const [brokerAnalytics, setBrokerAnalytics] = useState(null);
 
   useEffect(() => {
     loadsApi.posted()
@@ -33,6 +29,10 @@ export default function BrokerDashboard() {
     bookingsApi.pending()
       .then(data => setPendingCount(Array.isArray(data) ? data.length : 0))
       .catch(() => setPendingCount(0));
+
+    analyticsApi.broker()
+      .then(data => setBrokerAnalytics(data))
+      .catch(() => setBrokerAnalytics(null));
   }, []);
 
   const recentLoads = loads.slice(0, 4);
@@ -53,7 +53,7 @@ export default function BrokerDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: Package,    label: 'Active Loads',   value: loads.filter(l => l.status === 'active').length,   color: 'brand' },
-          { icon: Eye,        label: 'Total Views',    value: loads.reduce((s, l) => s + (l.viewCount || 0), 0), color: 'blue' },
+          { icon: Eye,        label: 'Total Views',    value: brokerAnalytics ? brokerAnalytics.total_views : loads.reduce((s, l) => s + (l.viewCount || 0), 0), color: 'blue' },
           { icon: Users,      label: 'Pending Bookings', value: pendingCount,                                    color: 'yellow' },
           { icon: TrendingUp, label: 'Fill Rate',      value: loads.length ? `${Math.round((loads.filter(l => l.status === 'filled').length / loads.length) * 100)}%` : '—', color: 'brand' },
         ].map(({ icon: Icon, label, value, color }) => (
@@ -72,15 +72,21 @@ export default function BrokerDashboard() {
       {/* Chart + rating */}
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 glass rounded-xl p-6 border border-dark-400/40">
-          <h2 className="text-white font-semibold mb-5">Load Views This Week</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={WEEKLY_VIEWS}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#21262d" vertical={false} />
-              <XAxis dataKey="day" tick={{ fill: '#6e7681', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="views" fill="#22c55e" fillOpacity={0.8} radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <h2 className="text-white font-semibold mb-5">Load Views (Last 6 Weeks)</h2>
+          {brokerAnalytics?.weekly?.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={brokerAnalytics.weekly}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#21262d" vertical={false} />
+                <XAxis dataKey="week" tick={{ fill: '#6e7681', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 }} />
+                <Bar dataKey="views" fill="#22c55e" fillOpacity={0.8} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-[200px]">
+              <p className="text-dark-400 text-sm">Post loads to see view data</p>
+            </div>
+          )}
         </div>
 
         <div className="glass rounded-xl p-6 border border-dark-400/40 space-y-4">
