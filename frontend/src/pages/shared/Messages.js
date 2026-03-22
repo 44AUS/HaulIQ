@@ -232,9 +232,9 @@ export default function Messages() {
                     className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-colors ${
                       confirmDeleteId === c.id
                         ? 'text-red-400 bg-red-500/10'
-                        : 'text-dark-500 opacity-0 group-hover:opacity-100 hover:text-red-400'
+                        : 'text-dark-500 hover:text-red-400'
                     }`}
-                    title={confirmDeleteId === c.id ? 'Click again to confirm' : 'Delete conversation'}>
+                    title={confirmDeleteId === c.id ? 'Click again to confirm delete' : 'Delete conversation'}>
                     <Trash2 size={13} />
                   </button>
                 </div>
