@@ -69,10 +69,12 @@ export const bidsApi = {
 
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 export const bookingsApi = {
-  request: (data)      => request('/api/bookings/', { method: 'POST', body: JSON.stringify(data) }),
-  review:  (id, data)  => request(`/api/bookings/${id}/review`, { method: 'PATCH', body: JSON.stringify(data) }),
-  my:      ()          => request('/api/bookings/my'),
-  pending: ()          => request('/api/bookings/pending'),
+  request:       (data)     => request('/api/bookings/', { method: 'POST', body: JSON.stringify(data) }),
+  review:        (id, data) => request(`/api/bookings/${id}/review`, { method: 'PATCH', body: JSON.stringify(data) }),
+  my:            ()         => request('/api/bookings/my'),
+  pending:       ()         => request('/api/bookings/pending'),
+  inProgress:    ()         => request('/api/bookings/in-progress'),
+  brokerActive:  ()         => request('/api/bookings/broker-active'),
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────

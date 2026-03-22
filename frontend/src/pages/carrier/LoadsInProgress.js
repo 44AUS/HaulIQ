@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw, FileText, CheckCircle } from 'lucide-react';
-import { CARRIER_ACTIVE_LOADS } from '../../data/sampleData';
-import { useMessaging } from '../../context/MessagingContext';
-import RateConfirmationModal from '../../components/shared/RateConfirmationModal';
+import React, { useState, useEffect } from 'react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw } from 'lucide-react';
+import { bookingsApi } from '../../services/api';
 
 const STATUS_CONFIG = {
   quoted:     { label: 'Awaiting Response', cls: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
@@ -51,26 +49,21 @@ function StatusTimeline({ status }) {
   );
 }
 
-function LoadProgressCard({ load, onOpenRC, getRCForLoad }) {
+function LoadProgressCard({ load }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.quoted;
-  const rc = getRCForLoad(load.id);
 
   return (
     <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
-      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-dark-300 text-xs mb-1">Load #{load.id}</p>
-          <div className="flex items-center gap-2">
-            <span className="text-white font-semibold text-sm">{load.type}</span>
-          </div>
+          <p className="text-dark-300 text-xs mb-1">Load #{load.id.slice(0, 8)}</p>
+          <span className="text-white font-semibold text-sm">{load.load_type}</span>
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.cls}`}>
           {cfg.label}
         </span>
       </div>
 
-      {/* Route */}
       <div className="flex items-center gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 text-dark-300 text-xs mb-0.5">
@@ -86,100 +79,49 @@ function LoadProgressCard({ load, onOpenRC, getRCForLoad }) {
           <div className="flex items-center justify-end gap-1 text-dark-300 text-xs mb-0.5">
             <MapPin size={10} /> Dest
           </div>
-          <p className="text-white font-semibold text-sm truncate">{load.dest}</p>
+          <p className="text-white font-semibold text-sm truncate">{load.destination}</p>
         </div>
       </div>
 
-      {/* Dates */}
       <div className="flex items-center justify-between mb-4 text-xs text-dark-400">
         <div className="flex items-center gap-1">
           <Calendar size={10} />
-          <span>Pickup: <span className="text-dark-200">{load.pickup}</span></span>
+          <span>Pickup: <span className="text-dark-200">{load.pickup_date}</span></span>
         </div>
         <div className="flex items-center gap-1">
           <Calendar size={10} />
-          <span>Drop: <span className="text-dark-200">{load.delivery}</span></span>
+          <span>Drop: <span className="text-dark-200">{load.delivery_date}</span></span>
         </div>
       </div>
 
-      {/* RC Status Banner */}
-      {(() => {
-        if (!rc) return null;
-        if (rc.status === 'pending_carrier') return (
-          <div className="mb-4 flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <FileText size={14} className="text-yellow-400" />
-              <span className="text-yellow-400 text-sm font-medium">Rate Confirmation requires your signature</span>
-            </div>
-            <button onClick={() => onOpenRC(rc)} className="btn-primary text-xs py-1.5 px-3">Review & Sign</button>
-          </div>
-        );
-        if (rc.status === 'fully_signed') return (
-          <div className="mb-4 flex items-center justify-between bg-brand-500/5 border border-brand-500/20 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-brand-400" />
-              <span className="text-brand-400 text-sm">Rate Confirmation signed</span>
-            </div>
-            <button onClick={() => onOpenRC(rc)} className="text-brand-400 hover:text-brand-300 text-xs underline">View RC</button>
-          </div>
-        );
-        return null;
-      })()}
-
-      {/* Booked — RC pending note */}
-      {load.status === 'booked' && rc && rc.status === 'pending_carrier' && (
-        <div className="mb-4 bg-dark-700/40 border border-dark-400/20 rounded-lg px-3 py-2">
-          <p className="text-dark-400 text-xs">Sign the Rate Confirmation before pickup.</p>
-        </div>
-      )}
-
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Rate</p>
-          <p className="text-white font-bold text-sm">${load.rate.toLocaleString()}</p>
+          <p className="text-white font-bold text-sm">${(load.rate || 0).toLocaleString()}</p>
         </div>
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Net Profit</p>
-          <p className="text-brand-400 font-bold text-sm">${load.netProfit.toLocaleString()}</p>
+          <p className="text-brand-400 font-bold text-sm">${(load.net_profit_est || 0).toLocaleString()}</p>
         </div>
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Per Mile</p>
-          <p className="text-white font-bold text-sm">${load.ratePerMile}</p>
+          <p className="text-white font-bold text-sm">${(load.rate_per_mile || 0).toFixed(2)}</p>
         </div>
       </div>
 
-      {/* Details row */}
       <div className="flex items-center gap-4 text-xs text-dark-300 mb-2">
-        <span className="flex items-center gap-1"><Package size={10} />{load.commodity}</span>
-        <span className="flex items-center gap-1"><Weight size={10} />{load.weight}</span>
-        <span className="text-dark-400">{load.broker?.name}</span>
+        {load.commodity && <span className="flex items-center gap-1"><Package size={10} />{load.commodity}</span>}
+        {load.weight_lbs && <span className="flex items-center gap-1"><Weight size={10} />{Number(load.weight_lbs).toLocaleString()} lbs</span>}
+        {load.broker_name && <span className="text-dark-400">{load.broker_name}</span>}
       </div>
 
-      {/* Timeline */}
       <StatusTimeline status={load.status} />
 
-      {/* Update button for in_transit */}
       {load.status === 'in_transit' && (
-        <div className="mt-4 flex items-center justify-between">
-          {load.carrierNote && (
-            <p className="text-xs text-dark-300 italic truncate flex-1 mr-3">"{load.carrierNote}"</p>
-          )}
-          {(!rc || rc.status === 'fully_signed') ? (
-            <button className="btn-secondary text-xs flex items-center gap-1.5 flex-shrink-0">
-              <RefreshCw size={12} />
-              Update Status
-            </button>
-          ) : (
-            <button
-              disabled
-              title="Sign the Rate Confirmation first"
-              className="btn-secondary text-xs flex items-center gap-1.5 flex-shrink-0 opacity-40 cursor-not-allowed"
-            >
-              <RefreshCw size={12} />
-              Update Status
-            </button>
-          )}
+        <div className="mt-4 flex justify-end">
+          <button className="btn-secondary text-xs flex items-center gap-1.5">
+            <RefreshCw size={12} /> Update Status
+          </button>
         </div>
       )}
     </div>
@@ -187,9 +129,15 @@ function LoadProgressCard({ load, onOpenRC, getRCForLoad }) {
 }
 
 export default function CarrierLoadsInProgress() {
-  const loads = CARRIER_ACTIVE_LOADS;
-  const { getRCForLoad, carrierSignRC } = useMessaging();
-  const [rcModal, setRcModal] = useState(null);
+  const [loads, setLoads] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    bookingsApi.inProgress()
+      .then(data => setLoads(Array.isArray(data) ? data : []))
+      .catch(() => setLoads([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
   const bookedCount    = loads.filter(l => l.status === 'booked').length;
@@ -197,7 +145,6 @@ export default function CarrierLoadsInProgress() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Activity size={22} className="text-brand-400" />
         <h1 className="text-2xl font-bold text-white">Loads in Progress</h1>
@@ -206,7 +153,6 @@ export default function CarrierLoadsInProgress() {
         </span>
       </div>
 
-      {/* Summary stat cards */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="stat-card">
           <p className="text-dark-300 text-xs mb-1">In Transit</p>
@@ -222,8 +168,11 @@ export default function CarrierLoadsInProgress() {
         </div>
       </div>
 
-      {/* Load list */}
-      {loads.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+        </div>
+      ) : loads.length === 0 ? (
         <div className="glass rounded-xl p-12 text-center border border-dark-400/30">
           <Activity size={40} className="text-dark-400 mx-auto mb-3" />
           <p className="text-white font-semibold mb-1">No active loads</p>
@@ -232,23 +181,9 @@ export default function CarrierLoadsInProgress() {
       ) : (
         <div className="space-y-4">
           {loads.map(load => (
-            <LoadProgressCard
-              key={load.id}
-              load={load}
-              onOpenRC={setRcModal}
-              getRCForLoad={getRCForLoad}
-            />
+            <LoadProgressCard key={load.id} load={load} />
           ))}
         </div>
-      )}
-
-      {rcModal && (
-        <RateConfirmationModal
-          rc={rcModal}
-          role="carrier"
-          onSign={(sig) => { carrierSignRC(rcModal.id, sig); }}
-          onClose={() => setRcModal(null)}
-        />
       )}
     </div>
   );

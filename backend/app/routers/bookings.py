@@ -10,6 +10,7 @@ from app.middleware.auth import get_current_user, require_carrier, require_broke
 from app.models.user import User
 from app.models.booking import Booking, BookingStatus
 from app.models.load import Load, LoadStatus
+from app.models.broker import Broker
 
 router = APIRouter()
 
@@ -97,6 +98,96 @@ def pending_bookings(
         .order_by(Booking.created_at.desc())
         .all()
     )
+
+
+@router.get("/in-progress", summary="Carrier: active bookings with load details")
+def carrier_in_progress(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.carrier_id == current_user.id,
+            Booking.status.in_([BookingStatus.pending, BookingStatus.approved]),
+        )
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
+    result = []
+    for bk in bookings:
+        load = db.query(Load).filter(Load.id == bk.load_id).first()
+        if not load:
+            continue
+        broker_name = load.broker.name if load.broker else None
+        result.append({
+            "id": str(load.id),
+            "booking_id": str(bk.id),
+            "status": "quoted" if bk.status == BookingStatus.pending else "booked",
+            "load_type": load.load_type.value if load.load_type else None,
+            "origin": load.origin,
+            "destination": load.destination,
+            "miles": load.miles,
+            "pickup_date": str(load.pickup_date) if load.pickup_date else None,
+            "delivery_date": str(load.delivery_date) if load.delivery_date else None,
+            "rate": load.rate,
+            "rate_per_mile": load.rate_per_mile,
+            "net_profit_est": load.net_profit_est,
+            "commodity": load.commodity,
+            "weight_lbs": load.weight_lbs,
+            "broker_name": broker_name,
+            "note": bk.note,
+        })
+    return result
+
+
+@router.get("/broker-active", summary="Broker: active+filled loads with carrier info")
+def broker_active_loads(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    loads = (
+        db.query(Load)
+        .filter(
+            Load.broker_user_id == current_user.id,
+            Load.status.in_([LoadStatus.active, LoadStatus.filled]),
+        )
+        .order_by(Load.posted_at.desc())
+        .all()
+    )
+    result = []
+    for load in loads:
+        approved = (
+            db.query(Booking)
+            .filter(Booking.load_id == load.id, Booking.status == BookingStatus.approved)
+            .first()
+        )
+        carrier_id = carrier_name = carrier_mc = None
+        if approved:
+            carrier = db.query(User).filter(User.id == approved.carrier_id).first()
+            if carrier:
+                carrier_id = str(carrier.id)
+                carrier_name = carrier.company or carrier.name
+                carrier_mc = carrier.mc_number
+        status = "booked" if load.status == LoadStatus.filled and approved else "available"
+        result.append({
+            "id": str(load.id),
+            "status": status,
+            "load_type": load.load_type.value if load.load_type else None,
+            "origin": load.origin,
+            "destination": load.destination,
+            "miles": load.miles,
+            "pickup_date": str(load.pickup_date) if load.pickup_date else None,
+            "delivery_date": str(load.delivery_date) if load.delivery_date else None,
+            "rate": load.rate,
+            "rate_per_mile": load.rate_per_mile,
+            "commodity": load.commodity,
+            "weight_lbs": load.weight_lbs,
+            "carrier_id": carrier_id,
+            "carrier_name": carrier_name,
+            "carrier_mc": carrier_mc,
+        })
+    return result
 
 
 @router.patch("/{booking_id}/review", response_model=BookingOut)

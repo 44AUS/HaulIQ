@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, FileText, CheckCircle } from 'lucide-react';
-import { BROKER_ACTIVE_LOADS } from '../../data/sampleData';
-import { useMessaging } from '../../context/MessagingContext';
-import RateConfirmationModal from '../../components/shared/RateConfirmationModal';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle } from 'lucide-react';
+import { bookingsApi } from '../../services/api';
 
 const STATUS_CONFIG = {
-  quoted:     { label: 'Awaiting Response', cls: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' },
-  booked:     { label: 'Booked',            cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
-  in_transit: { label: 'In Transit',        cls: 'bg-brand-500/10 text-brand-400 border border-brand-500/20' },
-  delivered:  { label: 'Delivered',         cls: 'bg-dark-600 text-dark-400 border border-dark-400/20' },
-  available:  { label: 'No Carrier Yet',    cls: 'bg-dark-600 text-dark-300 border border-dark-400/20' },
+  booked:     { label: 'Booked',         cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
+  in_transit: { label: 'In Transit',     cls: 'bg-brand-500/10 text-brand-400 border border-brand-500/20' },
+  delivered:  { label: 'Delivered',      cls: 'bg-dark-600 text-dark-400 border border-dark-400/20' },
+  available:  { label: 'No Carrier Yet', cls: 'bg-dark-600 text-dark-300 border border-dark-400/20' },
 };
 
 const TIMELINE_STEPS = ['Quoted', 'Booked', 'In Transit', 'Delivered'];
@@ -54,24 +51,21 @@ function StatusTimeline({ status }) {
   );
 }
 
-function BrokerLoadCard({ load, onOpenRC, getRCForLoad }) {
+function BrokerLoadCard({ load }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.available;
-  const rc = getRCForLoad(load.id);
 
   return (
     <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
-      {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-dark-300 text-xs mb-1">Load #{load.id}</p>
-          <span className="text-white font-semibold text-sm">{load.type}</span>
+          <p className="text-dark-300 text-xs mb-1">Load #{load.id.slice(0, 8)}</p>
+          <span className="text-white font-semibold text-sm">{load.load_type}</span>
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.cls}`}>
           {cfg.label}
         </span>
       </div>
 
-      {/* Route */}
       <div className="flex items-center gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 text-dark-300 text-xs mb-0.5">
@@ -87,51 +81,25 @@ function BrokerLoadCard({ load, onOpenRC, getRCForLoad }) {
           <div className="flex items-center justify-end gap-1 text-dark-300 text-xs mb-0.5">
             <MapPin size={10} /> Dest
           </div>
-          <p className="text-white font-semibold text-sm truncate">{load.dest}</p>
+          <p className="text-white font-semibold text-sm truncate">{load.destination}</p>
         </div>
       </div>
 
-      {/* Dates */}
       <div className="flex items-center justify-between mb-4 text-xs text-dark-400">
         <div className="flex items-center gap-1">
           <Calendar size={10} />
-          <span>Pickup: <span className="text-dark-200">{load.pickup}</span></span>
+          <span>Pickup: <span className="text-dark-200">{load.pickup_date}</span></span>
         </div>
         <div className="flex items-center gap-1">
           <Calendar size={10} />
-          <span>Drop: <span className="text-dark-200">{load.delivery}</span></span>
+          <span>Drop: <span className="text-dark-200">{load.delivery_date}</span></span>
         </div>
       </div>
 
-      {/* RC Status Banner */}
-      {(() => {
-        if (!rc) return null;
-        if (rc.status === 'pending_carrier') return (
-          <div className="mb-4 flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <FileText size={14} className="text-yellow-400" />
-              <span className="text-yellow-400 text-sm">Awaiting carrier signature on Rate Confirmation</span>
-            </div>
-            <button onClick={() => onOpenRC(rc)} className="text-yellow-400 hover:text-yellow-300 text-xs underline">View RC</button>
-          </div>
-        );
-        if (rc.status === 'fully_signed') return (
-          <div className="mb-4 flex items-center justify-between bg-brand-500/5 border border-brand-500/20 rounded-lg px-4 py-3">
-            <div className="flex items-center gap-2">
-              <CheckCircle size={14} className="text-brand-400" />
-              <span className="text-brand-400 text-sm">Rate Confirmation fully signed</span>
-            </div>
-            <button onClick={() => onOpenRC(rc)} className="text-brand-400 hover:text-brand-300 text-xs underline">View RC</button>
-          </div>
-        );
-        return null;
-      })()}
-
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Rate</p>
-          <p className="text-white font-bold text-sm">${load.rate.toLocaleString()}</p>
+          <p className="text-white font-bold text-sm">${(load.rate || 0).toLocaleString()}</p>
         </div>
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Miles</p>
@@ -139,23 +107,22 @@ function BrokerLoadCard({ load, onOpenRC, getRCForLoad }) {
         </div>
         <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
           <p className="text-dark-300 text-xs mb-0.5">Per Mile</p>
-          <p className="text-white font-bold text-sm">${load.ratePerMile}</p>
+          <p className="text-white font-bold text-sm">${(load.rate_per_mile || 0).toFixed(2)}</p>
         </div>
       </div>
 
-      {/* Carrier info */}
       <div className="bg-dark-700/40 rounded-lg px-3 py-2.5 mb-3">
-        {load.carrierId ? (
+        {load.carrier_id ? (
           <div className="flex items-center gap-2">
             <User size={13} className="text-dark-300 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <Link
-                to={`/carrier-profile/${load.carrierId}`}
+                to={`/carrier-profile/${load.carrier_id}`}
                 className="text-brand-400 hover:text-brand-300 text-sm font-semibold transition-colors"
               >
-                {load.carrierName}
+                {load.carrier_name}
               </Link>
-              <span className="text-dark-400 text-xs ml-2">{load.carrierMc}</span>
+              {load.carrier_mc && <span className="text-dark-400 text-xs ml-2">MC-{load.carrier_mc}</span>}
             </div>
           </div>
         ) : (
@@ -166,50 +133,50 @@ function BrokerLoadCard({ load, onOpenRC, getRCForLoad }) {
         )}
       </div>
 
-      {/* Details */}
-      <div className="flex items-center gap-4 text-xs text-dark-300 mb-2">
-        <span className="flex items-center gap-1"><Package size={10} />{load.commodity}</span>
-        <span className="flex items-center gap-1"><Weight size={10} />{load.weight}</span>
-      </div>
+      {load.commodity && (
+        <div className="flex items-center gap-4 text-xs text-dark-300 mb-2">
+          <span className="flex items-center gap-1"><Package size={10} />{load.commodity}</span>
+          {load.weight_lbs && <span className="flex items-center gap-1"><Weight size={10} />{Number(load.weight_lbs).toLocaleString()} lbs</span>}
+        </div>
+      )}
 
-      {/* No carrier note for available */}
       {load.status === 'available' && (
         <div className="mt-3 bg-dark-700/30 border border-dark-400/20 rounded-lg px-3 py-2">
           <p className="text-dark-400 text-xs">No carrier assigned — load is still open on the board.</p>
         </div>
       )}
 
-      {/* Timeline */}
       <StatusTimeline status={load.status} />
     </div>
   );
 }
 
 export default function BrokerLoadsInProgress() {
-  const { getRCForLoad } = useMessaging();
-  const [rcModal, setRcModal] = useState(null);
+  const [loads, setLoads] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const activeLoads    = BROKER_ACTIVE_LOADS.filter(l => l.status !== 'delivered');
-  const deliveredLoads = BROKER_ACTIVE_LOADS.filter(l => l.status === 'delivered');
+  useEffect(() => {
+    bookingsApi.brokerActive()
+      .then(data => setLoads(Array.isArray(data) ? data : []))
+      .catch(() => setLoads([]))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const inTransitCount = activeLoads.filter(l => l.status === 'in_transit').length;
-  const bookedCount    = activeLoads.filter(l => l.status === 'booked').length;
-  const availableCount = activeLoads.filter(l => l.status === 'available').length;
-  const deliveredCount = deliveredLoads.length;
+  const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
+  const bookedCount    = loads.filter(l => l.status === 'booked').length;
+  const availableCount = loads.filter(l => l.status === 'available').length;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Activity size={22} className="text-brand-400" />
         <h1 className="text-2xl font-bold text-white">Loads in Progress</h1>
         <span className="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold px-2.5 py-1 rounded-full">
-          {activeLoads.length}
+          {loads.length}
         </span>
       </div>
 
-      {/* Summary stat cards */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="stat-card">
           <p className="text-dark-300 text-xs mb-1">In Transit</p>
           <p className="text-2xl font-bold text-brand-400">{inTransitCount}</p>
@@ -222,56 +189,24 @@ export default function BrokerLoadsInProgress() {
           <p className="text-dark-300 text-xs mb-1">Not Filled</p>
           <p className="text-2xl font-bold text-dark-200">{availableCount}</p>
         </div>
-        <div className="stat-card">
-          <p className="text-dark-300 text-xs mb-1">Delivered Today</p>
-          <p className="text-2xl font-bold text-dark-300">{deliveredCount}</p>
-        </div>
       </div>
 
-      {/* Active loads */}
-      {activeLoads.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center border border-dark-400/30 mb-6">
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
+        </div>
+      ) : loads.length === 0 ? (
+        <div className="glass rounded-xl p-12 text-center border border-dark-400/30">
           <Activity size={40} className="text-dark-400 mx-auto mb-3" />
           <p className="text-white font-semibold mb-1">No active loads</p>
           <p className="text-dark-300 text-sm">Post a load to see it tracked here.</p>
         </div>
       ) : (
-        <div className="space-y-4 mb-8">
-          {activeLoads.map(load => (
-            <BrokerLoadCard
-              key={load.id}
-              load={load}
-              onOpenRC={setRcModal}
-              getRCForLoad={getRCForLoad}
-            />
+        <div className="space-y-4">
+          {loads.map(load => (
+            <BrokerLoadCard key={load.id} load={load} />
           ))}
         </div>
-      )}
-
-      {/* Completed section */}
-      {deliveredLoads.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold text-dark-200 mb-4">Completed</h2>
-          <div className="space-y-4">
-            {deliveredLoads.map(load => (
-              <BrokerLoadCard
-                key={load.id}
-                load={load}
-                onOpenRC={setRcModal}
-                getRCForLoad={getRCForLoad}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {rcModal && (
-        <RateConfirmationModal
-          rc={rcModal}
-          role="broker"
-          onSign={() => {}}
-          onClose={() => setRcModal(null)}
-        />
       )}
     </div>
   );
