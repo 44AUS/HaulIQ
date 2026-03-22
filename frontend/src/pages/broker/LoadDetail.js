@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, Calendar, Package, Weight, DollarSign, Eye, Users, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
-import { loadsApi, bidsApi, bookingsApi } from '../../services/api';
+import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 
 const BID_STATUS_CFG = {
