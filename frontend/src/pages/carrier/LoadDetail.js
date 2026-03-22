@@ -12,7 +12,7 @@ export default function LoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { sendMessage, placeBid, requestBooking, isOnAllowlist } = useMessaging();
+  const { placeBid, requestBooking, isOnAllowlist } = useMessaging();
 
   const [load, setLoad] = useState(null);
   const [loading, setLoading] = useState(true);
