@@ -203,6 +203,22 @@ def get_conversation(
     return _enrich(convo)
 
 
+@router.delete("/conversations/{convo_id}", status_code=204)
+def delete_conversation(
+    convo_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    convo = db.query(Conversation).filter(Conversation.id == convo_id).first()
+    if not convo:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if current_user.id not in (convo.carrier_id, convo.broker_id):
+        raise HTTPException(status_code=403, detail="Not a participant")
+    db.query(Message).filter(Message.conversation_id == convo_id).delete()
+    db.delete(convo)
+    db.commit()
+
+
 @router.get("/unread-count")
 def unread_count(
     db: Session = Depends(get_db),

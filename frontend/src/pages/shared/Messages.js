@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X } from 'lucide-react';
+import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi } from '../../services/api';
 
@@ -11,6 +11,7 @@ export default function Messages() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   // New message composer
   const [composing, setComposing] = useState(false);
@@ -88,9 +89,26 @@ export default function Messages() {
       .catch(() => {});
   };
 
+  const handleDeleteConvo = (e, id) => {
+    e.stopPropagation();
+    if (confirmDeleteId === id) {
+      messagesApi.deleteConvo(id)
+        .then(() => {
+          setConversations(prev => prev.filter(c => c.id !== id));
+          if (activeConvoId === id) { setActiveConvoId(null); setActiveMessages([]); }
+          setConfirmDeleteId(null);
+        })
+        .catch(() => setConfirmDeleteId(null));
+    } else {
+      setConfirmDeleteId(id);
+    }
+  };
+
   const getConvoLabel = (c) => {
-    if (user?.role === 'carrier') return c.broker_name || `Broker ${c.broker_id?.slice(0, 8) || ''}`;
-    return c.carrier_name || `Carrier ${c.carrier_id?.slice(0, 8) || ''}`;
+    if (String(c.carrier_id) === String(user?.id)) {
+      return c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`;
+    }
+    return c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`;
   };
 
   const getLastMsg = (c) => {
@@ -186,28 +204,40 @@ export default function Messages() {
               const lastMsg = getLastMsg(c);
               const unread = hasUnread(c);
               return (
-                <button key={c.id} onClick={() => setActiveConvoId(c.id)}
-                  className={`w-full text-left p-4 border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
-                        <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
-                          {getConvoLabel(c)}
-                        </p>
+                <div key={c.id}
+                  className={`relative group border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
+                  <button onClick={() => setActiveConvoId(c.id)} className="w-full text-left p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
+                          <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
+                            {getConvoLabel(c)}
+                          </p>
+                        </div>
+                        {c.load_id && (
+                          <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
+                        )}
+                        {lastMsg && (
+                          <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
+                        )}
                       </div>
-                      {c.load_id && (
-                        <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
-                      )}
-                      {lastMsg && (
-                        <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
-                      )}
+                      <p className="text-dark-500 text-xs flex-shrink-0 pr-5">
+                        {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </p>
                     </div>
-                    <p className="text-dark-500 text-xs flex-shrink-0">
-                      {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                    </p>
-                  </div>
-                </button>
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteConvo(e, c.id)}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-colors ${
+                      confirmDeleteId === c.id
+                        ? 'text-red-400 bg-red-500/10'
+                        : 'text-dark-500 opacity-0 group-hover:opacity-100 hover:text-red-400'
+                    }`}
+                    title={confirmDeleteId === c.id ? 'Click again to confirm' : 'Delete conversation'}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               );
             })
           )}

@@ -48,11 +48,12 @@ export const brokersApi = {
 
 // ─── Messages ──────────────────────────────────────────────────────────────────
 export const messagesApi = {
-  conversations: ()                          => request('/api/messages/conversations'),
-  conversation:  (id)                        => request(`/api/messages/conversations/${id}`),
-  send:          (loadId, brokerId, body)    => request('/api/messages/send', { method: 'POST', body: JSON.stringify({ load_id: loadId || undefined, broker_id: brokerId, body }) }),
-  direct:        (otherUserId, body = null)  => request('/api/messages/direct', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId, body }) }),
-  unreadCount:   ()                          => request('/api/messages/unread-count'),
+  conversations:  ()                          => request('/api/messages/conversations'),
+  conversation:   (id)                        => request(`/api/messages/conversations/${id}`),
+  send:           (loadId, brokerId, body)    => request('/api/messages/send', { method: 'POST', body: JSON.stringify({ load_id: loadId || undefined, broker_id: brokerId, body }) }),
+  direct:         (otherUserId, body = null)  => request('/api/messages/direct', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId, body }) }),
+  deleteConvo:    (id)                        => request(`/api/messages/conversations/${id}`, { method: 'DELETE' }),
+  unreadCount:    ()                          => request('/api/messages/unread-count'),
 };
 
 // ─── Bids ──────────────────────────────────────────────────────────────────────
