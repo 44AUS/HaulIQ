@@ -7,7 +7,7 @@ Create Date: 2026-03-22
 from alembic import op
 
 revision = '005_add_phone_to_users'
-down_revision = '004_nullable_conversation_load_id'
+down_revision = '004_convo_load_nullable'
 branch_labels = None
 depends_on = None
 
