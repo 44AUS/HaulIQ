@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     password: str
     name: str
     role: UserRole = UserRole.carrier
+    phone: Optional[str] = None
     company: Optional[str] = None
     mc_number: Optional[str] = None
     dot_number: Optional[str] = None
@@ -29,6 +30,7 @@ class UserLogin(BaseModel):
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None
+    phone: Optional[str] = None
     company: Optional[str] = None
     mc_number: Optional[str] = None
     dot_number: Optional[str] = None
@@ -41,6 +43,7 @@ class UserOut(BaseModel):
     name: str
     role: UserRole
     plan: UserPlan
+    phone: Optional[str]
     company: Optional[str]
     mc_number: Optional[str]
     dot_number: Optional[str]

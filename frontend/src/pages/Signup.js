@@ -19,7 +19,7 @@ export default function Signup() {
   const initRole = params.get('role') || '';
   const [step, setStep] = useState(initRole ? 1 : 0);
   const [role, setRole] = useState(initRole);
-  const [form, setForm] = useState({ name: '', email: '', password: '', company: '', mc: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', company: '', mc: '' });
   const [plan, setPlan] = useState('basic');
   const { signup, loading, error, setError } = useAuth();
   const navigate = useNavigate();
@@ -140,6 +140,11 @@ export default function Signup() {
                   </div>
                 )}
                 <div>
+                  <label className="block text-dark-100 text-sm font-medium mb-1.5">Phone Number</label>
+                  <input type="tel" className="input" placeholder="+1 (555) 000-0000" value={form.phone}
+                    onChange={e => updateForm('phone', e.target.value)} />
+                </div>
+                <div>
                   <label className="block text-dark-100 text-sm font-medium mb-1.5">Email</label>
                   <input type="email" className="input" placeholder="you@example.com" value={form.email}
                     onChange={e => updateForm('email', e.target.value)} />
@@ -151,7 +156,7 @@ export default function Signup() {
                 </div>
               </div>
               <button
-                onClick={() => { if (form.name && form.email && form.password) setStep(2); }}
+                onClick={() => { if (form.name && form.phone && form.email && form.password) setStep(2); }}
                 className="btn-primary w-full mt-6 flex items-center justify-center gap-2 py-3 glow-green">
                 Continue <ArrowRight size={16} />
               </button>

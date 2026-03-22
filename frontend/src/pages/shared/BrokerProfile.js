@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera } from 'lucide-react';
+import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera, Truck, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { brokersApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
@@ -190,6 +190,10 @@ export default function BrokerProfile() {
                   <badge.Icon size={11} />{badge.label}
                 </span>
               )}
+            </div>
+            <div className="flex items-center gap-3 mb-2 flex-wrap text-xs text-dark-400">
+              {broker.mc && <span className="flex items-center gap-1"><Truck size={11} />{broker.mc}</span>}
+              {broker.phone && <span className="flex items-center gap-1"><Phone size={11} />{broker.phone}</span>}
             </div>
             <div className="flex items-center gap-2 mb-3">
               <div className="flex gap-0.5">

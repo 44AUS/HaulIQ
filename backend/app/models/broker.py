@@ -45,6 +45,10 @@ class Broker(Base):
     reviews        = relationship("BrokerReview", back_populates="broker", cascade="all, delete-orphan")
     loads          = relationship("Load", back_populates="broker")
 
+    @property
+    def phone(self):
+        return self.user.phone if self.user else None
+
     def __repr__(self):
         return f"<Broker {self.name} ({self.avg_rating}★)>"
 

@@ -56,6 +56,7 @@ class CarrierStatsOut(BaseModel):
     name: str
     company: Optional[str]
     mc_number: Optional[str]
+    phone: Optional[str]
     avg_rating: float
     reviews_count: int
     avg_communication: Optional[float]
@@ -136,6 +137,7 @@ def get_carrier_stats(
         return CarrierStatsOut(
             carrier_id=carrier_id, name=carrier.name,
             company=carrier.company, mc_number=carrier.mc_number,
+            phone=carrier.phone,
             avg_rating=0.0, reviews_count=0,
             avg_communication=None, avg_on_time_pickup=None,
             avg_on_time_delivery=None, avg_load_care=None,
@@ -148,6 +150,7 @@ def get_carrier_stats(
         name=carrier.name,
         company=carrier.company,
         mc_number=carrier.mc_number,
+        phone=carrier.phone,
         avg_rating=_calc_avg([r.rating for r in reviews]),
         reviews_count=len(reviews),
         avg_communication=_calc_avg([r.communication for r in reviews]),

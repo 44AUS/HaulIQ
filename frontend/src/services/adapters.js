@@ -40,6 +40,7 @@ export function adaptBroker(b) {
     paySpeedVerified: b.pay_speed_verified || false,
     avgPaymentDays:  b.avg_payment_days || null,
     mc:              b.mc_number || null,
+    phone:           b.phone    || null,
     logo:            b.logo || null,
   };
 }

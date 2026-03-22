@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { User, Lock, Building, Truck, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Lock, Building, Truck, Phone, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 
@@ -9,6 +9,7 @@ export default function Settings() {
   const [profile, setProfile] = useState({
     name:    user?.name    || '',
     email:   user?.email   || '',
+    phone:   user?.phone   || '',
     company: user?.company || '',
     mc:      user?.mc      || '',
     dot:     user?.dot     || '',
@@ -24,13 +25,15 @@ export default function Settings() {
     setStatus(null);
     try {
       const updated = await authApi.update({
-        name:       profile.name       || undefined,
-        company:    profile.company    || undefined,
-        mc_number:  profile.mc        || undefined,
-        dot_number: profile.dot       || undefined,
+        name:       profile.name    || undefined,
+        phone:      profile.phone   || undefined,
+        company:    profile.company || undefined,
+        mc_number:  profile.mc     || undefined,
+        dot_number: profile.dot    || undefined,
       });
       updateUser({
         name:    updated.name,
+        phone:   updated.phone   || null,
         company: updated.company || updated.name,
         mc:      updated.mc_number  || null,
         dot:     updated.dot_number || null,
@@ -108,6 +111,20 @@ export default function Settings() {
               className="w-full bg-dark-700/50 border border-dark-600 rounded-lg px-3 py-2 text-dark-400 text-sm cursor-not-allowed"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs text-dark-400 mb-1">
+            <Phone size={12} className="inline mr-1" />
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            value={profile.phone}
+            onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
+            placeholder="+1 (555) 000-0000"
+            className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
+          />
         </div>
 
         <div>

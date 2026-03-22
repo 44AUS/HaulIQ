@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check } from 'lucide-react';
+import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { carrierReviewsApi, networkApi } from '../../services/api';
 import { adaptReview } from '../../services/adapters';
@@ -126,8 +126,9 @@ export default function CarrierProfile() {
                 <h1 className="text-xl font-bold text-white">{displayName}</h1>
               </div>
               {stats?.company_name && <p className="text-dark-300 text-sm">{stats.company_name}</p>}
-              <div className="flex items-center gap-3 mt-1 text-xs text-dark-400">
+              <div className="flex items-center gap-3 mt-1 text-xs text-dark-400 flex-wrap">
                 {stats?.mc_number && <span className="flex items-center gap-1"><Truck size={11} />{stats.mc_number}</span>}
+                {stats?.phone && <span className="flex items-center gap-1"><Phone size={11} />{stats.phone}</span>}
                 {stats?.total_reviews != null && <span>{stats.total_reviews} reviews</span>}
               </div>
             </div>

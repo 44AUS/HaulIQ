@@ -30,6 +30,7 @@ class User(Base):
     role           = Column(SAEnum(UserRole), nullable=False, default=UserRole.carrier)
     plan           = Column(SAEnum(UserPlan), nullable=False, default=UserPlan.basic)
     company        = Column(String(255), nullable=True)
+    phone          = Column(String(20), nullable=True)
     mc_number      = Column(String(50), nullable=True)
     dot_number     = Column(String(50), nullable=True)
     is_active      = Column(Boolean, default=True)

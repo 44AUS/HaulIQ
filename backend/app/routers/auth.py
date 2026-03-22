@@ -27,6 +27,7 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
         name=payload.name,
         role=payload.role,
         plan=UserPlan.basic,
+        phone=payload.phone,
         company=payload.company,
         mc_number=payload.mc_number,
         dot_number=payload.dot_number,
