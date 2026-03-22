@@ -112,10 +112,12 @@ export const instantBookApi = {
 
 // ─── Network ──────────────────────────────────────────────────────────────────
 export const networkApi = {
-  list:   ()           => request('/api/network/'),
-  add:    (carrierId)  => request('/api/network/', { method: 'POST', body: JSON.stringify({ carrier_id: carrierId }) }),
-  remove: (id)         => request(`/api/network/${id}`, { method: 'DELETE' }),
-  check:  (carrierId)  => request(`/api/network/check/${carrierId}`),
+  list:     ()                  => request('/api/network/'),
+  add:      (carrierId)         => request('/api/network/', { method: 'POST', body: JSON.stringify({ carrier_id: carrierId }) }),
+  remove:   (id)                => request(`/api/network/${id}`, { method: 'DELETE' }),
+  check:    (carrierId)         => request(`/api/network/check/${carrierId}`),
+  requests: ()                  => request('/api/network/requests'),
+  respond:  (id, accepted)      => request(`/api/network/${id}/respond`, { method: 'PATCH', body: JSON.stringify({ accepted }) }),
 };
 
 const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi };

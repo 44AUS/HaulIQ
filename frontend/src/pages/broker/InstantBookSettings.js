@@ -33,7 +33,7 @@ export default function InstantBookSettings() {
   const handleAddToNetwork = (carrierId) => {
     setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: true } }));
     networkApi.add(carrierId)
-      .then(res => setNetworkStatus(prev => ({ ...prev, [carrierId]: { in_network: true, entry_id: res.id, loading: false } })))
+      .then(res => setNetworkStatus(prev => ({ ...prev, [carrierId]: { status: res.status, entry_id: res.id, loading: false } })))
       .catch(() => setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: false } })));
   };
 
@@ -233,10 +233,12 @@ export default function InstantBookSettings() {
                       </td>
                       <td className="px-5 py-3.5">
                         {entry.carrier_id && (
-                          ns.in_network ? (
+                          ns.status === 'accepted' ? (
                             <span className="flex items-center gap-1 text-brand-400 text-xs font-medium">
                               <Check size={11} /> Network
                             </span>
+                          ) : ns.status === 'pending' ? (
+                            <span className="text-yellow-400 text-xs font-medium">Request Sent</span>
                           ) : (
                             <button
                               onClick={() => handleAddToNetwork(entry.carrier_id)}

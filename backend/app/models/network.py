@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -12,6 +12,7 @@ class BrokerNetwork(Base):
     id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     broker_id  = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     carrier_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
+    status     = Column(String(10), nullable=False, default='pending')  # pending | accepted | declined
     created_at = Column(DateTime, default=datetime.utcnow)
 
     __table_args__ = (

@@ -43,7 +43,7 @@ export default function CarrierProfile() {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [networkState, setNetworkState] = useState({ in_network: false, entry_id: null, loading: true });
+  const [networkState, setNetworkState] = useState({ status: 'none', entry_id: null, loading: true });
   const [form, setForm] = useState({
     rating: 0, communication: 0, onTimePickup: 0, onTimeDelivery: 0, loadCare: 0,
     wouldWorkAgain: null, comment: '', isAnonymous: false,
@@ -61,8 +61,8 @@ export default function CarrierProfile() {
 
     if (user?.role === 'broker') {
       networkApi.check(carrierId)
-        .then(data => setNetworkState({ in_network: data.in_network, entry_id: data.entry_id, loading: false }))
-        .catch(() => setNetworkState({ in_network: false, entry_id: null, loading: false }));
+        .then(data => setNetworkState({ status: data.status, entry_id: data.entry_id, loading: false }))
+        .catch(() => setNetworkState({ status: 'none', entry_id: null, loading: false }));
     } else {
       setNetworkState(prev => ({ ...prev, loading: false }));
     }
@@ -71,7 +71,7 @@ export default function CarrierProfile() {
   const handleAddToNetwork = () => {
     setNetworkState(prev => ({ ...prev, loading: true }));
     networkApi.add(carrierId)
-      .then(res => setNetworkState({ in_network: true, entry_id: res.id, loading: false }))
+      .then(res => setNetworkState({ status: res.status, entry_id: res.id, loading: false }))
       .catch(() => setNetworkState(prev => ({ ...prev, loading: false })));
   };
 
@@ -142,9 +142,13 @@ export default function CarrierProfile() {
             {user?.role === 'broker' && (
               <div className="flex items-center gap-2 justify-end mt-3">
                 {!networkState.loading && (
-                  networkState.in_network ? (
+                  networkState.status === 'accepted' ? (
                     <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium">
                       <Check size={12} /> In Network
+                    </span>
+                  ) : networkState.status === 'pending' ? (
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium">
+                      Request Sent
                     </span>
                   ) : (
                     <button onClick={handleAddToNetwork}
