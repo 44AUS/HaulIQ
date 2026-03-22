@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, ArrowLeft, Check, CheckCheck } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { messagesApi } from '../../services/api';
+import { messagesApi, networkApi } from '../../services/api';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -12,6 +12,11 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
+  // New message composer
+  const [composing, setComposing] = useState(false);
+  const [network, setNetwork] = useState([]);
+  const [networkQuery, setNetworkQuery] = useState('');
+
   useEffect(() => {
     messagesApi.conversations()
       .then(data => setConversations(Array.isArray(data) ? data : []))
@@ -20,15 +25,21 @@ export default function Messages() {
   }, []);
 
   useEffect(() => {
+    if (!composing) return;
+    networkApi.list()
+      .then(data => setNetwork(Array.isArray(data) ? data : []))
+      .catch(() => setNetwork([]));
+  }, [composing]);
+
+  useEffect(() => {
     if (!activeConvoId) return;
     messagesApi.conversation(activeConvoId)
       .then(data => {
         const msgs = data.messages || (Array.isArray(data) ? data : []);
         setActiveMessages(msgs);
-        // Refresh conversation list so unread dots update
         setConversations(prev =>
           prev.map(c => c.id === activeConvoId
-            ? { ...c, messages: (c.messages || []).map(m => m.sender_id !== undefined ? { ...m, is_read: true } : m) }
+            ? { ...c, messages: (c.messages || []).map(m => ({ ...m, is_read: true })) }
             : c
           )
         );
@@ -44,7 +55,7 @@ export default function Messages() {
 
   const handleSend = () => {
     if (!input.trim() || !activeConvo) return;
-    const loadId = activeConvo.load_id;
+    const loadId = activeConvo.load_id || null;
     const brokerId = activeConvo.broker_id;
     messagesApi.send(loadId, brokerId, input.trim())
       .then(msg => {
@@ -54,9 +65,31 @@ export default function Messages() {
       .catch(() => {});
   };
 
+  const handleStartDirect = (contact) => {
+    setComposing(false);
+    setNetworkQuery('');
+    // Check if convo with this user already exists
+    const existing = conversations.find(c =>
+      (c.carrier_id === contact.user_id || c.broker_id === contact.user_id)
+      && !c.load_id
+    );
+    if (existing) {
+      setActiveConvoId(existing.id);
+      return;
+    }
+    // Create a new direct conversation
+    messagesApi.direct(contact.user_id)
+      .then(convo => {
+        setConversations(prev => [convo, ...prev]);
+        setActiveConvoId(convo.id);
+        setActiveMessages(convo.messages || []);
+      })
+      .catch(() => {});
+  };
+
   const getConvoLabel = (c) => {
-    if (user?.role === 'carrier') return `Broker ${c.broker_id ? c.broker_id.slice(0, 8) : ''}`;
-    return `Carrier ${c.carrier_id ? c.carrier_id.slice(0, 8) : ''}`;
+    if (user?.role === 'carrier') return c.broker_name || `Broker ${c.broker_id?.slice(0, 8) || ''}`;
+    return c.carrier_name || `Carrier ${c.carrier_id?.slice(0, 8) || ''}`;
   };
 
   const getLastMsg = (c) => {
@@ -69,16 +102,73 @@ export default function Messages() {
     return msgs.some(m => m.sender_id !== user?.id && !m.is_read);
   };
 
+  const filteredNetwork = networkQuery
+    ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
+    : network;
+
   return (
     <div className="h-[calc(100vh-8rem)] flex gap-0 glass rounded-xl border border-dark-400/40 overflow-hidden">
       {/* Conversation list */}
       <div className={`w-full md:w-80 flex-shrink-0 border-r border-dark-400/40 flex flex-col ${activeConvoId ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-dark-400/40">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={18} className="text-brand-400" />
-            <h2 className="text-white font-semibold">Messages</h2>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare size={18} className="text-brand-400" />
+              <h2 className="text-white font-semibold">Messages</h2>
+            </div>
+            <button
+              onClick={() => setComposing(true)}
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-dark-300 hover:text-white hover:bg-dark-600 transition-colors"
+              title="New Message">
+              <SquarePen size={16} />
+            </button>
           </div>
         </div>
+
+        {/* New message composer */}
+        {composing && (
+          <div className="border-b border-dark-400/40 p-3 bg-dark-700/30">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-white text-sm font-medium flex-1">New Message</p>
+              <button onClick={() => { setComposing(false); setNetworkQuery(''); }}
+                className="text-dark-400 hover:text-white">
+                <X size={14} />
+              </button>
+            </div>
+            <div className="relative mb-2">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-dark-400" />
+              <input
+                className="w-full bg-dark-700 border border-dark-500/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-dark-400 focus:outline-none focus:border-brand-500/50"
+                placeholder="Search your network..."
+                value={networkQuery}
+                onChange={e => setNetworkQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {filteredNetwork.length === 0 ? (
+              <p className="text-dark-500 text-xs px-1 py-2">
+                {network.length === 0 ? 'No connections yet. Add carriers to your network first.' : 'No matches.'}
+              </p>
+            ) : (
+              <div className="max-h-40 overflow-y-auto space-y-0.5">
+                {filteredNetwork.map(contact => (
+                  <button key={contact.user_id}
+                    onClick={() => handleStartDirect(contact)}
+                    className="w-full text-left flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-600 transition-colors">
+                    <div className="w-7 h-7 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
+                      {contact.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white text-xs font-medium truncate">{contact.name}</p>
+                      {contact.company && <p className="text-dark-400 text-xs truncate">{contact.company}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center h-full">
@@ -88,7 +178,7 @@ export default function Messages() {
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
               <MessageSquare size={32} className="text-dark-500 mb-3" />
               <p className="text-dark-300 text-sm">No conversations yet</p>
-              <p className="text-dark-400 text-xs mt-1">Start a chat from a load detail page</p>
+              <p className="text-dark-400 text-xs mt-1">Use the compose button to message your network</p>
             </div>
           ) : (
             conversations.map(c => {
@@ -105,8 +195,11 @@ export default function Messages() {
                           {getConvoLabel(c)}
                         </p>
                       </div>
+                      {c.load_id && (
+                        <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
+                      )}
                       {lastMsg && (
-                        <p className="text-dark-300 text-xs truncate mt-1">{lastMsg.body}</p>
+                        <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
                       )}
                     </div>
                     <p className="text-dark-500 text-xs flex-shrink-0">
@@ -123,20 +216,18 @@ export default function Messages() {
       {/* Chat area */}
       {activeConvo ? (
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Chat header */}
           <div className="p-4 border-b border-dark-400/40 flex items-center gap-3">
             <button onClick={() => setActiveConvoId(null)} className="md:hidden text-dark-300 hover:text-white">
               <ArrowLeft size={18} />
             </button>
             <div>
-              <p className="text-white font-semibold text-sm">
-                {getConvoLabel(activeConvo)}
-              </p>
-              <p className="text-dark-400 text-xs">Load #{activeConvo.load_id?.slice(0, 8)}</p>
+              <p className="text-white font-semibold text-sm">{getConvoLabel(activeConvo)}</p>
+              {activeConvo.load_id && (
+                <p className="text-dark-400 text-xs">Load #{activeConvo.load_id.slice(0, 8)}</p>
+              )}
             </div>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {activeMessages.map(msg => {
               const isMe = msg.sender_id === user?.id;
@@ -160,7 +251,6 @@ export default function Messages() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
           <div className="p-4 border-t border-dark-400/40">
             <div className="flex gap-2">
               <input
@@ -184,6 +274,7 @@ export default function Messages() {
           <div className="text-center">
             <MessageSquare size={40} className="text-dark-600 mx-auto mb-3" />
             <p className="text-dark-300 text-sm">Select a conversation</p>
+            <p className="text-dark-400 text-xs mt-1">or use the compose button to start a new one</p>
           </div>
         </div>
       )}

@@ -11,7 +11,7 @@ class Conversation(Base):
     __tablename__ = "conversations"
 
     id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    load_id    = Column(UUID(as_uuid=True), ForeignKey("loads.id"), nullable=False, index=True)
+    load_id    = Column(UUID(as_uuid=True), ForeignKey("loads.id"), nullable=True, index=True)
     carrier_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     broker_id  = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)

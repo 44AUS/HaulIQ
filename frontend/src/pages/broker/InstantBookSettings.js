@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Zap, Search, Upload, Check, UserPlus, Trash2, AlertCircle, FileText, Users } from 'lucide-react';
-import { instantBookApi } from '../../services/api';
+import { Link } from 'react-router-dom';
+import { Zap, Search, Upload, Check, UserPlus, Trash2, AlertCircle, FileText, Users, Network } from 'lucide-react';
+import { instantBookApi, networkApi } from '../../services/api';
 
 export default function InstantBookSettings() {
   const [tab, setTab] = useState('list');
@@ -25,6 +26,16 @@ export default function InstantBookSettings() {
 
   // Remove confirm
   const [confirmRemove, setConfirmRemove] = useState(null);
+
+  // Network state per carrier_id
+  const [networkStatus, setNetworkStatus] = useState({}); // { carrier_id: { in_network, entry_id, loading } }
+
+  const handleAddToNetwork = (carrierId) => {
+    setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: true } }));
+    networkApi.add(carrierId)
+      .then(res => setNetworkStatus(prev => ({ ...prev, [carrierId]: { in_network: true, entry_id: res.id, loading: false } })))
+      .catch(() => setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: false } })));
+  };
 
   // Load allowlist on mount
   useEffect(() => {
@@ -176,58 +187,86 @@ export default function InstantBookSettings() {
                   <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden sm:table-cell">MC Number</th>
                   <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden md:table-cell">Source</th>
                   <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden md:table-cell">Added</th>
+                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium">Network</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
               <tbody>
-                {allowlist.map(entry => (
-                  <tr key={entry.id} className="border-b border-dark-400/20 hover:bg-dark-700/30 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
-                          {(entry.carrier_name || entry.carrier_email || '?').charAt(0).toUpperCase()}
+                {allowlist.map(entry => {
+                  const ns = networkStatus[entry.carrier_id] || {};
+                  return (
+                    <tr key={entry.id} className="border-b border-dark-400/20 hover:bg-dark-700/30 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
+                            {(entry.carrier_name || entry.carrier_email || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            {entry.carrier_id ? (
+                              <Link to={`/carrier-profile/${entry.carrier_id}`}
+                                className="text-white text-sm font-medium hover:text-brand-400 transition-colors">
+                                {entry.carrier_name || '—'}
+                              </Link>
+                            ) : (
+                              <p className="text-white text-sm font-medium">{entry.carrier_name || '—'}</p>
+                            )}
+                            <p className="text-dark-400 text-xs">{entry.carrier_email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-white text-sm font-medium">{entry.carrier_name || '—'}</p>
-                          <p className="text-dark-400 text-xs">{entry.carrier_email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 hidden sm:table-cell">
-                      <span className="text-dark-300 text-sm">{entry.carrier_mc || '—'}</span>
-                    </td>
-                    <td className="px-5 py-3.5 hidden md:table-cell">
-                      <span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${
-                        entry.source === 'upload'
-                          ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                          : 'bg-brand-500/10 text-brand-400 border-brand-500/20'
-                      }`}>
-                        {entry.source}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 hidden md:table-cell">
-                      <span className="text-dark-400 text-xs">
-                        {new Date(entry.added_at).toLocaleDateString()}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-right">
-                      {confirmRemove === entry.id ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <span className="text-dark-400 text-xs">Remove?</span>
-                          <button onClick={() => handleRemove(entry.id)}
-                            className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors">Yes</button>
-                          <button onClick={() => setConfirmRemove(null)}
-                            className="text-dark-400 hover:text-white text-xs transition-colors">No</button>
-                        </div>
-                      ) : (
-                        <button onClick={() => setConfirmRemove(entry.id)}
-                          className="text-dark-500 hover:text-red-400 transition-colors p-1">
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-5 py-3.5 hidden sm:table-cell">
+                        <span className="text-dark-300 text-sm">{entry.carrier_mc || '—'}</span>
+                      </td>
+                      <td className="px-5 py-3.5 hidden md:table-cell">
+                        <span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${
+                          entry.source === 'upload'
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            : 'bg-brand-500/10 text-brand-400 border-brand-500/20'
+                        }`}>
+                          {entry.source}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 hidden md:table-cell">
+                        <span className="text-dark-400 text-xs">
+                          {new Date(entry.added_at).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {entry.carrier_id && (
+                          ns.in_network ? (
+                            <span className="flex items-center gap-1 text-brand-400 text-xs font-medium">
+                              <Check size={11} /> Network
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleAddToNetwork(entry.carrier_id)}
+                              disabled={ns.loading}
+                              className="flex items-center gap-1 text-dark-400 hover:text-brand-400 text-xs transition-colors disabled:opacity-50"
+                              title="Add to Network">
+                              <Network size={13} /> {ns.loading ? '…' : 'Add to Network'}
+                            </button>
+                          )
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 text-right">
+                        {confirmRemove === entry.id ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="text-dark-400 text-xs">Remove?</span>
+                            <button onClick={() => handleRemove(entry.id)}
+                              className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors">Yes</button>
+                            <button onClick={() => setConfirmRemove(null)}
+                              className="text-dark-400 hover:text-white text-xs transition-colors">No</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setConfirmRemove(entry.id)}
+                            className="text-dark-500 hover:text-red-400 transition-colors p-1">
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}

@@ -5,8 +5,9 @@ from contextlib import asynccontextmanager
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
+from app.models import network as _network_model  # noqa: ensure table is registered
 
 settings = get_settings()
 
@@ -65,6 +66,7 @@ app.include_router(bids.router,      prefix="/api/bids",      tags=["Bids"])
 app.include_router(bookings.router,    prefix="/api/bookings",     tags=["Bookings"])
 app.include_router(instant_book.router, prefix="/api/instant-book", tags=["Instant Book"])
 app.include_router(carrier_reviews.router, prefix="/api/carrier-reviews", tags=["Carrier Reviews"])
+app.include_router(network.router,         prefix="/api/network",         tags=["Network"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

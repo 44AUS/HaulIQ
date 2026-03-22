@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users } from 'lucide-react';
+import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { carrierReviewsApi } from '../../services/api';
+import { carrierReviewsApi, networkApi } from '../../services/api';
 import { adaptReview } from '../../services/adapters';
 
 function StarInput({ value, onChange, size = 20 }) {
@@ -43,6 +43,7 @@ export default function CarrierProfile() {
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [networkState, setNetworkState] = useState({ in_network: false, entry_id: null, loading: true });
   const [form, setForm] = useState({
     rating: 0, communication: 0, onTimePickup: 0, onTimeDelivery: 0, loadCare: 0,
     wouldWorkAgain: null, comment: '', isAnonymous: false,
@@ -57,7 +58,22 @@ export default function CarrierProfile() {
     carrierReviewsApi.stats(carrierId)
       .then(data => setStats(data))
       .catch(() => setStats(null));
-  }, [carrierId]);
+
+    if (user?.role === 'broker') {
+      networkApi.check(carrierId)
+        .then(data => setNetworkState({ in_network: data.in_network, entry_id: data.entry_id, loading: false }))
+        .catch(() => setNetworkState({ in_network: false, entry_id: null, loading: false }));
+    } else {
+      setNetworkState(prev => ({ ...prev, loading: false }));
+    }
+  }, [carrierId, user?.role]);
+
+  const handleAddToNetwork = () => {
+    setNetworkState(prev => ({ ...prev, loading: true }));
+    networkApi.add(carrierId)
+      .then(res => setNetworkState({ in_network: true, entry_id: res.id, loading: false }))
+      .catch(() => setNetworkState(prev => ({ ...prev, loading: false })));
+  };
 
   const avgOverall = reviews.length
     ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1)
@@ -122,14 +138,30 @@ export default function CarrierProfile() {
               <span className="text-white font-bold text-xl">{avgOverall}</span>
             </div>
             <p className="text-dark-400 text-xs">{reviews.length} broker reviews</p>
-            {user?.role === 'broker' && !submitted && (
-              <button onClick={() => setShowForm(!showForm)}
-                className="mt-3 btn-primary text-xs px-3 py-1.5 flex items-center gap-1 ml-auto">
-                <Star size={12} /> Review
-              </button>
+            {user?.role === 'broker' && (
+              <div className="flex items-center gap-2 justify-end mt-3">
+                {!networkState.loading && (
+                  networkState.in_network ? (
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium">
+                      <Check size={12} /> In Network
+                    </span>
+                  ) : (
+                    <button onClick={handleAddToNetwork}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-600 border border-dark-400/40 text-dark-200 hover:text-white hover:border-brand-500/40 text-xs font-medium transition-all">
+                      <Network size={12} /> Add to Network
+                    </button>
+                  )
+                )}
+                {!submitted && (
+                  <button onClick={() => setShowForm(!showForm)}
+                    className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
+                    <Star size={12} /> Review
+                  </button>
+                )}
+              </div>
             )}
             {submitted && (
-              <div className="mt-3 flex items-center gap-1 justify-end text-brand-400 text-xs">
+              <div className="flex items-center gap-1 text-brand-400 text-xs">
                 <CheckCircle size={12} /> Submitted
               </div>
             )}

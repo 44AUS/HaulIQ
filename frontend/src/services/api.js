@@ -48,10 +48,11 @@ export const brokersApi = {
 
 // ─── Messages ──────────────────────────────────────────────────────────────────
 export const messagesApi = {
-  conversations: ()                         => request('/api/messages/conversations'),
-  conversation:  (id)                       => request(`/api/messages/conversations/${id}`),
-  send:          (loadId, brokerId, body)   => request('/api/messages/send', { method: 'POST', body: JSON.stringify({ load_id: loadId, broker_id: brokerId, body }) }),
-  unreadCount:   ()                         => request('/api/messages/unread-count'),
+  conversations: ()                          => request('/api/messages/conversations'),
+  conversation:  (id)                        => request(`/api/messages/conversations/${id}`),
+  send:          (loadId, brokerId, body)    => request('/api/messages/send', { method: 'POST', body: JSON.stringify({ load_id: loadId || undefined, broker_id: brokerId, body }) }),
+  direct:        (otherUserId, body = null)  => request('/api/messages/direct', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId, body }) }),
+  unreadCount:   ()                          => request('/api/messages/unread-count'),
 };
 
 // ─── Bids ──────────────────────────────────────────────────────────────────────
@@ -106,5 +107,13 @@ export const instantBookApi = {
   searchCarriers:(q)        => request(`/api/instant-book/carriers/search?q=${encodeURIComponent(q)}`),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi };
+// ─── Network ──────────────────────────────────────────────────────────────────
+export const networkApi = {
+  list:   ()           => request('/api/network/'),
+  add:    (carrierId)  => request('/api/network/', { method: 'POST', body: JSON.stringify({ carrier_id: carrierId }) }),
+  remove: (id)         => request(`/api/network/${id}`, { method: 'DELETE' }),
+  check:  (carrierId)  => request(`/api/network/check/${carrierId}`),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi };
 export default api;
