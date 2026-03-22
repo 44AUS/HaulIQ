@@ -205,8 +205,8 @@ export default function Messages() {
               const unread = hasUnread(c);
               return (
                 <div key={c.id}
-                  className={`relative group border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
-                  <button onClick={() => setActiveConvoId(c.id)} className="w-full text-left p-4">
+                  className={`flex items-center border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
+                  <button onClick={() => setActiveConvoId(c.id)} className="flex-1 text-left p-4 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
@@ -222,14 +222,14 @@ export default function Messages() {
                           <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
                         )}
                       </div>
-                      <p className="text-dark-500 text-xs flex-shrink-0 pr-5">
+                      <p className="text-dark-500 text-xs flex-shrink-0">
                         {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </p>
                     </div>
                   </button>
                   <button
                     onClick={(e) => handleDeleteConvo(e, c.id)}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-colors ${
+                    className={`flex-shrink-0 mr-3 p-1.5 rounded transition-colors ${
                       confirmDeleteId === c.id
                         ? 'text-red-400 bg-red-500/10'
                         : 'text-dark-500 hover:text-red-400'
