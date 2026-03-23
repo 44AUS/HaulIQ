@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
-import { loadsApi, messagesApi } from '../../services/api';
+import { loadsApi, messagesApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
@@ -14,7 +14,7 @@ export default function LoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { placeBid, requestBooking, isOnAllowlist } = useMessaging();
+  const { requestBooking, isOnAllowlist } = useMessaging();
 
   const [load, setLoad] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -75,10 +75,9 @@ export default function LoadDetail() {
 
   const handlePlaceBid = () => {
     if (!bidAmount || isNaN(parseFloat(bidAmount))) return;
-    placeBid(load.id, parseFloat(bidAmount), bidNote, user);
-    setBidModalOpen(false);
-    setBidAmount('');
-    setBidNote('');
+    bidsApi.place({ load_id: load._raw.id, amount: parseFloat(bidAmount), note: bidNote || null })
+      .then(() => { setBidModalOpen(false); setBidAmount(''); setBidNote(''); })
+      .catch(err => alert(err.message));
   };
 
   const handleSendMessage = () => {
