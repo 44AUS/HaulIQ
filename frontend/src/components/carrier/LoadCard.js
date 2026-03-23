@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, ArrowRight, Bookmark, BookmarkCheck, Zap, TrendingUp, Minus, TrendingDown, Truck, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { loadsApi } from '../../services/api';
 import BrokerRating from '../shared/BrokerRating';
 
 export default function LoadCard({ load, onSave }) {
@@ -18,7 +19,8 @@ export default function LoadCard({ load, onSave }) {
 
   const handleSave = (e) => {
     e.stopPropagation();
-    setSaved(!saved);
+    setSaved(s => !s);
+    loadsApi.toggleSave(load._raw.id).catch(() => setSaved(s => !s)); // revert on error
     onSave && onSave(load.id, !saved);
   };
 
