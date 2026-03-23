@@ -111,7 +111,7 @@ export default function LoadDetail() {
             <p className="text-dark-300 text-sm mt-1">{load.commodity} · {load.weight} · {load.miles} loaded miles</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaved(!saved)}
+            <button onClick={() => { loadsApi.toggleSave(load._raw.id).catch(() => {}); setSaved(s => !s); }}
               className={`p-2.5 rounded-lg border transition-all ${saved ? 'border-brand-500/40 bg-brand-500/10 text-brand-400' : 'border-dark-400/40 text-dark-300 hover:text-white hover:border-dark-300'}`}>
               {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
             </button>
