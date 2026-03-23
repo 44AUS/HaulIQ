@@ -76,6 +76,7 @@ class LoadOut(BaseModel):
     is_above_market: Optional[bool]
     status: LoadStatus
     is_hot: bool
+    is_saved: bool = False
     view_count: int
     notes: Optional[str]
     posted_at: datetime

@@ -22,6 +22,17 @@ PLAN_DAILY_LIMITS = {
 }
 
 
+def _stamp_saved(loads: list, user_id, db: Session) -> list:
+    """Set is_saved=True on any load the carrier has bookmarked."""
+    saved_ids = {
+        str(row.load_id)
+        for row in db.query(SavedLoad.load_id).filter(SavedLoad.carrier_id == user_id).all()
+    }
+    for load in loads:
+        load.is_saved = str(load.id) in saved_ids
+    return loads
+
+
 def _enrich_load(load: Load) -> Load:
     """Compute profit fields on a load object using live diesel price."""
     live_price, _ = get_diesel_price()
@@ -108,6 +119,7 @@ def list_loads(
     enriched = [_enrich_load(l) for l in loads]
     if profit_score:
         enriched = [l for l in enriched if l.profit_score and l.profit_score.value == profit_score]
+    _stamp_saved(enriched, current_user.id, db)
 
     return LoadListOut(
         loads=enriched,
@@ -198,7 +210,9 @@ def get_load(
             load.view_count = (load.view_count or 0) + 1
     db.commit()
 
-    return _enrich_load(load)
+    enriched = _enrich_load(load)
+    _stamp_saved([enriched], current_user.id, db)
+    return enriched
 
 
 # ─── POST /api/loads ───────────────────────────────────────────────────────────
@@ -304,7 +318,10 @@ def get_saved_loads(
         .filter(SavedLoad.carrier_id == current_user.id)
         .all()
     )
-    return [_enrich_load(s.load) for s in saved if s.load and s.load.status == LoadStatus.active]
+    enriched = [_enrich_load(s.load) for s in saved if s.load and s.load.status == LoadStatus.active]
+    for l in enriched:
+        l.is_saved = True
+    return enriched
 
 
 # ─── POST /api/loads/calculate ─────────────────────────────────────────────────
