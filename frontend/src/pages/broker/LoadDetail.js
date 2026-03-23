@@ -1,9 +1,10 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, Calendar, Package, Weight, DollarSign, Eye, Users, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
+
+const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
 const BID_STATUS_CFG = {
   pending:   { label: 'Pending',   cls: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },

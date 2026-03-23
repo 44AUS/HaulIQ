@@ -1,6 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
 import { loadsApi, messagesApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
@@ -8,6 +7,8 @@ import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
 import { useAuth } from '../../context/AuthContext';
 import { useMessaging } from '../../context/MessagingContext';
+
+const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
 export default function LoadDetail() {
   const { id } = useParams();
