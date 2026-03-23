@@ -109,6 +109,7 @@ export const instantBookApi = {
   remove:        (entryId)  => request(`/api/instant-book/allowlist/${entryId}`, { method: 'DELETE' }),
   bulkUpload:    (rows)     => request('/api/instant-book/allowlist/upload', { method: 'POST', body: JSON.stringify({ rows }) }),
   searchCarriers:(q)        => request(`/api/instant-book/carriers/search?q=${encodeURIComponent(q)}`),
+  check:         (loadId)   => request(`/api/instant-book/check/${loadId}`),
 };
 
 // ─── Network ──────────────────────────────────────────────────────────────────

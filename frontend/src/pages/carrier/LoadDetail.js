@@ -1,24 +1,21 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
-import { loadsApi, messagesApi, bidsApi } from '../../services/api';
+import { loadsApi, messagesApi, bidsApi, bookingsApi, instantBookApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
-import { useAuth } from '../../context/AuthContext';
-import { useMessaging } from '../../context/MessagingContext';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
 export default function LoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { requestBooking, isOnAllowlist } = useMessaging();
 
   const [load, setLoad] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [canInstantBook, setCanInstantBook] = useState(false);
 
   // Action state
   const [bidModalOpen, setBidModalOpen] = useState(false);
@@ -35,6 +32,10 @@ export default function LoadDetail() {
         const adapted = adaptLoad(data);
         setLoad(adapted);
         setSaved(adapted?.saved || false);
+        // Check real instant book eligibility
+        instantBookApi.check(data.id)
+          .then(res => setCanInstantBook(res.eligible === true))
+          .catch(() => setCanInstantBook(false));
       })
       .catch(() => setLoad(null))
       .finally(() => setLoading(false));
@@ -54,8 +55,6 @@ export default function LoadDetail() {
   );
 
   // Check if this carrier is on the broker's instant book allowlist
-  const DEMO_BROKER_ID = 'b1';
-  const canInstantBook = load.instantBook && isOnAllowlist(user?.id, user?.email, DEMO_BROKER_ID);
 
   const fuelCostEst = load.fuel;
   const deadheadCost = Math.round(load.deadhead * 0.62);
@@ -64,13 +63,15 @@ export default function LoadDetail() {
   const netProfit = grossRevenue - expenses;
 
   const handleInstantBook = () => {
-    requestBooking(load.id, '', true, user);
-    setBookingStatus('instant_booked');
+    bookingsApi.request({ load_id: load._raw.id, is_instant: true })
+      .then(() => setBookingStatus('instant_booked'))
+      .catch(err => alert(err.message));
   };
 
   const handleBookNow = () => {
-    requestBooking(load.id, '', false, user);
-    setBookingStatus('pending');
+    bookingsApi.request({ load_id: load._raw.id, is_instant: false })
+      .then(() => setBookingStatus('pending'))
+      .catch(err => alert(err.message));
   };
 
   const handlePlaceBid = () => {

@@ -103,13 +103,14 @@ export default function BookingRequests() {
             return (
               <div key={booking.id} className="glass rounded-xl border border-dark-400/40 p-5 flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                     <p className="text-white font-semibold">
                       {load ? `${load.origin} → ${load.dest}` : `Load #${String(booking.load_id).slice(0, 8)}`}
                     </p>
                     <span className="text-dark-500 text-xs">·</span>
-                    <Link to={`/carrier-profile/${booking.carrier_id}`} className="text-brand-400 hover:text-brand-300 text-sm font-medium flex items-center gap-1 transition-colors">
-                      View Carrier <ExternalLink size={11} />
+                    <span className="text-dark-200 text-sm">{booking.carrier_name || 'Carrier'}{booking.carrier_mc ? ` · MC-${booking.carrier_mc}` : ''}</span>
+                    <Link to={`/carrier-profile/${booking.carrier_id}`} className="text-brand-400 hover:text-brand-300 text-xs flex items-center gap-1 transition-colors">
+                      View profile <ExternalLink size={11} />
                     </Link>
                   </div>
                   <p className="text-dark-300 text-sm">

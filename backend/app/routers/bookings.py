@@ -30,6 +30,8 @@ class BookingOut(BaseModel):
     id: UUID
     load_id: UUID
     carrier_id: UUID
+    carrier_name: Optional[str] = None
+    carrier_mc: Optional[str] = None
     status: BookingStatus
     is_instant: str
     note: Optional[str]
@@ -89,15 +91,23 @@ def pending_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_broker),
 ):
-    # Return pending bookings for loads posted by this broker
     from app.models.load import Load
     broker_load_ids = [l.id for l in db.query(Load).filter(Load.broker_user_id == current_user.id).all()]
-    return (
+    bookings = (
         db.query(Booking)
         .filter(Booking.load_id.in_(broker_load_ids), Booking.status == BookingStatus.pending)
         .order_by(Booking.created_at.desc())
         .all()
     )
+    result = []
+    for b in bookings:
+        carrier = db.query(User).filter(User.id == b.carrier_id).first()
+        out = BookingOut.model_validate(b)
+        if carrier:
+            out.carrier_name = carrier.company or carrier.name
+            out.carrier_mc = carrier.mc_number
+        result.append(out)
+    return result
 
 
 @router.get("/in-progress", summary="Carrier: active bookings with load details")
