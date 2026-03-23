@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Check, X, Clock, ExternalLink, Building2, Hash, Phone } from 'lucide-react';
+import { Users, Check, X, Clock, ExternalLink, Building2, Hash } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
 
