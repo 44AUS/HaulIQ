@@ -8,8 +8,8 @@ from datetime import datetime
 from app.database import get_db
 from app.middleware.auth import get_current_user, require_carrier, require_broker
 from app.models.user import User
-from app.models.booking import Bid, BidStatus
-from app.models.load import Load
+from app.models.booking import Bid, BidStatus, Booking, BookingStatus
+from app.models.load import Load, LoadStatus
 
 router = APIRouter()
 
@@ -161,7 +161,35 @@ def accept_bid(
     bid = db.query(Bid).filter(Bid.id == bid_id).first()
     if not bid:
         raise HTTPException(status_code=404, detail="Bid not found")
+
     bid.status = BidStatus.accepted
+
+    # Mark the load filled
+    load = db.query(Load).filter(Load.id == bid.load_id).first()
+    if load:
+        load.status = LoadStatus.filled
+
+    # Reject all other pending bids on this load
+    db.query(Bid).filter(
+        Bid.load_id == bid.load_id,
+        Bid.id != bid_id,
+        Bid.status == BidStatus.pending,
+    ).update({"status": BidStatus.rejected})
+
+    # Create an approved booking so it appears in carrier's loads in progress
+    existing_booking = db.query(Booking).filter(
+        Booking.load_id == bid.load_id,
+        Booking.carrier_id == bid.carrier_id,
+    ).first()
+    if not existing_booking:
+        db.add(Booking(
+            load_id=bid.load_id,
+            carrier_id=bid.carrier_id,
+            status=BookingStatus.approved,
+            is_instant="false",
+            note=bid.note,
+        ))
+
     db.commit()
     db.refresh(bid)
     return bid
