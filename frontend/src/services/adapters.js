@@ -59,6 +59,7 @@ export function adaptLoad(l) {
     rate:         l.rate,
     ratePerMile:  l.rate_per_mile  || 0,
     fuel:         l.fuel_cost_est  || 0,
+    dieselPrice:  l.diesel_price_used || null,
     netProfit:    l.net_profit_est || 0,
     profitScore:  l.profit_score   || 'yellow',
     commodity:    l.commodity      || '',

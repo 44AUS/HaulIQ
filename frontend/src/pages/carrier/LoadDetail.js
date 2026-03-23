@@ -168,7 +168,7 @@ export default function LoadDetail() {
             <div className="space-y-3 mb-5">
               {[
                 { label: 'Gross Rate', value: `+$${grossRevenue.toLocaleString()}`, cls: 'text-brand-400' },
-                { label: `Fuel (~${load.miles} mi)`, value: `-$${fuelCostEst}`, cls: 'text-red-400' },
+                { label: `Fuel (~${load.miles} mi @ $${load.dieselPrice ? load.dieselPrice.toFixed(2) : '—'}/gal)`, value: `-$${fuelCostEst}`, cls: 'text-red-400' },
                 { label: `Deadhead (${load.deadhead} mi)`, value: `-$${deadheadCost}`, cls: 'text-red-400' },
                 { label: 'Misc / tolls', value: '-$120', cls: 'text-red-400' },
               ].map(({ label, value, cls }) => (

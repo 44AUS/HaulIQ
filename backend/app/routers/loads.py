@@ -10,6 +10,7 @@ from app.models.user import User, UserPlan
 from app.schemas.load import LoadCreate, LoadUpdate, LoadOut, LoadListOut
 from app.middleware.auth import get_current_user, require_broker, require_carrier
 from app.utils.profit import calculate_profit, get_market_rate
+from app.utils.fuel_price import get_diesel_price
 
 router = APIRouter()
 
@@ -22,20 +23,30 @@ PLAN_DAILY_LIMITS = {
 
 
 def _enrich_load(load: Load) -> Load:
-    """Compute profit fields on a load object (non-destructive)."""
+    """Compute profit fields on a load object using live diesel price."""
+    live_price, _ = get_diesel_price()
     result = calculate_profit(
         rate=load.rate,
         loaded_miles=load.miles,
         deadhead_miles=load.deadhead_miles or 0,
+        fuel_price=live_price,
     )
-    load.rate_per_mile   = result["rate_per_mile"]
-    load.fuel_cost_est   = result["fuel_cost"]
-    load.net_profit_est  = result["net_profit"]
+    load.rate_per_mile      = result["rate_per_mile"]
+    load.fuel_cost_est      = result["fuel_cost"]
+    load.diesel_price_used  = live_price
+    load.net_profit_est     = result["net_profit"]
     load.profit_score    = ProfitScore(result["profit_score"])
     market_rate          = get_market_rate(load.origin_state, load.dest_state)
     load.market_rate_per_mile = market_rate
     load.is_above_market = (result["rate_per_mile"] >= market_rate)
     return load
+
+
+# ─── GET /api/loads/fuel-price ────────────────────────────────────────────────
+@router.get("/fuel-price", summary="Current US diesel price used in profit calculations")
+def fuel_price(current_user: User = Depends(get_current_user)):
+    price, updated = get_diesel_price()
+    return {"price": price, "source": "EIA", "updated": updated}
 
 
 # ─── GET /api/loads ────────────────────────────────────────────────────────────

@@ -27,8 +27,11 @@ class Settings(BaseSettings):
     adyen_environment: str = "TEST"     # TEST or LIVE
 
     # Profit calc defaults
-    default_fuel_price: float = 3.85
+    default_fuel_price: float = 3.85   # fallback if EIA fetch fails
     default_mpg: float = 7.2
+
+    # EIA API key for live diesel prices (DEMO_KEY works at low traffic)
+    eia_api_key: str = "DEMO_KEY"
 
     @field_validator("database_url", mode="before")
     @classmethod

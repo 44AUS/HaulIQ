@@ -69,6 +69,7 @@ class LoadOut(BaseModel):
     rate: float
     rate_per_mile: Optional[float]
     fuel_cost_est: Optional[float]
+    diesel_price_used: Optional[float]
     net_profit_est: Optional[float]
     profit_score: Optional[ProfitScore]
     market_rate_per_mile: Optional[float]
