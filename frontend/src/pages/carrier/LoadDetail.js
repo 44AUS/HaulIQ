@@ -92,7 +92,7 @@ export default function LoadDetail() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Back */}
       <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-dark-300 hover:text-white text-sm transition-colors">
         <ArrowLeft size={16} /> Back to Load Board
