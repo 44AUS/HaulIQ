@@ -1,28 +1,19 @@
-import { useState } from 'react';
-import { PlusCircle, Check, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { PlusCircle, Check, ArrowRight, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import CityAutocomplete from '../../components/shared/CityAutocomplete';
+import { getDrivingMiles } from '../../services/routing';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 
-// Defined outside component so it never remounts on re-render
-function Field({ label, id, type = 'text', placeholder, required, value, onChange, children }) {
+function Field({ label, required, children }) {
   return (
     <div>
       <label className="block text-dark-100 text-sm font-medium mb-1.5">
         {label} {required && <span className="text-red-400">*</span>}
       </label>
-      {children || (
-        <input
-          type={type}
-          value={value}
-          onChange={onChange}
-          className="input"
-          placeholder={placeholder}
-          required={required}
-        />
-      )}
+      {children}
     </div>
   );
 }
@@ -37,26 +28,43 @@ export default function PostLoad() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [posted, setPosted] = useState(false);
+  const [calcingMiles, setCalcingMiles] = useState(false);
+  const milesTimer = useRef(null);
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  // Auto-calculate driving miles when both origin and dest look complete
+  useEffect(() => {
+    const { origin, dest } = form;
+    if (!origin.includes(',') || !dest.includes(',')) return;
+    clearTimeout(milesTimer.current);
+    milesTimer.current = setTimeout(() => {
+      setCalcingMiles(true);
+      getDrivingMiles(origin, dest)
+        .then(miles => { if (miles) set('miles', String(miles)); })
+        .finally(() => setCalcingMiles(false));
+    }, 600);
+    return () => clearTimeout(milesTimer.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.origin, form.dest]);
 
   const handlePost = (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    const payload = {
+    loadsApi.post({
       origin:         form.origin,
       destination:    form.dest,
       miles:          parseInt(form.miles) || 0,
       deadhead_miles: parseInt(form.deadhead) || 0,
-      load_type:      form.equipment,   // backend enum values ARE the display names
+      load_type:      form.equipment,
       weight_lbs:     form.weight ? parseInt(form.weight) : null,
       commodity:      form.commodity || null,
       pickup_date:    form.pickup,
       delivery_date:  form.delivery,
       rate:           parseFloat(form.rate),
       notes:          form.notes || null,
-    };
-    loadsApi.post(payload)
+    })
       .then(() => setPosted(true))
       .catch(err => { setError(err.message); setSubmitting(false); });
   };
@@ -88,48 +96,74 @@ export default function PostLoad() {
       <form onSubmit={handlePost} className="glass rounded-xl p-6 border border-dark-400/40 space-y-5">
         {/* Route */}
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-1.5">Origin City, State <span className="text-red-400">*</span></label>
+          <Field label="Origin City, State" required>
             <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} placeholder="Chicago, IL" required />
-          </div>
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-1.5">Destination City, State <span className="text-red-400">*</span></label>
+          </Field>
+          <Field label="Destination City, State" required>
             <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} placeholder="Atlanta, GA" required />
-          </div>
+          </Field>
         </div>
 
-        {/* Miles */}
+        {/* Miles — auto-calculated, still editable */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Loaded Miles" id="miles" placeholder="716" required
-            value={form.miles} onChange={e => set('miles', e.target.value)} />
-          <Field label="Deadhead Miles" id="deadhead" placeholder="0"
-            value={form.deadhead} onChange={e => set('deadhead', e.target.value)} />
+          <Field label="Loaded Miles" required>
+            <div className="relative">
+              <input
+                type="number"
+                className="input pr-8"
+                value={form.miles}
+                onChange={e => set('miles', e.target.value)}
+                placeholder={calcingMiles ? 'Calculating…' : '716'}
+                required
+              />
+              {calcingMiles && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-400 animate-spin">
+                  <Loader size={13} />
+                </div>
+              )}
+            </div>
+            {form.miles && !calcingMiles && (
+              <p className="text-dark-500 text-xs mt-1">Auto-calculated · edit if needed</p>
+            )}
+          </Field>
+          <Field label="Deadhead Miles">
+            <input type="number" className="input" value={form.deadhead}
+              onChange={e => set('deadhead', e.target.value)} placeholder="0" />
+          </Field>
         </div>
 
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Pickup Date" id="pickup" type="date" required
-            value={form.pickup} onChange={e => set('pickup', e.target.value)} />
-          <Field label="Delivery Date" id="delivery" type="date" required
-            value={form.delivery} onChange={e => set('delivery', e.target.value)} />
+          <Field label="Pickup Date" required>
+            <input type="date" className="input" value={form.pickup}
+              onChange={e => set('pickup', e.target.value)} required />
+          </Field>
+          <Field label="Delivery Date" required>
+            <input type="date" className="input" value={form.delivery}
+              onChange={e => set('delivery', e.target.value)} required />
+          </Field>
         </div>
 
         {/* Equipment */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Equipment Type" id="equipment">
+          <Field label="Equipment Type">
             <select value={form.equipment} onChange={e => set('equipment', e.target.value)} className="input cursor-pointer">
-              {EQUIPMENT.map(e => <option key={e}>{e}</option>)}
+              {EQUIPMENT.map(eq => <option key={eq}>{eq}</option>)}
             </select>
           </Field>
-          <Field label="Weight (lbs)" id="weight" placeholder="42000"
-            value={form.weight} onChange={e => set('weight', e.target.value)} />
+          <Field label="Weight (lbs)">
+            <input type="number" className="input" value={form.weight}
+              onChange={e => set('weight', e.target.value)} placeholder="42000" />
+          </Field>
         </div>
 
         {/* Commodity + dims */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Commodity" id="commodity" placeholder="General Freight"
-            value={form.commodity} onChange={e => set('commodity', e.target.value)} />
-          <Field label="Dimensions" id="dims">
+          <Field label="Commodity">
+            <input className="input" value={form.commodity}
+              onChange={e => set('commodity', e.target.value)} placeholder="General Freight" />
+          </Field>
+          <Field label="Dimensions">
             <select value={form.dims} onChange={e => set('dims', e.target.value)} className="input cursor-pointer">
               {['48x102', '53x102', '40x96', '28x102'].map(d => <option key={d}>{d}</option>)}
             </select>
@@ -155,7 +189,7 @@ export default function PostLoad() {
         </div>
 
         {/* Notes */}
-        <Field label="Special Instructions" id="notes">
+        <Field label="Special Instructions">
           <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
             className="input resize-none" rows={3}
             placeholder="Any special requirements, hazmat info, contact details..." />

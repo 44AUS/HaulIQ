@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Package, Edit, Trash2, Eye, Users, PlusCircle, X, Save } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Package, Edit, Trash2, Eye, Users, PlusCircle, X, Save, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import CityAutocomplete from '../../components/shared/CityAutocomplete';
+import { getDrivingMiles } from '../../services/routing';
 
 const STATUS_OPTS = ['all', 'active', 'filled', 'expired'];
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
@@ -26,7 +27,23 @@ function EditModal({ load, onClose, onSaved }) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [calcingMiles, setCalcingMiles] = useState(false);
+  const milesTimer = useRef(null);
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    const { origin, dest } = form;
+    if (!origin.includes(',') || !dest.includes(',')) return;
+    clearTimeout(milesTimer.current);
+    milesTimer.current = setTimeout(() => {
+      setCalcingMiles(true);
+      getDrivingMiles(origin, dest)
+        .then(miles => { if (miles) set('miles', String(miles)); })
+        .finally(() => setCalcingMiles(false));
+    }, 600);
+    return () => clearTimeout(milesTimer.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.origin, form.dest]);
 
   const handleSave = (e) => {
     e.preventDefault();
@@ -74,7 +91,10 @@ function EditModal({ load, onClose, onSaved }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-dark-100 text-sm font-medium mb-1.5">Loaded Miles</label>
-              <input className="input" type="number" value={form.miles} onChange={e => set('miles', e.target.value)} required />
+              <div className="relative">
+                <input className="input pr-8" type="number" value={form.miles} onChange={e => set('miles', e.target.value)} required />
+                {calcingMiles && <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-400 animate-spin"><Loader size={13} /></div>}
+              </div>
             </div>
             <div>
               <label className="block text-dark-100 text-sm font-medium mb-1.5">Deadhead Miles</label>
