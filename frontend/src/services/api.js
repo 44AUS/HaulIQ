@@ -65,6 +65,7 @@ export const bidsApi = {
   counter:  (id, data) => request(`/api/bids/${id}/counter`, { method: 'PATCH', body: JSON.stringify(data) }),
   withdraw: (id)     => request(`/api/bids/${id}`, { method: 'DELETE' }),
   my:       ()       => request('/api/bids/my'),
+  myLoads:  ()       => request('/api/bids/my-loads'),
   forLoad:  (loadId) => request(`/api/bids/load/${loadId}`),
 };
 

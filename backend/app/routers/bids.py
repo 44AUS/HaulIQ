@@ -31,6 +31,9 @@ class BidOut(BaseModel):
     carrier_id: UUID
     carrier_name: Optional[str] = None
     carrier_mc: Optional[str] = None
+    load_origin: Optional[str] = None
+    load_dest: Optional[str] = None
+    load_rate: Optional[float] = None
     amount: float
     note: Optional[str]
     status: BidStatus
@@ -65,6 +68,46 @@ def place_bid(
     return bid
 
 
+@router.get("/my-loads", response_model=list[BidOut])
+def bids_on_my_loads(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    """All bids across every load posted by this broker."""
+    broker_load_ids = [
+        l.id for l in db.query(Load.id).filter(Load.broker_user_id == current_user.id).all()
+    ]
+    if not broker_load_ids:
+        return []
+    bids = (
+        db.query(Bid)
+        .filter(Bid.load_id.in_(broker_load_ids))
+        .order_by(Bid.created_at.desc())
+        .all()
+    )
+    result = []
+    for bid in bids:
+        carrier = db.query(User).filter(User.id == bid.carrier_id).first()
+        load = db.query(Load).filter(Load.id == bid.load_id).first()
+        result.append(BidOut(
+            id=bid.id,
+            load_id=bid.load_id,
+            carrier_id=bid.carrier_id,
+            carrier_name=carrier.company or carrier.name if carrier else None,
+            carrier_mc=carrier.mc_number if carrier else None,
+            load_origin=load.origin if load else None,
+            load_dest=load.destination if load else None,
+            load_rate=load.rate if load else None,
+            amount=bid.amount,
+            note=bid.note,
+            status=bid.status,
+            counter_amount=bid.counter_amount,
+            counter_note=bid.counter_note,
+            created_at=bid.created_at,
+        ))
+    return result
+
+
 @router.get("/load/{load_id}", response_model=list[BidOut])
 def get_bids_for_load(
     load_id: UUID,
@@ -96,7 +139,17 @@ def my_bids(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_carrier),
 ):
-    return db.query(Bid).filter(Bid.carrier_id == current_user.id).order_by(Bid.created_at.desc()).all()
+    bids = db.query(Bid).filter(Bid.carrier_id == current_user.id).order_by(Bid.created_at.desc()).all()
+    result = []
+    for bid in bids:
+        load = db.query(Load).filter(Load.id == bid.load_id).first()
+        out = BidOut.model_validate(bid)
+        if load:
+            out.load_origin = load.origin
+            out.load_dest = load.destination
+            out.load_rate = load.rate
+        result.append(out)
+    return result
 
 
 @router.patch("/{bid_id}/accept", response_model=BidOut)

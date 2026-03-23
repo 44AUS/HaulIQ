@@ -24,6 +24,7 @@ export default function LoadDetail() {
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [bookingStatus, setBookingStatus] = useState(null); // null | 'pending' | 'instant_booked'
+  const [myBid, setMyBid] = useState(null); // existing bid on this load if any
 
   useEffect(() => {
     setLoading(true);
@@ -32,10 +33,12 @@ export default function LoadDetail() {
         const adapted = adaptLoad(data);
         setLoad(adapted);
         setSaved(adapted?.saved || false);
-        // Check real instant book eligibility
         instantBookApi.check(data.id)
           .then(res => setCanInstantBook(res.eligible === true))
           .catch(() => setCanInstantBook(false));
+        bidsApi.my()
+          .then(all => setMyBid(all.find(b => String(b.load_id) === String(data.id)) || null))
+          .catch(() => {});
       })
       .catch(() => setLoad(null))
       .finally(() => setLoading(false));
@@ -263,11 +266,40 @@ export default function LoadDetail() {
                   </button>
                 )}
 
-                {/* Place Bid */}
-                <button onClick={() => setBidModalOpen(true)}
-                  className="btn-secondary w-full py-3 flex items-center justify-center gap-2">
-                  <DollarSign size={16} /> Place Bid / Counter Offer
-                </button>
+                {/* Bid status — show if carrier already has a bid */}
+                {myBid ? (
+                  <div className={`rounded-xl border p-4 ${
+                    myBid.status === 'accepted'  ? 'bg-brand-500/10 border-brand-500/30' :
+                    myBid.status === 'countered' ? 'bg-blue-500/10 border-blue-500/30' :
+                    myBid.status === 'rejected'  ? 'bg-red-500/10 border-red-500/30' :
+                    'bg-dark-700/50 border-dark-400/30'
+                  }`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className={`text-sm font-semibold ${
+                        myBid.status === 'accepted'  ? 'text-brand-400' :
+                        myBid.status === 'countered' ? 'text-blue-400' :
+                        myBid.status === 'rejected'  ? 'text-red-400' :
+                        'text-dark-200'
+                      }`}>
+                        {myBid.status === 'accepted'  ? 'Bid Accepted!' :
+                         myBid.status === 'countered' ? 'Broker Countered' :
+                         myBid.status === 'rejected'  ? 'Bid Rejected' :
+                         'Bid Pending'}
+                      </p>
+                      <span className="text-white font-bold">${myBid.amount.toLocaleString()}</span>
+                    </div>
+                    {myBid.status === 'countered' && myBid.counter_amount && (
+                      <p className="text-blue-300 text-xs">Counter offer: <span className="font-semibold">${myBid.counter_amount.toLocaleString()}</span>
+                        {myBid.counter_note && ` — "${myBid.counter_note}"`}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <button onClick={() => setBidModalOpen(true)}
+                    className="btn-secondary w-full py-3 flex items-center justify-center gap-2">
+                    <DollarSign size={16} /> Place Bid / Counter Offer
+                  </button>
+                )}
               </>
             )}
 
