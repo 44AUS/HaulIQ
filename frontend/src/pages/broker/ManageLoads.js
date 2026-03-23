@@ -3,6 +3,7 @@ import { Package, Edit, Trash2, Eye, Users, PlusCircle, X, Save } from 'lucide-r
 import { Link } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
+import CityAutocomplete from '../../components/shared/CityAutocomplete';
 
 const STATUS_OPTS = ['all', 'active', 'filled', 'expired'];
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
@@ -62,11 +63,11 @@ function EditModal({ load, onClose, onSaved }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-dark-100 text-sm font-medium mb-1.5">Origin</label>
-              <input className="input" value={form.origin} onChange={e => set('origin', e.target.value)} required />
+              <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} required />
             </div>
             <div>
               <label className="block text-dark-100 text-sm font-medium mb-1.5">Destination</label>
-              <input className="input" value={form.dest} onChange={e => set('dest', e.target.value)} required />
+              <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} required />
             </div>
           </div>
 

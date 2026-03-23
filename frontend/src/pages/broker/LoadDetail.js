@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
+const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Truck, Calendar, Package, Weight, DollarSign, Eye, Users, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { loadsApi, bidsApi } from '../../services/api';
@@ -148,6 +149,12 @@ export default function BrokerLoadDetail() {
             <p className="text-dark-100 text-sm">{load.notes}</p>
           </div>
         )}
+
+        <div className="mt-5">
+          <Suspense fallback={<div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>}>
+            <RouteMap origin={load.origin} dest={load.dest} miles={load._raw?.miles} />
+          </Suspense>
+        </div>
       </div>
 
       {/* Bids */}

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 import { ArrowLeft, MapPin, Truck, MessageSquare, Bookmark, BookmarkCheck, AlertTriangle, Zap, CalendarCheck, DollarSign, Send, X, CheckCircle, Clock } from 'lucide-react';
 import { loadsApi, messagesApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
@@ -152,6 +153,11 @@ export default function LoadDetail() {
                   <p className="text-white font-semibold text-sm mt-0.5">{v}</p>
                 </div>
               ))}
+            </div>
+            <div className="mt-5">
+              <Suspense fallback={<div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>}>
+                <RouteMap origin={load.origin} dest={load.dest} miles={load._raw?.miles} />
+              </Suspense>
             </div>
           </div>
 

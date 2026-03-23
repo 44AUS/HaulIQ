@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PlusCircle, Check, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
+import CityAutocomplete from '../../components/shared/CityAutocomplete';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 
@@ -87,10 +88,14 @@ export default function PostLoad() {
       <form onSubmit={handlePost} className="glass rounded-xl p-6 border border-dark-400/40 space-y-5">
         {/* Route */}
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Origin City, State" id="origin" placeholder="Chicago, IL" required
-            value={form.origin} onChange={e => set('origin', e.target.value)} />
-          <Field label="Destination City, State" id="dest" placeholder="Atlanta, GA" required
-            value={form.dest} onChange={e => set('dest', e.target.value)} />
+          <div>
+            <label className="block text-dark-100 text-sm font-medium mb-1.5">Origin City, State <span className="text-red-400">*</span></label>
+            <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} placeholder="Chicago, IL" required />
+          </div>
+          <div>
+            <label className="block text-dark-100 text-sm font-medium mb-1.5">Destination City, State <span className="text-red-400">*</span></label>
+            <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} placeholder="Atlanta, GA" required />
+          </div>
         </div>
 
         {/* Miles */}
