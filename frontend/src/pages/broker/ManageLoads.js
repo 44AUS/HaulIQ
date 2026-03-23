@@ -1,23 +1,159 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Package, Edit, Trash2, Eye, Users, PlusCircle } from 'lucide-react';
+import { Package, Edit, Trash2, Eye, Users, PlusCircle, X, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 
 const STATUS_OPTS = ['all', 'active', 'filled', 'expired'];
+const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
+
+function EditModal({ load, onClose, onSaved }) {
+  const raw = load._raw;
+  const [form, setForm] = useState({
+    origin:         raw.origin || '',
+    dest:           raw.destination || '',
+    miles:          raw.miles || '',
+    deadhead:       raw.deadhead_miles || '',
+    pickup:         raw.pickup_date || '',
+    delivery:       raw.delivery_date || '',
+    equipment:      raw.load_type || 'Dry Van',
+    weight:         raw.weight_lbs || '',
+    commodity:      raw.commodity || '',
+    dims:           raw.dimensions || '48x102',
+    rate:           raw.rate || '',
+    notes:          raw.notes || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    loadsApi.update(raw.id, {
+      origin:         form.origin,
+      destination:    form.dest,
+      miles:          parseInt(form.miles) || undefined,
+      deadhead_miles: parseInt(form.deadhead) || 0,
+      load_type:      form.equipment,
+      weight_lbs:     form.weight ? parseInt(form.weight) : null,
+      commodity:      form.commodity || null,
+      dimensions:     form.dims,
+      pickup_date:    form.pickup || undefined,
+      delivery_date:  form.delivery || undefined,
+      rate:           parseFloat(form.rate) || undefined,
+      notes:          form.notes || null,
+    })
+      .then(() => { onSaved(); onClose(); })
+      .catch(err => { setError(err.message); setSaving(false); });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative glass rounded-xl border border-dark-400/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-dark-400/40">
+          <h2 className="text-white font-semibold">Edit Load</h2>
+          <button onClick={onClose} className="text-dark-400 hover:text-white transition-colors"><X size={18} /></button>
+        </div>
+
+        <form onSubmit={handleSave} className="p-5 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Origin</label>
+              <input className="input" value={form.origin} onChange={e => set('origin', e.target.value)} required />
+            </div>
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Destination</label>
+              <input className="input" value={form.dest} onChange={e => set('dest', e.target.value)} required />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Loaded Miles</label>
+              <input className="input" type="number" value={form.miles} onChange={e => set('miles', e.target.value)} required />
+            </div>
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Deadhead Miles</label>
+              <input className="input" type="number" value={form.deadhead} onChange={e => set('deadhead', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Pickup Date</label>
+              <input className="input" type="date" value={form.pickup} onChange={e => set('pickup', e.target.value)} required />
+            </div>
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Delivery Date</label>
+              <input className="input" type="date" value={form.delivery} onChange={e => set('delivery', e.target.value)} required />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Equipment Type</label>
+              <select className="input cursor-pointer" value={form.equipment} onChange={e => set('equipment', e.target.value)}>
+                {EQUIPMENT.map(eq => <option key={eq}>{eq}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Weight (lbs)</label>
+              <input className="input" type="number" value={form.weight} onChange={e => set('weight', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Commodity</label>
+              <input className="input" value={form.commodity} onChange={e => set('commodity', e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-dark-100 text-sm font-medium mb-1.5">Dimensions</label>
+              <select className="input cursor-pointer" value={form.dims} onChange={e => set('dims', e.target.value)}>
+                {['48x102', '53x102', '40x96', '28x102'].map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-dark-100 text-sm font-medium mb-1.5">Rate (All-In) $</label>
+            <input className="input" type="number" value={form.rate} onChange={e => set('rate', e.target.value)} required />
+          </div>
+
+          <div>
+            <label className="block text-dark-100 text-sm font-medium mb-1.5">Notes</label>
+            <textarea className="input resize-none" rows={3} value={form.notes} onChange={e => set('notes', e.target.value)} />
+          </div>
+
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 py-2.5 text-sm">Cancel</button>
+            <button type="submit" disabled={saving} className="btn-primary flex-1 py-2.5 text-sm flex items-center justify-center gap-2 disabled:opacity-60">
+              <Save size={14} /> {saving ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function ManageLoads() {
   const [loads, setLoads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [editingLoad, setEditingLoad] = useState(null);
 
   const fetchLoads = useCallback(() => {
     setLoading(true);
     loadsApi.posted()
       .then(res => {
         const adapted = adaptLoadList(res);
-        // map 'removed' status to 'expired' for display
         setLoads(adapted.map(l => ({ ...l, status: l.status === 'removed' ? 'expired' : l.status })));
         setError(null);
       })
@@ -47,7 +183,6 @@ export default function ManageLoads() {
         </Link>
       </div>
 
-      {/* Status filter */}
       <div className="flex gap-2 flex-wrap">
         {STATUS_OPTS.map(s => (
           <button key={s} onClick={() => setFilter(s)}
@@ -107,7 +242,10 @@ export default function ManageLoads() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         {load.status === 'active' && (
-                          <button className="p-1.5 text-dark-300 hover:text-white hover:bg-dark-600 rounded-lg transition-colors">
+                          <button
+                            onClick={() => setEditingLoad(load)}
+                            className="p-1.5 text-dark-300 hover:text-white hover:bg-dark-600 rounded-lg transition-colors"
+                            title="Edit load">
                             <Edit size={14} />
                           </button>
                         )}
@@ -122,6 +260,14 @@ export default function ManageLoads() {
             </table>
           </div>
         </div>
+      )}
+
+      {editingLoad && (
+        <EditModal
+          load={editingLoad}
+          onClose={() => setEditingLoad(null)}
+          onSaved={fetchLoads}
+        />
       )}
     </div>
   );

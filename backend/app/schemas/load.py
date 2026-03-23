@@ -37,6 +37,21 @@ class LoadCreate(BaseModel):
         return v
 
 
+class LoadUpdate(BaseModel):
+    origin: Optional[str] = None
+    destination: Optional[str] = None
+    miles: Optional[int] = None
+    deadhead_miles: Optional[int] = None
+    load_type: Optional[LoadType] = None
+    weight_lbs: Optional[int] = None
+    commodity: Optional[str] = None
+    dimensions: Optional[str] = None
+    pickup_date: Optional[date] = None
+    delivery_date: Optional[date] = None
+    rate: Optional[float] = None
+    notes: Optional[str] = None
+
+
 class LoadOut(BaseModel):
     id: UUID
     origin: str

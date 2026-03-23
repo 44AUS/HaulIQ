@@ -32,6 +32,7 @@ export const loadsApi = {
   list:       (params = {}) => request('/api/loads?' + new URLSearchParams(params)),
   get:        (id)          => request(`/api/loads/${id}`),
   post:       (data)        => request('/api/loads', { method: 'POST', body: JSON.stringify(data) }),
+  update:     (id, data)    => request(`/api/loads/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   delete:     (id)          => request(`/api/loads/${id}`, { method: 'DELETE' }),
   toggleSave: (id)          => request(`/api/loads/${id}/save`, { method: 'POST' }),
   savedList:  ()            => request('/api/loads/saved/me'),

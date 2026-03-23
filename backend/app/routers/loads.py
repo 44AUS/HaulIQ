@@ -7,7 +7,7 @@ from uuid import UUID
 from app.database import get_db
 from app.models.load import Load, SavedLoad, LoadView, LoadStatus, ProfitScore
 from app.models.user import User, UserPlan
-from app.schemas.load import LoadCreate, LoadOut, LoadListOut
+from app.schemas.load import LoadCreate, LoadUpdate, LoadOut, LoadListOut
 from app.middleware.auth import get_current_user, require_broker, require_carrier
 from app.utils.profit import calculate_profit, get_market_rate
 
@@ -212,6 +212,30 @@ def create_load(
     db.commit()
     db.refresh(load)
     load.broker = broker
+    return _enrich_load(load)
+
+
+# ─── PATCH /api/loads/{id} ─────────────────────────────────────────────────────
+@router.patch("/{load_id}", response_model=LoadOut, summary="Update a load (broker only)")
+def update_load(
+    load_id: UUID,
+    payload: LoadUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    load = db.query(Load).filter(
+        Load.id == load_id, Load.broker_user_id == current_user.id
+    ).first()
+    if not load:
+        raise HTTPException(status_code=404, detail="Load not found")
+    if load.status != LoadStatus.active:
+        raise HTTPException(status_code=400, detail="Only active loads can be edited")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(load, field, value)
+
+    db.commit()
+    db.refresh(load)
     return _enrich_load(load)
 
 
