@@ -32,6 +32,7 @@ import BrokerLoadDetail from './pages/broker/LoadDetail';
 
 // Pages — Shared
 import Messages from './pages/shared/Messages';
+import Network from './pages/shared/Network';
 import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
@@ -84,6 +85,7 @@ function CarrierRoutes() {
           <Route path="history" element={<LoadHistory />} />
           <Route path="active" element={<CarrierLoadsInProgress />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
+          <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -108,6 +110,7 @@ function BrokerRoutes() {
           <Route path="bookings" element={<BookingRequests />} />
           <Route path="instant-book" element={<InstantBookSettings />} />
           <Route path="active" element={<BrokerLoadsInProgress />} />
+          <Route path="network" element={<Network />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>

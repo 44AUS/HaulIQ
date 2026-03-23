@@ -4,10 +4,10 @@ import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
   CreditCard, DollarSign, Settings, LogOut, ChevronLeft, ChevronRight, Menu,
-  MessageSquare, Calendar, Zap, Activity
+  MessageSquare, Calendar, Zap, Activity, Network
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { messagesApi, bookingsApi } from '../../services/api';
+import { messagesApi, bookingsApi, networkApi } from '../../services/api';
 
 const CARRIER_LINKS = [
   { icon: LayoutDashboard, label: 'Dashboard',         path: '/carrier/dashboard' },
@@ -18,6 +18,7 @@ const CARRIER_LINKS = [
   { icon: History,         label: 'Load History',       path: '/carrier/history' },
   { icon: Activity,        label: 'Loads in Progress',  path: '/carrier/active' },
   { icon: TrendingUp,      label: 'Analytics',          path: '/carrier/analytics' },
+  { icon: Network,         label: 'Network',            path: '/carrier/network', badge: 'network' },
   { icon: MessageSquare,   label: 'Messages',           path: '/carrier/messages', badge: 'unread' },
 ];
 
@@ -27,6 +28,7 @@ const BROKER_LINKS = [
   { icon: Package,         label: 'Manage Loads',       path: '/broker/loads' },
   { icon: Activity,        label: 'Loads in Progress',  path: '/broker/active' },
   { icon: BarChart2,       label: 'Analytics',          path: '/broker/analytics' },
+  { icon: Network,         label: 'Network',            path: '/broker/network' },
   { icon: MessageSquare,   label: 'Messages',           path: '/broker/messages', badge: 'unread' },
   { icon: Calendar,        label: 'Booking Requests',   path: '/broker/bookings', badge: 'bookings' },
   { icon: Zap,             label: 'Instant Book',       path: '/broker/instant-book' },
@@ -48,6 +50,7 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
+  const [pendingNetwork, setPendingNetwork] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -63,6 +66,13 @@ export default function Sidebar() {
       .catch(() => setPendingBookings(0));
   }, [user, location.pathname]);
 
+  useEffect(() => {
+    if (!user || user.role !== 'carrier') return;
+    networkApi.requests()
+      .then(data => setPendingNetwork(Array.isArray(data) ? data.length : 0))
+      .catch(() => setPendingNetwork(0));
+  }, [user, location.pathname]);
+
   if (!user) return null;
 
   const links = user.role === 'carrier' ? CARRIER_LINKS
@@ -72,6 +82,7 @@ export default function Sidebar() {
   const getBadgeCount = (badge) => {
     if (badge === 'unread') return unreadMessages;
     if (badge === 'bookings') return pendingBookings;
+    if (badge === 'network') return pendingNetwork;
     return 0;
   };
 

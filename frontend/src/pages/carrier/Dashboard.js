@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, DollarSign, Truck, MapPin, Zap, Brain, ArrowRight, Users, Check, X } from 'lucide-react';
+import { TrendingUp, DollarSign, Truck, MapPin, Zap, Brain, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { loadsApi, analyticsApi, networkApi } from '../../services/api';
+import { loadsApi, analyticsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
@@ -35,13 +35,6 @@ export default function CarrierDashboard() {
   const { user } = useAuth();
   const [hotLoads, setHotLoads] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [networkRequests, setNetworkRequests] = useState([]);
-
-  const handleRespond = (id, accepted) => {
-    networkApi.respond(id, accepted)
-      .then(() => setNetworkRequests(prev => prev.filter(r => r.id !== id)))
-      .catch(() => {});
-  };
 
   useEffect(() => {
     loadsApi.list({ per_page: 3, sort_by: 'recent', hot_only: true })
@@ -57,9 +50,6 @@ export default function CarrierDashboard() {
       .then(data => setSummary(data))
       .catch(() => setSummary(null));
 
-    networkApi.requests()
-      .then(data => setNetworkRequests(Array.isArray(data) ? data : []))
-      .catch(() => setNetworkRequests([]));
   }, []);
 
   const weeklyData = (summary?.weekly_earnings || []).slice(-6);
@@ -135,40 +125,6 @@ export default function CarrierDashboard() {
           </Link>
         </div>
       </div>
-
-      {/* Network Requests */}
-      {networkRequests.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Users size={18} className="text-brand-400" />
-            <h2 className="text-white font-semibold">Network Requests</h2>
-            <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">{networkRequests.length}</span>
-          </div>
-          <div className="space-y-3">
-            {networkRequests.map(req => (
-              <div key={req.id} className="glass rounded-xl border border-dark-400/40 px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
-                <div>
-                  <p className="text-white font-semibold text-sm">{req.name}</p>
-                  {req.company && <p className="text-dark-400 text-xs">{req.company}</p>}
-                  <p className="text-dark-500 text-xs mt-0.5">Wants to connect with you</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleRespond(req.id, true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 hover:bg-brand-500/20 text-xs font-medium transition-colors">
-                    <Check size={12} /> Accept
-                  </button>
-                  <button
-                    onClick={() => handleRespond(req.id, false)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-colors">
-                    <X size={12} /> Decline
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Hot Loads */}
       <div>
