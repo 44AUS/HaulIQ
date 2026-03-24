@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from contextlib import asynccontextmanager
+from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
@@ -17,6 +18,13 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Create all tables on startup (use Alembic migrations in production)
     Base.metadata.create_all(bind=engine)
+    # Ensure new enum values exist in existing PostgreSQL databases
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'in_transit'"))
+            conn.commit()
+        except Exception:
+            conn.rollback()
     yield
 
 

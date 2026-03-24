@@ -19,6 +19,8 @@ import SavedLoads from './pages/carrier/SavedLoads';
 import LoadHistory from './pages/carrier/LoadHistory';
 import CarrierAnalytics from './pages/carrier/Analytics';
 import CarrierLoadsInProgress from './pages/carrier/LoadsInProgress';
+import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
+import PlaceBid from './pages/carrier/PlaceBid';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
@@ -85,6 +87,8 @@ function CarrierRoutes() {
           <Route path="saved" element={<SavedLoads />} />
           <Route path="history" element={<LoadHistory />} />
           <Route path="active" element={<CarrierLoadsInProgress />} />
+          <Route path="active/:bookingId" element={<ActiveLoadDetail />} />
+          <Route path="loads/:id/bid" element={<PlaceBid />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />

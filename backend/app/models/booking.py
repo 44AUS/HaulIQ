@@ -16,10 +16,11 @@ class BidStatus(str, enum.Enum):
 
 
 class BookingStatus(str, enum.Enum):
-    pending  = "pending"
-    approved = "approved"
-    denied   = "denied"
+    pending   = "pending"
+    approved  = "approved"
+    denied    = "denied"
     cancelled = "cancelled"
+    in_transit = "in_transit"
     completed = "completed"
 
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, ChevronRight } from 'lucide-react';
 import { bookingsApi } from '../../services/api';
 
 const STATUS_CONFIG = {
@@ -49,19 +50,25 @@ function StatusTimeline({ status }) {
   );
 }
 
-function LoadProgressCard({ load }) {
+function LoadProgressCard({ load, onClick }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.quoted;
 
   return (
-    <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
+    <div
+      onClick={onClick}
+      className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in cursor-pointer hover:border-brand-500/40 hover:bg-dark-800/50 transition-all group"
+    >
       <div className="flex items-start justify-between mb-4">
         <div>
           <p className="text-dark-300 text-xs mb-1">Load #{load.id.slice(0, 8)}</p>
           <span className="text-white font-semibold text-sm">{load.load_type}</span>
         </div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.cls}`}>
-          {cfg.label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.cls}`}>
+            {cfg.label}
+          </span>
+          <ChevronRight size={16} className="text-dark-500 group-hover:text-brand-400 transition-colors" />
+        </div>
       </div>
 
       <div className="flex items-center gap-3 mb-3">
@@ -117,18 +124,13 @@ function LoadProgressCard({ load }) {
 
       <StatusTimeline status={load.status} />
 
-      {load.status === 'in_transit' && (
-        <div className="mt-4 flex justify-end">
-          <button className="btn-secondary text-xs flex items-center gap-1.5">
-            <RefreshCw size={12} /> Update Status
-          </button>
-        </div>
-      )}
+      <p className="text-dark-500 text-xs mt-3 text-right">Tap to view details &amp; update status</p>
     </div>
   );
 }
 
 export default function CarrierLoadsInProgress() {
+  const navigate = useNavigate();
   const [loads, setLoads] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -140,7 +142,7 @@ export default function CarrierLoadsInProgress() {
   }, []);
 
   const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
-  const bookedCount    = loads.filter(l => l.status === 'booked').length;
+  const bookedCount    = loads.filter(l => l.status === 'booked' || l.status === 'in_transit').length;
   const quotedCount    = loads.filter(l => l.status === 'quoted').length;
 
   return (
@@ -181,7 +183,11 @@ export default function CarrierLoadsInProgress() {
       ) : (
         <div className="space-y-4">
           {loads.map(load => (
-            <LoadProgressCard key={load.id} load={load} />
+            <LoadProgressCard
+              key={load.id}
+              load={load}
+              onClick={() => navigate(`/carrier/active/${load.booking_id}`)}
+            />
           ))}
         </div>
       )}

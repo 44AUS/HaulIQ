@@ -119,7 +119,7 @@ def carrier_in_progress(
         db.query(Booking)
         .filter(
             Booking.carrier_id == current_user.id,
-            Booking.status.in_([BookingStatus.pending, BookingStatus.approved]),
+            Booking.status.in_([BookingStatus.pending, BookingStatus.approved, BookingStatus.in_transit]),
         )
         .order_by(Booking.created_at.desc())
         .all()
@@ -133,7 +133,11 @@ def carrier_in_progress(
         result.append({
             "id": str(load.id),
             "booking_id": str(bk.id),
-            "status": "quoted" if bk.status == BookingStatus.pending else "booked",
+            "status": (
+                "quoted"     if bk.status == BookingStatus.pending    else
+                "in_transit" if bk.status == BookingStatus.in_transit else
+                "booked"
+            ),
             "load_type": load.load_type.value if load.load_type else None,
             "origin": load.origin,
             "destination": load.destination,
@@ -198,6 +202,98 @@ def broker_active_loads(
             "carrier_mc": carrier_mc,
         })
     return result
+
+
+@router.get("/{booking_id}", summary="Get single booking with load details")
+def get_booking(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if booking.carrier_id != current_user.id:
+        load = db.query(Load).filter(Load.id == booking.load_id).first()
+        if not load or load.broker_user_id != current_user.id:
+            raise HTTPException(status_code=403, detail="Forbidden")
+
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    broker_name = broker_mc = broker_phone = None
+    if load and load.broker:
+        broker_name = load.broker.name
+        broker_mc = load.broker.mc_number
+        broker_phone = load.broker.phone
+
+    carrier = db.query(User).filter(User.id == booking.carrier_id).first()
+
+    return {
+        "id": str(booking.id),
+        "status": booking.status,
+        "is_instant": booking.is_instant,
+        "note": booking.note,
+        "broker_note": booking.broker_note,
+        "created_at": booking.created_at,
+        "load": {
+            "id": str(load.id),
+            "origin": load.origin,
+            "destination": load.destination,
+            "miles": load.miles,
+            "deadhead_miles": load.deadhead_miles,
+            "rate": load.rate,
+            "rate_per_mile": load.rate_per_mile,
+            "fuel_cost_est": load.fuel_cost_est,
+            "net_profit_est": load.net_profit_est,
+            "load_type": load.load_type.value if load.load_type else None,
+            "commodity": load.commodity,
+            "weight_lbs": load.weight_lbs,
+            "pickup_date": str(load.pickup_date) if load.pickup_date else None,
+            "delivery_date": str(load.delivery_date) if load.delivery_date else None,
+            "dimensions": load.dimensions,
+            "notes": load.notes,
+            "broker_name": broker_name,
+            "broker_mc": broker_mc,
+            "broker_phone": broker_phone,
+            "broker_user_id": str(load.broker_user_id) if load.broker_user_id else None,
+        } if load else None,
+        "carrier_name": (carrier.company or carrier.name) if carrier else None,
+    }
+
+
+@router.patch("/{booking_id}/pickup", summary="Carrier: confirm load pickup → in transit")
+def confirm_pickup(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.carrier_id == current_user.id,
+        Booking.status == BookingStatus.approved,
+    ).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found or not in approved state")
+    booking.status = BookingStatus.in_transit
+    db.commit()
+    return {"status": booking.status}
+
+
+@router.patch("/{booking_id}/deliver", summary="Carrier: confirm delivery → completed")
+def confirm_delivery(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.carrier_id == current_user.id,
+        Booking.status == BookingStatus.in_transit,
+    ).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found or not in transit")
+    booking.status = BookingStatus.completed
+    db.commit()
+    return {"status": booking.status}
 
 
 @router.patch("/{booking_id}/review", response_model=BookingOut)

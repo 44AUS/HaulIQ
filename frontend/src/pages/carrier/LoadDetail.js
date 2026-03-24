@@ -18,9 +18,6 @@ export default function LoadDetail() {
   const [canInstantBook, setCanInstantBook] = useState(false);
 
   // Action state
-  const [bidModalOpen, setBidModalOpen] = useState(false);
-  const [bidAmount, setBidAmount] = useState('');
-  const [bidNote, setBidNote] = useState('');
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [bookingStatus, setBookingStatus] = useState(null); // null | 'pending' | 'instant_booked'
@@ -74,13 +71,6 @@ export default function LoadDetail() {
   const handleBookNow = () => {
     bookingsApi.request({ load_id: load._raw.id, is_instant: false })
       .then(() => setBookingStatus('pending'))
-      .catch(err => alert(err.message));
-  };
-
-  const handlePlaceBid = () => {
-    if (!bidAmount || isNaN(parseFloat(bidAmount))) return;
-    bidsApi.place({ load_id: load._raw.id, amount: parseFloat(bidAmount), note: bidNote || null })
-      .then(() => { setBidModalOpen(false); setBidAmount(''); setBidNote(''); })
       .catch(err => alert(err.message));
   };
 
@@ -295,10 +285,10 @@ export default function LoadDetail() {
                     )}
                   </div>
                 ) : (
-                  <button onClick={() => setBidModalOpen(true)}
+                  <Link to={`/carrier/loads/${id}/bid`}
                     className="btn-secondary w-full py-3 flex items-center justify-center gap-2">
                     <DollarSign size={16} /> Place Bid / Counter Offer
-                  </button>
+                  </Link>
                 )}
               </>
             )}
@@ -347,57 +337,6 @@ export default function LoadDetail() {
         </div>
       </div>
 
-      {/* Bid Modal */}
-      {bidModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass border border-dark-400/40 rounded-2xl p-8 max-w-sm w-full">
-            <h3 className="text-white font-bold text-lg mb-1">Place a Bid</h3>
-            <p className="text-dark-300 text-sm mb-5">{load.origin} → {load.dest} · Listed at <span className="text-white font-semibold">${load.rate.toLocaleString()}</span></p>
-
-            <div className="mb-4">
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Your bid amount</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400">$</span>
-                <input
-                  className="input pl-7"
-                  type="number"
-                  placeholder={String(load.rate)}
-                  value={bidAmount}
-                  onChange={e => setBidAmount(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              {bidAmount && !isNaN(parseFloat(bidAmount)) && (
-                <p className={`text-xs mt-1.5 ${parseFloat(bidAmount) >= load.rate ? 'text-brand-400' : 'text-yellow-400'}`}>
-                  {parseFloat(bidAmount) >= load.rate ? '+' : ''}{(((parseFloat(bidAmount) - load.rate) / load.rate) * 100).toFixed(1)}% vs listed rate
-                </p>
-              )}
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Note (optional)</label>
-              <textarea
-                className="input resize-none text-sm"
-                rows={2}
-                placeholder="Tell the broker why they should pick your bid..."
-                value={bidNote}
-                onChange={e => setBidNote(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button onClick={() => { setBidModalOpen(false); setBidAmount(''); setBidNote(''); }}
-                className="flex-1 btn-secondary py-2.5 text-sm">
-                Cancel
-              </button>
-              <button onClick={handlePlaceBid} disabled={!bidAmount || isNaN(parseFloat(bidAmount))}
-                className="flex-1 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white py-2.5 rounded-xl text-sm font-semibold transition-colors">
-                Submit Bid
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
