@@ -82,7 +82,7 @@ function NavItem({ item, collapsed, badgeCount, active, onClick }) {
       selected={active}
       onClick={onClick}
       sx={{
-        borderRadius: 0,
+        borderRadius: '0 !important',
         px: collapsed ? 0 : 2.5,
         py: 1.25,
         justifyContent: collapsed ? 'center' : 'flex-start',
@@ -332,7 +332,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
               <ListItemButton
                 onClick={handleLogout}
                 sx={{
-                  borderRadius: 0,
+                  borderRadius: '0 !important',
                   justifyContent: 'center',
                   py: 1.25,
                   color: 'error.light',
@@ -348,7 +348,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
             <ListItemButton
               onClick={handleLogout}
               sx={{
-                borderRadius: 0,
+                borderRadius: '0 !important',
                 px: 2.5,
                 py: 1.25,
                 color: 'error.light',
