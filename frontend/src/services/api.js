@@ -140,5 +140,12 @@ export const locationsApi = {
   get:     (bookingId)       => request(`/api/locations/${bookingId}`),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi };
+// ─── Blocks ───────────────────────────────────────────────────────────────────
+export const blocksApi = {
+  block:   (userId) => request(`/api/blocks/${userId}`, { method: 'POST' }),
+  unblock: (userId) => request(`/api/blocks/${userId}`, { method: 'DELETE' }),
+  check:   (userId) => request(`/api/blocks/check/${userId}`),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi };
 export default api;

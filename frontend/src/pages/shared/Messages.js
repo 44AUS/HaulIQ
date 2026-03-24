@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2, MapPin, Navigation, Loader } from 'lucide-react';
+import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2, MapPin, Navigation, Loader, Ban, ShieldOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { messagesApi, networkApi, locationsApi } from '../../services/api';
+import { messagesApi, networkApi, locationsApi, blocksApi } from '../../services/api';
 
 function parseSpecial(body) {
   try {
@@ -10,6 +10,16 @@ function parseSpecial(body) {
     if (obj.__type) return obj;
   } catch {}
   return null;
+}
+
+function Avatar({ name, size = 'sm', className = '' }) {
+  const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const dim = size === 'lg' ? 'w-10 h-10 text-sm' : size === 'md' ? 'w-8 h-8 text-xs' : 'w-7 h-7 text-xs';
+  return (
+    <div className={`${dim} rounded-full bg-brand-500/15 border border-brand-500/25 flex items-center justify-center text-brand-400 font-bold flex-shrink-0 ${className}`}>
+      {initials}
+    </div>
+  );
 }
 
 function LocationRequestCard({ data, isMe, onShare }) {
@@ -71,7 +81,8 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [sharingLocation, setSharingLocation] = useState(null); // booking_id being shared
+  const [sharingLocation, setSharingLocation] = useState(null);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
@@ -84,17 +95,13 @@ export default function Messages() {
             lng: pos.coords.longitude,
             accuracy: pos.coords.accuracy,
           });
-          // Refresh the active conversation
           if (activeConvoId) {
             messagesApi.conversation(activeConvoId)
               .then(data => setActiveMessages(data.messages || (Array.isArray(data) ? data : [])))
               .catch(() => {});
           }
-          // Navigate to messages for the conversation
           if (res.conversation_id) {
-            const convoId = res.conversation_id;
-            setConversations(prev => prev.find(c => c.id === convoId) ? prev : prev);
-            setActiveConvoId(convoId);
+            setActiveConvoId(res.conversation_id);
           }
         } catch (e) {
           alert('Failed to share location: ' + e.message);
@@ -105,6 +112,25 @@ export default function Messages() {
       (err) => { alert('Location access denied: ' + err.message); setSharingLocation(null); },
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleToggleBlock = async (otherUserId) => {
+    if (!otherUserId || blockLoading) return;
+    setBlockLoading(true);
+    try {
+      const convo = conversations.find(c => c.id === activeConvoId);
+      if (convo?.is_blocked_by_me) {
+        await blocksApi.unblock(otherUserId);
+        setConversations(prev => prev.map(c => c.id === activeConvoId ? { ...c, is_blocked_by_me: false } : c));
+      } else {
+        await blocksApi.block(otherUserId);
+        setConversations(prev => prev.map(c => c.id === activeConvoId ? { ...c, is_blocked_by_me: true } : c));
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBlockLoading(false);
+    }
   };
 
   // New message composer
@@ -168,10 +194,29 @@ export default function Messages() {
 
   const activeConvo = conversations.find(c => c.id === activeConvoId);
 
+  // Derive the other party's info from the active conversation
+  const getOtherParty = (convo) => {
+    if (!convo || !user) return null;
+    if (String(convo.carrier_id) === String(user.id)) {
+      return { id: convo.broker_id, name: convo.broker_name, role: 'broker' };
+    }
+    return { id: convo.carrier_id, name: convo.carrier_name, role: 'carrier' };
+  };
+
+  const getSenderName = (senderId, convo) => {
+    if (!convo) return '';
+    if (String(senderId) === String(convo.carrier_id)) return convo.carrier_name || 'Carrier';
+    return convo.broker_name || 'Broker';
+  };
+
+  const getProfileLink = (party) => {
+    if (!party) return '#';
+    return party.role === 'carrier' ? `/carrier-profile/${party.id}` : `/broker-profile/${party.id}`;
+  };
+
   const handleSend = () => {
     if (!input.trim() || !activeConvo) return;
     const loadId = activeConvo.load_id || null;
-    // backend's broker_id field = "the other party's user_id"
     const otherPartyId = user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id;
     messagesApi.send(loadId, otherPartyId, input.trim())
       .then(msg => {
@@ -184,7 +229,6 @@ export default function Messages() {
   const handleStartDirect = (contact) => {
     setComposing(false);
     setNetworkQuery('');
-    // Check if convo with this user already exists
     const existing = conversations.find(c =>
       (c.carrier_id === contact.user_id || c.broker_id === contact.user_id)
       && !c.load_id
@@ -193,7 +237,6 @@ export default function Messages() {
       setActiveConvoId(existing.id);
       return;
     }
-    // Create a new direct conversation
     messagesApi.direct(contact.user_id)
       .then(convo => {
         setConversations(prev => [convo, ...prev]);
@@ -238,6 +281,8 @@ export default function Messages() {
   const filteredNetwork = networkQuery
     ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
     : network;
+
+  const otherParty = getOtherParty(activeConvo);
 
   return (
     <div className="h-[calc(100vh-8rem)] flex gap-0 glass rounded-xl border border-dark-400/40 overflow-hidden">
@@ -288,9 +333,7 @@ export default function Messages() {
                   <button key={contact.user_id}
                     onClick={() => handleStartDirect(contact)}
                     className="w-full text-left flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-600 transition-colors">
-                    <div className="w-7 h-7 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
-                      {contact.name.charAt(0)}
-                    </div>
+                    <Avatar name={contact.name} size="sm" />
                     <div className="min-w-0">
                       <p className="text-white text-xs font-medium truncate">{contact.name}</p>
                       {contact.company && <p className="text-dark-400 text-xs truncate">{contact.company}</p>}
@@ -317,28 +360,43 @@ export default function Messages() {
             conversations.map(c => {
               const lastMsg = getLastMsg(c);
               const unread = hasUnread(c);
+              const label = getConvoLabel(c);
+              const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+              const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
               return (
                 <div key={c.id}
                   className={`flex items-center border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
-                  <button onClick={() => setActiveConvoId(c.id)} className="flex-1 text-left p-4 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
+                  <button onClick={() => setActiveConvoId(c.id)} className="flex-1 text-left p-3 min-w-0">
+                    <div className="flex items-start gap-2.5">
+                      <Link
+                        to={otherRole === 'carrier' ? `/carrier-profile/${otherId}` : `/broker-profile/${otherId}`}
+                        onClick={e => e.stopPropagation()}
+                        className="flex-shrink-0 mt-0.5"
+                      >
+                        <Avatar name={label} size="md" />
+                      </Link>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
-                          <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
-                            {getConvoLabel(c)}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
+                              {c.is_blocked_by_me && <Ban size={10} className="text-red-400 flex-shrink-0" />}
+                              <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
+                                {label}
+                              </p>
+                            </div>
+                            {c.load_id && (
+                              <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
+                            )}
+                            {lastMsg && (
+                              <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
+                            )}
+                          </div>
+                          <p className="text-dark-500 text-xs flex-shrink-0 mt-0.5">
+                            {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                           </p>
                         </div>
-                        {c.load_id && (
-                          <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
-                        )}
-                        {lastMsg && (
-                          <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
-                        )}
                       </div>
-                      <p className="text-dark-500 text-xs flex-shrink-0">
-                        {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                      </p>
                     </div>
                   </button>
                   <button
@@ -361,45 +419,103 @@ export default function Messages() {
       {/* Chat area */}
       {activeConvo ? (
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="p-4 border-b border-dark-400/40 flex items-center gap-3">
+          {/* Chat header */}
+          <div className="p-3.5 border-b border-dark-400/40 flex items-center gap-3">
             <button onClick={() => setActiveConvoId(null)} className="md:hidden text-dark-300 hover:text-white">
               <ArrowLeft size={18} />
             </button>
-            <div>
-              <p className="text-white font-semibold text-sm">{getConvoLabel(activeConvo)}</p>
+            {otherParty && (
+              <Link to={getProfileLink(otherParty)} className="flex-shrink-0">
+                <Avatar name={otherParty.name} size="md" />
+              </Link>
+            )}
+            <div className="flex-1 min-w-0">
+              {otherParty ? (
+                <Link
+                  to={getProfileLink(otherParty)}
+                  className="text-white font-semibold text-sm hover:text-brand-400 transition-colors"
+                >
+                  {otherParty.name}
+                </Link>
+              ) : (
+                <p className="text-white font-semibold text-sm">{getConvoLabel(activeConvo)}</p>
+              )}
               {activeConvo.load_id && (
                 <p className="text-dark-400 text-xs">Load #{activeConvo.load_id.slice(0, 8)}</p>
               )}
             </div>
+            {/* Locate Load button — broker only, when carrier has an in-transit booking */}
+            {user?.role === 'broker' && activeConvo.active_booking_id && (
+              <Link
+                to={`/broker/track/${activeConvo.active_booking_id}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex-shrink-0"
+              >
+                <Navigation size={12} /> Locate Load
+              </Link>
+            )}
+            {/* Block / Unblock button */}
+            {otherParty && (
+              <button
+                onClick={() => handleToggleBlock(otherParty.id)}
+                disabled={blockLoading}
+                title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
+                className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
+                  activeConvo.is_blocked_by_me
+                    ? 'text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20'
+                    : 'text-dark-400 hover:text-red-400 hover:bg-dark-700'
+                }`}
+              >
+                {blockLoading
+                  ? <div className="w-3.5 h-3.5 border border-current/30 border-t-current rounded-full animate-spin" />
+                  : activeConvo.is_blocked_by_me
+                    ? <ShieldOff size={15} />
+                    : <Ban size={15} />
+                }
+              </button>
+            )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {/* Blocked notice */}
+          {activeConvo.is_blocked_by_me && (
+            <div className="mx-4 mt-3 px-3 py-2.5 rounded-xl bg-red-500/8 border border-red-500/20 flex items-center gap-2">
+              <Ban size={13} className="text-red-400 flex-shrink-0" />
+              <p className="text-red-400 text-xs">You have blocked this user. They can no longer message you.</p>
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-2">
             {activeMessages.map(msg => {
               const isMe = msg.sender_id === user?.id;
               const special = parseSpecial(msg.body);
+              const senderName = getSenderName(msg.sender_id, activeConvo);
 
               if (special?.__type === 'location_request') {
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    {!isMe && <Avatar name={senderName} size="sm" />}
                     {sharingLocation === special.booking_id
                       ? <div className="flex items-center gap-2 text-dark-400 text-xs py-2"><Loader size={13} className="animate-spin" /> Getting your location…</div>
                       : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
                     }
+                    {isMe && <Avatar name={senderName} size="sm" />}
                   </div>
                 );
               }
 
               if (special?.__type === 'location_share') {
                 return (
-                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    {!isMe && <Avatar name={senderName} size="sm" />}
                     <LocationShareCard data={special} isMe={isMe} />
+                    {isMe && <Avatar name={senderName} size="sm" />}
                   </div>
                 );
               }
 
               return (
-                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                  {!isMe && <Avatar name={senderName} size="sm" />}
+                  <div className={`max-w-[72%] rounded-2xl px-4 py-2.5 ${
                     isMe ? 'bg-brand-500 text-white rounded-br-sm' : 'bg-dark-700 text-dark-100 rounded-bl-sm'
                   }`}>
                     <p className="text-sm leading-relaxed">{msg.body}</p>
@@ -411,6 +527,7 @@ export default function Messages() {
                       )}
                     </p>
                   </div>
+                  {isMe && <Avatar name={senderName} size="sm" />}
                 </div>
               );
             })}
@@ -425,10 +542,11 @@ export default function Messages() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                disabled={activeConvo.is_blocked_by_me}
               />
               <button
                 onClick={handleSend}
-                disabled={!input.trim()}
+                disabled={!input.trim() || activeConvo.is_blocked_by_me}
                 className="bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white px-4 rounded-xl transition-colors flex items-center justify-center">
                 <Send size={16} />
               </button>

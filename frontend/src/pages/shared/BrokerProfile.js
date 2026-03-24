@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera, Truck, Phone } from 'lucide-react';
+import { Star, Shield, AlertTriangle, Zap, ThumbsUp, ThumbsDown, Clock, CheckCircle, ArrowLeft, MessageSquare, Camera, Truck, Phone, Ban, ShieldOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { brokersApi } from '../../services/api';
+import { brokersApi, blocksApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
 
 // Star rating input component
@@ -83,6 +83,8 @@ export default function BrokerProfile() {
   const [loadingBroker, setLoadingBroker] = useState(true);
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [brokerError, setBrokerError] = useState(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   useEffect(() => {
     brokersApi.get(brokerId)
@@ -94,7 +96,30 @@ export default function BrokerProfile() {
       .then(data => setReviews(Array.isArray(data) ? data.map(adaptReview) : []))
       .catch(() => setReviews([]))
       .finally(() => setLoadingReviews(false));
-  }, [brokerId]);
+
+    if (!isOwner) {
+      blocksApi.check(brokerId)
+        .then(data => setIsBlocked(data.is_blocked))
+        .catch(() => {});
+    }
+  }, [brokerId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleToggleBlock = async () => {
+    setBlockLoading(true);
+    try {
+      if (isBlocked) {
+        await blocksApi.unblock(brokerId);
+        setIsBlocked(false);
+      } else {
+        await blocksApi.block(brokerId);
+        setIsBlocked(true);
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBlockLoading(false);
+    }
+  };
 
   const isOwner = user?.id === brokerId;
   const logo = isOwner ? (user?.logo ?? broker?.logo) : broker?.logo;
@@ -218,18 +243,36 @@ export default function BrokerProfile() {
             </div>
             </div>
           </div>
-          {user?.role === 'carrier' && !submitted && (
-            <button onClick={() => setShowForm(!showForm)}
-              className="btn-primary flex items-center gap-2 text-sm py-2.5 px-4">
-              <Star size={14} /> Write a Review
-            </button>
-          )}
-          {submitted && (
-            <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-lg px-3 py-2">
-              <CheckCircle size={14} className="text-brand-400" />
-              <span className="text-brand-400 text-sm">Review submitted</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {!isOwner && (
+              <button
+                onClick={handleToggleBlock}
+                disabled={blockLoading}
+                className={`flex items-center gap-1.5 text-sm py-2 px-3 rounded-lg border transition-colors ${
+                  isBlocked
+                    ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                    : 'bg-dark-700 border-dark-500/40 text-dark-300 hover:text-red-400 hover:border-red-500/30'
+                }`}
+              >
+                {blockLoading
+                  ? <div className="w-3.5 h-3.5 border border-current/30 border-t-current rounded-full animate-spin" />
+                  : isBlocked ? <><ShieldOff size={14} /> Unblock</> : <><Ban size={14} /> Block</>
+                }
+              </button>
+            )}
+            {user?.role === 'carrier' && !submitted && (
+              <button onClick={() => setShowForm(!showForm)}
+                className="btn-primary flex items-center gap-2 text-sm py-2.5 px-4">
+                <Star size={14} /> Write a Review
+              </button>
+            )}
+            {submitted && (
+              <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-lg px-3 py-2">
+                <CheckCircle size={14} className="text-brand-400" />
+                <span className="text-brand-400 text-sm">Review submitted</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

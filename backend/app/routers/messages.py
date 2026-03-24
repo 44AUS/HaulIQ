@@ -9,6 +9,9 @@ from app.database import get_db
 from app.middleware.auth import get_current_user
 from app.models.user import User
 from app.models.messaging import Conversation, Message
+from app.models.block import UserBlock
+from app.models.booking import Booking, BookingStatus
+from app.models.load import Load
 
 router = APIRouter()
 
@@ -44,10 +47,35 @@ class ConversationOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     messages: list[MessageOut]
+    is_blocked_by_me: bool = False
+    active_booking_id: Optional[UUID] = None
     model_config = {"from_attributes": True}
 
 
-def _enrich(c: Conversation) -> ConversationOut:
+def _enrich(c: Conversation, db: Session = None, current_user_id=None) -> ConversationOut:
+    is_blocked = False
+    active_booking_id = None
+
+    if db is not None and current_user_id is not None:
+        other_id = c.broker_id if str(c.carrier_id) == str(current_user_id) else c.carrier_id
+        is_blocked = db.query(UserBlock).filter_by(
+            blocker_id=current_user_id, blocked_id=other_id
+        ).first() is not None
+
+        # Check for an in-transit booking between this carrier and broker
+        booking = (
+            db.query(Booking)
+            .join(Load, Booking.load_id == Load.id)
+            .filter(
+                Booking.carrier_id == c.carrier_id,
+                Load.broker_user_id == c.broker_id,
+                Booking.status == BookingStatus.in_transit,
+            )
+            .first()
+        )
+        if booking:
+            active_booking_id = booking.id
+
     return ConversationOut(
         id=c.id,
         load_id=c.load_id,
@@ -58,6 +86,8 @@ def _enrich(c: Conversation) -> ConversationOut:
         created_at=c.created_at,
         updated_at=c.updated_at,
         messages=[MessageOut.model_validate(m, from_attributes=True) for m in c.messages],
+        is_blocked_by_me=is_blocked,
+        active_booking_id=active_booking_id,
     )
 
 
@@ -157,7 +187,7 @@ def direct_conversation(
         .filter(Conversation.id == convo.id)
         .first()
     )
-    return _enrich(convo)
+    return _enrich(convo, db, current_user.id)
 
 
 @router.get("/conversations", response_model=list[ConversationOut])
@@ -175,7 +205,7 @@ def list_conversations(
     else:
         q = q.filter(Conversation.broker_id == current_user.id)
     convos = q.order_by(Conversation.updated_at.desc()).all()
-    return [_enrich(c) for c in convos]
+    return [_enrich(c, db, current_user.id) for c in convos]
 
 
 @router.get("/conversations/{convo_id}", response_model=ConversationOut)
@@ -200,7 +230,7 @@ def get_conversation(
         if msg.sender_id != current_user.id:
             msg.is_read = True
     db.commit()
-    return _enrich(convo)
+    return _enrich(convo, db, current_user.id)
 
 
 @router.delete("/conversations/{convo_id}", status_code=204)

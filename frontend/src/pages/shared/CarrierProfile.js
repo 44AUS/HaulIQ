@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check, Phone } from 'lucide-react';
+import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check, Phone, Ban, ShieldOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { carrierReviewsApi, networkApi } from '../../services/api';
+import { carrierReviewsApi, networkApi, blocksApi } from '../../services/api';
 import { adaptReview } from '../../services/adapters';
 
 function StarInput({ value, onChange, size = 20 }) {
@@ -44,6 +44,8 @@ export default function CarrierProfile() {
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [networkState, setNetworkState] = useState({ status: 'none', entry_id: null, loading: true });
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
   const [form, setForm] = useState({
     rating: 0, communication: 0, onTimePickup: 0, onTimeDelivery: 0, loadCare: 0,
     wouldWorkAgain: null, comment: '', isAnonymous: false,
@@ -63,10 +65,30 @@ export default function CarrierProfile() {
       networkApi.check(carrierId)
         .then(data => setNetworkState({ status: data.status, entry_id: data.entry_id, loading: false }))
         .catch(() => setNetworkState({ status: 'none', entry_id: null, loading: false }));
+      blocksApi.check(carrierId)
+        .then(data => setIsBlocked(data.is_blocked))
+        .catch(() => {});
     } else {
       setNetworkState(prev => ({ ...prev, loading: false }));
     }
   }, [carrierId, user?.role]);
+
+  const handleToggleBlock = async () => {
+    setBlockLoading(true);
+    try {
+      if (isBlocked) {
+        await blocksApi.unblock(carrierId);
+        setIsBlocked(false);
+      } else {
+        await blocksApi.block(carrierId);
+        setIsBlocked(true);
+      }
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setBlockLoading(false);
+    }
+  };
 
   const handleAddToNetwork = () => {
     setNetworkState(prev => ({ ...prev, loading: true }));
@@ -140,7 +162,7 @@ export default function CarrierProfile() {
             </div>
             <p className="text-dark-400 text-xs">{reviews.length} broker reviews</p>
             {user?.role === 'broker' && (
-              <div className="flex items-center gap-2 justify-end mt-3">
+              <div className="flex items-center gap-2 justify-end mt-3 flex-wrap">
                 {!networkState.loading && (
                   networkState.status === 'accepted' ? (
                     <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium">
@@ -163,6 +185,21 @@ export default function CarrierProfile() {
                     <Star size={12} /> Review
                   </button>
                 )}
+                <button
+                  onClick={handleToggleBlock}
+                  disabled={blockLoading}
+                  title={isBlocked ? 'Unblock user' : 'Block user'}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+                    isBlocked
+                      ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
+                      : 'bg-dark-700 border-dark-500/40 text-dark-300 hover:text-red-400 hover:border-red-500/30'
+                  }`}
+                >
+                  {blockLoading
+                    ? <div className="w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin" />
+                    : isBlocked ? <><ShieldOff size={12} /> Unblock</> : <><Ban size={12} /> Block</>
+                  }
+                </button>
               </div>
             )}
             {submitted && (
