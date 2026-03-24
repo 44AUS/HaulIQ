@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Navigation, RefreshCw, AlertTriangle, Clock, User, Phone, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MapPin, Navigation, RefreshCw, AlertTriangle, Clock, User, MessageSquare } from 'lucide-react';
 import { bookingsApi, locationsApi } from '../../services/api';
 
 const LiveTrackingMap = lazy(() => import('../../components/shared/LiveTrackingMap'));
