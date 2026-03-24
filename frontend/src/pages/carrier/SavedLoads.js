@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { BookmarkCheck } from 'lucide-react';
+import {
+  Box, Typography, Grid, CircularProgress, Card, CardContent, Alert
+} from '@mui/material';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
@@ -17,30 +20,45 @@ export default function SavedLoads() {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2"><BookmarkCheck size={22} className="text-brand-400" />Saved Loads</h1>
-        <p className="text-dark-300 text-sm mt-1">{loads.length} loads saved</p>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <BookmarkAddedIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+          <Typography variant="h5" fontWeight={700}>Saved Loads</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          {loads.length} loads saved
+        </Typography>
+      </Box>
+
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
       ) : error ? (
-        <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
-          <p className="text-red-400">{error}</p>
-        </div>
+        <Alert severity="error">{error}</Alert>
       ) : loads.length === 0 ? (
-        <div className="glass rounded-xl border border-dark-400/40 py-20 text-center">
-          <BookmarkCheck size={36} className="text-dark-500 mx-auto mb-3" />
-          <p className="text-dark-300">No saved loads yet.</p>
-          <p className="text-dark-500 text-sm mt-1">Bookmark loads from the Load Board to track them here.</p>
-        </div>
+        <Card>
+          <CardContent sx={{ textAlign: 'center', py: 10 }}>
+            <BookmarkAddedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+            <Typography variant="body1" color="text.secondary" gutterBottom>
+              No saved loads yet.
+            </Typography>
+            <Typography variant="body2" color="text.disabled">
+              Bookmark loads from the Load Board to track them here.
+            </Typography>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {loads.map(l => <LoadCard key={l.id} load={l} />)}
-        </div>
+        <Grid container spacing={3}>
+          {loads.map(l => (
+            <Grid item xs={12} sm={6} xl={4} key={l.id}>
+              <LoadCard load={l} />
+            </Grid>
+          ))}
+        </Grid>
       )}
-    </div>
+    </Box>
   );
 }

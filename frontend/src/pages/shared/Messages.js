@@ -1,6 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2, MapPin, Navigation, Loader, Ban, ShieldOff } from 'lucide-react';
+import {
+  Box, Paper, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
+  Avatar, IconButton, TextField, Divider, CircularProgress, Button, Chip,
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DoneIcon from '@mui/icons-material/Done';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import BlockIcon from '@mui/icons-material/Block';
+import GppBadIcon from '@mui/icons-material/GppBad';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi } from '../../services/api';
 
@@ -12,37 +28,50 @@ function parseSpecial(body) {
   return null;
 }
 
-function Avatar({ name, size = 'sm', className = '' }) {
+function UserAvatar({ name, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  const dim = size === 'lg' ? 'w-10 h-10 text-sm' : size === 'md' ? 'w-8 h-8 text-xs' : 'w-7 h-7 text-xs';
   return (
-    <div className={`${dim} rounded-full bg-brand-500/15 border border-brand-500/25 flex items-center justify-center text-brand-400 font-bold flex-shrink-0 ${className}`}>
+    <Avatar sx={{ width: size, height: size, bgcolor: 'primary.dark', fontSize: size < 30 ? 11 : 13, fontWeight: 700, flexShrink: 0 }}>
       {initials}
-    </div>
+    </Avatar>
   );
 }
 
 function LocationRequestCard({ data, isMe, onShare }) {
   return (
-    <div className={`rounded-xl border p-3.5 max-w-[75%] ${isMe ? 'ml-auto bg-brand-500/10 border-brand-500/30' : 'bg-dark-700/80 border-dark-500/40'}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <Navigation size={14} className="text-brand-400 flex-shrink-0" />
-        <p className="text-white text-sm font-semibold">Location Requested</p>
-      </div>
-      <p className="text-dark-300 text-xs leading-relaxed mb-3">
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        maxWidth: '75%',
+        ml: isMe ? 'auto' : 0,
+        bgcolor: isMe ? 'primary.dark' : 'background.paper',
+        borderColor: isMe ? 'primary.main' : 'divider',
+        borderRadius: 2,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <NavigationIcon sx={{ fontSize: 14, color: 'primary.light' }} />
+        <Typography variant="body2" fontWeight={600} color="text.primary">Location Requested</Typography>
+      </Box>
+      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
         {isMe
-          ? `You asked ${data.requester_name ? 'the carrier' : 'them'} to share their location.`
-          : `${data.requester_name || 'The broker'} is asking for your current location.`}
-      </p>
+          ? 'You asked the carrier to share their location.'
+          : 'The broker is asking for your current location.'}
+      </Typography>
       {!isMe && (
-        <button
+        <Button
+          variant="contained"
+          size="small"
+          fullWidth
+          startIcon={<LocationOnIcon />}
           onClick={() => onShare(data.booking_id)}
-          className="w-full py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          sx={{ fontSize: 11 }}
         >
-          <MapPin size={12} /> Share My Location
-        </button>
+          Share My Location
+        </Button>
       )}
-    </div>
+    </Paper>
   );
 }
 
@@ -50,24 +79,40 @@ function LocationShareCard({ data, isMe }) {
   const city = data.city || 'Unknown location';
   const name = isMe ? 'You are' : `${data.carrier_name || 'Carrier'} is`;
   return (
-    <div className={`rounded-xl border p-3.5 max-w-[75%] ${isMe ? 'ml-auto bg-emerald-500/10 border-emerald-500/30' : 'bg-dark-700/80 border-dark-500/40'}`}>
-      <div className="flex items-center gap-2 mb-1.5">
-        <MapPin size={14} className="text-emerald-400 flex-shrink-0" />
-        <p className="text-white text-sm font-semibold">Location Shared</p>
-      </div>
-      <p className="text-dark-300 text-sm mb-3">
-        <span className="text-white font-medium">{name} currently near </span>
-        <span className="text-emerald-400 font-bold">{city}</span>
-      </p>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 1.5,
+        maxWidth: '75%',
+        ml: isMe ? 'auto' : 0,
+        bgcolor: isMe ? 'rgba(46,125,50,0.12)' : 'background.paper',
+        borderColor: isMe ? 'success.main' : 'divider',
+        borderRadius: 2,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+        <LocationOnIcon sx={{ fontSize: 14, color: 'success.main' }} />
+        <Typography variant="body2" fontWeight={600} color="text.primary">Location Shared</Typography>
+      </Box>
+      <Typography variant="body2" sx={{ mb: 1.5 }}>
+        <Box component="span" color="text.primary" fontWeight={500}>{name} currently near </Box>
+        <Box component="span" color="success.main" fontWeight={700}>{city}</Box>
+      </Typography>
       {data.lat && data.lng && (
-        <Link
+        <Button
+          component={Link}
           to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
-          className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          variant="contained"
+          size="small"
+          fullWidth
+          startIcon={<LocationOnIcon />}
+          color="success"
+          sx={{ fontSize: 11 }}
         >
-          <MapPin size={12} /> View Map
-        </Link>
+          View Map
+        </Button>
       )}
-    </div>
+    </Paper>
   );
 }
 
@@ -100,9 +145,7 @@ export default function Messages() {
               .then(data => setActiveMessages(data.messages || (Array.isArray(data) ? data : [])))
               .catch(() => {});
           }
-          if (res.conversation_id) {
-            setActiveConvoId(res.conversation_id);
-          }
+          if (res.conversation_id) setActiveConvoId(res.conversation_id);
         } catch (e) {
           alert('Failed to share location: ' + e.message);
         } finally {
@@ -133,7 +176,6 @@ export default function Messages() {
     }
   };
 
-  // New message composer
   const [composing, setComposing] = useState(false);
   const [network, setNetwork] = useState([]);
   const [networkQuery, setNetworkQuery] = useState('');
@@ -194,7 +236,6 @@ export default function Messages() {
 
   const activeConvo = conversations.find(c => c.id === activeConvoId);
 
-  // Derive the other party's info from the active conversation
   const getOtherParty = (convo) => {
     if (!convo || !user) return null;
     if (String(convo.carrier_id) === String(user.id)) {
@@ -219,10 +260,7 @@ export default function Messages() {
     const loadId = activeConvo.load_id || null;
     const otherPartyId = user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id;
     messagesApi.send(loadId, otherPartyId, input.trim())
-      .then(msg => {
-        setActiveMessages(prev => [...prev, msg]);
-        setInput('');
-      })
+      .then(msg => { setActiveMessages(prev => [...prev, msg]); setInput(''); })
       .catch(() => {});
   };
 
@@ -230,13 +268,9 @@ export default function Messages() {
     setComposing(false);
     setNetworkQuery('');
     const existing = conversations.find(c =>
-      (c.carrier_id === contact.user_id || c.broker_id === contact.user_id)
-      && !c.load_id
+      (c.carrier_id === contact.user_id || c.broker_id === contact.user_id) && !c.load_id
     );
-    if (existing) {
-      setActiveConvoId(existing.id);
-      return;
-    }
+    if (existing) { setActiveConvoId(existing.id); return; }
     messagesApi.direct(contact.user_id)
       .then(convo => {
         setConversations(prev => [convo, ...prev]);
@@ -285,205 +319,239 @@ export default function Messages() {
   const otherParty = getOtherParty(activeConvo);
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex gap-0 glass rounded-xl border border-dark-400/40 overflow-hidden">
-      {/* Conversation list */}
-      <div className={`w-full md:w-80 flex-shrink-0 border-r border-dark-400/40 flex flex-col ${activeConvoId ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b border-dark-400/40">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageSquare size={18} className="text-brand-400" />
-              <h2 className="text-white font-semibold">Messages</h2>
-            </div>
-            <button
-              onClick={() => setComposing(true)}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-dark-300 hover:text-white hover:bg-dark-600 transition-colors"
-              title="New Message">
-              <SquarePen size={16} />
-            </button>
-          </div>
-        </div>
+    <Paper
+      variant="outlined"
+      sx={{
+        height: 'calc(100vh - 140px)',
+        display: 'flex',
+        overflow: 'hidden',
+        bgcolor: 'background.paper',
+      }}
+    >
+      {/* Conversation list panel */}
+      <Box
+        sx={{
+          width: { xs: '100%', md: 300 },
+          flexShrink: 0,
+          borderRight: 1,
+          borderColor: 'divider',
+          display: { xs: activeConvoId ? 'none' : 'flex', md: 'flex' },
+          flexDirection: 'column',
+        }}
+      >
+        {/* Panel header */}
+        <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+            <Typography variant="subtitle2" fontWeight={700}>Messages</Typography>
+          </Box>
+          <IconButton size="small" onClick={() => setComposing(true)} title="New Message">
+            <EditNoteIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
-        {/* New message composer */}
+        {/* Compose panel */}
         {composing && (
-          <div className="border-b border-dark-400/40 p-3 bg-dark-700/30">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-white text-sm font-medium flex-1">New Message</p>
-              <button onClick={() => { setComposing(false); setNetworkQuery(''); }}
-                className="text-dark-400 hover:text-white">
-                <X size={14} />
-              </button>
-            </div>
-            <div className="relative mb-2">
-              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-dark-400" />
-              <input
-                className="w-full bg-dark-700 border border-dark-500/40 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-dark-400 focus:outline-none focus:border-brand-500/50"
-                placeholder="Search your network..."
-                value={networkQuery}
-                onChange={e => setNetworkQuery(e.target.value)}
-                autoFocus
-              />
-            </div>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 1.5, bgcolor: 'action.hover' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Typography variant="caption" fontWeight={600} sx={{ flex: 1 }}>New Message</Typography>
+              <IconButton size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
+                <CloseIcon sx={{ fontSize: 14 }} />
+              </IconButton>
+            </Box>
+            <TextField
+              size="small"
+              fullWidth
+              placeholder="Search your network..."
+              value={networkQuery}
+              onChange={e => setNetworkQuery(e.target.value)}
+              autoFocus
+              InputProps={{ startAdornment: <SearchIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
+              sx={{ mb: 1, '& .MuiInputBase-input': { fontSize: 12 } }}
+            />
             {filteredNetwork.length === 0 ? (
-              <p className="text-dark-500 text-xs px-1 py-2">
-                {network.length === 0 ? 'No connections yet. Add carriers to your network first.' : 'No matches.'}
-              </p>
+              <Typography variant="caption" color="text.disabled" sx={{ px: 0.5 }}>
+                {network.length === 0 ? 'No connections yet.' : 'No matches.'}
+              </Typography>
             ) : (
-              <div className="max-h-40 overflow-y-auto space-y-0.5">
+              <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
                 {filteredNetwork.map(contact => (
-                  <button key={contact.user_id}
-                    onClick={() => handleStartDirect(contact)}
-                    className="w-full text-left flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-600 transition-colors">
-                    <Avatar name={contact.name} size="sm" />
-                    <div className="min-w-0">
-                      <p className="text-white text-xs font-medium truncate">{contact.name}</p>
-                      {contact.company && <p className="text-dark-400 text-xs truncate">{contact.company}</p>}
-                    </div>
-                  </button>
+                  <ListItemButton key={contact.user_id} dense onClick={() => handleStartDirect(contact)} sx={{ borderRadius: 1 }}>
+                    <ListItemAvatar sx={{ minWidth: 36 }}>
+                      <UserAvatar name={contact.name} size={28} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={<Typography variant="caption" fontWeight={600}>{contact.name}</Typography>}
+                      secondary={contact.company ? <Typography variant="caption" color="text.secondary">{contact.company}</Typography> : null}
+                    />
+                  </ListItemButton>
                 ))}
-              </div>
+              </Box>
             )}
-          </div>
+          </Box>
         )}
 
-        <div className="flex-1 overflow-y-auto">
+        {/* Conversations list */}
+        <Box sx={{ flex: 1, overflowY: 'auto' }}>
           {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-            </div>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <CircularProgress size={24} />
+            </Box>
           ) : conversations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-6">
-              <MessageSquare size={32} className="text-dark-500 mb-3" />
-              <p className="text-dark-300 text-sm">No conversations yet</p>
-              <p className="text-dark-400 text-xs mt-1">Use the compose button to message your network</p>
-            </div>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
+              <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
+              <Typography variant="caption" color="text.disabled" mt={0.5}>Use the compose button to start one</Typography>
+            </Box>
           ) : (
-            conversations.map(c => {
-              const lastMsg = getLastMsg(c);
-              const unread = hasUnread(c);
-              const label = getConvoLabel(c);
-              const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-              const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
-              return (
-                <div key={c.id}
-                  className={`flex items-center border-b border-dark-400/20 hover:bg-dark-700/50 transition-colors ${activeConvoId === c.id ? 'bg-dark-700/50' : ''}`}>
-                  <button onClick={() => setActiveConvoId(c.id)} className="flex-1 text-left p-3 min-w-0">
-                    <div className="flex items-start gap-2.5">
-                      <Link
-                        to={otherRole === 'carrier' ? `/carrier-profile/${otherId}` : `/broker-profile/${otherId}`}
-                        onClick={e => e.stopPropagation()}
-                        className="flex-shrink-0 mt-0.5"
-                      >
-                        <Avatar name={label} size="md" />
-                      </Link>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
-                              {unread && <div className="w-2 h-2 bg-brand-500 rounded-full flex-shrink-0" />}
-                              {c.is_blocked_by_me && <Ban size={10} className="text-red-400 flex-shrink-0" />}
-                              <p className={`text-sm font-medium truncate ${unread ? 'text-white' : 'text-dark-100'}`}>
-                                {label}
-                              </p>
-                            </div>
-                            {c.load_id && (
-                              <p className="text-dark-500 text-xs">Load #{c.load_id.slice(0, 8)}</p>
-                            )}
-                            {lastMsg && (
-                              <p className="text-dark-300 text-xs truncate mt-0.5">{lastMsg.body}</p>
-                            )}
-                          </div>
-                          <p className="text-dark-500 text-xs flex-shrink-0 mt-0.5">
-                            {lastMsg ? new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={(e) => handleDeleteConvo(e, c.id)}
-                    className={`flex-shrink-0 mr-3 p-1.5 rounded transition-colors ${
-                      confirmDeleteId === c.id
-                        ? 'text-red-400 bg-red-500/10'
-                        : 'text-dark-500 hover:text-red-400'
-                    }`}
-                    title={confirmDeleteId === c.id ? 'Click again to confirm delete' : 'Delete conversation'}>
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              );
-            })
+            <List disablePadding>
+              {conversations.map(c => {
+                const lastMsg = getLastMsg(c);
+                const unread = hasUnread(c);
+                const label = getConvoLabel(c);
+                const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+                const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+                return (
+                  <Box
+                    key={c.id}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      borderBottom: 1,
+                      borderColor: 'divider',
+                      bgcolor: activeConvoId === c.id ? 'action.selected' : 'transparent',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                  >
+                    <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
+                      <ListItemAvatar sx={{ minWidth: 42 }}>
+                        <Box
+                          component={Link}
+                          to={otherRole === 'carrier' ? `/carrier-profile/${otherId}` : `/broker-profile/${otherId}`}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          <UserAvatar name={label} size={32} />
+                        </Box>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
+                            {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
+                            <Typography variant="caption" fontWeight={unread ? 700 : 500} noWrap>{label}</Typography>
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            {c.load_id && <Typography variant="caption" color="text.disabled" display="block">Load #{c.load_id.slice(0, 8)}</Typography>}
+                            {lastMsg && <Typography variant="caption" color="text.secondary" noWrap display="block">{lastMsg.body}</Typography>}
+                          </Box>
+                        }
+                        secondaryTypographyProps={{ component: 'div' }}
+                      />
+                      {lastMsg && (
+                        <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10 }}>
+                          {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Typography>
+                      )}
+                    </ListItemButton>
+                    <IconButton
+                      size="small"
+                      sx={{
+                        mr: 0.5,
+                        color: confirmDeleteId === c.id ? 'error.main' : 'text.disabled',
+                        bgcolor: confirmDeleteId === c.id ? 'error.dark' : 'transparent',
+                        '&:hover': { color: 'error.main' },
+                      }}
+                      onClick={(e) => handleDeleteConvo(e, c.id)}
+                      title={confirmDeleteId === c.id ? 'Click again to confirm' : 'Delete conversation'}
+                    >
+                      <DeleteOutlineIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                  </Box>
+                );
+              })}
+            </List>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Chat area */}
       {activeConvo ? (
-        <div className="flex-1 flex flex-col min-w-0">
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           {/* Chat header */}
-          <div className="p-3.5 border-b border-dark-400/40 flex items-center gap-3">
-            <button onClick={() => setActiveConvoId(null)} className="md:hidden text-dark-300 hover:text-white">
-              <ArrowLeft size={18} />
-            </button>
+          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <IconButton size="small" onClick={() => setActiveConvoId(null)} sx={{ display: { md: 'none' } }}>
+              <ArrowBackIcon fontSize="small" />
+            </IconButton>
             {otherParty && (
-              <Link to={getProfileLink(otherParty)} className="flex-shrink-0">
-                <Avatar name={otherParty.name} size="md" />
-              </Link>
+              <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0 }}>
+                <UserAvatar name={otherParty.name} size={32} />
+              </Box>
             )}
-            <div className="flex-1 min-w-0">
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               {otherParty ? (
-                <Link
+                <Typography
+                  component={Link}
                   to={getProfileLink(otherParty)}
-                  className="text-white font-semibold text-sm hover:text-brand-400 transition-colors"
+                  variant="body2"
+                  fontWeight={700}
+                  sx={{ textDecoration: 'none', color: 'text.primary', '&:hover': { color: 'primary.main' } }}
                 >
                   {otherParty.name}
-                </Link>
+                </Typography>
               ) : (
-                <p className="text-white font-semibold text-sm">{getConvoLabel(activeConvo)}</p>
+                <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
               )}
               {activeConvo.load_id && (
-                <p className="text-dark-400 text-xs">Load #{activeConvo.load_id.slice(0, 8)}</p>
+                <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
               )}
-            </div>
-            {/* Locate Load button — broker only, when carrier has an in-transit booking */}
+            </Box>
             {user?.role === 'broker' && activeConvo.active_booking_id && (
-              <Link
+              <Button
+                component={Link}
                 to={`/broker/track/${activeConvo.active_booking_id}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex-shrink-0"
+                variant="outlined"
+                size="small"
+                color="success"
+                startIcon={<NavigationIcon />}
+                sx={{ fontSize: 11, flexShrink: 0 }}
               >
-                <Navigation size={12} /> Locate Load
-              </Link>
+                Locate Load
+              </Button>
             )}
-            {/* Block / Unblock button */}
             {otherParty && (
-              <button
+              <IconButton
+                size="small"
                 onClick={() => handleToggleBlock(otherParty.id)}
                 disabled={blockLoading}
                 title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
-                className={`flex-shrink-0 p-1.5 rounded-lg transition-colors ${
-                  activeConvo.is_blocked_by_me
-                    ? 'text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20'
-                    : 'text-dark-400 hover:text-red-400 hover:bg-dark-700'
-                }`}
+                sx={{
+                  flexShrink: 0,
+                  color: activeConvo.is_blocked_by_me ? 'error.main' : 'text.disabled',
+                  '&:hover': { color: 'error.main' },
+                }}
               >
                 {blockLoading
-                  ? <div className="w-3.5 h-3.5 border border-current/30 border-t-current rounded-full animate-spin" />
+                  ? <CircularProgress size={14} color="inherit" />
                   : activeConvo.is_blocked_by_me
-                    ? <ShieldOff size={15} />
-                    : <Ban size={15} />
+                    ? <GppBadIcon sx={{ fontSize: 18 }} />
+                    : <BlockIcon sx={{ fontSize: 18 }} />
                 }
-              </button>
+              </IconButton>
             )}
-          </div>
+          </Box>
 
           {/* Blocked notice */}
           {activeConvo.is_blocked_by_me && (
-            <div className="mx-4 mt-3 px-3 py-2.5 rounded-xl bg-red-500/8 border border-red-500/20 flex items-center gap-2">
-              <Ban size={13} className="text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-xs">You have blocked this user. They can no longer message you.</p>
-            </div>
+            <Box sx={{ mx: 2, mt: 1.5, px: 2, py: 1, borderRadius: 2, bgcolor: 'error.dark', border: 1, borderColor: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BlockIcon sx={{ fontSize: 14, color: 'error.light' }} />
+              <Typography variant="caption" color="error.light">You have blocked this user. They can no longer message you.</Typography>
+            </Box>
           )}
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {/* Messages */}
+          <Box sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
             {activeMessages.map(msg => {
               const isMe = msg.sender_id === user?.id;
               const special = parseSpecial(msg.body);
@@ -491,77 +559,87 @@ export default function Messages() {
 
               if (special?.__type === 'location_request') {
                 return (
-                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                    {!isMe && <Avatar name={senderName} size="sm" />}
+                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                    {!isMe && <UserAvatar name={senderName} size={26} />}
                     {sharingLocation === special.booking_id
-                      ? <div className="flex items-center gap-2 text-dark-400 text-xs py-2"><Loader size={13} className="animate-spin" /> Getting your location…</div>
+                      ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><CircularProgress size={13} /><Typography variant="caption" color="text.secondary">Getting your location…</Typography></Box>
                       : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
                     }
-                    {isMe && <Avatar name={senderName} size="sm" />}
-                  </div>
+                    {isMe && <UserAvatar name={senderName} size={26} />}
+                  </Box>
                 );
               }
 
               if (special?.__type === 'location_share') {
                 return (
-                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                    {!isMe && <Avatar name={senderName} size="sm" />}
+                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                    {!isMe && <UserAvatar name={senderName} size={26} />}
                     <LocationShareCard data={special} isMe={isMe} />
-                    {isMe && <Avatar name={senderName} size="sm" />}
-                  </div>
+                    {isMe && <UserAvatar name={senderName} size={26} />}
+                  </Box>
                 );
               }
 
               return (
-                <div key={msg.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  {!isMe && <Avatar name={senderName} size="sm" />}
-                  <div className={`max-w-[72%] rounded-2xl px-4 py-2.5 ${
-                    isMe ? 'bg-brand-500 text-white rounded-br-sm' : 'bg-dark-700 text-dark-100 rounded-bl-sm'
-                  }`}>
-                    <p className="text-sm leading-relaxed">{msg.body}</p>
-                    <p className={`text-xs mt-1 flex items-center gap-1 ${isMe ? 'text-brand-200' : 'text-dark-400'}`}>
-                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  <Box
+                    sx={{
+                      maxWidth: '72%',
+                      px: 2,
+                      py: 1.25,
+                      borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      bgcolor: isMe ? 'primary.main' : 'action.hover',
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ lineHeight: 1.5 }}>{msg.body}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, justifyContent: 'flex-end' }}>
+                      <Typography variant="caption" sx={{ fontSize: 10, color: isMe ? 'primary.light' : 'text.disabled' }}>
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
                       {isMe && (msg.is_read
-                        ? <CheckCheck size={12} className="text-brand-300" />
-                        : <Check size={12} className="text-brand-400/60" />
+                        ? <DoneAllIcon sx={{ fontSize: 12, color: 'primary.light' }} />
+                        : <DoneIcon sx={{ fontSize: 12, color: 'primary.light', opacity: 0.6 }} />
                       )}
-                    </p>
-                  </div>
-                  {isMe && <Avatar name={senderName} size="sm" />}
-                </div>
+                    </Box>
+                  </Box>
+                  {isMe && <UserAvatar name={senderName} size={26} />}
+                </Box>
               );
             })}
             <div ref={messagesEndRef} />
-          </div>
+          </Box>
 
-          <div className="p-4 border-t border-dark-400/40">
-            <div className="flex gap-2">
-              <input
-                className="input flex-1"
-                placeholder="Type a message..."
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                disabled={activeConvo.is_blocked_by_me}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || activeConvo.is_blocked_by_me}
-                className="bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white px-4 rounded-xl transition-colors flex items-center justify-center">
-                <Send size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
+          {/* Input */}
+          <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 1 }}>
+            <TextField
+              fullWidth
+              size="small"
+              placeholder="Type a message..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              disabled={activeConvo.is_blocked_by_me}
+            />
+            <IconButton
+              color="primary"
+              onClick={handleSend}
+              disabled={!input.trim() || activeConvo.is_blocked_by_me}
+              sx={{ bgcolor: 'primary.main', color: '#fff', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' }, '&:disabled': { bgcolor: 'action.disabledBackground' } }}
+            >
+              <SendIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
       ) : (
-        <div className="hidden md:flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <MessageSquare size={40} className="text-dark-600 mx-auto mb-3" />
-            <p className="text-dark-300 text-sm">Select a conversation</p>
-            <p className="text-dark-400 text-xs mt-1">or use the compose button to start a new one</p>
-          </div>
-        </div>
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <ChatBubbleOutlineIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
+            <Typography variant="body2" color="text.secondary">Select a conversation</Typography>
+            <Typography variant="caption" color="text.disabled">or use the compose button to start a new one</Typography>
+          </Box>
+        </Box>
       )}
-    </div>
+    </Paper>
   );
 }

@@ -1,22 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { PlusCircle, Check, ArrowRight, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import CityAutocomplete from '../../components/shared/CityAutocomplete';
 import { getDrivingMiles } from '../../services/routing';
+import {
+  Box, Typography, Button, Paper, Grid, TextField, FormControl,
+  InputLabel, Select, MenuItem, InputAdornment, CircularProgress, Alert,
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
-
-function Field({ label, required, children }) {
-  return (
-    <div>
-      <label className="block text-dark-100 text-sm font-medium mb-1.5">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
-      {children}
-    </div>
-  );
-}
+const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 
 export default function PostLoad() {
   const navigate = useNavigate();
@@ -33,7 +29,6 @@ export default function PostLoad() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Auto-calculate driving miles when both origin and dest look complete
   useEffect(() => {
     const { origin, dest } = form;
     if (!origin.includes(',') || !dest.includes(',')) return;
@@ -70,142 +65,168 @@ export default function PostLoad() {
   };
 
   if (posted) return (
-    <div className="max-w-lg mx-auto text-center py-20 animate-fade-in">
-      <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5 glow-green">
-        <Check size={28} className="text-brand-400" />
-      </div>
-      <h2 className="text-2xl font-bold text-white mb-2">Load Posted!</h2>
-      <p className="text-dark-300 text-sm">Your load is now live on the board. Carriers will see it immediately.</p>
-      <div className="flex gap-3 justify-center mt-6">
-        <button onClick={() => { setPosted(false); setForm({ origin: '', dest: '', pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102', commodity: '', rate: '', miles: '', deadhead: '', notes: '' }); }}
-          className="btn-secondary px-6 py-2.5 text-sm">Post Another</button>
-        <button onClick={() => navigate('/broker/loads')} className="btn-primary px-6 py-2.5 text-sm">View Loads</button>
-      </div>
-    </div>
+    <Box sx={{ maxWidth: 480, mx: 'auto', textAlign: 'center', py: 10 }}>
+      <Box sx={{
+        width: 72, height: 72, borderRadius: '50%',
+        bgcolor: 'success.main', opacity: 0.1,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2,
+        position: 'relative',
+      }}>
+        <CheckCircleOutlineIcon sx={{ fontSize: 48, color: 'success.main', position: 'absolute', opacity: 10 }} />
+      </Box>
+      <CheckCircleOutlineIcon sx={{ fontSize: 56, color: 'success.main', mb: 2 }} />
+      <Typography variant="h5" fontWeight={700} sx={{ mb: 1 }}>Load Posted!</Typography>
+      <Typography variant="body2" color="text.secondary">
+        Your load is now live on the board. Carriers will see it immediately.
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
+        <Button variant="outlined" onClick={() => {
+          setPosted(false);
+          setForm({ origin: '', dest: '', pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102', commodity: '', rate: '', miles: '', deadhead: '', notes: '' });
+        }}>
+          Post Another
+        </Button>
+        <Button variant="contained" onClick={() => navigate('/broker/loads')}>
+          View Loads
+        </Button>
+      </Box>
+    </Box>
   );
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <PlusCircle size={22} className="text-brand-400" />Post a Load
-        </h1>
-        <p className="text-dark-300 text-sm mt-1">Fill out the details and your load will be live instantly</p>
-      </div>
+    <Box sx={{ maxWidth: 680, mx: 'auto' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AddCircleOutlineIcon color="primary" /> Post a Load
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Fill out the details and your load will be live instantly
+        </Typography>
+      </Box>
 
-      <form onSubmit={handlePost} className="glass rounded-xl p-6 border border-dark-400/40 space-y-5">
-        {/* Route */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Origin City, State" required>
-            <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} placeholder="Chicago, IL" required />
-          </Field>
-          <Field label="Destination City, State" required>
-            <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} placeholder="Atlanta, GA" required />
-          </Field>
-        </div>
+      <Paper variant="outlined" sx={{ p: 3 }}>
+        <Box component="form" onSubmit={handlePost} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Route */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                Origin City, State *
+              </Typography>
+              <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} placeholder="Chicago, IL" required />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                Destination City, State *
+              </Typography>
+              <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} placeholder="Atlanta, GA" required />
+            </Grid>
+          </Grid>
 
-        {/* Miles — auto-calculated, still editable */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Loaded Miles" required>
-            <div className="relative">
-              <input
-                type="number"
-                className="input pr-8"
-                value={form.miles}
+          {/* Miles */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth size="small" label="Loaded Miles" required
+                type="number" value={form.miles}
                 onChange={e => set('miles', e.target.value)}
                 placeholder={calcingMiles ? 'Calculating…' : '716'}
-                required
+                InputProps={{
+                  endAdornment: calcingMiles ? (
+                    <InputAdornment position="end"><CircularProgress size={14} /></InputAdornment>
+                  ) : null,
+                }}
+                helperText={form.miles && !calcingMiles ? 'Auto-calculated · edit if needed' : ''}
               />
-              {calcingMiles && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-400 animate-spin">
-                  <Loader size={13} />
-                </div>
-              )}
-            </div>
-            {form.miles && !calcingMiles && (
-              <p className="text-dark-500 text-xs mt-1">Auto-calculated · edit if needed</p>
-            )}
-          </Field>
-          <Field label="Deadhead Miles">
-            <input type="number" className="input" value={form.deadhead}
-              onChange={e => set('deadhead', e.target.value)} placeholder="0" />
-          </Field>
-        </div>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Deadhead Miles" type="number"
+                value={form.deadhead} onChange={e => set('deadhead', e.target.value)} placeholder="0" />
+            </Grid>
+          </Grid>
 
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Pickup Date" required>
-            <input type="date" className="input" value={form.pickup}
-              onChange={e => set('pickup', e.target.value)} required />
-          </Field>
-          <Field label="Delivery Date" required>
-            <input type="date" className="input" value={form.delivery}
-              onChange={e => set('delivery', e.target.value)} required />
-          </Field>
-        </div>
+          {/* Dates */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Pickup Date" required
+                type="date" value={form.pickup} onChange={e => set('pickup', e.target.value)}
+                InputLabelProps={{ shrink: true }} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Delivery Date" required
+                type="date" value={form.delivery} onChange={e => set('delivery', e.target.value)}
+                InputLabelProps={{ shrink: true }} />
+            </Grid>
+          </Grid>
 
-        {/* Equipment */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Equipment Type">
-            <select value={form.equipment} onChange={e => set('equipment', e.target.value)} className="input cursor-pointer">
-              {EQUIPMENT.map(eq => <option key={eq}>{eq}</option>)}
-            </select>
-          </Field>
-          <Field label="Weight (lbs)">
-            <input type="number" className="input" value={form.weight}
-              onChange={e => set('weight', e.target.value)} placeholder="42000" />
-          </Field>
-        </div>
+          {/* Equipment */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Equipment Type</InputLabel>
+                <Select value={form.equipment} label="Equipment Type" onChange={e => set('equipment', e.target.value)}>
+                  {EQUIPMENT.map(eq => <MenuItem key={eq} value={eq}>{eq}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Weight (lbs)" type="number"
+                value={form.weight} onChange={e => set('weight', e.target.value)} placeholder="42000" />
+            </Grid>
+          </Grid>
 
-        {/* Commodity + dims */}
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Commodity">
-            <input className="input" value={form.commodity}
-              onChange={e => set('commodity', e.target.value)} placeholder="General Freight" />
-          </Field>
-          <Field label="Dimensions">
-            <select value={form.dims} onChange={e => set('dims', e.target.value)} className="input cursor-pointer">
-              {['48x102', '53x102', '40x96', '28x102'].map(d => <option key={d}>{d}</option>)}
-            </select>
-          </Field>
-        </div>
+          {/* Commodity + Dims */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Commodity"
+                value={form.commodity} onChange={e => set('commodity', e.target.value)} placeholder="General Freight" />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Dimensions</InputLabel>
+                <Select value={form.dims} label="Dimensions" onChange={e => set('dims', e.target.value)}>
+                  {DIMS.map(d => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
-        {/* Rate */}
-        <div>
-          <label className="block text-dark-100 text-sm font-medium mb-1.5">
-            Rate (All-In) <span className="text-red-400">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-300 text-sm">$</span>
-            <input type="number" value={form.rate} onChange={e => set('rate', e.target.value)}
-              className="input pl-7" placeholder="2500" required />
-          </div>
-          {form.rate && (
-            <p className="text-dark-400 text-xs mt-1">
-              Market context: avg for similar loads is ~$2.80-3.20/mi
-              {parseFloat(form.rate) < 1500 && <span className="text-yellow-400 ml-2">— May appear in "Worst Loads" feed</span>}
-            </p>
-          )}
-        </div>
+          {/* Rate */}
+          <Box>
+            <TextField
+              fullWidth size="small" label="Rate (All-In)" required
+              type="number" value={form.rate} onChange={e => set('rate', e.target.value)}
+              placeholder="2500"
+              InputProps={{
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+              }}
+              helperText={
+                form.rate
+                  ? `Market context: avg for similar loads is ~$2.80–3.20/mi${parseFloat(form.rate) < 1500 ? ' — May appear in "Worst Loads" feed' : ''}`
+                  : ''
+              }
+              FormHelperTextProps={{ sx: { color: parseFloat(form.rate) < 1500 ? 'warning.main' : 'text.secondary' } }}
+            />
+          </Box>
 
-        {/* Notes */}
-        <Field label="Special Instructions">
-          <textarea value={form.notes} onChange={e => set('notes', e.target.value)}
-            className="input resize-none" rows={3}
+          {/* Notes */}
+          <TextField fullWidth size="small" label="Special Instructions" multiline rows={3}
+            value={form.notes} onChange={e => set('notes', e.target.value)}
             placeholder="Any special requirements, hazmat info, contact details..." />
-        </Field>
 
-        {error && (
-          <div className="glass rounded-xl border border-red-500/20 p-4 text-center">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
+          {error && <Alert severity="error">{error}</Alert>}
 
-        <button type="submit" disabled={submitting}
-          className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
-          {submitting ? 'Posting...' : <><span>Post Load Live</span><ArrowRight size={16} /></>}
-        </button>
-      </form>
-    </div>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={submitting}
+            endIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardIcon />}
+            sx={{ py: 1.5 }}
+          >
+            {submitting ? 'Posting...' : 'Post Load Live'}
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { History, TrendingUp, Minus, TrendingDown } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Grid, CircularProgress, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
+} from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { analyticsApi } from '../../services/api';
 import { adaptHistory } from '../../services/adapters';
 
 const ScoreIcon = ({ score }) => {
-  if (score === 'green') return <TrendingUp size={14} className="text-brand-400" />;
-  if (score === 'yellow') return <Minus size={14} className="text-yellow-400" />;
-  return <TrendingDown size={14} className="text-red-400" />;
+  if (score === 'green') return <TrendingUpIcon sx={{ fontSize: 16, color: 'success.main' }} />;
+  if (score === 'yellow') return <RemoveIcon sx={{ fontSize: 16, color: 'warning.main' }} />;
+  return <TrendingDownIcon sx={{ fontSize: 16, color: 'error.main' }} />;
 };
 
 export default function LoadHistory() {
@@ -25,73 +32,119 @@ export default function LoadHistory() {
   const totalGross = history.reduce((s, l) => s + (l.rate || 0), 0);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2"><History size={22} className="text-brand-400" />Load History</h1>
-        <p className="text-dark-300 text-sm mt-1">Your completed loads</p>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <HistoryIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+          <Typography variant="h5" fontWeight={700}>Load History</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Your completed loads
+        </Typography>
+      </Box>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
       ) : error ? (
-        <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
-          <p className="text-red-400">{error}</p>
-        </div>
+        <Alert severity="error">{error}</Alert>
       ) : (
         <>
           {/* Summary */}
-          <div className="grid grid-cols-3 gap-4">
+          <Grid container spacing={3}>
             {[
-              { label: 'Total Gross', value: `$${totalGross.toLocaleString()}` },
+              { label: 'Total Gross', value: `$${totalGross.toLocaleString()}`, highlight: false },
               { label: 'Total Net', value: `$${totalNet.toLocaleString()}`, highlight: true },
-              { label: 'Loads Completed', value: history.length },
+              { label: 'Loads Completed', value: history.length, highlight: false },
             ].map(({ label, value, highlight }) => (
-              <div key={label} className="stat-card">
-                <p className="text-dark-300 text-xs">{label}</p>
-                <p className={`text-2xl font-bold ${highlight ? 'text-brand-400' : 'text-white'}`}>{value}</p>
-              </div>
+              <Grid item xs={12} sm={4} key={label}>
+                <Card>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>{label}</Typography>
+                    <Typography variant="h4" fontWeight={800} sx={{ color: highlight ? 'primary.main' : 'text.primary' }}>
+                      {value}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
+          </Grid>
 
           {history.length === 0 ? (
-            <div className="glass rounded-xl border border-dark-400/40 py-20 text-center">
-              <History size={36} className="text-dark-500 mx-auto mb-3" />
-              <p className="text-dark-300">No completed loads yet.</p>
-            </div>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', py: 10 }}>
+                <HistoryIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+                <Typography variant="body1" color="text.secondary">No completed loads yet.</Typography>
+              </CardContent>
+            </Card>
           ) : (
-            <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-dark-700/50 text-dark-300 text-xs uppercase tracking-wider">
-                    <tr>
+            <Card>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
                       {['Date', 'Route', 'Miles', 'Rate', 'Net Profit', 'Broker', 'Score'].map(h => (
-                        <th key={h} className="px-5 py-3 text-left font-medium whitespace-nowrap">{h}</th>
+                        <TableCell
+                          key={h}
+                          sx={{
+                            textTransform: 'uppercase',
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            letterSpacing: 0.5,
+                            color: 'secondary.main',
+                            bgcolor: 'action.hover',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {h}
+                        </TableCell>
                       ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-dark-400/20">
-                    {history.map(load => (
-                      <tr key={load.id} className="hover:bg-dark-700/20 transition-colors">
-                        <td className="px-5 py-4 text-dark-300 text-xs whitespace-nowrap">{load.date}</td>
-                        <td className="px-5 py-4 text-white font-medium whitespace-nowrap">{load.origin} → {load.dest}</td>
-                        <td className="px-5 py-4 text-dark-200">{load.miles}</td>
-                        <td className="px-5 py-4 text-white">${(load.rate || 0).toLocaleString()}</td>
-                        <td className={`px-5 py-4 font-bold ${(load.net || 0) > 0 ? 'text-brand-400' : 'text-red-400'}`}>
-                          {(load.net || 0) >= 0 ? '+' : ''}${(load.net || 0).toLocaleString()}
-                        </td>
-                        <td className="px-5 py-4 text-dark-200 text-xs">{load.broker}</td>
-                        <td className="px-5 py-4"><ScoreIcon score={load.score} /></td>
-                      </tr>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {history.map((load, idx) => (
+                      <TableRow
+                        key={load.id}
+                        sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}
+                      >
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                          <Typography variant="caption" color="text.secondary">{load.date}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                          <Typography variant="body2" fontWeight={600}>{load.origin} → {load.dest}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{load.miles}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">${(load.rate || 0).toLocaleString()}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            fontWeight={700}
+                            sx={{ color: (load.net || 0) > 0 ? 'success.main' : 'error.main' }}
+                          >
+                            {(load.net || 0) >= 0 ? '+' : ''}${(load.net || 0).toLocaleString()}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="caption" color="text.secondary">{load.broker}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <ScoreIcon score={load.score} />
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Card>
           )}
         </>
       )}
-    </div>
+    </Box>
   );
 }

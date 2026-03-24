@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, CreditCard, AlertCircle, Loader, X } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Button, Alert, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, Grid, Chip,
+  List, ListItem, ListItemIcon, ListItemText, IconButton,
+} from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../../context/AuthContext';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -34,7 +42,6 @@ export default function ManageSubscription() {
 
   const handleSelectPlan = (plan) => {
     if (plan.price === 0) {
-      // Free plan — switch immediately
       fetch(`${API}/api/subscriptions/change`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -42,7 +49,6 @@ export default function ManageSubscription() {
       }).then(() => navigate(`/${user.role}/dashboard`));
       return;
     }
-    // Paid plan — go through Adyen checkout
     navigate(`/checkout?plan_id=${plan.id}`);
   };
 
@@ -59,137 +65,141 @@ export default function ManageSubscription() {
 
   const currentTier = currentSub?.plan?.tier || 'basic';
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader size={24} className="text-brand-400 animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Manage Subscription</h1>
-        <p className="text-dark-300 text-sm mt-1">
+    <Box sx={{ maxWidth: 900, mx: 'auto', py: 2 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" fontWeight={700}>Manage Subscription</Typography>
+        <Typography variant="body2" color="text.secondary" mt={0.5}>
           {currentSub
             ? `Currently on ${currentSub.plan.name} · renews ${new Date(currentSub.current_period_end).toLocaleDateString()}`
             : 'No active subscription'}
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
-      {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
-          <AlertCircle size={15} className="text-red-400 flex-shrink-0" />
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
+      {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-      {/* Status badge */}
       {currentSub?.status === 'past_due' && (
-        <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3 mb-6">
-          <AlertCircle size={15} className="text-yellow-400 flex-shrink-0" />
-          <p className="text-yellow-400 text-sm">
-            Your payment is past due. Update your payment method to keep access.
-          </p>
-        </div>
+        <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 3 }}>
+          Your payment is past due. Update your payment method to keep access.
+        </Alert>
       )}
 
       {/* Plan cards */}
-      <div className="grid gap-4 md:grid-cols-3 mb-10">
+      <Grid container spacing={2} sx={{ mb: 5 }}>
         {plans.map(plan => {
           const isCurrent = currentSub?.plan?.id === plan.id;
           const isUpgrade = TIER_ORDER[plan.tier] > TIER_ORDER[currentTier];
 
           return (
-            <div key={plan.id}
-              className={`glass rounded-2xl border p-6 flex flex-col transition-all ${
-                isCurrent
-                  ? 'border-brand-500/40 bg-brand-500/5'
-                  : 'border-dark-400/40 hover:border-dark-300/60'
-              }`}>
-              {isCurrent && (
-                <span className="badge-green text-xs self-start mb-3">Current Plan</span>
-              )}
-              {plan.tier === 'pro' && !isCurrent && (
-                <span className="badge-yellow text-xs self-start mb-3">Most Popular</span>
-              )}
-              <p className="text-white font-bold text-lg mb-1">{plan.name}</p>
-              <p className="text-dark-300 text-sm mb-4">{plan.description}</p>
-              <div className="mb-4">
-                <span className="text-white font-bold text-3xl">${plan.price}</span>
-                <span className="text-dark-400 text-sm">/mo</span>
-              </div>
-              <ul className="space-y-2 mb-6 flex-1">
-                {(plan.features || []).map((f, i) => (
-                  <li key={i} className="flex items-start gap-2 text-dark-200 text-sm">
-                    <Check size={14} className="text-brand-400 flex-shrink-0 mt-0.5" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              {isCurrent ? (
-                <div className="text-center text-dark-400 text-sm py-2">Active</div>
-              ) : (
-                <button
-                  onClick={() => handleSelectPlan(plan)}
-                  className={`w-full py-2.5 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                    isUpgrade
-                      ? 'bg-brand-500 text-white hover:bg-brand-600'
-                      : 'border border-dark-400/60 text-dark-200 hover:border-dark-300 hover:text-white'
-                  }`}>
-                  {plan.price > 0 && <CreditCard size={14} />}
-                  {isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
-                </button>
-              )}
-            </div>
+            <Grid item xs={12} md={4} key={plan.id}>
+              <Card
+                variant="outlined"
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  borderColor: isCurrent ? 'primary.main' : 'divider',
+                  bgcolor: isCurrent ? 'rgba(21,101,192,0.04)' : 'background.paper',
+                }}
+              >
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                  {isCurrent && (
+                    <Chip label="Current Plan" size="small" color="success" sx={{ alignSelf: 'flex-start', mb: 1.5 }} />
+                  )}
+                  {plan.tier === 'pro' && !isCurrent && (
+                    <Chip label="Most Popular" size="small" color="warning" sx={{ alignSelf: 'flex-start', mb: 1.5 }} />
+                  )}
+                  <Typography variant="subtitle1" fontWeight={700} mb={0.5}>{plan.name}</Typography>
+                  <Typography variant="body2" color="text.secondary" mb={2}>{plan.description}</Typography>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography component="span" variant="h4" fontWeight={800}>${plan.price}</Typography>
+                    <Typography component="span" variant="body2" color="text.secondary">/mo</Typography>
+                  </Box>
+                  <List dense disablePadding sx={{ flex: 1, mb: 2 }}>
+                    {(plan.features || []).map((f, i) => (
+                      <ListItem key={i} disablePadding sx={{ py: 0.25 }}>
+                        <ListItemIcon sx={{ minWidth: 28 }}>
+                          <CheckIcon sx={{ fontSize: 15, color: 'primary.main' }} />
+                        </ListItemIcon>
+                        <ListItemText primary={<Typography variant="body2" color="text.secondary">{f}</Typography>} />
+                      </ListItem>
+                    ))}
+                  </List>
+                  {isCurrent ? (
+                    <Typography variant="body2" color="text.secondary" textAlign="center" py={1}>Active</Typography>
+                  ) : (
+                    <Button
+                      variant={isUpgrade ? 'contained' : 'outlined'}
+                      fullWidth
+                      onClick={() => handleSelectPlan(plan)}
+                      startIcon={plan.price > 0 ? <CreditCardIcon /> : null}
+                    >
+                      {isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
           );
         })}
-      </div>
+      </Grid>
 
-      {/* Cancel */}
+      {/* Cancel section */}
       {currentSub && currentSub.status !== 'cancelled' && currentTier !== 'basic' && (
-        <div className="glass rounded-xl border border-dark-400/40 p-5 flex items-center justify-between">
-          <div>
-            <p className="text-white text-sm font-medium">Cancel Subscription</p>
-            <p className="text-dark-400 text-xs mt-0.5">You'll be downgraded to Basic at the end of your billing period.</p>
-          </div>
-          <button
-            onClick={() => setShowCancelModal(true)}
-            className="border border-red-500/30 text-red-400 hover:bg-red-500/10 px-4 py-2 rounded-lg text-sm transition-all">
-            Cancel Plan
-          </button>
-        </div>
+        <Card variant="outlined">
+          <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="body2" fontWeight={600}>Cancel Subscription</Typography>
+              <Typography variant="caption" color="text.secondary">
+                You'll be downgraded to Basic at the end of your billing period.
+              </Typography>
+            </Box>
+            <Button variant="outlined" color="error" onClick={() => setShowCancelModal(true)}>
+              Cancel Plan
+            </Button>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Cancel confirm modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass border border-dark-400/40 rounded-2xl p-8 max-w-sm w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-bold">Cancel Subscription?</h3>
-              <button onClick={() => setShowCancelModal(false)} className="text-dark-400 hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-            <p className="text-dark-300 text-sm mb-6 leading-relaxed">
-              Your {currentSub.plan.name} plan will remain active until{' '}
-              <strong className="text-white">{new Date(currentSub.current_period_end).toLocaleDateString()}</strong>,
-              then you'll be moved to the free Basic plan.
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowCancelModal(false)}
-                className="flex-1 border border-dark-400/60 text-dark-200 hover:text-white py-2.5 rounded-xl text-sm transition-all">
-                Keep Plan
-              </button>
-              <button onClick={handleCancel} disabled={cancelling}
-                className="flex-1 bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 py-2.5 rounded-xl text-sm transition-all disabled:opacity-50">
-                {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Cancel confirm dialog */}
+      <Dialog open={showCancelModal} onClose={() => setShowCancelModal(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          Cancel Subscription?
+          <IconButton size="small" onClick={() => setShowCancelModal(false)}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+            Your {currentSub?.plan?.name} plan will remain active until{' '}
+            <Typography component="span" fontWeight={700} color="text.primary">
+              {currentSub ? new Date(currentSub.current_period_end).toLocaleDateString() : ''}
+            </Typography>
+            , then you'll be moved to the free Basic plan.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button variant="outlined" onClick={() => setShowCancelModal(false)} fullWidth>
+            Keep Plan
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleCancel}
+            disabled={cancelling}
+            fullWidth
+          >
+            {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

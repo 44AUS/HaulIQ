@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, MessageSquare, Navigation } from 'lucide-react';
 import { bookingsApi } from '../../services/api';
+import {
+  Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, Paper,
+  Divider, Button,
+} from '@mui/material';
+import PlaceIcon from '@mui/icons-material/Place';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import PersonIcon from '@mui/icons-material/Person';
+import AlertCircleIcon from '@mui/icons-material/ErrorOutline';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ScaleIcon from '@mui/icons-material/Scale';
+import ActivityIcon from '@mui/icons-material/Timeline';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const STATUS_CONFIG = {
-  booked:     { label: 'Booked',         cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
-  in_transit: { label: 'In Transit',     cls: 'bg-brand-500/10 text-brand-400 border border-brand-500/20' },
-  delivered:  { label: 'Delivered',      cls: 'bg-dark-600 text-dark-400 border border-dark-400/20' },
-  available:  { label: 'No Carrier Yet', cls: 'bg-dark-600 text-dark-300 border border-dark-400/20' },
+  booked:     { label: 'Booked',         color: 'info' },
+  in_transit: { label: 'In Transit',     color: 'success' },
+  delivered:  { label: 'Delivered',      color: 'default' },
+  available:  { label: 'No Carrier Yet', color: 'default' },
 };
 
 const TIMELINE_STEPS = ['Quoted', 'Booked', 'In Transit', 'Delivered'];
@@ -17,37 +31,45 @@ function StatusTimeline({ status }) {
   const current = STATUS_STEP[status] ?? -1;
   if (current < 0) return null;
   return (
-    <div className="flex items-center w-full mt-4">
+    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', mt: 2 }}>
       {TIMELINE_STEPS.map((step, idx) => {
         const done   = idx < current;
         const active = idx === current;
         const future = idx > current;
         return (
           <React.Fragment key={step}>
-            <div className="flex flex-col items-center flex-shrink-0">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all
-                ${done   ? 'bg-brand-500' : ''}
-                ${active ? 'bg-brand-500 ring-2 ring-brand-400/40 ring-offset-1 ring-offset-dark-800' : ''}
-                ${future ? 'bg-dark-600 border border-dark-400/40' : ''}
-              `}>
-                {done && (
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-                {active && <div className="w-2 h-2 rounded-full bg-white" />}
-              </div>
-              <span className={`text-[10px] mt-1 whitespace-nowrap ${active ? 'text-brand-400 font-semibold' : done ? 'text-brand-400/60' : 'text-dark-400'}`}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+              <Box sx={{
+                width: 20, height: 20, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                bgcolor: done || active ? 'success.main' : 'action.disabledBackground',
+                border: active ? '2px solid' : 'none',
+                borderColor: 'success.light',
+                outline: active ? '2px solid rgba(46,125,50,0.25)' : 'none',
+              }}>
+                {done && <CheckCircleIcon sx={{ fontSize: 14, color: 'white' }} />}
+                {active && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'white' }} />}
+              </Box>
+              <Typography variant="caption" sx={{
+                mt: 0.5, whiteSpace: 'nowrap', fontSize: '0.65rem',
+                color: active ? 'success.main' : done ? 'success.light' : 'text.disabled',
+                fontWeight: active ? 700 : 400,
+              }}>
                 {step}
-              </span>
-            </div>
+              </Typography>
+            </Box>
             {idx < TIMELINE_STEPS.length - 1 && (
-              <div className={`flex-1 h-px mx-1 mb-4 ${done ? 'bg-brand-500' : 'border-t border-dashed border-dark-500'}`} />
+              <Box sx={{
+                flex: 1, height: 1, mx: 0.5, mb: 2,
+                bgcolor: done ? 'success.main' : 'divider',
+                borderTop: done ? 'none' : '1px dashed',
+                borderColor: 'divider',
+              }} />
             )}
           </React.Fragment>
         );
       })}
-    </div>
+    </Box>
   );
 }
 
@@ -55,120 +77,150 @@ function BrokerLoadCard({ load }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.available;
 
   return (
-    <div className="glass rounded-xl p-5 border border-dark-400/30 animate-fade-in">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-dark-300 text-xs mb-1">Load #{load.id.slice(0, 8)}</p>
-          <span className="text-white font-semibold text-sm">{load.load_type}</span>
-        </div>
-        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.cls}`}>
-          {cfg.label}
-        </span>
-      </div>
+    <Card variant="outlined">
+      <CardContent>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+          <Box>
+            <Typography variant="caption" color="text.secondary">Load #{load.id.slice(0, 8)}</Typography>
+            <Typography variant="subtitle2" fontWeight={600}>{load.load_type}</Typography>
+          </Box>
+          <Chip label={cfg.label} size="small" color={cfg.color} />
+        </Box>
 
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 text-dark-300 text-xs mb-0.5">
-            <MapPin size={10} /> Origin
-          </div>
-          <p className="text-white font-semibold text-sm truncate">{load.origin}</p>
-        </div>
-        <div className="flex flex-col items-center">
-          <ArrowRight size={16} className="text-dark-400" />
-          <span className="text-dark-300 text-xs mt-0.5">{load.miles}mi</span>
-        </div>
-        <div className="flex-1 min-w-0 text-right">
-          <div className="flex items-center justify-end gap-1 text-dark-300 text-xs mb-0.5">
-            <MapPin size={10} /> Dest
-          </div>
-          <p className="text-white font-semibold text-sm truncate">{load.destination}</p>
-        </div>
-      </div>
+        {/* Route */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <PlaceIcon sx={{ fontSize: 11 }} /> Origin
+            </Typography>
+            <Typography variant="body2" fontWeight={600} noWrap>{load.origin}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ArrowForwardIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">{load.miles}mi</Typography>
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
+              <PlaceIcon sx={{ fontSize: 11 }} /> Dest
+            </Typography>
+            <Typography variant="body2" fontWeight={600} noWrap>{load.destination}</Typography>
+          </Box>
+        </Box>
 
-      <div className="flex items-center justify-between mb-4 text-xs text-dark-400">
-        <div className="flex items-center gap-1">
-          <Calendar size={10} />
-          <span>Pickup: <span className="text-dark-200">{load.pickup_date}</span></span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Calendar size={10} />
-          <span>Drop: <span className="text-dark-200">{load.delivery_date}</span></span>
-        </div>
-      </div>
+        {/* Dates */}
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <CalendarTodayIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">
+              Pickup: <span style={{ color: 'inherit', fontWeight: 500 }}>{load.pickup_date}</span>
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <CalendarTodayIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <Typography variant="caption" color="text.secondary">
+              Drop: <span style={{ fontWeight: 500 }}>{load.delivery_date}</span>
+            </Typography>
+          </Box>
+        </Box>
 
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
-          <p className="text-dark-300 text-xs mb-0.5">Rate</p>
-          <p className="text-white font-bold text-sm">${(load.rate || 0).toLocaleString()}</p>
-        </div>
-        <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
-          <p className="text-dark-300 text-xs mb-0.5">Miles</p>
-          <p className="text-white font-bold text-sm">{load.miles}</p>
-        </div>
-        <div className="bg-dark-700/50 rounded-lg p-2.5 text-center">
-          <p className="text-dark-300 text-xs mb-0.5">Per Mile</p>
-          <p className="text-white font-bold text-sm">${(load.rate_per_mile || 0).toFixed(2)}</p>
-        </div>
-      </div>
+        {/* Stats */}
+        <Grid container spacing={1.5} sx={{ mb: 2 }}>
+          {[
+            { label: 'Rate', value: `$${(load.rate || 0).toLocaleString()}` },
+            { label: 'Miles', value: load.miles },
+            { label: 'Per Mile', value: `$${(load.rate_per_mile || 0).toFixed(2)}` },
+          ].map(({ label, value }) => (
+            <Grid item xs={4} key={label}>
+              <Paper variant="outlined" sx={{ p: 1, textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>{label}</Typography>
+                <Typography variant="body2" fontWeight={700}>{value}</Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
 
-      <div className="bg-dark-700/40 rounded-lg px-3 py-2.5 mb-3">
-        {load.carrier_id ? (
-          <div className="flex items-center gap-2">
-            <User size={13} className="text-dark-300 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <Link
-                to={`/carrier-profile/${load.carrier_id}`}
-                className="text-brand-400 hover:text-brand-300 text-sm font-semibold transition-colors"
+        {/* Carrier */}
+        <Paper variant="outlined" sx={{ px: 1.5, py: 1, mb: 1.5 }}>
+          {load.carrier_id ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PersonIcon sx={{ fontSize: 15, color: 'text.secondary', flexShrink: 0 }} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  component={Link}
+                  to={`/carrier-profile/${load.carrier_id}`}
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                >
+                  {load.carrier_name}
+                </Typography>
+                {load.carrier_mc && (
+                  <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>MC-{load.carrier_mc}</Typography>
+                )}
+              </Box>
+              <Button
+                component={Link}
+                to={`/broker/messages?userId=${load.carrier_id}`}
+                variant="text"
+                size="small"
+                startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 13 }} />}
+                sx={{ fontSize: '0.7rem', flexShrink: 0 }}
               >
-                {load.carrier_name}
-              </Link>
-              {load.carrier_mc && <span className="text-dark-400 text-xs ml-2">MC-{load.carrier_mc}</span>}
-            </div>
-            <Link
-              to={`/broker/messages?userId=${load.carrier_id}`}
-              className="flex items-center gap-1 text-dark-400 hover:text-brand-400 text-xs transition-colors flex-shrink-0"
-              title="Message carrier"
-            >
-              <MessageSquare size={13} /> Message
-            </Link>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <AlertCircle size={13} className="text-dark-400 flex-shrink-0" />
-            <span className="text-dark-400 text-sm italic">Awaiting carrier assignment</span>
-          </div>
+                Message
+              </Button>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <AlertCircleIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                Awaiting carrier assignment
+              </Typography>
+            </Box>
+          )}
+        </Paper>
+
+        {/* Commodity */}
+        {load.commodity && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <InventoryIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+              <Typography variant="caption" color="text.secondary">{load.commodity}</Typography>
+            </Box>
+            {load.weight_lbs && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <ScaleIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                <Typography variant="caption" color="text.secondary">{Number(load.weight_lbs).toLocaleString()} lbs</Typography>
+              </Box>
+            )}
+          </Box>
         )}
-      </div>
 
-      {load.commodity && (
-        <div className="flex items-center gap-4 text-xs text-dark-300 mb-2">
-          <span className="flex items-center gap-1"><Package size={10} />{load.commodity}</span>
-          {load.weight_lbs && <span className="flex items-center gap-1"><Weight size={10} />{Number(load.weight_lbs).toLocaleString()} lbs</span>}
-        </div>
-      )}
+        {load.status === 'available' && (
+          <Paper variant="outlined" sx={{ px: 1.5, py: 1, mt: 1 }}>
+            <Typography variant="caption" color="text.secondary">
+              No carrier assigned — load is still open on the board.
+            </Typography>
+          </Paper>
+        )}
 
-      {load.status === 'available' && (
-        <div className="mt-3 bg-dark-700/30 border border-dark-400/20 rounded-lg px-3 py-2">
-          <p className="text-dark-400 text-xs">No carrier assigned — load is still open on the board.</p>
-        </div>
-      )}
+        <StatusTimeline status={load.status} />
 
-      <StatusTimeline status={load.status} />
-
-      {(load.status === 'in_transit' || load.status === 'booked') && load.booking_id && (
-        <Link
-          to={`/broker/track/${load.booking_id}`}
-          className={`mt-4 w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
-            load.status === 'in_transit'
-              ? 'bg-brand-500 hover:bg-brand-600 text-white'
-              : 'border border-dark-500 text-dark-300 hover:text-white hover:border-dark-400'
-          }`}
-        >
-          <Navigation size={14} />
-          {load.status === 'in_transit' ? 'Track Live Location' : 'View Tracking'}
-        </Link>
-      )}
-    </div>
+        {(load.status === 'in_transit' || load.status === 'booked') && load.booking_id && (
+          <Button
+            component={Link}
+            to={`/broker/track/${load.booking_id}`}
+            variant={load.status === 'in_transit' ? 'contained' : 'outlined'}
+            color={load.status === 'in_transit' ? 'success' : 'inherit'}
+            fullWidth
+            startIcon={<NavigationIcon />}
+            sx={{ mt: 2 }}
+          >
+            {load.status === 'in_transit' ? 'Track Live Location' : 'View Tracking'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -188,47 +240,43 @@ export default function BrokerLoadsInProgress() {
   const availableCount = loads.filter(l => l.status === 'available').length;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <Activity size={22} className="text-brand-400" />
-        <h1 className="text-2xl font-bold text-white">Loads in Progress</h1>
-        <span className="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold px-2.5 py-1 rounded-full">
-          {loads.length}
-        </span>
-      </div>
+    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+        <ActivityIcon color="primary" />
+        <Typography variant="h5" fontWeight={700}>Loads in Progress</Typography>
+        <Chip label={loads.length} size="small" color="primary" />
+      </Box>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="stat-card">
-          <p className="text-dark-300 text-xs mb-1">In Transit</p>
-          <p className="text-2xl font-bold text-brand-400">{inTransitCount}</p>
-        </div>
-        <div className="stat-card">
-          <p className="text-dark-300 text-xs mb-1">Booked</p>
-          <p className="text-2xl font-bold text-blue-400">{bookedCount}</p>
-        </div>
-        <div className="stat-card">
-          <p className="text-dark-300 text-xs mb-1">Not Filled</p>
-          <p className="text-2xl font-bold text-dark-200">{availableCount}</p>
-        </div>
-      </div>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {[
+          { label: 'In Transit', value: inTransitCount, color: 'success.main' },
+          { label: 'Booked',     value: bookedCount,    color: 'info.main' },
+          { label: 'Not Filled', value: availableCount, color: 'text.secondary' },
+        ].map(({ label, value, color }) => (
+          <Grid item xs={4} key={label}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', py: '16px !important' }}>
+                <Typography variant="caption" color="text.secondary">{label}</Typography>
+                <Typography variant="h4" fontWeight={800} sx={{ color }}>{value}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
       ) : loads.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center border border-dark-400/30">
-          <Activity size={40} className="text-dark-400 mx-auto mb-3" />
-          <p className="text-white font-semibold mb-1">No active loads</p>
-          <p className="text-dark-300 text-sm">Post a load to see it tracked here.</p>
-        </div>
+        <Paper variant="outlined" sx={{ p: 6, textAlign: 'center' }}>
+          <ActivityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>No active loads</Typography>
+          <Typography variant="body2" color="text.secondary">Post a load to see it tracked here.</Typography>
+        </Paper>
       ) : (
-        <div className="space-y-4">
-          {loads.map(load => (
-            <BrokerLoadCard key={load.id} load={load} />
-          ))}
-        </div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {loads.map(load => <BrokerLoadCard key={load.id} load={load} />)}
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

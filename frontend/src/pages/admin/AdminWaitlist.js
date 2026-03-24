@@ -1,17 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Trash2, RefreshCw, Truck, Briefcase } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Grid, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell,
+  IconButton, CircularProgress, Alert,
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import WorkIcon from '@mui/icons-material/Work';
 import { waitlistApi } from '../../services/api';
 
 function RoleBadge({ role }) {
-  if (role === 'carrier') return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-500/15 text-brand-400">
-      <Truck size={11} /> Carrier
-    </span>
-  );
+  if (role === 'carrier') {
+    return (
+      <Chip
+        icon={<LocalShippingIcon sx={{ fontSize: 13 }} />}
+        label="Carrier"
+        size="small"
+        color="primary"
+        variant="outlined"
+        sx={{ fontSize: 11 }}
+      />
+    );
+  }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/15 text-blue-400">
-      <Briefcase size={11} /> Broker
-    </span>
+    <Chip
+      icon={<WorkIcon sx={{ fontSize: 13 }} />}
+      label="Broker"
+      size="small"
+      color="info"
+      variant="outlined"
+      sx={{ fontSize: 11 }}
+    />
   );
 }
 
@@ -19,7 +40,7 @@ export default function AdminWaitlist() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all'); // all | carrier | broker
+  const [filter, setFilter] = useState('all');
   const [deleting, setDeleting] = useState(null);
 
   const load = async () => {
@@ -55,113 +76,132 @@ export default function AdminWaitlist() {
   const brokerCount = entries.filter(e => e.role === 'broker').length;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Users size={18} className="text-brand-400" />
-            <h1 className="text-2xl font-bold text-white">Waitlist</h1>
-          </div>
-          <p className="text-dark-300 text-sm">People waiting for early access to HaulIQ</p>
-        </div>
-        <button
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            <PeopleIcon color="primary" />
+            <Typography variant="h5" fontWeight={700}>Waitlist</Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">People waiting for early access to HaulIQ</Typography>
+        </Box>
+        <Button
+          variant="outlined"
+          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
           onClick={load}
-          className="btn-secondary flex items-center gap-2 text-sm"
           disabled={loading}
         >
-          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           Refresh
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <Grid container spacing={2}>
         {[
-          { label: 'Total', value: entries.length, color: 'text-white' },
-          { label: 'Carriers', value: carrierCount, color: 'text-brand-400' },
-          { label: 'Brokers', value: brokerCount, color: 'text-blue-400' },
+          { label: 'Total',    value: entries.length,  color: 'text.primary' },
+          { label: 'Carriers', value: carrierCount,    color: 'primary.main' },
+          { label: 'Brokers',  value: brokerCount,     color: 'info.main' },
         ].map(({ label, value, color }) => (
-          <div key={label} className="stat-card text-center">
-            <div className={`text-3xl font-bold ${color}`}>{value}</div>
-            <div className="text-dark-400 text-sm mt-1">{label}</div>
-          </div>
+          <Grid item xs={4} key={label}>
+            <Card variant="outlined">
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight={800} color={color}>{value}</Typography>
+                <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2">
-        {['all', 'carrier', 'broker'].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filter === f
-                ? 'bg-brand-500 text-white'
-                : 'bg-dark-800 text-dark-300 hover:text-white'
-            }`}
+      {/* Filter buttons */}
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {[
+          { key: 'all',     label: `All (${entries.length})` },
+          { key: 'carrier', label: `Carriers (${carrierCount})` },
+          { key: 'broker',  label: `Brokers (${brokerCount})` },
+        ].map(({ key, label }) => (
+          <Button
+            key={key}
+            size="small"
+            variant={filter === key ? 'contained' : 'outlined'}
+            onClick={() => setFilter(key)}
           >
-            {f === 'all' ? `All (${entries.length})` : f === 'carrier' ? `Carriers (${carrierCount})` : `Brokers (${brokerCount})`}
-          </button>
+            {label}
+          </Button>
         ))}
-      </div>
+      </Box>
 
       {/* Table */}
-      <div className="card overflow-hidden p-0">
+      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-7 h-7 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-          </div>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
         ) : error ? (
-          <div className="text-center py-16 text-red-400">{error}</div>
+          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-dark-400">
-            {filter === 'all' ? 'No waitlist entries yet.' : `No ${filter}s on the waitlist yet.`}
-          </div>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="body2" color="text.secondary">
+              {filter === 'all' ? 'No waitlist entries yet.' : `No ${filter}s on the waitlist yet.`}
+            </Typography>
+          </Box>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-dark-700">
-                <th className="text-left px-5 py-3 text-dark-400 font-medium">Name</th>
-                <th className="text-left px-5 py-3 text-dark-400 font-medium">Email</th>
-                <th className="text-left px-5 py-3 text-dark-400 font-medium">Role</th>
-                <th className="text-left px-5 py-3 text-dark-400 font-medium">Joined</th>
-                <th className="px-5 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((entry, i) => (
-                <tr
-                  key={entry.id}
-                  className={`border-b border-dark-800 hover:bg-dark-800/50 transition-colors ${i === filtered.length - 1 ? 'border-0' : ''}`}
-                >
-                  <td className="px-5 py-3 text-white font-medium">
-                    {entry.name || <span className="text-dark-500 italic">—</span>}
-                  </td>
-                  <td className="px-5 py-3 text-dark-300">{entry.email}</td>
-                  <td className="px-5 py-3"><RoleBadge role={entry.role} /></td>
-                  <td className="px-5 py-3 text-dark-400">
-                    {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <button
-                      onClick={() => handleDelete(entry.id)}
-                      disabled={deleting === entry.id}
-                      className="p-1.5 rounded hover:bg-red-500/10 text-dark-500 hover:text-red-400 transition-colors disabled:opacity-40"
-                      title="Remove from waitlist"
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'action.hover' }}>
+                  {['Name', 'Email', 'Role', 'Joined', ''].map((h, i) => (
+                    <TableCell
+                      key={i}
+                      sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main' }}
                     >
-                      {deleting === entry.id
-                        ? <RefreshCw size={14} className="animate-spin" />
-                        : <Trash2 size={14} />
+                      {h}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filtered.map(entry => (
+                  <TableRow key={entry.id} hover>
+                    <TableCell>
+                      {entry.name
+                        ? <Typography variant="body2" fontWeight={600}>{entry.name}</Typography>
+                        : <Typography variant="body2" color="text.disabled" fontStyle="italic">—</Typography>
                       }
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">{entry.email}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <RoleBadge role={entry.role} />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDelete(entry.id)}
+                        disabled={deleting === entry.id}
+                        title="Remove from waitlist"
+                        sx={{ '&:hover': { color: 'error.main' } }}
+                      >
+                        {deleting === entry.id
+                          ? <CircularProgress size={14} color="inherit" />
+                          : <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                        }
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         )}
-      </div>
-    </div>
+      </Card>
+    </Box>
   );
 }

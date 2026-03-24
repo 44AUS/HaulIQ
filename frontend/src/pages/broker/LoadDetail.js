@@ -1,18 +1,43 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Truck, Calendar, Package, Weight, DollarSign, Eye, Users, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
+import {
+  Box, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress,
+  Divider, Paper, Alert,
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PlaceIcon from '@mui/icons-material/Place';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ScaleIcon from '@mui/icons-material/Scale';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GroupIcon from '@mui/icons-material/Group';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
-const BID_STATUS_CFG = {
-  pending:   { label: 'Pending',   cls: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
-  accepted:  { label: 'Accepted',  cls: 'bg-brand-500/10 text-brand-400 border-brand-500/20' },
-  rejected:  { label: 'Rejected',  cls: 'bg-red-500/10 text-red-400 border-red-500/20' },
-  countered: { label: 'Countered', cls: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  withdrawn: { label: 'Withdrawn', cls: 'bg-dark-600 text-dark-400 border-dark-400/20' },
-};
+function loadStatusChip(status) {
+  if (status === 'active') return <Chip label="Active" color="success" size="small" />;
+  if (status === 'filled') return <Chip label="Filled" color="info" size="small" />;
+  return <Chip label="Expired" color="error" size="small" />;
+}
+
+function bidStatusChip(status) {
+  const map = {
+    pending:   { label: 'Pending',   color: 'warning' },
+    accepted:  { label: 'Accepted',  color: 'success' },
+    rejected:  { label: 'Rejected',  color: 'error' },
+    countered: { label: 'Countered', color: 'info' },
+    withdrawn: { label: 'Withdrawn', color: 'default' },
+  };
+  const cfg = map[status] || map.pending;
+  return <Chip label={cfg.label} color={cfg.color} size="small" />;
+}
 
 export default function BrokerLoadDetail() {
   const { id } = useParams();
@@ -50,179 +75,207 @@ export default function BrokerLoadDetail() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
   );
 
   if (error || !load) return (
-    <div className="glass rounded-xl border border-red-500/20 p-12 text-center">
-      <p className="text-red-400">{error || 'Load not found'}</p>
-      <button onClick={() => navigate(-1)} className="btn-secondary mt-4 text-sm">Go back</button>
-    </div>
+    <Box sx={{ textAlign: 'center', py: 8 }}>
+      <Alert severity="error" sx={{ mb: 2, maxWidth: 400, mx: 'auto' }}>{error || 'Load not found'}</Alert>
+      <Button variant="outlined" onClick={() => navigate(-1)}>Go back</Button>
+    </Box>
   );
 
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      {/* Back nav */}
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-dark-300 hover:text-white text-sm transition-colors">
-        <ArrowLeft size={16} /> Back to Manage Loads
-      </button>
+    <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Button startIcon={<ArrowBackIcon />} variant="text" onClick={() => navigate(-1)} sx={{ alignSelf: 'flex-start' }}>
+        Back to Manage Loads
+      </Button>
 
-      {/* Load header */}
-      <div className="glass rounded-xl border border-dark-400/40 p-6">
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-5">
-          <div>
-            <p className="text-dark-400 text-xs mb-1">Load #{load.id.slice(0, 8)}</p>
-            <h1 className="text-white text-xl font-bold">{load.origin} → {load.dest}</h1>
-            <p className="text-dark-300 text-sm mt-0.5">{load.type} · {load.miles} miles</p>
-          </div>
-          <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border capitalize ${
-            load.status === 'active' ? 'bg-brand-500/10 text-brand-400 border-brand-500/20' :
-            load.status === 'filled' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-            'bg-red-500/10 text-red-400 border-red-500/20'
-          }`}>{load.status}</span>
-        </div>
+      {/* Load Header */}
+      <Card>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            <Box>
+              <Typography variant="caption" color="text.secondary">Load #{load.id.slice(0, 8)}</Typography>
+              <Typography variant="h6" fontWeight={700}>{load.origin} → {load.dest}</Typography>
+              <Typography variant="body2" color="text.secondary">{load.type} · {load.miles} miles</Typography>
+            </Box>
+            {loadStatusChip(load.status)}
+          </Box>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          <div className="bg-dark-700/50 rounded-lg p-3 text-center">
-            <p className="text-dark-400 text-xs mb-1 flex items-center justify-center gap-1"><DollarSign size={10} />Rate</p>
-            <p className="text-white font-bold">${(load.rate || 0).toLocaleString()}</p>
-          </div>
-          <div className="bg-dark-700/50 rounded-lg p-3 text-center">
-            <p className="text-dark-400 text-xs mb-1">Per Mile</p>
-            <p className="text-white font-bold">${(load.ratePerMile || 0).toFixed(2)}</p>
-          </div>
-          <div className="bg-dark-700/50 rounded-lg p-3 text-center">
-            <p className="text-dark-400 text-xs mb-1 flex items-center justify-center gap-1"><Eye size={10} />Views</p>
-            <p className="text-white font-bold">{load.viewCount || 0}</p>
-          </div>
-          <div className="bg-dark-700/50 rounded-lg p-3 text-center">
-            <p className="text-dark-400 text-xs mb-1 flex items-center justify-center gap-1"><Users size={10} />Bids</p>
-            <p className="text-white font-bold">{bids.length}</p>
-          </div>
-        </div>
+          {/* Stats */}
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            {[
+              { label: 'Rate', value: `$${(load.rate || 0).toLocaleString()}`, icon: <AttachMoneyIcon sx={{ fontSize: 14 }} /> },
+              { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` },
+              { label: 'Views', value: load.viewCount || 0, icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
+              { label: 'Bids', value: bids.length, icon: <GroupIcon sx={{ fontSize: 14 }} /> },
+            ].map(({ label, value, icon }) => (
+              <Grid item xs={6} sm={3} key={label}>
+                <Paper variant="outlined" sx={{ p: 1.5, textAlign: 'center' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                    {icon}{label}
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight={700}>{value}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
 
-        <div className="grid md:grid-cols-2 gap-4 text-sm">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-dark-300">
-              <MapPin size={13} className="text-brand-400 flex-shrink-0" />
-              <span>Origin: <span className="text-white">{load.origin}</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-dark-300">
-              <MapPin size={13} className="text-dark-400 flex-shrink-0" />
-              <span>Dest: <span className="text-white">{load.dest}</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-dark-300">
-              <Calendar size={13} className="flex-shrink-0" />
-              <span>Pickup: <span className="text-white">{load.pickup}</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-dark-300">
-              <Calendar size={13} className="flex-shrink-0" />
-              <span>Delivery: <span className="text-white">{load.delivery}</span></span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {load.commodity && (
-              <div className="flex items-center gap-2 text-dark-300">
-                <Package size={13} className="flex-shrink-0" />
-                <span>Commodity: <span className="text-white">{load.commodity}</span></span>
-              </div>
-            )}
-            {load.weight && (
-              <div className="flex items-center gap-2 text-dark-300">
-                <Weight size={13} className="flex-shrink-0" />
-                <span>Weight: <span className="text-white">{load.weight}</span></span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-dark-300">
-              <Truck size={13} className="flex-shrink-0" />
-              <span>Type: <span className="text-white">{load.type}</span></span>
-            </div>
-          </div>
-        </div>
+          {/* Details */}
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {[
+                  { icon: <PlaceIcon sx={{ fontSize: 14, color: 'primary.main' }} />, text: `Origin: ${load.origin}` },
+                  { icon: <PlaceIcon sx={{ fontSize: 14, color: 'text.secondary' }} />, text: `Dest: ${load.dest}` },
+                  { icon: <CalendarTodayIcon sx={{ fontSize: 14 }} />, text: `Pickup: ${load.pickup}` },
+                  { icon: <CalendarTodayIcon sx={{ fontSize: 14 }} />, text: `Delivery: ${load.delivery}` },
+                ].map(({ icon, text }) => (
+                  <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {icon}
+                    <Typography variant="body2" color="text.secondary">{text}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {load.commodity && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <InventoryIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="body2" color="text.secondary">Commodity: {load.commodity}</Typography>
+                  </Box>
+                )}
+                {load.weight && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <ScaleIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="body2" color="text.secondary">Weight: {load.weight}</Typography>
+                  </Box>
+                )}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <LocalShippingIcon sx={{ fontSize: 14 }} />
+                  <Typography variant="body2" color="text.secondary">Type: {load.type}</Typography>
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
 
-        {load.notes && (
-          <div className="mt-4 bg-dark-700/30 rounded-lg px-4 py-3">
-            <p className="text-dark-400 text-xs mb-1">Notes</p>
-            <p className="text-dark-100 text-sm">{load.notes}</p>
-          </div>
-        )}
+          {load.notes && (
+            <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Notes</Typography>
+              <Typography variant="body2">{load.notes}</Typography>
+            </Paper>
+          )}
 
-        <div className="mt-5">
-          <Suspense fallback={<div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>}>
+          <Suspense fallback={
+            <Box sx={{ height: 224, borderRadius: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CircularProgress size={24} />
+            </Box>
+          }>
             <RouteMap origin={load.origin} dest={load.dest} miles={load._raw?.miles} />
           </Suspense>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Bids */}
-      <div className="glass rounded-xl border border-dark-400/40 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Users size={16} className="text-brand-400" />
-          <h2 className="text-white font-semibold">Bids</h2>
-          {pendingBids.length > 0 && (
-            <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs px-2 py-0.5 rounded-full">
-              {pendingBids.length} pending
-            </span>
-          )}
-        </div>
+      <Card>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+            <GroupIcon color="primary" />
+            <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
+            {pendingBids.length > 0 && (
+              <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />
+            )}
+          </Box>
 
-        {bids.length === 0 ? (
-          <p className="text-dark-400 text-sm text-center py-6">No bids yet</p>
-        ) : (
-          <div className="space-y-3">
-            {bids.map(bid => {
-              const cfg = BID_STATUS_CFG[bid.status] || BID_STATUS_CFG.pending;
-              return (
-                <div key={bid.id} className="bg-dark-700/40 rounded-xl p-4 border border-dark-400/20">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Link to={`/carrier-profile/${bid.carrier_id}`} className="text-white font-semibold text-sm hover:text-brand-400 transition-colors">
+          {bids.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>
+              No bids yet
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {bids.map(bid => (
+                <Paper key={bid.id} variant="outlined" sx={{ p: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                        <Typography
+                          component={Link}
+                          to={`/carrier-profile/${bid.carrier_id}`}
+                          variant="body2"
+                          fontWeight={600}
+                          sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                        >
                           {bid.carrier_name || 'Carrier'}
-                        </Link>
-                        {bid.carrier_mc && <span className="text-dark-400 text-xs">MC-{bid.carrier_mc}</span>}
-                        <span className={`text-xs px-2 py-0.5 rounded-full border ${cfg.cls}`}>{cfg.label}</span>
-                      </div>
-                      <p className="text-brand-400 font-bold text-lg">${(bid.amount || 0).toLocaleString()}</p>
-                      {bid.note && <p className="text-dark-300 text-xs mt-1 italic">"{bid.note}"</p>}
-                      {bid.counter_amount && (
-                        <p className="text-blue-400 text-xs mt-1">Counter offer: ${bid.counter_amount.toLocaleString()}{bid.counter_note && ` — ${bid.counter_note}`}</p>
+                        </Typography>
+                        {bid.carrier_mc && (
+                          <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>
+                        )}
+                        {bidStatusChip(bid.status)}
+                      </Box>
+                      <Typography variant="h6" fontWeight={700} color="primary.main">
+                        ${(bid.amount || 0).toLocaleString()}
+                      </Typography>
+                      {bid.note && (
+                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+                          "{bid.note}"
+                        </Typography>
                       )}
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Link to={`/broker/messages`} className="p-1.5 text-dark-400 hover:text-brand-400 hover:bg-brand-500/10 rounded-lg transition-colors" title="Message carrier">
-                        <MessageSquare size={14} />
-                      </Link>
+                      {bid.counter_amount && (
+                        <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
+                          Counter offer: ${bid.counter_amount.toLocaleString()}
+                          {bid.counter_note && ` — ${bid.counter_note}`}
+                        </Typography>
+                      )}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                      <Button
+                        component={Link}
+                        to="/broker/messages"
+                        variant="text"
+                        size="small"
+                        title="Message carrier"
+                        sx={{ minWidth: 0, px: 1 }}
+                      >
+                        <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
+                      </Button>
                       {bid.status === 'pending' && load.status === 'active' && (
                         <>
-                          <button
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="success"
+                            startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}
                             onClick={() => handleAcceptBid(bid.id)}
                             disabled={actionLoading === bid.id}
-                            className="flex items-center gap-1 text-xs bg-brand-500/10 text-brand-400 border border-brand-500/20 hover:bg-brand-500/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                           >
-                            <CheckCircle size={12} /> Accept
-                          </button>
-                          <button
+                            Accept
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}
                             onClick={() => handleRejectBid(bid.id)}
                             disabled={actionLoading === bid.id + '_reject'}
-                            className="flex items-center gap-1 text-xs bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                           >
-                            <XCircle size={12} /> Reject
-                          </button>
+                            Reject
+                          </Button>
                         </>
                       )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+                    </Box>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

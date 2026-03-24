@@ -1,29 +1,49 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Package, Edit, Trash2, Eye, Users, PlusCircle, X, Save, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import CityAutocomplete from '../../components/shared/CityAutocomplete';
 import { getDrivingMiles } from '../../services/routing';
+import {
+  Box, Typography, Button, Card, Table, TableHead, TableRow, TableCell, TableBody,
+  Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, FormControl, InputLabel, Select, MenuItem, Grid, Alert,
+  CircularProgress, Paper, ToggleButtonGroup, ToggleButton, InputAdornment,
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GroupIcon from '@mui/icons-material/Group';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
 
 const STATUS_OPTS = ['all', 'active', 'filled', 'expired'];
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
+const DIMS = ['48x102', '53x102', '40x96', '28x102'];
+
+function statusChip(status) {
+  if (status === 'active') return <Chip label="Active" size="small" color="success" />;
+  if (status === 'filled') return <Chip label="Filled" size="small" color="info" />;
+  return <Chip label="Expired" size="small" color="error" />;
+}
 
 function EditModal({ load, onClose, onSaved }) {
   const raw = load._raw;
   const [form, setForm] = useState({
-    origin:         raw.origin || '',
-    dest:           raw.destination || '',
-    miles:          raw.miles || '',
-    deadhead:       raw.deadhead_miles || '',
-    pickup:         raw.pickup_date || '',
-    delivery:       raw.delivery_date || '',
-    equipment:      raw.load_type || 'Dry Van',
-    weight:         raw.weight_lbs || '',
-    commodity:      raw.commodity || '',
-    dims:           raw.dimensions || '48x102',
-    rate:           raw.rate || '',
-    notes:          raw.notes || '',
+    origin:    raw.origin || '',
+    dest:      raw.destination || '',
+    miles:     raw.miles || '',
+    deadhead:  raw.deadhead_miles || '',
+    pickup:    raw.pickup_date || '',
+    delivery:  raw.delivery_date || '',
+    equipment: raw.load_type || 'Dry Van',
+    weight:    raw.weight_lbs || '',
+    commodity: raw.commodity || '',
+    dims:      raw.dimensions || '48x102',
+    rate:      raw.rate || '',
+    notes:     raw.notes || '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -68,98 +88,95 @@ function EditModal({ load, onClose, onSaved }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative glass rounded-xl border border-dark-400/40 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-dark-400/40">
-          <h2 className="text-white font-semibold">Edit Load</h2>
-          <button onClick={onClose} className="text-dark-400 hover:text-white transition-colors"><X size={18} /></button>
-        </div>
-
-        <form onSubmit={handleSave} className="p-5 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Origin</label>
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        Edit Load
+        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+      </DialogTitle>
+      <Box component="form" onSubmit={handleSave}>
+        <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Origin *</Typography>
               <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} required />
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Destination</label>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Destination *</Typography>
               <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} required />
-            </div>
-          </div>
+            </Grid>
+          </Grid>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Loaded Miles</label>
-              <div className="relative">
-                <input className="input pr-8" type="number" value={form.miles} onChange={e => set('miles', e.target.value)} required />
-                {calcingMiles && <div className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-400 animate-spin"><Loader size={13} /></div>}
-              </div>
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Deadhead Miles</label>
-              <input className="input" type="number" value={form.deadhead} onChange={e => set('deadhead', e.target.value)} />
-            </div>
-          </div>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Loaded Miles" required type="number"
+                value={form.miles} onChange={e => set('miles', e.target.value)}
+                InputProps={{ endAdornment: calcingMiles ? <InputAdornment position="end"><CircularProgress size={14} /></InputAdornment> : null }} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Deadhead Miles" type="number"
+                value={form.deadhead} onChange={e => set('deadhead', e.target.value)} />
+            </Grid>
+          </Grid>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Pickup Date</label>
-              <input className="input" type="date" value={form.pickup} onChange={e => set('pickup', e.target.value)} required />
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Delivery Date</label>
-              <input className="input" type="date" value={form.delivery} onChange={e => set('delivery', e.target.value)} required />
-            </div>
-          </div>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Pickup Date" required type="date"
+                value={form.pickup} onChange={e => set('pickup', e.target.value)}
+                InputLabelProps={{ shrink: true }} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Delivery Date" required type="date"
+                value={form.delivery} onChange={e => set('delivery', e.target.value)}
+                InputLabelProps={{ shrink: true }} />
+            </Grid>
+          </Grid>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Equipment Type</label>
-              <select className="input cursor-pointer" value={form.equipment} onChange={e => set('equipment', e.target.value)}>
-                {EQUIPMENT.map(eq => <option key={eq}>{eq}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Weight (lbs)</label>
-              <input className="input" type="number" value={form.weight} onChange={e => set('weight', e.target.value)} />
-            </div>
-          </div>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Equipment Type</InputLabel>
+                <Select value={form.equipment} label="Equipment Type" onChange={e => set('equipment', e.target.value)}>
+                  {EQUIPMENT.map(eq => <MenuItem key={eq} value={eq}>{eq}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Weight (lbs)" type="number"
+                value={form.weight} onChange={e => set('weight', e.target.value)} />
+            </Grid>
+          </Grid>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Commodity</label>
-              <input className="input" value={form.commodity} onChange={e => set('commodity', e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Dimensions</label>
-              <select className="input cursor-pointer" value={form.dims} onChange={e => set('dims', e.target.value)}>
-                {['48x102', '53x102', '40x96', '28x102'].map(d => <option key={d}>{d}</option>)}
-              </select>
-            </div>
-          </div>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Commodity"
+                value={form.commodity} onChange={e => set('commodity', e.target.value)} />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Dimensions</InputLabel>
+                <Select value={form.dims} label="Dimensions" onChange={e => set('dims', e.target.value)}>
+                  {DIMS.map(d => <MenuItem key={d} value={d}>{d}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
 
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-1.5">Rate (All-In) $</label>
-            <input className="input" type="number" value={form.rate} onChange={e => set('rate', e.target.value)} required />
-          </div>
+          <TextField fullWidth size="small" label="Rate (All-In) $" required type="number"
+            value={form.rate} onChange={e => set('rate', e.target.value)} />
 
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-1.5">Notes</label>
-            <textarea className="input resize-none" rows={3} value={form.notes} onChange={e => set('notes', e.target.value)} />
-          </div>
+          <TextField fullWidth size="small" label="Notes" multiline rows={3}
+            value={form.notes} onChange={e => set('notes', e.target.value)} />
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 py-2.5 text-sm">Cancel</button>
-            <button type="submit" disabled={saving} className="btn-primary flex-1 py-2.5 text-sm flex items-center justify-center gap-2 disabled:opacity-60">
-              <Save size={14} /> {saving ? 'Saving…' : 'Save Changes'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+          {error && <Alert severity="error">{error}</Alert>}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, gap: 1 }}>
+          <Button variant="outlined" onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 }
 
@@ -193,94 +210,106 @@ export default function ManageLoads() {
   const filtered = filter === 'all' ? loads : loads.filter(l => l.status === filter);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2"><Package size={22} className="text-brand-400" />Manage Loads</h1>
-          <p className="text-dark-300 text-sm mt-1">{loads.filter(l => l.status === 'active').length} active loads</p>
-        </div>
-        <Link to="/broker/post" className="btn-primary flex items-center gap-2 text-sm py-2.5">
-          <PlusCircle size={16} /> Post New Load
-        </Link>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <InventoryIcon color="primary" /> Manage Loads
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            {loads.filter(l => l.status === 'active').length} active loads
+          </Typography>
+        </Box>
+        <Button component={Link} to="/broker/post" variant="contained" startIcon={<AddCircleOutlineIcon />}>
+          Post New Load
+        </Button>
+      </Box>
 
-      <div className="flex gap-2 flex-wrap">
-        {STATUS_OPTS.map(s => (
-          <button key={s} onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium border transition-all capitalize ${
-              filter === s ? 'border-brand-500 bg-brand-500/10 text-brand-400' : 'border-dark-400/40 text-dark-300 hover:text-white'
-            }`}>
-            {s} {s !== 'all' && `(${loads.filter(l => l.status === s).length})`}
-          </button>
-        ))}
-      </div>
+      {/* Filter chips */}
+      <Box>
+        <ToggleButtonGroup value={filter} exclusive onChange={(_, v) => v && setFilter(v)} size="small">
+          {STATUS_OPTS.map(s => (
+            <ToggleButton key={s} value={s} sx={{ textTransform: 'capitalize', px: 2 }}>
+              {s}{s !== 'all' && ` (${loads.filter(l => l.status === s).length})`}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Box>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
       ) : error ? (
-        <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
-          <p className="text-red-400">{error}</p>
-        </div>
+        <Alert severity="error">{error}</Alert>
       ) : (
-        <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-dark-700/50 text-dark-300 text-xs uppercase tracking-wider">
-                <tr>
+        <Card>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'action.hover' }}>
                   {['Route', 'Type', 'Rate', 'Pickup', 'Views', 'Bids', 'Status', 'Actions'].map(h => (
-                    <th key={h} className="px-5 py-3 text-left font-medium whitespace-nowrap">{h}</th>
+                    <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                      {h}
+                    </TableCell>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-dark-400/20">
+                </TableRow>
+              </TableHead>
+              <TableBody>
                 {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="px-5 py-10 text-center text-dark-400">No loads found</td>
-                  </tr>
-                ) : filtered.map(load => (
-                  <tr key={load.id} className="hover:bg-dark-700/20 transition-colors">
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      <Link to={`/broker/loads/${load._raw.id}`} className="text-white font-medium hover:text-brand-400 transition-colors">
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 5, color: 'text.secondary' }}>
+                      No loads found
+                    </TableCell>
+                  </TableRow>
+                ) : filtered.map((load, idx) => (
+                  <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      <Typography
+                        component={Link}
+                        to={`/broker/loads/${load._raw.id}`}
+                        variant="body2"
+                        fontWeight={600}
+                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                      >
                         {load.origin} → {load.dest}
-                      </Link>
-                    </td>
-                    <td className="px-5 py-4 text-dark-300 whitespace-nowrap">{load.type}</td>
-                    <td className="px-5 py-4 text-white font-semibold">${(load.rate || 0).toLocaleString()}</td>
-                    <td className="px-5 py-4 text-dark-300 text-xs whitespace-nowrap">{load.pickup}</td>
-                    <td className="px-5 py-4">
-                      <span className="flex items-center gap-1 text-dark-200"><Eye size={12} />{load.viewCount || 0}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="flex items-center gap-1 text-dark-200"><Users size={12} />—</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={load.status === 'active' ? 'badge-green' : load.status === 'filled' ? 'badge-blue' : 'badge-red'}>
-                        {load.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>{load.type}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
+                    <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.pickup}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <VisibilityIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                        <Typography variant="body2">{load.viewCount || 0}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <GroupIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                        <Typography variant="body2">—</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{statusChip(load.status)}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {load.status === 'active' && (
-                          <button
-                            onClick={() => setEditingLoad(load)}
-                            className="p-1.5 text-dark-300 hover:text-white hover:bg-dark-600 rounded-lg transition-colors"
-                            title="Edit load">
-                            <Edit size={14} />
-                          </button>
+                          <IconButton size="small" onClick={() => setEditingLoad(load)} title="Edit load">
+                            <EditIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
                         )}
-                        <button onClick={() => handleDelete(load)} className="p-1.5 text-dark-300 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        <IconButton size="small" onClick={() => handleDelete(load)} color="error">
+                          <DeleteIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </TableBody>
+            </Table>
+          </Box>
+        </Card>
       )}
 
       {editingLoad && (
@@ -290,6 +319,6 @@ export default function ManageLoads() {
           onSaved={fetchLoads}
         />
       )}
-    </div>
+    </Box>
   );
 }

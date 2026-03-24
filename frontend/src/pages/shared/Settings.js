@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { User, Lock, Building, Truck, Phone, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, TextField, Button, Alert,
+  Grid, Divider,
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
+import BusinessIcon from '@mui/icons-material/Business';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import PhoneIcon from '@mui/icons-material/Phone';
+import SaveIcon from '@mui/icons-material/Save';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 
@@ -16,8 +25,8 @@ export default function Settings() {
   });
 
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
-  const [status, setStatus]       = useState(null); // { type: 'success'|'error', msg }
-  const [saving, setSaving]       = useState(false);
+  const [status, setStatus] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   async function saveProfile(e) {
     e.preventDefault();
@@ -71,169 +80,170 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 space-y-8">
-      <h1 className="text-2xl font-bold text-white">Account Settings</h1>
+    <Box sx={{ maxWidth: 640, mx: 'auto', py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Typography variant="h5" fontWeight={700}>Account Settings</Typography>
 
       {status && (
-        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${
-          status.type === 'success'
-            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-            : 'bg-red-500/10 text-red-400 border border-red-500/20'
-        }`}>
-          {status.type === 'success'
-            ? <CheckCircle size={16} />
-            : <AlertCircle size={16} />}
+        <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>
           {status.msg}
-        </div>
+        </Alert>
       )}
 
-      {/* Profile */}
-      <form onSubmit={saveProfile} className="bg-dark-800 rounded-xl border border-dark-700 p-6 space-y-5">
-        <div className="flex items-center gap-2 mb-1">
-          <User size={18} className="text-brand-400" />
-          <h2 className="text-lg font-semibold text-white">Profile Information</h2>
-        </div>
+      {/* Profile form */}
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="subtitle1" fontWeight={700}>Profile Information</Typography>
+          </Box>
+          <Box component="form" onSubmit={saveProfile}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Full Name"
+                  size="small"
+                  fullWidth
+                  value={profile.name}
+                  onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Email"
+                  size="small"
+                  fullWidth
+                  value={profile.email}
+                  disabled
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Phone Number"
+                  size="small"
+                  fullWidth
+                  type="tel"
+                  placeholder="+1 (555) 000-0000"
+                  value={profile.phone}
+                  onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
+                  InputProps={{ startAdornment: <PhoneIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Company Name"
+                  size="small"
+                  fullWidth
+                  value={profile.company}
+                  onChange={e => setProfile(p => ({ ...p, company: e.target.value }))}
+                  InputProps={{ startAdornment: <BusinessIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
+                />
+              </Grid>
+              {user?.role === 'carrier' && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="MC Number"
+                      size="small"
+                      fullWidth
+                      placeholder="MC-000000"
+                      value={profile.mc}
+                      onChange={e => setProfile(p => ({ ...p, mc: e.target.value }))}
+                      InputProps={{ startAdornment: <LocalShippingIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="DOT Number"
+                      size="small"
+                      fullWidth
+                      placeholder="DOT-000000"
+                      value={profile.dot}
+                      onChange={e => setProfile(p => ({ ...p, dot: e.target.value }))}
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={saving}
+                startIcon={<SaveIcon />}
+              >
+                {saving ? 'Saving…' : 'Save Changes'}
+              </Button>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs text-dark-400 mb-1">Full Name</label>
-            <input
-              value={profile.name}
-              onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
-              className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-dark-400 mb-1">Email</label>
-            <input
-              value={profile.email}
-              disabled
-              className="w-full bg-dark-700/50 border border-dark-600 rounded-lg px-3 py-2 text-dark-400 text-sm cursor-not-allowed"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs text-dark-400 mb-1">
-            <Phone size={12} className="inline mr-1" />
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            value={profile.phone}
-            onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
-            placeholder="+1 (555) 000-0000"
-            className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs text-dark-400 mb-1">
-            <Building size={12} className="inline mr-1" />
-            Company Name
-          </label>
-          <input
-            value={profile.company}
-            onChange={e => setProfile(p => ({ ...p, company: e.target.value }))}
-            className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-          />
-        </div>
-
-        {user?.role === 'carrier' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs text-dark-400 mb-1">
-                <Truck size={12} className="inline mr-1" />
-                MC Number
-              </label>
-              <input
-                value={profile.mc}
-                onChange={e => setProfile(p => ({ ...p, mc: e.target.value }))}
-                placeholder="MC-000000"
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-dark-400 mb-1">DOT Number</label>
-              <input
-                value={profile.dot}
-                onChange={e => setProfile(p => ({ ...p, dot: e.target.value }))}
-                placeholder="DOT-000000"
-                className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Save size={15} />
-            {saving ? 'Saving…' : 'Save Changes'}
-          </button>
-        </div>
-      </form>
-
-      {/* Password */}
-      <form onSubmit={changePassword} className="bg-dark-800 rounded-xl border border-dark-700 p-6 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Lock size={18} className="text-brand-400" />
-          <h2 className="text-lg font-semibold text-white">Change Password</h2>
-        </div>
-
-        <div>
-          <label className="block text-xs text-dark-400 mb-1">New Password</label>
-          <input
-            type="password"
-            value={passwords.next}
-            onChange={e => setPasswords(p => ({ ...p, next: e.target.value }))}
-            placeholder="Min. 8 characters"
-            className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-dark-400 mb-1">Confirm New Password</label>
-          <input
-            type="password"
-            value={passwords.confirm}
-            onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
-            className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-brand-500"
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving || !passwords.next}
-            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Lock size={15} />
-            {saving ? 'Saving…' : 'Change Password'}
-          </button>
-        </div>
-      </form>
+      {/* Password form */}
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+            <LockIcon color="primary" />
+            <Typography variant="subtitle1" fontWeight={700}>Change Password</Typography>
+          </Box>
+          <Box component="form" onSubmit={changePassword}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  label="New Password"
+                  size="small"
+                  fullWidth
+                  type="password"
+                  placeholder="Min. 8 characters"
+                  value={passwords.next}
+                  onChange={e => setPasswords(p => ({ ...p, next: e.target.value }))}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label="Confirm New Password"
+                  size="small"
+                  fullWidth
+                  type="password"
+                  value={passwords.confirm}
+                  onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
+                />
+              </Grid>
+            </Grid>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={saving || !passwords.next}
+                startIcon={<LockIcon />}
+              >
+                {saving ? 'Saving…' : 'Change Password'}
+              </Button>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Account info */}
-      <div className="bg-dark-800 rounded-xl border border-dark-700 p-6 space-y-3">
-        <h2 className="text-lg font-semibold text-white mb-3">Account Info</h2>
-        <div className="flex justify-between text-sm">
-          <span className="text-dark-400">Role</span>
-          <span className="text-white capitalize">{user?.role}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-dark-400">Plan</span>
-          <span className="text-white capitalize">{user?.plan}</span>
-        </div>
-        {user?.joined && (
-          <div className="flex justify-between text-sm">
-            <span className="text-dark-400">Member since</span>
-            <span className="text-white">{user.joined}</span>
-          </div>
-        )}
-      </div>
-    </div>
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="subtitle1" fontWeight={700} mb={2}>Account Info</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {[
+              { label: 'Role', value: user?.role },
+              { label: 'Plan', value: user?.plan },
+              ...(user?.joined ? [{ label: 'Member since', value: user.joined }] : []),
+            ].map(({ label, value }, i, arr) => (
+              <Box key={label}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography variant="body2" color="text.secondary">{label}</Typography>
+                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{value}</Typography>
+                </Box>
+                {i < arr.length - 1 && <Divider sx={{ mt: 1.5 }} />}
+              </Box>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

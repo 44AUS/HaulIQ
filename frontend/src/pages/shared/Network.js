@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Check, X, Clock, ExternalLink, Building2, Hash } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Avatar, Button, IconButton,
+  Chip, Grid, CircularProgress, Divider,
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import BusinessIcon from '@mui/icons-material/Business';
+import TagIcon from '@mui/icons-material/Tag';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
 
@@ -39,147 +49,174 @@ export default function Network() {
     entry.role === 'carrier' ? `/carrier-profile/${entry.user_id}` : `/broker-profile/${entry.user_id}`;
 
   if (loading) return (
-    <div className="flex items-center justify-center py-24">
-      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
   );
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Users size={22} className="text-brand-400" /> My Network
-        </h1>
-        <p className="text-dark-300 text-sm mt-1">
-          {user?.role === 'broker' ? 'Carriers you\'ve connected with' : 'Brokers you\'re connected with'}
-        </p>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Header */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <PeopleIcon sx={{ color: 'primary.main' }} />
+          <Typography variant="h5" fontWeight={700}>My Network</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          {user?.role === 'broker' ? "Carriers you've connected with" : "Brokers you're connected with"}
+        </Typography>
+      </Box>
 
-      {/* Pending requests (carrier only — they approve) */}
+      {/* Pending requests */}
       {pending.length > 0 && (
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={16} className="text-yellow-400" />
-            <h2 className="text-white font-semibold">Pending Requests</h2>
-            <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
-              {pending.length}
-            </span>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <AccessTimeIcon sx={{ color: 'warning.main', fontSize: 18 }} />
+            <Typography variant="subtitle1" fontWeight={700}>Pending Requests</Typography>
+            <Chip label={pending.length} size="small" color="warning" />
+          </Box>
+          <Grid container spacing={2}>
             {pending.map(req => (
-              <div key={req.id} className="glass rounded-xl border border-yellow-500/20 p-5">
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 font-bold flex-shrink-0">
-                      {req.name?.charAt(0) || '?'}
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold text-sm">{req.name}</p>
-                      {req.company && (
-                        <p className="text-dark-400 text-xs flex items-center gap-1">
-                          <Building2 size={10} /> {req.company}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Link to={profilePath(req)} className="text-brand-400 hover:text-brand-300 transition-colors" title="View profile">
-                    <ExternalLink size={14} />
-                  </Link>
-                </div>
-                <p className="text-dark-400 text-xs mb-4 italic">Wants to connect with you</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleRespond(req.id, true)}
-                    disabled={responding === req.id + '_accept'}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 hover:bg-brand-500/20 text-xs font-medium transition-colors disabled:opacity-50">
-                    <Check size={12} /> Accept
-                  </button>
-                  <button
-                    onClick={() => handleRespond(req.id, false)}
-                    disabled={responding === req.id + '_decline'}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-colors disabled:opacity-50">
-                    <X size={12} /> Decline
-                  </button>
-                </div>
-              </div>
+              <Grid item xs={12} md={6} key={req.id}>
+                <Card variant="outlined" sx={{ borderColor: 'warning.main', bgcolor: 'rgba(245,127,23,0.04)' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ bgcolor: 'warning.dark', width: 40, height: 40, fontWeight: 700 }}>
+                          {req.name?.charAt(0) || '?'}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body2" fontWeight={700}>{req.name}</Typography>
+                          {req.company && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <BusinessIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+                              <Typography variant="caption" color="text.secondary">{req.company}</Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                      <IconButton component={Link} to={profilePath(req)} size="small" title="View profile">
+                        <OpenInNewIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" fontStyle="italic" display="block" sx={{ mb: 2 }}>
+                      Wants to connect with you
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        fullWidth
+                        startIcon={<CheckIcon />}
+                        onClick={() => handleRespond(req.id, true)}
+                        disabled={responding === req.id + '_accept'}
+                      >
+                        Accept
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        fullWidth
+                        startIcon={<CloseIcon />}
+                        onClick={() => handleRespond(req.id, false)}
+                        disabled={responding === req.id + '_decline'}
+                      >
+                        Decline
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
-        </div>
+          </Grid>
+        </Box>
       )}
 
-      {/* Broker pending sent (they can see their outbound pending) */}
       {/* Connections */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Check size={16} className="text-brand-400" />
-          <h2 className="text-white font-semibold">Connections</h2>
-          <span className="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold px-2 py-0.5 rounded-full">
-            {connections.length}
-          </span>
-        </div>
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <CheckIcon sx={{ color: 'primary.main', fontSize: 18 }} />
+          <Typography variant="subtitle1" fontWeight={700}>Connections</Typography>
+          <Chip label={connections.length} size="small" color="primary" variant="outlined" />
+        </Box>
 
         {connections.length === 0 ? (
-          <div className="glass rounded-xl border border-dark-400/40 p-12 text-center">
-            <Users size={36} className="text-dark-500 mx-auto mb-3" />
-            <p className="text-dark-300 text-sm font-medium">No connections yet</p>
-            <p className="text-dark-500 text-xs mt-1">
-              {user?.role === 'broker'
-                ? 'Add carriers from their profile page or the Instant Book settings'
-                : 'Brokers will appear here after you accept their connection requests'}
-            </p>
-          </div>
+          <Card variant="outlined">
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <PeopleIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary" fontWeight={600}>No connections yet</Typography>
+              <Typography variant="caption" color="text.disabled">
+                {user?.role === 'broker'
+                  ? 'Add carriers from their profile page or the Instant Book settings'
+                  : 'Brokers will appear here after you accept their connection requests'}
+              </Typography>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Grid container spacing={2}>
             {connections.map(conn => (
-              <div key={conn.id} className="glass rounded-xl border border-dark-400/40 p-5 flex flex-col gap-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 font-bold flex-shrink-0">
-                      {conn.name?.charAt(0) || '?'}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-white font-semibold text-sm truncate">{conn.name}</p>
-                      <p className="text-dark-400 text-xs capitalize">{conn.role}</p>
-                    </div>
-                  </div>
-                  <Link to={profilePath(conn)} className="text-brand-400 hover:text-brand-300 transition-colors flex-shrink-0" title="View profile">
-                    <ExternalLink size={14} />
-                  </Link>
-                </div>
+              <Grid item xs={12} md={6} lg={4} key={conn.id}>
+                <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                        <Avatar sx={{ bgcolor: 'primary.dark', width: 40, height: 40, fontWeight: 700, flexShrink: 0 }}>
+                          {conn.name?.charAt(0) || '?'}
+                        </Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={700} noWrap>{conn.name}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>{conn.role}</Typography>
+                        </Box>
+                      </Box>
+                      <IconButton component={Link} to={profilePath(conn)} size="small" title="View profile" sx={{ flexShrink: 0 }}>
+                        <OpenInNewIcon sx={{ fontSize: 14 }} />
+                      </IconButton>
+                    </Box>
 
-                <div className="space-y-1.5 text-xs text-dark-300">
-                  {conn.company && (
-                    <div className="flex items-center gap-2">
-                      <Building2 size={11} className="flex-shrink-0 text-dark-500" />
-                      <span className="truncate">{conn.company}</span>
-                    </div>
-                  )}
-                  {conn.mc_number && (
-                    <div className="flex items-center gap-2">
-                      <Hash size={11} className="flex-shrink-0 text-dark-500" />
-                      <span>MC-{conn.mc_number}</span>
-                    </div>
-                  )}
-                </div>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 2 }}>
+                      {conn.company && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <BusinessIcon sx={{ fontSize: 13, color: 'text.disabled', flexShrink: 0 }} />
+                          <Typography variant="caption" color="text.secondary" noWrap>{conn.company}</Typography>
+                        </Box>
+                      )}
+                      {conn.mc_number && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TagIcon sx={{ fontSize: 13, color: 'text.disabled', flexShrink: 0 }} />
+                          <Typography variant="caption" color="text.secondary">MC-{conn.mc_number}</Typography>
+                        </Box>
+                      )}
+                    </Box>
 
-                <div className="flex items-center gap-2 mt-auto pt-2 border-t border-dark-400/20">
-                  <Link
-                    to={profilePath(conn)}
-                    className="flex-1 text-center py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 hover:bg-brand-500/20 text-xs font-medium transition-colors">
-                    View Profile
-                  </Link>
-                  <button
-                    onClick={() => handleRemove(conn.id)}
-                    className="px-2.5 py-1.5 rounded-lg bg-dark-700 border border-dark-400/30 text-dark-400 hover:text-red-400 hover:border-red-500/30 text-xs transition-colors"
-                    title="Remove connection">
-                    <X size={12} />
-                  </button>
-                </div>
-              </div>
+                    <Divider sx={{ mb: 1.5 }} />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        component={Link}
+                        to={profilePath(conn)}
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                      >
+                        View Profile
+                      </Button>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemove(conn.id)}
+                        title="Remove connection"
+                        sx={{ '&:hover': { color: 'error.main' } }}
+                      >
+                        <CloseIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
+          </Grid>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

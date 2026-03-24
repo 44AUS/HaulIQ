@@ -1,129 +1,164 @@
 import React, { useState } from 'react';
-import { CreditCard, Edit, Plus, Check, X } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Button, Grid, Chip,
+  List, ListItem, ListItemIcon, ListItemText, Tabs, Tab,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, IconButton,
+} from '@mui/material';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import CircleIcon from '@mui/icons-material/Circle';
 import { CARRIER_PLANS, BROKER_PLANS } from '../../data/sampleData';
 
-const PlanCard = ({ plan, onEdit }) => (
-  <div className={`glass rounded-xl p-5 border transition-all ${
-    plan.color === 'brand' ? 'border-brand-500/30' : plan.color === 'purple' ? 'border-purple-500/30' : 'border-dark-400/40'
-  }`}>
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <div className="flex items-center gap-2">
-          <h3 className="text-white font-bold">{plan.name}</h3>
-          {plan.popular && <span className="badge-green text-xs">Popular</span>}
-        </div>
-        <p className="text-dark-300 text-xs mt-0.5">{plan.description}</p>
-      </div>
-      <button onClick={() => onEdit(plan)} className="p-1.5 text-dark-300 hover:text-white hover:bg-dark-600 rounded-lg transition-colors">
-        <Edit size={14} />
-      </button>
-    </div>
-    <p className="text-2xl font-black text-white mb-3">
-      {plan.price === 0 ? 'Free' : `$${plan.price}/${plan.period}`}
-    </p>
-    <ul className="space-y-1.5 mb-4">
-      {plan.features.slice(0, 4).map(f => (
-        <li key={f} className="flex items-center gap-1.5 text-xs text-dark-200">
-          <Check size={11} className="text-brand-400 flex-shrink-0" />{f}
-        </li>
-      ))}
-      {plan.features.length > 4 && <li className="text-dark-400 text-xs ml-4">+{plan.features.length - 4} more</li>}
-    </ul>
-    <div className="flex gap-2">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-500/10 rounded-lg">
-        <div className="w-1.5 h-1.5 bg-brand-400 rounded-full" />
-        <span className="text-brand-400 text-xs font-medium">Active</span>
-      </div>
-    </div>
-  </div>
-);
+function PlanCard({ plan, onEdit }) {
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        height: '100%',
+        borderColor: plan.color === 'brand' ? 'primary.main' : plan.color === 'purple' ? 'secondary.main' : 'divider',
+      }}
+    >
+      <CardContent sx={{ p: 2.5, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography variant="subtitle1" fontWeight={700}>{plan.name}</Typography>
+              {plan.popular && <Chip label="Popular" size="small" color="success" />}
+            </Box>
+            <Typography variant="caption" color="text.secondary">{plan.description}</Typography>
+          </Box>
+          <IconButton size="small" onClick={() => onEdit(plan)}>
+            <EditIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        </Box>
+        <Typography variant="h4" fontWeight={800} mb={2}>
+          {plan.price === 0 ? 'Free' : `$${plan.price}/${plan.period}`}
+        </Typography>
+        <List dense disablePadding sx={{ flex: 1, mb: 2 }}>
+          {plan.features.slice(0, 4).map(f => (
+            <ListItem key={f} disablePadding sx={{ py: 0.25 }}>
+              <ListItemIcon sx={{ minWidth: 24 }}>
+                <CheckIcon sx={{ fontSize: 13, color: 'primary.main' }} />
+              </ListItemIcon>
+              <ListItemText primary={<Typography variant="caption">{f}</Typography>} />
+            </ListItem>
+          ))}
+          {plan.features.length > 4 && (
+            <ListItem disablePadding>
+              <ListItemText primary={<Typography variant="caption" color="text.secondary">+{plan.features.length - 4} more</Typography>} />
+            </ListItem>
+          )}
+        </List>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <CircleIcon sx={{ fontSize: 8, color: 'success.main' }} />
+          <Typography variant="caption" color="success.main" fontWeight={600}>Active</Typography>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+}
 
-const EditModal = ({ plan, onClose }) => {
+function EditModal({ plan, onClose }) {
   const [price, setPrice] = useState(plan.price);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-      <div className="glass rounded-2xl border border-dark-400/60 p-6 w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-white font-bold">Edit Plan: {plan.name}</h2>
-          <button onClick={onClose} className="text-dark-300 hover:text-white p-1 rounded-lg hover:bg-dark-600">
-            <X size={18} />
-          </button>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-1.5">Monthly Price ($)</label>
-            <input type="number" value={price} onChange={e => setPrice(e.target.value)} className="input" />
-          </div>
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-2">Features</label>
-            <div className="space-y-2">
+    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        Edit Plan: {plan.name}
+        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+          <TextField
+            label="Monthly Price ($)"
+            size="small"
+            fullWidth
+            type="number"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+          />
+          <Box>
+            <Typography variant="body2" fontWeight={600} mb={1}>Features</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
               {plan.features.map((f, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Check size={12} className="text-brand-400 flex-shrink-0" />
-                  <span className="text-dark-200 text-sm flex-1">{f}</span>
-                  <button className="text-dark-500 hover:text-red-400 transition-colors"><X size={12} /></button>
-                </div>
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CheckIcon sx={{ fontSize: 13, color: 'primary.main', flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ flex: 1 }}>{f}</Typography>
+                  <IconButton size="small" sx={{ '&:hover': { color: 'error.main' } }}>
+                    <CloseIcon sx={{ fontSize: 13 }} />
+                  </IconButton>
+                </Box>
               ))}
-            </div>
-          </div>
-          <div className="flex gap-2 pt-3 border-t border-dark-400/40">
-            <button onClick={onClose} className="flex-1 btn-secondary text-sm py-2">Cancel</button>
-            <button onClick={onClose} className="flex-1 btn-primary text-sm py-2">Save Changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </Box>
+        </Box>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+        <Button variant="outlined" onClick={onClose} fullWidth>Cancel</Button>
+        <Button variant="contained" onClick={onClose} fullWidth>Save Changes</Button>
+      </DialogActions>
+    </Dialog>
   );
-};
+}
 
 export default function AdminSubscriptions() {
-  const [tab, setTab] = useState('carrier');
+  const [tab, setTab] = useState(0);
   const [editingPlan, setEditingPlan] = useState(null);
 
-  const plans = tab === 'carrier' ? CARRIER_PLANS : BROKER_PLANS;
+  const plans = tab === 0 ? CARRIER_PLANS : BROKER_PLANS;
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2"><CreditCard size={22} className="text-brand-400" />Subscription Plans</h1>
-          <p className="text-dark-300 text-sm mt-1">Manage pricing and features for all subscription tiers</p>
-        </div>
-        <button className="btn-primary flex items-center gap-2 text-sm py-2.5">
-          <Plus size={16} /> Create Plan
-        </button>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+            <CreditCardIcon color="primary" />
+            <Typography variant="h5" fontWeight={700}>Subscription Plans</Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary">Manage pricing and features for all subscription tiers</Typography>
+        </Box>
+        <Button variant="contained" startIcon={<AddIcon />}>Create Plan</Button>
+      </Box>
 
-      {/* Subscription summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Summary stats */}
+      <Grid container spacing={2}>
         {[
-          { label: 'Total MRR', value: '$48,200' },
+          { label: 'Total MRR',    value: '$48,200' },
           { label: 'Carrier Subs', value: '1,284' },
-          { label: 'Broker Subs', value: '804' },
-          { label: 'Churn Rate', value: '2.1%' },
+          { label: 'Broker Subs',  value: '804' },
+          { label: 'Churn Rate',   value: '2.1%' },
         ].map(({ label, value }) => (
-          <div key={label} className="stat-card">
-            <p className="text-dark-300 text-xs">{label}</p>
-            <p className="text-white text-xl font-bold">{value}</p>
-          </div>
+          <Grid item xs={6} sm={3} key={label}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" mb={0.5}>{label}</Typography>
+                <Typography variant="h4" fontWeight={800}>{value}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* Tab */}
-      <div className="inline-flex glass rounded-xl p-1">
-        {['carrier', 'broker'].map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all capitalize ${tab === t ? 'bg-brand-500 text-white' : 'text-dark-200 hover:text-white'}`}>
-            {t === 'carrier' ? '🚛 Carrier Plans' : '📋 Broker Plans'}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid sm:grid-cols-3 gap-5">
-        {plans.map(plan => <PlanCard key={plan.id} plan={plan} onEdit={setEditingPlan} />)}
-      </div>
+      {/* Tabs */}
+      <Box>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tab label="Carrier Plans" />
+          <Tab label="Broker Plans" />
+        </Tabs>
+        <Grid container spacing={2}>
+          {plans.map(plan => (
+            <Grid item xs={12} sm={4} key={plan.id}>
+              <PlanCard plan={plan} onEdit={setEditingPlan} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
 
       {editingPlan && <EditModal plan={editingPlan} onClose={() => setEditingPlan(null)} />}
-    </div>
+    </Box>
   );
 }

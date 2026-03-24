@@ -1,36 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, Truck, ThumbsUp, ThumbsDown, CheckCircle, ArrowLeft, Users, Network, Check, Phone, Ban, ShieldOff } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
+  TextField, Grid, CircularProgress, LinearProgress,
+  FormControlLabel, Checkbox, Paper,
+} from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PeopleIcon from '@mui/icons-material/People';
+import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import CheckIcon from '@mui/icons-material/Check';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BlockIcon from '@mui/icons-material/Block';
+import GppBadIcon from '@mui/icons-material/GppBad';
 import { useAuth } from '../../context/AuthContext';
 import { carrierReviewsApi, networkApi, blocksApi } from '../../services/api';
 import { adaptReview } from '../../services/adapters';
 
-function StarInput({ value, onChange, size = 20 }) {
+function StarInput({ value, onChange, size = 22 }) {
   const [hover, setHover] = useState(0);
   return (
-    <div className="flex gap-1">
-      {[1,2,3,4,5].map(i => (
-        <button key={i} type="button"
-          onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}
+    <Box sx={{ display: 'flex', gap: 0.25 }}>
+      {[1, 2, 3, 4, 5].map(i => (
+        <IconButton
+          key={i}
+          size="small"
+          type="button"
+          onMouseEnter={() => setHover(i)}
+          onMouseLeave={() => setHover(0)}
           onClick={() => onChange(i)}
-          className="transition-transform hover:scale-110">
-          <Star size={size} className={(hover || value) >= i ? 'text-yellow-400 fill-yellow-400' : 'text-dark-500'} />
-        </button>
+          sx={{ p: 0.25 }}
+        >
+          {(hover || value) >= i
+            ? <StarIcon sx={{ fontSize: size, color: '#FFC107' }} />
+            : <StarBorderIcon sx={{ fontSize: size, color: 'text.disabled' }} />
+          }
+        </IconButton>
       ))}
-    </div>
+    </Box>
   );
 }
 
 function MiniBar({ value, max = 5 }) {
-  if (!value) return <span className="text-dark-500 text-xs">—</span>;
-  const pct = (value / max) * 100;
+  if (!value) return <Typography variant="caption" color="text.disabled">—</Typography>;
   return (
-    <div className="flex items-center gap-2">
-      <div className="w-20 bg-dark-700 rounded-full h-1.5">
-        <div className="bg-brand-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-white text-xs font-medium">{value}</span>
-    </div>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <LinearProgress
+        variant="determinate"
+        value={(value / max) * 100}
+        sx={{ width: 80, height: 6, borderRadius: 3 }}
+      />
+      <Typography variant="caption" fontWeight={600}>{value}</Typography>
+    </Box>
   );
 }
 
@@ -103,7 +129,7 @@ export default function CarrierProfile() {
 
   const _avg = (key) => {
     const vals = reviews.filter(r => r[key]).map(r => r[key]);
-    return vals.length ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : null;
+    return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
   };
 
   const wwaCount = reviews.filter(r => r.wouldWorkAgain === true).length;
@@ -131,218 +157,265 @@ export default function CarrierProfile() {
   const displayName = stats?.carrier_name || `Carrier ${carrierId.slice(0, 8)}`;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <Link to={-1} className="flex items-center gap-1.5 text-dark-300 hover:text-white text-sm transition-colors">
-        <ArrowLeft size={16} /> Back
-      </Link>
+    <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Button component={Link} to={-1} variant="text" startIcon={<ArrowBackIcon />} sx={{ alignSelf: 'flex-start' }}>
+        Back
+      </Button>
 
-      {/* Hero */}
-      <div className="glass rounded-xl border border-dark-400/40 p-6">
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-brand-500/10 border-2 border-brand-500/30 flex items-center justify-center text-brand-400 text-xl font-black flex-shrink-0">
-              {displayName.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold text-white">{displayName}</h1>
-              </div>
-              {stats?.company_name && <p className="text-dark-300 text-sm">{stats.company_name}</p>}
-              <div className="flex items-center gap-3 mt-1 text-xs text-dark-400 flex-wrap">
-                {stats?.mc_number && <span className="flex items-center gap-1"><Truck size={11} />{stats.mc_number}</span>}
-                {stats?.phone && <span className="flex items-center gap-1"><Phone size={11} />{stats.phone}</span>}
-                {stats?.total_reviews != null && <span>{stats.total_reviews} reviews</span>}
-              </div>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center gap-1.5 justify-end mb-1">
-              <Star size={16} className="text-yellow-400 fill-yellow-400" />
-              <span className="text-white font-bold text-xl">{avgOverall}</span>
-            </div>
-            <p className="text-dark-400 text-xs">{reviews.length} broker reviews</p>
-            {user?.role === 'broker' && (
-              <div className="flex items-center gap-2 justify-end mt-3 flex-wrap">
-                {!networkState.loading && (
-                  networkState.status === 'accepted' ? (
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-medium">
-                      <Check size={12} /> In Network
-                    </span>
-                  ) : networkState.status === 'pending' ? (
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium">
-                      Request Sent
-                    </span>
-                  ) : (
-                    <button onClick={handleAddToNetwork}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-600 border border-dark-400/40 text-dark-200 hover:text-white hover:border-brand-500/40 text-xs font-medium transition-all">
-                      <Network size={12} /> Add to Network
-                    </button>
-                  )
+      {/* Hero card */}
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.dark', fontSize: 22, fontWeight: 900, flexShrink: 0 }}>
+                {displayName.charAt(0)}
+              </Avatar>
+              <Box>
+                <Typography variant="h5" fontWeight={700} mb={0.25}>{displayName}</Typography>
+                {stats?.company_name && (
+                  <Typography variant="body2" color="text.secondary">{stats.company_name}</Typography>
                 )}
-                {!submitted && (
-                  <button onClick={() => setShowForm(!showForm)}
-                    className="btn-primary text-xs px-3 py-1.5 flex items-center gap-1">
-                    <Star size={12} /> Review
-                  </button>
-                )}
-                <button
-                  onClick={handleToggleBlock}
-                  disabled={blockLoading}
-                  title={isBlocked ? 'Unblock user' : 'Block user'}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
-                    isBlocked
-                      ? 'bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20'
-                      : 'bg-dark-700 border-dark-500/40 text-dark-300 hover:text-red-400 hover:border-red-500/30'
-                  }`}
-                >
-                  {blockLoading
-                    ? <div className="w-3 h-3 border border-current/30 border-t-current rounded-full animate-spin" />
-                    : isBlocked ? <><ShieldOff size={12} /> Unblock</> : <><Ban size={12} /> Block</>
-                  }
-                </button>
-              </div>
-            )}
-            {submitted && (
-              <div className="flex items-center gap-1 text-brand-400 text-xs">
-                <CheckCircle size={12} /> Submitted
-              </div>
-            )}
-          </div>
-        </div>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5, flexWrap: 'wrap' }}>
+                  {stats?.mc_number && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <LocalShippingIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <Typography variant="caption" color="text.secondary">{stats.mc_number}</Typography>
+                    </Box>
+                  )}
+                  {stats?.phone && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <PhoneIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <Typography variant="caption" color="text.secondary">{stats.phone}</Typography>
+                    </Box>
+                  )}
+                  {stats?.total_reviews != null && (
+                    <Typography variant="caption" color="text.secondary">{stats.total_reviews} reviews</Typography>
+                  )}
+                </Box>
+              </Box>
+            </Box>
+            <Box sx={{ textAlign: 'right' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'flex-end', mb: 0.5 }}>
+                <StarIcon sx={{ color: '#FFC107', fontSize: 20 }} />
+                <Typography variant="h5" fontWeight={700}>{avgOverall}</Typography>
+              </Box>
+              <Typography variant="caption" color="text.secondary" display="block">{reviews.length} broker reviews</Typography>
+              {user?.role === 'broker' && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end', mt: 1.5, flexWrap: 'wrap' }}>
+                  {!networkState.loading && (
+                    networkState.status === 'accepted' ? (
+                      <Chip icon={<CheckIcon />} label="In Network" size="small" color="primary" variant="outlined" />
+                    ) : networkState.status === 'pending' ? (
+                      <Chip label="Request Sent" size="small" color="warning" variant="outlined" />
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<NetworkCheckIcon />}
+                        onClick={handleAddToNetwork}
+                      >
+                        Add to Network
+                      </Button>
+                    )
+                  )}
+                  {!submitted && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<StarIcon />}
+                      onClick={() => setShowForm(!showForm)}
+                    >
+                      Review
+                    </Button>
+                  )}
+                  <Button
+                    variant="outlined"
+                    color={isBlocked ? 'error' : 'inherit'}
+                    size="small"
+                    startIcon={blockLoading ? <CircularProgress size={12} color="inherit" /> : isBlocked ? <GppBadIcon /> : <BlockIcon />}
+                    onClick={handleToggleBlock}
+                    disabled={blockLoading}
+                    title={isBlocked ? 'Unblock user' : 'Block user'}
+                  >
+                    {isBlocked ? 'Unblock' : 'Block'}
+                  </Button>
+                </Box>
+              )}
+              {submitted && <Chip icon={<CheckCircleIcon />} label="Submitted" color="success" size="small" sx={{ mt: 1 }} />}
+            </Box>
+          </Box>
 
-        {/* Sub-rating bars */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5 pt-5 border-t border-dark-400/30">
-          {[
-            { label: 'Communication',    value: _avg('communication') },
-            { label: 'On-Time Pickup',   value: _avg('onTimePickup') },
-            { label: 'On-Time Delivery', value: _avg('onTimeDelivery') },
-            { label: 'Load Care',        value: _avg('loadCare') },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p className="text-dark-400 text-xs mb-1.5">{label}</p>
-              <MiniBar value={value} />
-            </div>
-          ))}
-        </div>
+          {/* Sub-rating bars */}
+          <Box sx={{ mt: 3, pt: 2.5, borderTop: 1, borderColor: 'divider' }}>
+            <Grid container spacing={2}>
+              {[
+                { label: 'Communication',    value: _avg('communication') },
+                { label: 'On-Time Pickup',   value: _avg('onTimePickup') },
+                { label: 'On-Time Delivery', value: _avg('onTimeDelivery') },
+                { label: 'Load Care',        value: _avg('loadCare') },
+              ].map(({ label, value }) => (
+                <Grid item xs={6} sm={3} key={label}>
+                  <Typography variant="caption" color="text.secondary" display="block" mb={0.75}>{label}</Typography>
+                  <MiniBar value={value} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
 
-        {wwaPct !== null && (
-          <div className={`mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm ${wwaPct >= 80 ? 'bg-brand-500/10 border-brand-500/20 text-brand-400' : wwaPct >= 60 ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
-            <ThumbsUp size={14} /> {wwaPct}% of brokers would book again
-          </div>
-        )}
-      </div>
+          {wwaPct !== null && (
+            <Box sx={{ mt: 2 }}>
+              <Chip
+                icon={<ThumbUpIcon />}
+                label={`${wwaPct}% of brokers would book again`}
+                size="small"
+                color={wwaPct >= 80 ? 'success' : wwaPct >= 60 ? 'warning' : 'error'}
+                variant="outlined"
+              />
+            </Box>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Review form */}
       {showForm && (
-        <div className="glass rounded-xl border border-brand-500/20 p-6">
-          <h3 className="text-white font-bold mb-5">Review {displayName}</h3>
-          <div className="space-y-5">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-2">Overall Rating *</label>
-              <StarInput value={form.rating} onChange={v => setForm(f=>({...f, rating:v}))} size={28} />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {[
-                { key: 'communication',  label: 'Communication' },
-                { key: 'onTimePickup',   label: 'On-Time Pickup' },
-                { key: 'onTimeDelivery', label: 'On-Time Delivery' },
-                { key: 'loadCare',       label: 'Load Care / No Damage' },
-              ].map(({ key, label }) => (
-                <div key={key}>
-                  <label className="block text-dark-100 text-sm font-medium mb-2">{label}</label>
-                  <StarInput value={form[key]} onChange={v => setForm(f=>({...f, [key]:v}))} size={18} />
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-2">Would you book this carrier again?</label>
-              <div className="flex gap-3">
-                <button onClick={() => setForm(f=>({...f, wouldWorkAgain: true}))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-all ${form.wouldWorkAgain === true ? 'border-brand-500/40 bg-brand-500/10 text-brand-400' : 'border-dark-400/40 text-dark-300 hover:text-white'}`}>
-                  <ThumbsUp size={14} /> Yes
-                </button>
-                <button onClick={() => setForm(f=>({...f, wouldWorkAgain: false}))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm transition-all ${form.wouldWorkAgain === false ? 'border-red-500/40 bg-red-500/10 text-red-400' : 'border-dark-400/40 text-dark-300 hover:text-white'}`}>
-                  <ThumbsDown size={14} /> No
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Your experience</label>
-              <textarea className="input resize-none" rows={3}
+        <Card variant="outlined" sx={{ borderColor: 'primary.main' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="subtitle1" fontWeight={700} mb={2.5}>Review {displayName}</Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Box>
+                <Typography variant="body2" fontWeight={600} mb={1}>Overall Rating *</Typography>
+                <StarInput value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} size={28} />
+              </Box>
+              <Grid container spacing={2}>
+                {[
+                  { key: 'communication',  label: 'Communication' },
+                  { key: 'onTimePickup',   label: 'On-Time Pickup' },
+                  { key: 'onTimeDelivery', label: 'On-Time Delivery' },
+                  { key: 'loadCare',       label: 'Load Care / No Damage' },
+                ].map(({ key, label }) => (
+                  <Grid item xs={12} sm={6} key={key}>
+                    <Typography variant="body2" fontWeight={600} mb={1}>{label}</Typography>
+                    <StarInput value={form[key]} onChange={v => setForm(f => ({ ...f, [key]: v }))} size={20} />
+                  </Grid>
+                ))}
+              </Grid>
+              <Box>
+                <Typography variant="body2" fontWeight={600} mb={1}>Would you book this carrier again?</Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button
+                    variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'}
+                    size="small"
+                    startIcon={<ThumbUpIcon />}
+                    onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
+                    color={form.wouldWorkAgain === false ? 'error' : 'inherit'}
+                    size="small"
+                    startIcon={<ThumbDownIcon />}
+                    onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}
+                  >
+                    No
+                  </Button>
+                </Box>
+              </Box>
+              <TextField
+                label="Your experience"
+                size="small"
+                fullWidth
+                multiline
+                rows={3}
                 placeholder="Describe reliability, professionalism, any issues..."
-                value={form.comment} onChange={e => setForm(f=>({...f, comment: e.target.value}))} />
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.isAnonymous}
-                  onChange={e => setForm(f=>({...f, isAnonymous: e.target.checked}))} />
-                <span className="text-dark-300 text-sm">Submit anonymously</span>
-              </label>
-              <div className="flex gap-3">
-                <button onClick={() => setShowForm(false)} className="btn-secondary text-sm px-4 py-2">Cancel</button>
-                <button onClick={handleSubmit} disabled={form.rating === 0}
-                  className="btn-primary text-sm px-5 py-2 disabled:opacity-40">Submit Review</button>
-              </div>
-            </div>
-          </div>
-        </div>
+                value={form.comment}
+                onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
+              />
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <FormControlLabel
+                  control={<Checkbox size="small" checked={form.isAnonymous} onChange={e => setForm(f => ({ ...f, isAnonymous: e.target.checked }))} />}
+                  label={<Typography variant="body2">Submit anonymously</Typography>}
+                />
+                <Box sx={{ display: 'flex', gap: 1.5 }}>
+                  <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
+                  <Button variant="contained" size="small" onClick={handleSubmit} disabled={form.rating === 0}>
+                    Submit Review
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Reviews */}
-      <div className="space-y-4">
-        <h2 className="text-white font-semibold">Broker Reviews ({reviews.length})</h2>
+      {/* Reviews list */}
+      <Box>
+        <Typography variant="subtitle1" fontWeight={700} mb={2}>Broker Reviews ({reviews.length})</Typography>
         {loadingReviews ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-          </div>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}>
+            <CircularProgress size={24} />
+          </Box>
         ) : reviews.length === 0 ? (
-          <div className="glass rounded-xl border border-dark-400/40 p-10 text-center">
-            <Users size={32} className="text-dark-600 mx-auto mb-3" />
-            <p className="text-dark-300">No reviews yet for this carrier.</p>
-          </div>
-        ) : reviews.map(review => (
-          <div key={review.id} className="glass rounded-xl border border-dark-400/40 p-5">
-            <div className="flex items-start justify-between flex-wrap gap-3 mb-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-7 h-7 rounded-full bg-dark-600 flex items-center justify-center text-dark-200 text-xs font-bold">
-                    {review.isAnonymous ? '?' : review.brokerName.charAt(0)}
-                  </div>
-                  <span className="text-white text-sm font-medium">
-                    {review.isAnonymous ? 'Anonymous Broker' : review.brokerName}
-                  </span>
-                  {review.wouldWorkAgain === true && (
-                    <span className="bg-brand-500/10 text-brand-400 text-xs px-2 py-0.5 rounded-full border border-brand-500/20">✓ Would book again</span>
+          <Card variant="outlined">
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <PeopleIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">No reviews yet for this carrier.</Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {reviews.map(review => (
+              <Card key={review.id} variant="outlined">
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 1.5 }}>
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                        <Avatar sx={{ width: 28, height: 28, bgcolor: 'action.selected', fontSize: 12, fontWeight: 700 }}>
+                          {review.isAnonymous ? '?' : review.brokerName.charAt(0)}
+                        </Avatar>
+                        <Typography variant="body2" fontWeight={600}>
+                          {review.isAnonymous ? 'Anonymous Broker' : review.brokerName}
+                        </Typography>
+                        {review.wouldWorkAgain === true && (
+                          <Chip label="✓ Would book again" size="small" color="success" variant="outlined" />
+                        )}
+                        {review.wouldWorkAgain === false && (
+                          <Chip label="✗ Would not book again" size="small" color="error" variant="outlined" />
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {[1, 2, 3, 4, 5].map(i => (
+                          i <= review.rating
+                            ? <StarIcon key={i} sx={{ fontSize: 13, color: '#FFC107' }} />
+                            : <StarBorderIcon key={i} sx={{ fontSize: 13, color: 'text.disabled' }} />
+                        ))}
+                        <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
+                        <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
+                    {[
+                      { label: 'Communication',    value: review.communication },
+                      { label: 'On-Time Pickup',   value: review.onTimePickup },
+                      { label: 'On-Time Delivery', value: review.onTimeDelivery },
+                      { label: 'Load Care',        value: review.loadCare },
+                    ].filter(x => x.value).map(({ label, value }) => (
+                      <Grid item xs={6} sm={3} key={label}>
+                        <Typography variant="caption" color="text.disabled" display="block" mb={0.5}>{label}</Typography>
+                        <MiniBar value={value} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                  {review.comment && (
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{review.comment}</Typography>
                   )}
-                  {review.wouldWorkAgain === false && (
-                    <span className="bg-red-500/10 text-red-400 text-xs px-2 py-0.5 rounded-full border border-red-500/20">✗ Would not book again</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {[1,2,3,4,5].map(i => <Star key={i} size={12} className={i<=review.rating?'text-yellow-400 fill-yellow-400':'text-dark-600'} />)}
-                  <span className="text-white text-xs font-semibold">{review.rating}.0</span>
-                  <span className="text-dark-500 text-xs">· {new Date(review.createdAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-              {[
-                { label: 'Communication',    value: review.communication },
-                { label: 'On-Time Pickup',   value: review.onTimePickup },
-                { label: 'On-Time Delivery', value: review.onTimeDelivery },
-                { label: 'Load Care',        value: review.loadCare },
-              ].filter(x => x.value).map(({ label, value }) => (
-                <div key={label}>
-                  <p className="text-dark-500 text-xs mb-0.5">{label}</p>
-                  <MiniBar value={value} />
-                </div>
-              ))}
-            </div>
-            {review.comment && <p className="text-dark-200 text-sm leading-relaxed">{review.comment}</p>}
-          </div>
-        ))}
-      </div>
-    </div>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        )}
+      </Box>
+    </Box>
   );
 }

@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, TrendingUp, Eye, Users, PlusCircle, ArrowRight, Star } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { loadsApi, bookingsApi, analyticsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import {
+  Box, Typography, Button, Card, CardContent, Grid, Table, TableHead,
+  TableRow, TableCell, TableBody, Chip, Paper, Divider,
+} from '@mui/material';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GroupIcon from '@mui/icons-material/Group';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import InventoryIcon from '@mui/icons-material/Inventory';
 
-const StatusBadge = ({ status }) => {
-  if (status === 'active')  return <span className="badge-green">Active</span>;
-  if (status === 'filled')  return <span className="badge-blue">Filled</span>;
-  return <span className="badge-red">Expired</span>;
-};
+function statusChip(status) {
+  if (status === 'active')  return <Chip label="Active"  size="small" color="success" />;
+  if (status === 'filled')  return <Chip label="Filled"  size="small" color="info" />;
+  return <Chip label="Expired" size="small" color="error" />;
+}
 
 export default function BrokerDashboard() {
   const { user } = useAuth();
@@ -37,120 +48,184 @@ export default function BrokerDashboard() {
 
   const recentLoads = loads.slice(0, 4);
 
+  const stats = [
+    {
+      icon: <LocalShippingIcon sx={{ color: 'primary.main' }} />,
+      label: 'Active Loads',
+      value: loads.filter(l => l.status === 'active').length,
+      bg: 'primary.main',
+    },
+    {
+      icon: <VisibilityIcon sx={{ color: 'info.main' }} />,
+      label: 'Total Views',
+      value: brokerAnalytics ? brokerAnalytics.total_views : loads.reduce((s, l) => s + (l.viewCount || 0), 0),
+      bg: 'info.main',
+    },
+    {
+      icon: <GroupIcon sx={{ color: 'warning.main' }} />,
+      label: 'Pending Bookings',
+      value: pendingCount,
+      bg: 'warning.main',
+    },
+    {
+      icon: <TrendingUpIcon sx={{ color: 'success.main' }} />,
+      label: 'Fill Rate',
+      value: loads.length ? `${Math.round((loads.filter(l => l.status === 'filled').length / loads.length) * 100)}%` : '—',
+      bg: 'success.main',
+    },
+  ];
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Welcome, {user?.name?.split(' ')[0]} 👋</h1>
-          <p className="text-dark-300 text-sm mt-1">Your freight brokerage performance overview</p>
-        </div>
-        <Link to="/broker/post" className="btn-primary flex items-center gap-2 text-sm py-2.5">
-          <PlusCircle size={16} /> Post a Load
-        </Link>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700}>
+            Welcome, {user?.name?.split(' ')[0]}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Your freight brokerage performance overview
+          </Typography>
+        </Box>
+        <Button
+          component={Link}
+          to="/broker/post"
+          variant="contained"
+          startIcon={<AddCircleOutlineIcon />}
+        >
+          Post a Load
+        </Button>
+      </Box>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: Package,    label: 'Active Loads',   value: loads.filter(l => l.status === 'active').length,   color: 'brand' },
-          { icon: Eye,        label: 'Total Views',    value: brokerAnalytics ? brokerAnalytics.total_views : loads.reduce((s, l) => s + (l.viewCount || 0), 0), color: 'blue' },
-          { icon: Users,      label: 'Pending Bookings', value: pendingCount,                                    color: 'yellow' },
-          { icon: TrendingUp, label: 'Fill Rate',      value: loads.length ? `${Math.round((loads.filter(l => l.status === 'filled').length / loads.length) * 100)}%` : '—', color: 'brand' },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div key={label} className="stat-card">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${color === 'brand' ? 'bg-brand-500/10' : color === 'blue' ? 'bg-blue-500/10' : 'bg-yellow-500/10'}`}>
-              <Icon size={18} className={color === 'brand' ? 'text-brand-400' : color === 'blue' ? 'text-blue-400' : 'text-yellow-400'} />
-            </div>
-            <div>
-              <p className="text-dark-300 text-xs">{label}</p>
-              <p className="text-white text-2xl font-bold">{value}</p>
-            </div>
-          </div>
+      <Grid container spacing={3}>
+        {stats.map(({ icon, label, value }) => (
+          <Grid item xs={6} md={3} key={label}>
+            <Card>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{
+                  width: 44, height: 44, borderRadius: 2,
+                  bgcolor: 'action.selected',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  {icon}
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">{label}</Typography>
+                  <Typography variant="h4" fontWeight={800}>{value}</Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* Chart + rating */}
-      <div className="grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 glass rounded-xl p-6 border border-dark-400/40">
-          <h2 className="text-white font-semibold mb-5">Load Views (Last 6 Weeks)</h2>
-          {brokerAnalytics?.weekly?.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={brokerAnalytics.weekly}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#21262d" vertical={false} />
-                <XAxis dataKey="week" tick={{ fill: '#6e7681', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="views" fill="#22c55e" fillOpacity={0.8} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-[200px]">
-              <p className="text-dark-400 text-sm">Post loads to see view data</p>
-            </div>
-          )}
-        </div>
+      {/* Chart + Rating */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                Load Views (Last 6 Weeks)
+              </Typography>
+              {brokerAnalytics?.weekly?.length > 0 ? (
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={brokerAnalytics.weekly}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.07)" />
+                    <XAxis dataKey="week" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                    <Tooltip />
+                    <Bar dataKey="views" fill="#1565C0" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+                  <Typography variant="body2" color="text.secondary">Post loads to see view data</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
 
-        <div className="glass rounded-xl p-6 border border-dark-400/40 space-y-4">
-          <h2 className="text-white font-semibold text-sm">Your Broker Rating</h2>
-          <div className="text-center py-4">
-            <div className="text-5xl font-black text-white mb-1">—</div>
-            <div className="flex justify-center gap-1 mb-2">
-              {[1,2,3,4,5].map(i => <Star key={i} size={16} className="text-dark-600" />)}
-            </div>
-            <p className="text-dark-400 text-xs">Based on carrier reviews</p>
-          </div>
-          <div className="space-y-2">
-            {[['Payment Speed', '—'], ['Response Rate', '—'], ['Load Accuracy', '—']].map(([k, v]) => (
-              <div key={k} className="flex justify-between text-sm">
-                <span className="text-dark-300">{k}</span>
-                <span className="text-brand-400 font-semibold">{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        <Grid item xs={12} md={4}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>
+                Your Broker Rating
+              </Typography>
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h3" fontWeight={900}>—</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, my: 1 }}>
+                  {[1,2,3,4,5].map(i => <StarBorderIcon key={i} sx={{ fontSize: 18, color: 'text.disabled' }} />)}
+                </Box>
+                <Typography variant="caption" color="text.secondary">Based on carrier reviews</Typography>
+              </Box>
+              <Divider sx={{ my: 1.5 }} />
+              {[['Payment Speed', '—'], ['Response Rate', '—'], ['Load Accuracy', '—']].map(([k, v]) => (
+                <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75 }}>
+                  <Typography variant="body2" color="text.secondary">{k}</Typography>
+                  <Typography variant="body2" fontWeight={600} color="primary.main">{v}</Typography>
+                </Box>
+              ))}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-      {/* Recent loads */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-white font-semibold">My Recent Loads</h2>
-          <Link to="/broker/loads" className="text-brand-400 text-xs hover:text-brand-300 flex items-center gap-1">
-            Manage all <ArrowRight size={12} />
-          </Link>
-        </div>
+      {/* Recent Loads */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="subtitle1" fontWeight={600}>My Recent Loads</Typography>
+          <Button
+            component={Link}
+            to="/broker/loads"
+            variant="text"
+            endIcon={<ArrowForwardIcon />}
+            size="small"
+          >
+            Manage all
+          </Button>
+        </Box>
+
         {loads.length === 0 ? (
-          <div className="glass rounded-xl border border-dark-400/40 p-8 text-center">
-            <Package size={32} className="text-dark-500 mx-auto mb-3" />
-            <p className="text-dark-300">No loads posted yet.</p>
-            <Link to="/broker/post" className="text-brand-400 text-sm mt-2 inline-block">Post your first load</Link>
-          </div>
+          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+            <InventoryIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              No loads posted yet.
+            </Typography>
+            <Button component={Link} to="/broker/post" variant="text" size="small">
+              Post your first load
+            </Button>
+          </Paper>
         ) : (
-          <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-dark-700/50 text-dark-300 text-xs uppercase tracking-wider">
-                  <tr>
+          <Card>
+            <Box sx={{ overflowX: 'auto' }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'action.hover' }}>
                     {['Route', 'Type', 'Rate', 'Views', 'Status', 'Posted'].map(h => (
-                      <th key={h} className="px-5 py-3 text-left font-medium whitespace-nowrap">{h}</th>
+                      <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                        {h}
+                      </TableCell>
                     ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dark-400/20">
-                  {recentLoads.map(load => (
-                    <tr key={load.id} className="hover:bg-dark-700/20 transition-colors">
-                      <td className="px-5 py-4 text-white font-medium whitespace-nowrap">{load.origin} → {load.dest}</td>
-                      <td className="px-5 py-4 text-dark-300">{load.type}</td>
-                      <td className="px-5 py-4 text-white font-semibold">${(load.rate || 0).toLocaleString()}</td>
-                      <td className="px-5 py-4 text-dark-200">{load.viewCount || 0}</td>
-                      <td className="px-5 py-4"><StatusBadge status={load.status} /></td>
-                      <td className="px-5 py-4 text-dark-400 text-xs">{load.posted}</td>
-                    </tr>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recentLoads.map((load, idx) => (
+                    <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{load.origin} → {load.dest}</TableCell>
+                      <TableCell sx={{ color: 'text.secondary' }}>{load.type}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
+                      <TableCell>{load.viewCount || 0}</TableCell>
+                      <TableCell>{statusChip(load.status)}</TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{load.posted}</TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+            </Box>
+          </Card>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

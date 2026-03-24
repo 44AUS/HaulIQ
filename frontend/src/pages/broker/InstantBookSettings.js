@@ -1,34 +1,43 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Search, Upload, Check, UserPlus, Trash2, AlertCircle, FileText, Users, Network } from 'lucide-react';
 import { instantBookApi, networkApi } from '../../services/api';
+import {
+  Box, Typography, Button, Card, CardContent, Paper, Table, TableHead,
+  TableRow, TableCell, TableBody, Chip, CircularProgress, Alert, TextField,
+  Tabs, Tab, Avatar, IconButton, InputAdornment,
+} from '@mui/material';
+import BoltIcon from '@mui/icons-material/Bolt';
+import SearchIcon from '@mui/icons-material/Search';
+import UploadIcon from '@mui/icons-material/Upload';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
+import HubIcon from '@mui/icons-material/Hub';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ArticleIcon from '@mui/icons-material/Article';
 
 export default function InstantBookSettings() {
-  const [tab, setTab] = useState('list');
+  const [tab, setTab] = useState(0);
 
-  // Allowlist state
   const [allowlist, setAllowlist] = useState([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState(null);
 
-  // Search tab state
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [addingId, setAddingId] = useState(null);
 
-  // Upload tab state
   const [uploadText, setUploadText] = useState('');
   const [uploadResult, setUploadResult] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Remove confirm
   const [confirmRemove, setConfirmRemove] = useState(null);
 
-  // Network state per carrier_id
-  const [networkStatus, setNetworkStatus] = useState({}); // { carrier_id: { in_network, entry_id, loading } }
+  const [networkStatus, setNetworkStatus] = useState({});
 
   const handleAddToNetwork = (carrierId) => {
     setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: true } }));
@@ -37,7 +46,6 @@ export default function InstantBookSettings() {
       .catch(() => setNetworkStatus(prev => ({ ...prev, [carrierId]: { ...prev[carrierId], loading: false } })));
   };
 
-  // Load allowlist on mount
   useEffect(() => {
     instantBookApi.allowlist()
       .then(data => setAllowlist(Array.isArray(data) ? data : []))
@@ -45,7 +53,6 @@ export default function InstantBookSettings() {
       .finally(() => setListLoading(false));
   }, []);
 
-  // Search carriers with debounce
   useEffect(() => {
     if (query.length < 2) { setSearchResults([]); return; }
     const timer = setTimeout(() => {
@@ -65,23 +72,17 @@ export default function InstantBookSettings() {
     if (isAlreadyAdded(carrier) || addingId) return;
     setAddingId(carrier.id);
     instantBookApi.add(carrier.id)
-      .then(entry => {
-        setAllowlist(prev => [entry, ...prev]);
-      })
+      .then(entry => setAllowlist(prev => [entry, ...prev]))
       .catch(() => {})
       .finally(() => setAddingId(null));
   };
 
   const handleRemove = (entryId) => {
     instantBookApi.remove(entryId)
-      .then(() => {
-        setAllowlist(prev => prev.filter(e => e.id !== entryId));
-        setConfirmRemove(null);
-      })
+      .then(() => { setAllowlist(prev => prev.filter(e => e.id !== entryId)); setConfirmRemove(null); })
       .catch(() => setConfirmRemove(null));
   };
 
-  // Parse pasted CSV/text
   const parseUploadText = (text) => {
     const lines = text.trim().split('\n').filter(l => l.trim());
     return lines.map(line => {
@@ -100,7 +101,6 @@ export default function InstantBookSettings() {
       .then(result => {
         setUploadResult(result);
         setUploadText('');
-        // Refresh the allowlist
         return instantBookApi.allowlist();
       })
       .then(data => setAllowlist(Array.isArray(data) ? data : []))
@@ -119,303 +119,299 @@ export default function InstantBookSettings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
+    <Box sx={{ maxWidth: 860, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Zap size={20} className="text-emerald-400" />
-            <h1 className="text-2xl font-bold text-white">Instant Book Settings</h1>
-          </div>
-          <p className="text-dark-300 text-sm">
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BoltIcon color="success" /> Instant Book Settings
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Only carriers on your allowlist can instantly book your loads. Others must submit a Book Now request.
-          </p>
-        </div>
-        <div className="glass border border-dark-400/40 rounded-xl px-4 py-3 text-center">
-          <p className="text-white font-bold text-2xl">{allowlist.length}</p>
-          <p className="text-dark-400 text-xs">Approved carriers</p>
-        </div>
-      </div>
+          </Typography>
+        </Box>
+        <Card>
+          <CardContent sx={{ textAlign: 'center', py: '12px !important', px: 3 }}>
+            <Typography variant="h4" fontWeight={800}>{allowlist.length}</Typography>
+            <Typography variant="caption" color="text.secondary">Approved carriers</Typography>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* Info banner */}
-      <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-        <p className="text-emerald-300/80 text-sm leading-relaxed">
-          When a load has <strong className="text-emerald-400">Instant Book</strong> enabled, only your approved carriers will see the Instant Book button. All other carriers will see a standard Book Now request that requires your approval.
-        </p>
-      </div>
+      <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'flex-start', gap: 1.5, borderColor: 'success.main', bgcolor: 'rgba(46,125,50,0.04)' }}>
+        <InfoOutlinedIcon sx={{ color: 'success.main', flexShrink: 0, mt: 0.2, fontSize: 18 }} />
+        <Typography variant="body2" color="text.secondary">
+          When a load has <strong>Instant Book</strong> enabled, only your approved carriers will see the Instant Book button. All other carriers will see a standard Book Now request that requires your approval.
+        </Typography>
+      </Paper>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-dark-800 rounded-xl border border-dark-400/40 w-fit">
-        {[
-          { key: 'list',   label: `Allowlist (${allowlist.length})`, icon: Users },
-          { key: 'search', label: 'Add from HaulIQ',                 icon: Search },
-          { key: 'upload', label: 'Upload a list',                   icon: Upload },
-        ].map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setTab(key)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === key ? 'bg-dark-600 text-white' : 'text-dark-300 hover:text-white'
-            }`}>
-            <Icon size={14} />
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tab icon={<GroupIcon sx={{ fontSize: 16 }} />} iconPosition="start" label={`Allowlist (${allowlist.length})`} />
+        <Tab icon={<SearchIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Add from HaulIQ" />
+        <Tab icon={<UploadIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Upload a list" />
+      </Tabs>
 
-      {/* ── Allowlist tab ── */}
-      {tab === 'list' && (
-        <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
+      {/* Allowlist tab */}
+      {tab === 0 && (
+        <Card>
           {listLoading ? (
-            <div className="py-16 flex justify-center">
-              <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-            </div>
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
           ) : listError ? (
-            <div className="py-16 text-center">
-              <p className="text-red-400 text-sm">{listError}</p>
-            </div>
+            <CardContent><Alert severity="error">{listError}</Alert></CardContent>
           ) : allowlist.length === 0 ? (
-            <div className="py-16 text-center">
-              <Users size={36} className="text-dark-600 mx-auto mb-3" />
-              <p className="text-dark-300 text-sm">No carriers on your allowlist yet</p>
-              <p className="text-dark-500 text-xs mt-1">Add carriers via search or upload</p>
-            </div>
+            <CardContent sx={{ textAlign: 'center', py: 6 }}>
+              <GroupIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">No carriers on your allowlist yet</Typography>
+              <Typography variant="caption" color="text.disabled">Add carriers via search or upload</Typography>
+            </CardContent>
           ) : (
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-dark-400/40">
-                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium">Carrier</th>
-                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden sm:table-cell">MC Number</th>
-                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden md:table-cell">Source</th>
-                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium hidden md:table-cell">Added</th>
-                  <th className="text-left px-5 py-3 text-dark-300 text-xs font-medium">Network</th>
-                  <th className="px-5 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {allowlist.map(entry => {
-                  const ns = networkStatus[entry.carrier_id] || {};
-                  return (
-                    <tr key={entry.id} className="border-b border-dark-400/20 hover:bg-dark-700/30 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-xs font-bold flex-shrink-0">
-                            {(entry.carrier_name || entry.carrier_email || '?').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            {entry.carrier_id ? (
-                              <Link to={`/carrier-profile/${entry.carrier_id}`}
-                                className="text-white text-sm font-medium hover:text-brand-400 transition-colors">
-                                {entry.carrier_name || '—'}
-                              </Link>
-                            ) : (
-                              <p className="text-white text-sm font-medium">{entry.carrier_name || '—'}</p>
-                            )}
-                            <p className="text-dark-400 text-xs">{entry.carrier_email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-3.5 hidden sm:table-cell">
-                        <span className="text-dark-300 text-sm">{entry.carrier_mc || '—'}</span>
-                      </td>
-                      <td className="px-5 py-3.5 hidden md:table-cell">
-                        <span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${
-                          entry.source === 'upload'
-                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                            : 'bg-brand-500/10 text-brand-400 border-brand-500/20'
-                        }`}>
-                          {entry.source}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 hidden md:table-cell">
-                        <span className="text-dark-400 text-xs">
+            <Box sx={{ overflowX: 'auto' }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'action.hover' }}>
+                    {['Carrier', 'MC Number', 'Source', 'Added', 'Network', ''].map(h => (
+                      <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary' }}>
+                        {h}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {allowlist.map((entry, idx) => {
+                    const ns = networkStatus[entry.carrier_id] || {};
+                    const initial = (entry.carrier_name || entry.carrier_email || '?').charAt(0).toUpperCase();
+                    return (
+                      <TableRow key={entry.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.75rem' }}>
+                              {initial}
+                            </Avatar>
+                            <Box>
+                              {entry.carrier_id ? (
+                                <Typography
+                                  component={Link}
+                                  to={`/carrier-profile/${entry.carrier_id}`}
+                                  variant="body2"
+                                  fontWeight={600}
+                                  sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                                >
+                                  {entry.carrier_name || '—'}
+                                </Typography>
+                              ) : (
+                                <Typography variant="body2" fontWeight={600}>{entry.carrier_name || '—'}</Typography>
+                              )}
+                              <Typography variant="caption" color="text.secondary">{entry.carrier_email}</Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>{entry.carrier_mc || '—'}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={entry.source}
+                            size="small"
+                            color={entry.source === 'upload' ? 'info' : 'primary'}
+                            variant="outlined"
+                            sx={{ textTransform: 'capitalize' }}
+                          />
+                        </TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
                           {new Date(entry.added_at).toLocaleDateString()}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        {entry.carrier_id && (
-                          ns.status === 'accepted' ? (
-                            <span className="flex items-center gap-1 text-brand-400 text-xs font-medium">
-                              <Check size={11} /> Network
-                            </span>
-                          ) : ns.status === 'pending' ? (
-                            <span className="text-yellow-400 text-xs font-medium">Request Sent</span>
+                        </TableCell>
+                        <TableCell>
+                          {entry.carrier_id && (
+                            ns.status === 'accepted' ? (
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+                                <CheckIcon sx={{ fontSize: 14 }} />
+                                <Typography variant="caption" fontWeight={600}>Network</Typography>
+                              </Box>
+                            ) : ns.status === 'pending' ? (
+                              <Typography variant="caption" color="warning.main" fontWeight={600}>Request Sent</Typography>
+                            ) : (
+                              <Button
+                                size="small"
+                                variant="text"
+                                startIcon={ns.loading ? <CircularProgress size={12} /> : <HubIcon sx={{ fontSize: 14 }} />}
+                                disabled={ns.loading}
+                                onClick={() => handleAddToNetwork(entry.carrier_id)}
+                                sx={{ fontSize: '0.7rem' }}
+                              >
+                                {ns.loading ? '…' : 'Add to Network'}
+                              </Button>
+                            )
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          {confirmRemove === entry.id ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Typography variant="caption" color="text.secondary">Remove?</Typography>
+                              <Button size="small" color="error" variant="text" onClick={() => handleRemove(entry.id)} sx={{ minWidth: 0, px: 0.5 }}>Yes</Button>
+                              <Button size="small" variant="text" onClick={() => setConfirmRemove(null)} sx={{ minWidth: 0, px: 0.5 }}>No</Button>
+                            </Box>
                           ) : (
-                            <button
-                              onClick={() => handleAddToNetwork(entry.carrier_id)}
-                              disabled={ns.loading}
-                              className="flex items-center gap-1 text-dark-400 hover:text-brand-400 text-xs transition-colors disabled:opacity-50"
-                              title="Add to Network">
-                              <Network size={13} /> {ns.loading ? '…' : 'Add to Network'}
-                            </button>
-                          )
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        {confirmRemove === entry.id ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="text-dark-400 text-xs">Remove?</span>
-                            <button onClick={() => handleRemove(entry.id)}
-                              className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors">Yes</button>
-                            <button onClick={() => setConfirmRemove(null)}
-                              className="text-dark-400 hover:text-white text-xs transition-colors">No</button>
-                          </div>
-                        ) : (
-                          <button onClick={() => setConfirmRemove(entry.id)}
-                            className="text-dark-500 hover:text-red-400 transition-colors p-1">
-                            <Trash2 size={15} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                            <IconButton size="small" color="error" onClick={() => setConfirmRemove(entry.id)}>
+                              <DeleteIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Box>
           )}
-        </div>
+        </Card>
       )}
 
-      {/* ── Search tab ── */}
-      {tab === 'search' && (
-        <div className="space-y-4">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-300" />
-            <input
-              className="input pl-9"
-              placeholder="Search by name, email, or MC number..."
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-            />
-            {searching && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-            )}
-          </div>
+      {/* Search tab */}
+      {tab === 1 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            fullWidth size="small"
+            placeholder="Search by name, email, or MC number..."
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            autoFocus
+            InputProps={{
+              startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></InputAdornment>,
+              endAdornment: searching ? <InputAdornment position="end"><CircularProgress size={16} /></InputAdornment> : null,
+            }}
+          />
 
           {query.length >= 2 && !searching && searchResults.length === 0 && (
-            <div className="glass rounded-xl border border-dark-400/40 p-8 text-center">
-              <p className="text-dark-300 text-sm">No carriers found matching "{query}"</p>
-              <p className="text-dark-500 text-xs mt-1">Only registered HaulIQ carriers appear here</p>
-            </div>
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">No carriers found matching "{query}"</Typography>
+              <Typography variant="caption" color="text.disabled">Only registered HaulIQ carriers appear here</Typography>
+            </Paper>
           )}
 
           {searchResults.length > 0 && (
-            <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-              {searchResults.map(carrier => {
+            <Card>
+              {searchResults.map((carrier, idx) => {
                 const already = isAlreadyAdded(carrier);
                 const adding = addingId === carrier.id;
                 return (
-                  <div key={carrier.id}
-                    className="flex items-center gap-4 px-5 py-4 border-b border-dark-400/20 last:border-0 hover:bg-dark-700/30 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-brand-500/10 border border-brand-500/20 flex items-center justify-center text-brand-400 text-sm font-bold flex-shrink-0">
+                  <Box key={carrier.id} sx={{
+                    display: 'flex', alignItems: 'center', gap: 2, px: 2, py: 1.5,
+                    borderBottom: idx < searchResults.length - 1 ? 1 : 0, borderColor: 'divider',
+                    '&:hover': { bgcolor: 'action.hover' },
+                  }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
                       {carrier.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium text-sm">{carrier.name}</p>
-                      <div className="flex items-center gap-3 mt-0.5">
-                        <p className="text-dark-400 text-xs">{carrier.email}</p>
+                    </Avatar>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" fontWeight={600}>{carrier.name}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="caption" color="text.secondary">{carrier.email}</Typography>
                         {carrier.mc_number && (
-                          <>
-                            <span className="text-dark-600">·</span>
-                            <p className="text-dark-400 text-xs">{carrier.mc_number}</p>
-                          </>
+                          <Typography variant="caption" color="text.secondary">· {carrier.mc_number}</Typography>
                         )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleAdd(carrier)}
+                      </Box>
+                    </Box>
+                    <Button
+                      size="small"
+                      variant={already ? 'outlined' : 'contained'}
+                      color={already ? 'success' : 'primary'}
                       disabled={already || adding}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        already
-                          ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 cursor-default'
-                          : 'bg-brand-500 hover:bg-brand-600 text-white disabled:opacity-60'
-                      }`}>
-                      {already ? <><Check size={12} /> Added</> : adding ? 'Adding…' : <><UserPlus size={12} /> Add</>}
-                    </button>
-                  </div>
+                      startIcon={already ? <CheckIcon /> : adding ? <CircularProgress size={12} color="inherit" /> : <PersonAddIcon />}
+                      onClick={() => handleAdd(carrier)}
+                    >
+                      {already ? 'Added' : adding ? 'Adding…' : 'Add'}
+                    </Button>
+                  </Box>
                 );
               })}
-            </div>
+            </Card>
           )}
 
           {query.length < 2 && (
-            <div className="glass rounded-xl border border-dark-400/40 p-8 text-center">
-              <Search size={28} className="text-dark-600 mx-auto mb-2" />
-              <p className="text-dark-300 text-sm">Search HaulIQ's carrier database</p>
-              <p className="text-dark-500 text-xs mt-1">Type at least 2 characters to search by name, email, or MC number</p>
-            </div>
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <SearchIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">Search HaulIQ's carrier database</Typography>
+              <Typography variant="caption" color="text.disabled">
+                Type at least 2 characters to search by name, email, or MC number
+              </Typography>
+            </Paper>
           )}
-        </div>
+        </Box>
       )}
 
-      {/* ── Upload tab ── */}
-      {tab === 'upload' && (
-        <div className="space-y-5">
-          <div className="glass rounded-xl border border-dark-400/40 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText size={15} className="text-dark-300" />
-              <p className="text-white text-sm font-medium">Accepted formats</p>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-3">
-              {[
-                { label: 'Email only',        example: 'driver@company.com' },
-                { label: 'CSV (Name, Email)', example: 'John Smith, john@co.com' },
-                { label: 'CSV (Name, Email, MC)', example: 'John Smith, john@co.com, MC-123' },
-              ].map(({ label, example }) => (
-                <div key={label} className="bg-dark-700/50 rounded-lg p-3">
-                  <p className="text-dark-200 text-xs font-medium mb-1">{label}</p>
-                  <p className="text-dark-400 text-xs font-mono">{example}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Upload tab */}
+      {tab === 2 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <ArticleIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                <Typography variant="subtitle2">Accepted formats</Typography>
+              </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' }, gap: 1.5 }}>
+                {[
+                  { label: 'Email only', example: 'driver@company.com' },
+                  { label: 'CSV (Name, Email)', example: 'John Smith, john@co.com' },
+                  { label: 'CSV (Name, Email, MC)', example: 'John Smith, john@co.com, MC-123' },
+                ].map(({ label, example }) => (
+                  <Paper key={label} variant="outlined" sx={{ p: 1.5 }}>
+                    <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.5 }}>{label}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>{example}</Typography>
+                  </Paper>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
 
-          <div
+          <Paper
+            variant="outlined"
             onDrop={handleFileDrop}
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-              dragOver ? 'border-brand-500/60 bg-brand-500/5' : 'border-dark-400/40 hover:border-dark-300/60'
-            }`}>
-            <Upload size={24} className="text-dark-400 mx-auto mb-2" />
-            <p className="text-dark-200 text-sm">Drop a .csv or .txt file here</p>
-            <p className="text-dark-500 text-xs mt-1">or click to browse</p>
-            <input ref={fileInputRef} type="file" accept=".csv,.txt" className="hidden" onChange={handleFileDrop} />
-          </div>
+            sx={{
+              p: 4, textAlign: 'center', cursor: 'pointer',
+              borderStyle: 'dashed', borderWidth: 2,
+              borderColor: dragOver ? 'primary.main' : 'divider',
+              bgcolor: dragOver ? 'action.selected' : 'transparent',
+              transition: 'all 0.2s',
+              '&:hover': { borderColor: 'text.secondary' },
+            }}
+          >
+            <UploadIcon sx={{ fontSize: 32, color: 'text.secondary', mb: 1 }} />
+            <Typography variant="body2" color="text.secondary">Drop a .csv or .txt file here</Typography>
+            <Typography variant="caption" color="text.disabled">or click to browse</Typography>
+            <input ref={fileInputRef} type="file" accept=".csv,.txt" style={{ display: 'none' }} onChange={handleFileDrop} />
+          </Paper>
 
-          <div>
-            <label className="block text-dark-100 text-sm font-medium mb-2">Or paste your list</label>
-            <textarea
-              className="input resize-none font-mono text-sm"
-              rows={8}
-              placeholder={"driver@company.com\nJohn Smith, john@co.com, MC-123456\nJane Doe, jane@fleet.com"}
-              value={uploadText}
-              onChange={e => { setUploadText(e.target.value); setUploadResult(null); }}
-            />
-          </div>
+          <TextField
+            fullWidth size="small" label="Or paste your list" multiline rows={8}
+            placeholder={"driver@company.com\nJohn Smith, john@co.com, MC-123456\nJane Doe, jane@fleet.com"}
+            value={uploadText}
+            onChange={e => { setUploadText(e.target.value); setUploadResult(null); }}
+            inputProps={{ style: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
+          />
 
           {uploadResult && (
-            <div className="bg-brand-500/10 border border-brand-500/20 rounded-xl p-4 flex items-center gap-3">
-              <Check size={18} className="text-brand-400 flex-shrink-0" />
-              <div>
-                <p className="text-brand-400 font-semibold text-sm">Upload complete</p>
-                <p className="text-dark-300 text-xs mt-0.5">
-                  {uploadResult.added} carrier{uploadResult.added !== 1 ? 's' : ''} added
-                  {uploadResult.skipped > 0 && `, ${uploadResult.skipped} skipped (duplicates or invalid)`}
-                </p>
-              </div>
-            </div>
+            <Alert severity="success" icon={<CheckIcon />}>
+              <strong>Upload complete — </strong>
+              {uploadResult.added} carrier{uploadResult.added !== 1 ? 's' : ''} added
+              {uploadResult.skipped > 0 && `, ${uploadResult.skipped} skipped (duplicates or invalid)`}
+            </Alert>
           )}
 
-          <button
+          <Button
+            variant="contained"
+            size="large"
             onClick={handleUploadSubmit}
             disabled={!uploadText.trim() || uploading}
-            className="btn-primary w-full py-3 flex items-center justify-center gap-2 disabled:opacity-40">
-            <Upload size={16} /> {uploading ? 'Importing…' : 'Import Carriers'}
-          </button>
-        </div>
+            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <UploadIcon />}
+            sx={{ py: 1.5 }}
+          >
+            {uploading ? 'Importing…' : 'Import Carriers'}
+          </Button>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

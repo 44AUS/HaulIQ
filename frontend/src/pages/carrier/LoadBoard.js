@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Zap, X } from 'lucide-react';
+import {
+  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel,
+  InputAdornment, IconButton, Chip, CircularProgress, Button, Grid
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import BoltIcon from '@mui/icons-material/Bolt';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
@@ -38,84 +44,121 @@ export default function LoadBoard() {
   }, [search, type, sort, scoreFilter, hotOnly]);
 
   const counts = {
-    green:  loads.filter(l => l.profitScore === 'green').length,
+    green: loads.filter(l => l.profitScore === 'green').length,
     yellow: loads.filter(l => l.profitScore === 'yellow').length,
-    red:    loads.filter(l => l.profitScore === 'red').length,
+    red: loads.filter(l => l.profitScore === 'red').length,
   };
 
-  return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Load Board</h1>
-        <p className="text-dark-300 text-sm mt-1">{loads.length} loads available · Sorted by profitability</p>
-      </div>
+  const scoreFilters = [
+    { key: 'all', label: `All Loads (${loads.length})`, color: 'default' },
+    { key: 'green', label: `High Profit (${counts.green})`, color: 'success' },
+    { key: 'yellow', label: `Marginal (${counts.yellow})`, color: 'warning' },
+    { key: 'red', label: `Loss Risk (${counts.red})`, color: 'error' },
+  ];
 
-      {/* Profit score quick-filter pills */}
-      <div className="flex flex-wrap gap-3">
-        {[
-          { key: 'all', label: `All Loads (${loads.length})`, cls: 'border-dark-400/50 text-dark-200 hover:text-white hover:border-dark-300', active: 'border-white text-white bg-dark-600' },
-          { key: 'green', label: `✅ High Profit (${counts.green})`, cls: 'border-brand-500/20 text-brand-400 hover:border-brand-500/40', active: 'border-brand-500 bg-brand-500/10 text-brand-400' },
-          { key: 'yellow', label: `⚠️ Marginal (${counts.yellow})`, cls: 'border-yellow-500/20 text-yellow-400', active: 'border-yellow-500 bg-yellow-500/10 text-yellow-400' },
-          { key: 'red', label: `❌ Loss Risk (${counts.red})`, cls: 'border-red-500/20 text-red-400', active: 'border-red-500 bg-red-500/10 text-red-400' },
-        ].map(({ key, label, cls, active }) => (
-          <button key={key} onClick={() => setScoreFilter(key)}
-            className={`px-4 py-2 rounded-full text-xs font-medium border transition-all ${scoreFilter === key ? active : cls}`}>
-            {label}
-          </button>
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header */}
+      <Box>
+        <Typography variant="h5" fontWeight={700}>Load Board</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          {loads.length} loads available · Sorted by profitability
+        </Typography>
+      </Box>
+
+      {/* Profit score quick-filter chips */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {scoreFilters.map(({ key, label, color }) => (
+          <Chip
+            key={key}
+            label={label}
+            size="small"
+            color={scoreFilter === key ? color : 'default'}
+            variant={scoreFilter === key ? 'filled' : 'outlined'}
+            onClick={() => setScoreFilter(key)}
+            sx={{ cursor: 'pointer' }}
+          />
         ))}
-        <button onClick={() => setHotOnly(!hotOnly)}
-          className={`px-4 py-2 rounded-full text-xs font-medium border transition-all flex items-center gap-1 ${hotOnly ? 'border-red-500 bg-red-500/10 text-red-400' : 'border-red-500/20 text-red-400 hover:border-red-500/40'}`}>
-          <Zap size={11} /> Hot Only
-        </button>
-      </div>
+        <Chip
+          icon={<BoltIcon />}
+          label="Hot Only"
+          size="small"
+          color={hotOnly ? 'error' : 'default'}
+          variant={hotOnly ? 'filled' : 'outlined'}
+          onClick={() => setHotOnly(!hotOnly)}
+          sx={{ cursor: 'pointer' }}
+        />
+      </Box>
 
       {/* Search + filter bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-300" />
-          <input
-            className="input pl-9"
-            placeholder="Search origin, destination, commodity..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-400 hover:text-white">
-              <X size={14} />
-            </button>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <select value={type} onChange={e => setType(e.target.value)} className="input py-0 w-auto bg-dark-700 cursor-pointer text-sm">
-            {TYPES.map(t => <option key={t}>{t}</option>)}
-          </select>
-          <select value={sort} onChange={e => setSort(e.target.value)} className="input py-0 w-auto bg-dark-700 cursor-pointer text-sm">
-            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search origin, destination, commodity..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: search ? (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => setSearch('')} edge="end">
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ) : null,
+          }}
+        />
+        <Box sx={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+          <FormControl size="small" sx={{ minWidth: 130 }}>
+            <InputLabel>Type</InputLabel>
+            <Select value={type} onChange={e => setType(e.target.value)} label="Type">
+              {TYPES.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Sort By</InputLabel>
+            <Select value={sort} onChange={e => setSort(e.target.value)} label="Sort By">
+              {SORT_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
 
       {/* Results */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
       ) : apiError ? (
-        <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
-          <p className="text-red-400">{apiError}</p>
-        </div>
+        <Box sx={{ border: '1px solid', borderColor: 'error.main', borderRadius: 2, p: 4, textAlign: 'center' }}>
+          <Typography color="error">{apiError}</Typography>
+        </Box>
       ) : loads.length === 0 ? (
-        <div className="text-center py-20 glass rounded-xl">
-          <p className="text-dark-300 text-lg">No loads match your filters</p>
-          <button onClick={() => { setSearch(''); setType('All Types'); setScoreFilter('all'); setHotOnly(false); }}
-            className="text-brand-400 text-sm mt-2 hover:text-brand-300">Clear filters</button>
-        </div>
+        <Box sx={{ textAlign: 'center', py: 8, bgcolor: 'background.paper', borderRadius: 2 }}>
+          <Typography variant="body1" color="text.secondary" gutterBottom>
+            No loads match your filters
+          </Typography>
+          <Button
+            variant="text"
+            onClick={() => { setSearch(''); setType('All Types'); setScoreFilter('all'); setHotOnly(false); }}
+          >
+            Clear filters
+          </Button>
+        </Box>
       ) : (
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {loads.map(load => <LoadCard key={load.id} load={load} />)}
-        </div>
+        <Grid container spacing={3}>
+          {loads.map(load => (
+            <Grid item xs={12} sm={6} xl={4} key={load.id}>
+              <LoadCard load={load} />
+            </Grid>
+          ))}
+        </Grid>
       )}
-    </div>
+    </Box>
   );
 }

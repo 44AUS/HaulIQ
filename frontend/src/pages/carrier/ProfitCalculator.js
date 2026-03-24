@@ -1,5 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Calculator, TrendingUp, Minus, TrendingDown, RefreshCw } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, TextField,
+  InputAdornment, Stack, Divider
+} from '@mui/material';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import RemoveIcon from '@mui/icons-material/Remove';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 export default function ProfitCalculator() {
   const [form, setForm] = useState({
@@ -41,118 +49,199 @@ export default function ProfitCalculator() {
   }, [form]);
 
   const scoreConfig = {
-    green:  { label: 'High Profit',  Icon: TrendingUp,   cls: 'bg-brand-500/10 border-brand-500/30 text-brand-400', bg: 'brand' },
-    yellow: { label: 'Marginal',     Icon: Minus,         cls: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400', bg: 'yellow' },
-    red:    { label: 'Loss / Low',   Icon: TrendingDown,  cls: 'bg-red-500/10 border-red-500/30 text-red-400', bg: 'red' },
+    green: {
+      label: 'High Profit',
+      Icon: TrendingUpIcon,
+      color: 'success.main',
+      bgcolor: 'rgba(46,125,50,0.08)',
+      borderColor: 'success.main',
+      tip: 'This load is worth taking.',
+    },
+    yellow: {
+      label: 'Marginal',
+      Icon: RemoveIcon,
+      color: 'warning.main',
+      bgcolor: 'rgba(245,127,23,0.08)',
+      borderColor: 'warning.main',
+      tip: 'Barely profitable — negotiate if possible.',
+    },
+    red: {
+      label: 'Loss / Low',
+      Icon: TrendingDownIcon,
+      color: 'error.main',
+      bgcolor: 'rgba(198,40,40,0.08)',
+      borderColor: 'error.main',
+      tip: 'Avoid this load.',
+    },
   }[calc.score];
 
-  const Field = ({ label, id, placeholder, prefix, step = '1', hint }) => (
-    <div>
-      <label className="block text-dark-100 text-sm font-medium mb-1.5">{label} {hint && <span className="text-dark-400 text-xs">({hint})</span>}</label>
-      <div className="relative">
-        {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-300 text-sm">{prefix}</span>}
-        <input
-          type="number" step={step} placeholder={placeholder}
-          value={form[id]} onChange={e => set(id, e.target.value)}
-          className={`input ${prefix ? 'pl-7' : ''}`}
-        />
-      </div>
-    </div>
-  );
+  const fields = [
+    { label: 'Rate Offered', id: 'rate', prefix: '$', placeholder: '2500' },
+    { label: 'Loaded Miles', id: 'loadedMiles', placeholder: '450' },
+    { label: 'Deadhead Miles', id: 'deadheadMiles', placeholder: '60', hint: 'empty miles' },
+    { label: 'Fuel Price', id: 'fuelPrice', prefix: '$', placeholder: '3.85', step: '0.01', hint: 'per gallon' },
+    { label: 'MPG', id: 'mpg', placeholder: '7.2', step: '0.1', hint: 'your truck' },
+    { label: 'Driver Pay', id: 'driverPay', prefix: '$', placeholder: '0', hint: 'if applicable' },
+    { label: 'Tolls', id: 'tolls', prefix: '$', placeholder: '0' },
+    { label: 'Misc / Other', id: 'misc', prefix: '$', placeholder: '0' },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-          <Calculator size={22} className="text-brand-400" /> Profit Calculator
-        </h1>
-        <p className="text-dark-300 text-sm mt-1">Calculate your real net profit before accepting any load</p>
-      </div>
+    <Box sx={{ maxWidth: 900, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <CalculateIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+          <Typography variant="h5" fontWeight={700}>Profit Calculator</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Calculate your real net profit before accepting any load
+        </Typography>
+      </Box>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <Grid container spacing={3}>
         {/* Inputs */}
-        <div className="glass rounded-xl p-6 border border-dark-400/40 space-y-5">
-          <h2 className="text-white font-semibold">Load Details</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Rate Offered" id="rate" prefix="$" placeholder="2500" />
-            <Field label="Loaded Miles" id="loadedMiles" placeholder="450" />
-            <Field label="Deadhead Miles" id="deadheadMiles" placeholder="60" hint="empty miles" />
-            <Field label="Fuel Price" id="fuelPrice" prefix="$" placeholder="3.85" step="0.01" hint="per gallon" />
-            <Field label="MPG" id="mpg" placeholder="7.2" step="0.1" hint="your truck" />
-            <Field label="Driver Pay" id="driverPay" prefix="$" placeholder="0" hint="if applicable" />
-            <Field label="Tolls" id="tolls" prefix="$" placeholder="0" />
-            <Field label="Misc / Other" id="misc" prefix="$" placeholder="0" />
-          </div>
-          <button onClick={() => setForm({ rate: '', loadedMiles: '', deadheadMiles: '', fuelPrice: '3.85', mpg: '7.2', driverPay: '', tolls: '', misc: '' })}
-            className="btn-ghost flex items-center gap-1.5 text-sm w-full justify-center">
-            <RefreshCw size={14} /> Reset
-          </button>
-        </div>
+        <Grid item xs={12} lg={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={600} gutterBottom>Load Details</Typography>
+              <Grid container spacing={2}>
+                {fields.map(({ label, id, prefix, placeholder, step, hint }) => (
+                  <Grid item xs={6} key={id}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="number"
+                      label={hint ? `${label} (${hint})` : label}
+                      placeholder={placeholder}
+                      value={form[id]}
+                      onChange={e => set(id, e.target.value)}
+                      inputProps={{ step: step || '1' }}
+                      InputProps={prefix ? {
+                        startAdornment: (
+                          <InputAdornment position="start">{prefix}</InputAdornment>
+                        ),
+                      } : undefined}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              <Button
+                onClick={() => setForm({ rate: '', loadedMiles: '', deadheadMiles: '', fuelPrice: '3.85', mpg: '7.2', driverPay: '', tolls: '', misc: '' })}
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                fullWidth
+                sx={{ mt: 2 }}
+              >
+                Reset
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
 
         {/* Results */}
-        <div className="space-y-4">
-          {/* Score card */}
-          <div className={`rounded-xl p-6 border ${scoreConfig.cls} flex items-center gap-4`}>
-            <div className="w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
-              <scoreConfig.Icon size={28} />
-            </div>
-            <div>
-              <p className="text-xs font-medium opacity-70">Profit Rating</p>
-              <p className="text-2xl font-black mt-0.5">{scoreConfig.label}</p>
-              <p className="text-xs opacity-60 mt-0.5">
-                {calc.score === 'green' ? 'This load is worth taking.' : calc.score === 'yellow' ? 'Barely profitable — negotiate if possible.' : 'Avoid this load.'}
-              </p>
-            </div>
-          </div>
+        <Grid item xs={12} lg={6}>
+          <Stack spacing={2}>
+            {/* Score card */}
+            <Card sx={{
+              border: '1px solid',
+              borderColor: scoreConfig.borderColor,
+              bgcolor: scoreConfig.bgcolor,
+            }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box sx={{
+                    width: 56, height: 56, borderRadius: 2,
+                    bgcolor: 'rgba(255,255,255,0.05)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <scoreConfig.Icon sx={{ fontSize: 28, color: scoreConfig.color }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: scoreConfig.color, opacity: 0.8 }}>
+                      Profit Rating
+                    </Typography>
+                    <Typography variant="h5" fontWeight={800} sx={{ color: scoreConfig.color }}>
+                      {scoreConfig.label}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: scoreConfig.color, opacity: 0.7 }}>
+                      {scoreConfig.tip}
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
 
-          {/* Breakdown */}
-          <div className="glass rounded-xl p-6 border border-dark-400/40 space-y-4">
-            <h2 className="text-white font-semibold">Breakdown</h2>
-            {[
-              { label: 'Gross Rate', value: form.rate ? `$${parseFloat(form.rate).toLocaleString()}` : '—', cls: 'text-white' },
-              { label: 'Fuel Cost', value: form.rate ? `-$${calc.fuelCost.toLocaleString()}` : '—', cls: 'text-red-400' },
-              { label: 'Other Expenses', value: form.rate ? `-$${(calc.totalExpenses - calc.fuelCost).toLocaleString()}` : '—', cls: 'text-red-400' },
-            ].map(({ label, value, cls }) => (
-              <div key={label} className="flex justify-between py-2 border-b border-dark-400/20">
-                <span className="text-dark-300 text-sm">{label}</span>
-                <span className={`font-semibold text-sm ${cls}`}>{value}</span>
-              </div>
-            ))}
-            <div className="flex justify-between pt-1">
-              <span className="text-white font-bold">Net Profit</span>
-              <span className={`text-2xl font-black ${calc.score === 'green' ? 'text-brand-400' : calc.score === 'yellow' ? 'text-yellow-400' : 'text-red-400'}`}>
-                {form.rate ? (calc.netProfit >= 0 ? '+' : '') + '$' + calc.netProfit.toLocaleString() : '—'}
-              </span>
-            </div>
-          </div>
+            {/* Breakdown */}
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>Breakdown</Typography>
+                <Stack spacing={0}>
+                  {[
+                    { label: 'Gross Rate', value: form.rate ? `$${parseFloat(form.rate).toLocaleString()}` : '—', color: 'text.primary' },
+                    { label: 'Fuel Cost', value: form.rate ? `-$${calc.fuelCost.toLocaleString()}` : '—', color: 'error.main' },
+                    { label: 'Other Expenses', value: form.rate ? `-$${(calc.totalExpenses - calc.fuelCost).toLocaleString()}` : '—', color: 'error.main' },
+                  ].map(({ label, value, color }) => (
+                    <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">{label}</Typography>
+                      <Typography variant="body2" fontWeight={600} sx={{ color }}>{value}</Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2 }}>
+                    <Typography variant="body1" fontWeight={700}>Net Profit</Typography>
+                    <Typography
+                      variant="h5"
+                      fontWeight={800}
+                      sx={{ color: calc.score === 'green' ? 'success.main' : calc.score === 'yellow' ? 'warning.main' : 'error.main' }}
+                    >
+                      {form.rate ? (calc.netProfit >= 0 ? '+' : '') + '$' + calc.netProfit.toLocaleString() : '—'}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
 
-          {/* Per-mile stats */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Rate/Mile', value: form.rate ? `$${calc.ratePerMile}` : '—' },
-              { label: 'Net/Mile', value: form.rate ? `$${calc.netPerMile}` : '—' },
-              { label: 'Margin', value: form.rate ? `${calc.margin}%` : '—' },
-            ].map(({ label, value }) => (
-              <div key={label} className="glass rounded-lg p-3 text-center border border-dark-400/30">
-                <p className="text-dark-300 text-xs">{label}</p>
-                <p className="text-white font-bold text-lg mt-0.5">{value}</p>
-              </div>
-            ))}
-          </div>
+            {/* Per-mile stats */}
+            <Grid container spacing={2}>
+              {[
+                { label: 'Rate/Mile', value: form.rate ? `$${calc.ratePerMile}` : '—' },
+                { label: 'Net/Mile', value: form.rate ? `$${calc.netPerMile}` : '—' },
+                { label: 'Margin', value: form.rate ? `${calc.margin}%` : '—' },
+              ].map(({ label, value }) => (
+                <Grid item xs={4} key={label}>
+                  <Card variant="outlined">
+                    <CardContent sx={{ textAlign: 'center', py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
+                      <Typography variant="h6" fontWeight={700} sx={{ mt: 0.5 }}>{value}</Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
 
-          {/* Tips */}
-          {calc.score === 'red' && form.rate && (
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 text-xs text-red-300/80 leading-relaxed">
-              💡 <strong>Tip:</strong> Try negotiating the rate up, reducing deadhead miles, or waiting for a better load on this lane.
-            </div>
-          )}
-          {calc.score === 'yellow' && form.rate && (
-            <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4 text-xs text-yellow-300/80 leading-relaxed">
-              💡 <strong>Tip:</strong> Marginal load. Consider if you have a better option, or use this to reposition for a high-profit lane.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+            {/* Tips */}
+            {calc.score === 'red' && form.rate && (
+              <Card sx={{ bgcolor: 'rgba(198,40,40,0.05)', border: '1px solid', borderColor: 'error.main' }}>
+                <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Typography variant="caption" color="error.main">
+                    <strong>Tip:</strong> Try negotiating the rate up, reducing deadhead miles, or waiting for a better load on this lane.
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
+            {calc.score === 'yellow' && form.rate && (
+              <Card sx={{ bgcolor: 'rgba(245,127,23,0.05)', border: '1px solid', borderColor: 'warning.main' }}>
+                <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Typography variant="caption" color="warning.main">
+                    <strong>Tip:</strong> Marginal load. Consider if you have a better option, or use this to reposition for a high-profit lane.
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

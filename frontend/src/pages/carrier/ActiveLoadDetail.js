@@ -1,10 +1,24 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ArrowLeft, MapPin, Calendar, Package, DollarSign,
-  Truck, MessageSquare, CheckCircle, Navigation, Flag, Phone, Mail,
-  AlertTriangle, Clock, ChevronRight
-} from 'lucide-react';
+  Box, Typography, Button, Card, CardContent, Grid, Chip,
+  CircularProgress, Stack, Alert
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import MessageIcon from '@mui/icons-material/Message';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import FlagIcon from '@mui/icons-material/Flag';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { bookingsApi, bidsApi } from '../../services/api';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
@@ -15,43 +29,49 @@ const STEPS = ['Quoted', 'Booked', 'In Transit', 'Delivered'];
 function StatusTimeline({ status }) {
   const current = STEP_MAP[status] ?? 1;
   return (
-    <div className="flex items-center w-full">
+    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
       {STEPS.map((step, idx) => {
         const done = idx < current;
         const active = idx === current;
         return (
-          <div key={step} className="flex items-center flex-1 last:flex-none">
-            <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all
-                ${done   ? 'bg-brand-500' : ''}
-                ${active ? 'bg-brand-500 ring-2 ring-brand-400/40 ring-offset-2 ring-offset-dark-900' : ''}
-                ${!done && !active ? 'bg-dark-700 border border-dark-500' : ''}
-              `}>
-                {done   && <CheckCircle size={16} className="text-white" />}
-                {active && <div className="w-3 h-3 rounded-full bg-white" />}
-                {!done && !active && <div className="w-2 h-2 rounded-full bg-dark-500" />}
-              </div>
-              <span className={`text-xs mt-1.5 whitespace-nowrap font-medium ${
-                active ? 'text-brand-400' : done ? 'text-brand-400/60' : 'text-dark-500'
-              }`}>{step}</span>
-            </div>
+          <Box key={step} sx={{ display: 'flex', alignItems: 'center', flex: idx < STEPS.length - 1 ? 1 : 'none' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box sx={{
+                width: 32, height: 32, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                bgcolor: done || active ? 'primary.main' : 'action.disabledBackground',
+                border: active ? '2px solid' : 'none',
+                borderColor: 'primary.light',
+                boxShadow: active ? '0 0 0 4px rgba(21,101,192,0.15)' : 'none',
+              }}>
+                {done && <CheckCircleIcon sx={{ color: 'white', fontSize: 18 }} />}
+                {active && <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'white' }} />}
+                {!done && !active && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'text.disabled' }} />}
+              </Box>
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 0.75,
+                  whiteSpace: 'nowrap',
+                  fontWeight: active ? 700 : 400,
+                  color: active ? 'primary.main' : done ? 'primary.light' : 'text.disabled',
+                }}
+              >
+                {step}
+              </Typography>
+            </Box>
             {idx < STEPS.length - 1 && (
-              <div className={`flex-1 h-px mx-2 mb-5 ${done ? 'bg-brand-500' : 'border-t border-dashed border-dark-600'}`} />
+              <Box sx={{
+                flex: 1, height: 1, mx: 1, mb: 2.5,
+                bgcolor: done ? 'primary.main' : 'divider',
+                borderTop: done ? 'none' : '1px dashed',
+                borderColor: 'divider',
+              }} />
             )}
-          </div>
+          </Box>
         );
       })}
-    </div>
-  );
-}
-
-function StatBox({ label, value, sub, color = 'text-white' }) {
-  return (
-    <div className="bg-dark-800/60 rounded-xl p-4 border border-dark-700/50">
-      <p className="text-dark-400 text-xs mb-1">{label}</p>
-      <p className={`font-bold text-lg ${color}`}>{value}</p>
-      {sub && <p className="text-dark-500 text-xs mt-0.5">{sub}</p>}
-    </div>
+    </Box>
   );
 }
 
@@ -67,7 +87,6 @@ export default function ActiveLoadDetail() {
 
   const load = booking?.load;
 
-  // Map booking status → 4-step timeline label
   const timelineStatus =
     booking?.status === 'pending'    ? 'quoted'     :
     booking?.status === 'in_transit' ? 'in_transit' :
@@ -78,7 +97,6 @@ export default function ActiveLoadDetail() {
     bookingsApi.get(bookingId)
       .then(data => {
         setBooking(data);
-        // Check for a bid on this load
         if (data?.load?.id) {
           bidsApi.my()
             .then(bids => setMyBid(bids.find(b => String(b.load_id) === String(data.load.id)) || null))
@@ -114,297 +132,378 @@ export default function ActiveLoadDetail() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
   );
 
   if (error || !booking) return (
-    <div className="text-center py-20 space-y-3">
-      <AlertTriangle size={32} className="text-red-400 mx-auto" />
-      <p className="text-dark-300">{error || 'Booking not found.'}</p>
-      <button onClick={() => navigate(-1)} className="text-brand-400 text-sm">Go back</button>
-    </div>
+    <Box sx={{ textAlign: 'center', py: 10 }}>
+      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <Typography color="text.secondary" gutterBottom>{error || 'Booking not found.'}</Typography>
+      <Button variant="text" onClick={() => navigate(-1)}>Go back</Button>
+    </Box>
   );
 
-  const netProfit = load ? (load.rate || 0) - (load.fuel_cost_est || 0) - Math.round((load.deadhead_miles || 0) * 0.62) - 120 : 0;
+  const netProfit = load
+    ? (load.rate || 0) - (load.fuel_cost_est || 0) - Math.round((load.deadhead_miles || 0) * 0.62) - 120
+    : 0;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Back */}
-      <button onClick={() => navigate('/carrier/active')} className="flex items-center gap-1.5 text-dark-300 hover:text-white text-sm transition-colors">
-        <ArrowLeft size={16} /> Back to Active Loads
-      </button>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        variant="text"
+        onClick={() => navigate('/carrier/active')}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Back to Active Loads
+      </Button>
 
       {/* Header */}
-      <div className="glass rounded-xl p-6 border border-dark-400/40">
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className="badge-blue flex items-center gap-1">
-                <Truck size={10} /> {load?.load_type?.replace('_', ' ') || 'Load'}
-              </span>
-              <span className="text-dark-400 text-xs">Booking #{bookingId.slice(0, 8)}</span>
-            </div>
-            <h1 className="text-2xl font-bold text-white">
-              {load?.origin} → {load?.destination}
-            </h1>
-            <p className="text-dark-300 text-sm mt-1">
-              {load?.commodity} · {load?.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : ''} · {load?.miles} loaded miles
-            </p>
-          </div>
-          {/* Message broker */}
-          {load?.broker_user_id && (
-            <Link
-              to={`/carrier/messages?userId=${load.broker_user_id}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dark-400/40 text-dark-200 hover:text-white hover:border-dark-300 text-sm transition-colors"
-            >
-              <MessageSquare size={15} /> Message Broker
-            </Link>
-          )}
-        </div>
-
-        {/* Timeline */}
-        <StatusTimeline status={timelineStatus} />
-
-        {/* Action buttons */}
-        <div className="mt-6">
-          {booking.status === 'approved' && (
-            <button
-              onClick={handlePickup}
-              disabled={actionLoading}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white transition-colors shadow-lg shadow-brand-500/20"
-            >
-              {actionLoading
-                ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : <Navigation size={16} />
-              }
-              Confirm Pickup — Mark as In Transit
-            </button>
-          )}
-
-          {booking.status === 'in_transit' && (
-            <button
-              onClick={handleDeliver}
-              disabled={actionLoading}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white transition-colors shadow-lg shadow-emerald-500/20"
-            >
-              {actionLoading
-                ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : <Flag size={16} />
-              }
-              Confirm Delivery — Mark as Delivered
-            </button>
-          )}
-
-          {booking.status === 'completed' && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
-              <CheckCircle size={20} className="text-emerald-400 flex-shrink-0" />
-              <div>
-                <p className="text-emerald-400 font-semibold">Load Delivered</p>
-                <p className="text-emerald-300/70 text-sm">This load has been completed.</p>
-              </div>
-            </div>
-          )}
-
-          {booking.status === 'pending' && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 flex items-center gap-3">
-              <Clock size={20} className="text-yellow-400 flex-shrink-0" />
-              <div>
-                <p className="text-yellow-400 font-semibold">Awaiting Broker Approval</p>
-                <p className="text-yellow-300/70 text-sm">The broker hasn't confirmed your booking request yet.</p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-5">
-        {/* Left — load details */}
-        <div className="lg:col-span-2 space-y-5">
-          {/* Route */}
-          <div className="glass rounded-xl p-6 border border-dark-400/40">
-            <h2 className="text-white font-semibold mb-5">Route Details</h2>
-            <div className="space-y-4 mb-5">
-              {[
-                { label: 'Pickup', value: load?.origin, sub: load?.pickup_date, color: 'text-brand-400' },
-                { label: 'Delivery', value: load?.destination, sub: load?.delivery_date, color: 'text-red-400' },
-              ].map(({ label, value, sub, color }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-dark-700 flex items-center justify-center flex-shrink-0">
-                    <MapPin size={15} className={color} />
-                  </div>
-                  <div>
-                    <p className="text-dark-400 text-xs">{label}</p>
-                    <p className="text-white font-medium">{value}</p>
-                    {sub && <p className="text-dark-400 text-xs flex items-center gap-1"><Calendar size={9} />{sub}</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-dark-700/50 mb-5">
-              <StatBox label="Loaded Miles" value={`${load?.miles || 0} mi`} />
-              <StatBox label="Deadhead" value={`${load?.deadhead_miles || 0} mi`} />
-              <StatBox label="Dimensions" value={load?.dimensions || '48x102'} />
-            </div>
-
-            {load?.origin && load?.destination && (
-              <Suspense fallback={<div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>}>
-                <RouteMap origin={load.origin} dest={load.destination} miles={load.miles} />
-              </Suspense>
+      <Card>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                <Chip icon={<LocalShippingIcon />} label={load?.load_type?.replace('_', ' ') || 'Load'} size="small" color="primary" variant="outlined" />
+                <Typography variant="caption" color="text.secondary">
+                  Booking #{bookingId.slice(0, 8)}
+                </Typography>
+              </Box>
+              <Typography variant="h5" fontWeight={700}>
+                {load?.origin} → {load?.destination}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                {load?.commodity}
+                {load?.weight_lbs ? ` · ${Number(load.weight_lbs).toLocaleString()} lbs` : ''}
+                {load?.miles ? ` · ${load.miles} loaded miles` : ''}
+              </Typography>
+            </Box>
+            {load?.broker_user_id && (
+              <Button
+                component={Link}
+                to={`/carrier/messages?userId=${load.broker_user_id}`}
+                variant="outlined"
+                startIcon={<MessageIcon />}
+              >
+                Message Broker
+              </Button>
             )}
-          </div>
+          </Box>
 
-          {/* Profit breakdown */}
-          <div className="glass rounded-xl p-6 border border-dark-400/40">
-            <h2 className="text-white font-semibold mb-4">Profit Breakdown</h2>
-            <div className="space-y-3 mb-4">
-              {[
-                { label: 'Gross Rate', value: `+$${(load?.rate || 0).toLocaleString()}`, cls: 'text-brand-400' },
-                { label: `Fuel (~${load?.miles || 0} mi)`, value: `-$${load?.fuel_cost_est || 0}`, cls: 'text-red-400' },
-                { label: `Deadhead (${load?.deadhead_miles || 0} mi)`, value: `-$${Math.round((load?.deadhead_miles || 0) * 0.62)}`, cls: 'text-red-400' },
-                { label: 'Misc / tolls', value: '-$120', cls: 'text-red-400' },
-              ].map(({ label, value, cls }) => (
-                <div key={label} className="flex items-center justify-between py-2 border-b border-dark-700/40">
-                  <span className="text-dark-300 text-sm">{label}</span>
-                  <span className={`font-semibold text-sm ${cls}`}>{value}</span>
-                </div>
-              ))}
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-white font-bold">Est. Net Profit</span>
-                <span className={`text-xl font-black ${netProfit > 0 ? 'text-brand-400' : 'text-red-400'}`}>
-                  {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}
-                </span>
-              </div>
-            </div>
-          </div>
+          <StatusTimeline status={timelineStatus} />
 
-          {/* Notes */}
-          {(booking.note || booking.broker_note || load?.notes) && (
-            <div className="glass rounded-xl p-6 border border-dark-400/40">
-              <h2 className="text-white font-semibold mb-4">Notes</h2>
-              <div className="space-y-3">
-                {load?.notes && (
-                  <div>
-                    <p className="text-dark-400 text-xs mb-1">Load Instructions</p>
-                    <p className="text-dark-200 text-sm">{load.notes}</p>
-                  </div>
+          {/* Action buttons */}
+          <Box sx={{ mt: 3 }}>
+            {booking.status === 'approved' && (
+              <Button
+                onClick={handlePickup}
+                disabled={actionLoading}
+                variant="contained"
+                fullWidth
+                size="large"
+                startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <NavigationIcon />}
+              >
+                Confirm Pickup — Mark as In Transit
+              </Button>
+            )}
+
+            {booking.status === 'in_transit' && (
+              <Button
+                onClick={handleDeliver}
+                disabled={actionLoading}
+                variant="contained"
+                color="success"
+                fullWidth
+                size="large"
+                startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <FlagIcon />}
+              >
+                Confirm Delivery — Mark as Delivered
+              </Button>
+            )}
+
+            {booking.status === 'completed' && (
+              <Alert severity="success" icon={<CheckCircleIcon />}>
+                <Typography variant="body2" fontWeight={600}>Load Delivered</Typography>
+                <Typography variant="caption">This load has been completed.</Typography>
+              </Alert>
+            )}
+
+            {booking.status === 'pending' && (
+              <Alert severity="warning" icon={<AccessTimeIcon />}>
+                <Typography variant="body2" fontWeight={600}>Awaiting Broker Approval</Typography>
+                <Typography variant="caption">The broker hasn't confirmed your booking request yet.</Typography>
+              </Alert>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Grid container spacing={3}>
+        {/* Left — load details */}
+        <Grid item xs={12} lg={8}>
+          <Stack spacing={3}>
+            {/* Route */}
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>Route Details</Typography>
+                <Stack spacing={2} sx={{ mb: 2 }}>
+                  {[
+                    { label: 'Pickup', value: load?.origin, sub: load?.pickup_date, color: 'primary.main' },
+                    { label: 'Delivery', value: load?.destination, sub: load?.delivery_date, color: 'error.main' },
+                  ].map(({ label, value, sub, color }) => (
+                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{
+                        width: 36, height: 36, borderRadius: 1.5,
+                        bgcolor: 'action.hover',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                      }}>
+                        <LocationOnIcon sx={{ fontSize: 18, color }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="caption" color="text.secondary">{label}</Typography>
+                        <Typography variant="body2" fontWeight={600}>{value}</Typography>
+                        {sub && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <CalendarTodayIcon sx={{ fontSize: 10 }} color="action" />
+                            <Typography variant="caption" color="text.disabled">{sub}</Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+
+                <Grid container spacing={2} sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider', mb: 2 }}>
+                  {[
+                    ['Loaded Miles', `${load?.miles || 0} mi`],
+                    ['Deadhead', `${load?.deadhead_miles || 0} mi`],
+                    ['Dimensions', load?.dimensions || '48x102'],
+                  ].map(([k, v]) => (
+                    <Grid item xs={4} key={k}>
+                      <Box sx={{ bgcolor: 'action.hover', borderRadius: 1.5, p: 1.5 }}>
+                        <Typography variant="caption" color="text.secondary" display="block">{k}</Typography>
+                        <Typography variant="body2" fontWeight={600} sx={{ mt: 0.5 }}>{v}</Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {load?.origin && load?.destination && (
+                  <Suspense fallback={
+                    <Box sx={{ height: 224, bgcolor: 'action.hover', borderRadius: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <CircularProgress size={24} />
+                    </Box>
+                  }>
+                    <RouteMap origin={load.origin} dest={load.destination} miles={load.miles} />
+                  </Suspense>
                 )}
-                {booking.note && (
-                  <div>
-                    <p className="text-dark-400 text-xs mb-1">Your Note</p>
-                    <p className="text-dark-200 text-sm">{booking.note}</p>
-                  </div>
-                )}
-                {booking.broker_note && (
-                  <div>
-                    <p className="text-dark-400 text-xs mb-1">Broker Note</p>
-                    <p className="text-dark-200 text-sm">{booking.broker_note}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+              </CardContent>
+            </Card>
+
+            {/* Profit breakdown */}
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>Profit Breakdown</Typography>
+                <Stack spacing={0}>
+                  {[
+                    { label: 'Gross Rate', value: `+$${(load?.rate || 0).toLocaleString()}`, color: 'success.main' },
+                    { label: `Fuel (~${load?.miles || 0} mi)`, value: `-$${load?.fuel_cost_est || 0}`, color: 'error.main' },
+                    { label: `Deadhead (${load?.deadhead_miles || 0} mi)`, value: `-$${Math.round((load?.deadhead_miles || 0) * 0.62)}`, color: 'error.main' },
+                    { label: 'Misc / tolls', value: '-$120', color: 'error.main' },
+                  ].map(({ label, value, color }) => (
+                    <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <Typography variant="body2" color="text.secondary">{label}</Typography>
+                      <Typography variant="body2" fontWeight={600} sx={{ color }}>{value}</Typography>
+                    </Box>
+                  ))}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2 }}>
+                    <Typography variant="body1" fontWeight={700}>Est. Net Profit</Typography>
+                    <Typography variant="h5" fontWeight={800} sx={{ color: netProfit > 0 ? 'success.main' : 'error.main' }}>
+                      {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Notes */}
+            {(booking.note || booking.broker_note || load?.notes) && (
+              <Card>
+                <CardContent>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>Notes</Typography>
+                  <Stack spacing={2}>
+                    {load?.notes && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Load Instructions</Typography>
+                        <Typography variant="body2">{load.notes}</Typography>
+                      </Box>
+                    )}
+                    {booking.note && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Your Note</Typography>
+                        <Typography variant="body2">{booking.note}</Typography>
+                      </Box>
+                    )}
+                    {booking.broker_note && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Broker Note</Typography>
+                        <Typography variant="body2">{booking.broker_note}</Typography>
+                      </Box>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            )}
+          </Stack>
+        </Grid>
 
         {/* Right — broker + stats */}
-        <div className="space-y-5">
-          {/* Rate summary */}
-          <div className="glass rounded-xl p-5 border border-dark-400/40 space-y-3">
-            <h2 className="text-white font-semibold text-sm">Rate Summary</h2>
-            {[
-              { label: 'Agreed Rate', value: `$${(load?.rate || 0).toLocaleString()}`, color: 'text-brand-400' },
-              { label: 'Per Mile', value: `$${(load?.rate_per_mile || 0).toFixed(2)}` },
-              { label: 'Commodity', value: load?.commodity || '—' },
-              { label: 'Weight', value: load?.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : '—' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="flex justify-between text-sm">
-                <span className="text-dark-400">{label}</span>
-                <span className={`font-semibold ${color || 'text-white'}`}>{value}</span>
-              </div>
-            ))}
-          </div>
+        <Grid item xs={12} lg={4}>
+          <Stack spacing={3}>
+            {/* Rate summary */}
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>Rate Summary</Typography>
+                <Stack spacing={1.5}>
+                  {[
+                    { label: 'Agreed Rate', value: `$${(load?.rate || 0).toLocaleString()}`, color: 'primary.main' },
+                    { label: 'Per Mile', value: `$${(load?.rate_per_mile || 0).toFixed(2)}` },
+                    { label: 'Commodity', value: load?.commodity || '—' },
+                    { label: 'Weight', value: load?.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : '—' },
+                  ].map(({ label, value, color }) => (
+                    <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">{label}</Typography>
+                      <Typography variant="body2" fontWeight={600} sx={color ? { color } : {}}>{value}</Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </CardContent>
+            </Card>
 
-          {/* Broker info */}
-          {load?.broker_name && (
-            <div className="glass rounded-xl p-5 border border-dark-400/40">
-              <h2 className="text-white font-semibold text-sm mb-3">Broker</h2>
-              <div className="space-y-2">
-                <p className="text-white font-medium">{load.broker_name}</p>
-                {load.broker_mc && <p className="text-dark-400 text-xs">MC# {load.broker_mc}</p>}
-                {load.broker_email && (
-                  <a href={`mailto:${load.broker_email}`} className="flex items-center gap-2 text-brand-400 text-sm hover:text-brand-300 transition-colors mt-2">
-                    <Mail size={13} /> {load.broker_email}
-                  </a>
-                )}
-                {load.broker_phone && (
-                  <a href={`tel:${load.broker_phone}`} className="flex items-center gap-2 text-brand-400 text-sm hover:text-brand-300 transition-colors mt-1">
-                    <Phone size={13} /> {load.broker_phone}
-                  </a>
-                )}
-              </div>
-              {load.broker_user_id && (
-                <Link
-                  to={`/carrier/messages?userId=${load.broker_user_id}`}
-                  className="mt-3 w-full py-2 rounded-lg border border-dark-500 text-dark-200 hover:text-white text-sm flex items-center justify-center gap-2 transition-colors"
-                >
-                  <MessageSquare size={13} /> Open Messages <ChevronRight size={13} />
-                </Link>
-              )}
-            </div>
-          )}
+            {/* Broker info */}
+            {load?.broker_name && (
+              <Card>
+                <CardContent>
+                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>Broker</Typography>
+                  <Typography variant="body2" fontWeight={600} gutterBottom>{load.broker_name}</Typography>
+                  {load.broker_mc && (
+                    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                      MC# {load.broker_mc}
+                    </Typography>
+                  )}
+                  {load.broker_email && (
+                    <Button
+                      component="a"
+                      href={`mailto:${load.broker_email}`}
+                      variant="text"
+                      size="small"
+                      startIcon={<EmailIcon fontSize="small" />}
+                      sx={{ display: 'flex', justifyContent: 'flex-start', px: 0, mt: 1 }}
+                    >
+                      {load.broker_email}
+                    </Button>
+                  )}
+                  {load.broker_phone && (
+                    <Button
+                      component="a"
+                      href={`tel:${load.broker_phone}`}
+                      variant="text"
+                      size="small"
+                      startIcon={<PhoneIcon fontSize="small" />}
+                      sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}
+                    >
+                      {load.broker_phone}
+                    </Button>
+                  )}
+                  {load.broker_user_id && (
+                    <Button
+                      component={Link}
+                      to={`/carrier/messages?userId=${load.broker_user_id}`}
+                      variant="outlined"
+                      fullWidth
+                      startIcon={<MessageIcon />}
+                      endIcon={<ChevronRightIcon />}
+                      size="small"
+                      sx={{ mt: 1.5 }}
+                    >
+                      Open Messages
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Bid status (if carrier bid on this load) */}
-          {myBid && (
-            <div className={`glass rounded-xl p-5 border ${
-              myBid.status === 'accepted'  ? 'border-brand-500/30' :
-              myBid.status === 'countered' ? 'border-blue-500/30' :
-              myBid.status === 'rejected'  ? 'border-red-500/30' :
-              'border-dark-400/40'
-            }`}>
-              <h2 className="text-white font-semibold text-sm mb-3">Your Bid</h2>
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-sm font-semibold ${
-                  myBid.status === 'accepted'  ? 'text-brand-400' :
-                  myBid.status === 'countered' ? 'text-blue-400' :
-                  myBid.status === 'rejected'  ? 'text-red-400' :
-                  'text-yellow-400'
-                }`}>
-                  {myBid.status === 'accepted'  ? 'Accepted' :
-                   myBid.status === 'countered' ? 'Countered' :
-                   myBid.status === 'rejected'  ? 'Rejected' : 'Pending'}
-                </span>
-                <span className="text-white font-bold">${myBid.amount?.toLocaleString()}</span>
-              </div>
-              {myBid.status === 'countered' && myBid.counter_amount && (
-                <div className="bg-blue-500/10 rounded-lg p-3 text-sm">
-                  <p className="text-blue-300 text-xs mb-1">Broker counter offer</p>
-                  <p className="text-white font-bold">${myBid.counter_amount.toLocaleString()}</p>
-                  {myBid.counter_note && <p className="text-blue-300/70 text-xs mt-1">"{myBid.counter_note}"</p>}
-                </div>
-              )}
-            </div>
-          )}
+            {/* Bid status */}
+            {myBid && (
+              <Card variant="outlined" sx={{
+                borderColor:
+                  myBid.status === 'accepted' ? 'success.main' :
+                  myBid.status === 'countered' ? 'info.main' :
+                  myBid.status === 'rejected' ? 'error.main' : 'warning.main'
+              }}>
+                <CardContent>
+                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>Your Bid</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Chip
+                      label={
+                        myBid.status === 'accepted' ? 'Accepted' :
+                        myBid.status === 'countered' ? 'Countered' :
+                        myBid.status === 'rejected' ? 'Rejected' : 'Pending'
+                      }
+                      size="small"
+                      color={
+                        myBid.status === 'accepted' ? 'success' :
+                        myBid.status === 'countered' ? 'info' :
+                        myBid.status === 'rejected' ? 'error' : 'warning'
+                      }
+                    />
+                    <Typography variant="body2" fontWeight={700}>${myBid.amount?.toLocaleString()}</Typography>
+                  </Box>
+                  {myBid.status === 'countered' && myBid.counter_amount && (
+                    <Box sx={{ bgcolor: 'info.main', bgcolor: 'rgba(2,136,209,0.08)', borderRadius: 1, p: 1.5 }}>
+                      <Typography variant="caption" color="info.main" display="block" gutterBottom>Broker counter offer</Typography>
+                      <Typography variant="body2" fontWeight={700}>${myBid.counter_amount.toLocaleString()}</Typography>
+                      {myBid.counter_note && (
+                        <Typography variant="caption" color="text.secondary">"{myBid.counter_note}"</Typography>
+                      )}
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Quick actions */}
-          <div className="glass rounded-xl p-5 border border-dark-400/40 space-y-2">
-            <h2 className="text-white font-semibold text-sm mb-3">Quick Actions</h2>
-            <Link
-              to="/carrier/loads"
-              className="w-full py-2.5 rounded-xl border border-dark-500 text-dark-200 hover:text-white text-sm flex items-center justify-center gap-2 transition-colors"
-            >
-              <Package size={14} /> Browse More Loads
-            </Link>
-            <Link
-              to="/carrier/active"
-              className="w-full py-2.5 rounded-xl border border-dark-500 text-dark-200 hover:text-white text-sm flex items-center justify-center gap-2 transition-colors"
-            >
-              <DollarSign size={14} /> All Active Loads
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+            {/* Quick actions */}
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>Quick Actions</Typography>
+                <Stack spacing={1.5}>
+                  <Button
+                    component={Link}
+                    to="/carrier/loads"
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<InventoryIcon />}
+                  >
+                    Browse More Loads
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/carrier/active"
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<AttachMoneyIcon />}
+                  >
+                    All Active Loads
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

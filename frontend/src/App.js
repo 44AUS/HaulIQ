@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
+import { AppThemeProvider } from './context/ThemeContext';
+import { Box, CircularProgress } from '@mui/material';
 
 // Pages — Public
 import Landing from './pages/Landing';
@@ -55,7 +57,7 @@ import DashboardLayout from './components/layout/DashboardLayout';
 // ─── Route guards ─────────────────────────────────────────────────────────────
 function ProtectedRoute({ children, requiredRole }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-dark-900 flex items-center justify-center"><div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" /></div>;
+  if (loading) return <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (!user) return <Navigate to="/login" replace />;
   if (requiredRole && user.role !== requiredRole) {
     if (user.role === 'admin') return <Navigate to="/admin" replace />;
@@ -181,14 +183,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MessagingProvider>
-        <BrowserRouter>
-          <div className="dark">
+    <AppThemeProvider>
+      <AuthProvider>
+        <MessagingProvider>
+          <BrowserRouter>
             <AppRoutes />
-          </div>
-        </BrowserRouter>
-      </MessagingProvider>
-    </AuthProvider>
+          </BrowserRouter>
+        </MessagingProvider>
+      </AuthProvider>
+    </AppThemeProvider>
   );
 }

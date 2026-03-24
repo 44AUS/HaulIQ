@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, DollarSign, MapPin, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+  Box, Typography, Button, Card, CardContent, Grid, CircularProgress,
+  TextField, Alert, Stack, InputAdornment
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 
@@ -52,178 +60,205 @@ export default function PlaceBid() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-    </div>
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+      <CircularProgress />
+    </Box>
   );
 
   if (!load) return (
-    <div className="text-center py-20">
-      <AlertTriangle size={32} className="text-red-400 mx-auto mb-3" />
-      <p className="text-dark-300">Load not found.</p>
-      <Link to="/carrier/loads" className="text-brand-400 mt-2 inline-block text-sm">Back to Load Board</Link>
-    </div>
+    <Box sx={{ textAlign: 'center', py: 10 }}>
+      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <Typography color="text.secondary" gutterBottom>Load not found.</Typography>
+      <Button component={Link} to="/carrier/loads" variant="text">Back to Load Board</Button>
+    </Box>
   );
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+    <Box sx={{ maxWidth: 640, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Back */}
-      <button onClick={() => navigate(`/carrier/loads/${id}`)} className="flex items-center gap-1.5 text-dark-300 hover:text-white text-sm transition-colors">
-        <ArrowLeft size={16} /> Back to Load
-      </button>
+      <Button
+        startIcon={<ArrowBackIcon />}
+        variant="text"
+        onClick={() => navigate(`/carrier/loads/${id}`)}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Back to Load
+      </Button>
 
       {/* Load summary */}
-      <div className="glass rounded-xl p-6 border border-dark-400/40">
-        <p className="text-dark-400 text-xs mb-2">You're bidding on</p>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1 text-dark-400 text-xs mb-0.5"><MapPin size={10} /> Origin</div>
-            <p className="text-white font-semibold">{load.origin}</p>
-          </div>
-          <div className="text-dark-500 text-sm">→</div>
-          <div className="flex-1 min-w-0 text-right">
-            <div className="flex items-center justify-end gap-1 text-dark-400 text-xs mb-0.5"><MapPin size={10} /> Destination</div>
-            <p className="text-white font-semibold">{load.dest}</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t border-dark-700/50">
-          <div>
-            <p className="text-dark-400 text-xs">Listed Rate</p>
-            <p className="text-white font-bold">${load.rate.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-dark-400 text-xs">Miles</p>
-            <p className="text-white font-bold">{load.miles} mi</p>
-          </div>
-          <div>
-            <p className="text-dark-400 text-xs">Type</p>
-            <p className="text-white font-bold">{load.type}</p>
-          </div>
-        </div>
-      </div>
+      <Card>
+        <CardContent>
+          <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+            You're bidding on
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                <LocationOnIcon sx={{ fontSize: 12 }} color="action" />
+                <Typography variant="caption" color="text.secondary">Origin</Typography>
+              </Box>
+              <Typography variant="body1" fontWeight={600}>{load.origin}</Typography>
+            </Box>
+            <Typography color="text.secondary">→</Typography>
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, mb: 0.5 }}>
+                <LocationOnIcon sx={{ fontSize: 12 }} color="action" />
+                <Typography variant="caption" color="text.secondary">Destination</Typography>
+              </Box>
+              <Typography variant="body1" fontWeight={600}>{load.dest}</Typography>
+            </Box>
+          </Box>
+          <Grid container spacing={2} sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="text.secondary" display="block">Listed Rate</Typography>
+              <Typography variant="body1" fontWeight={700}>${load.rate.toLocaleString()}</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="text.secondary" display="block">Miles</Typography>
+              <Typography variant="body1" fontWeight={700}>{load.miles} mi</Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography variant="caption" color="text.secondary" display="block">Type</Typography>
+              <Typography variant="body1" fontWeight={700}>{load.type}</Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
 
       {/* Existing bid notice */}
       {existingBid && (
-        <div className={`rounded-xl border p-4 flex items-start gap-3 ${
-          existingBid.status === 'pending'   ? 'bg-yellow-500/10 border-yellow-500/30' :
-          existingBid.status === 'accepted'  ? 'bg-brand-500/10 border-brand-500/30' :
-          existingBid.status === 'countered' ? 'bg-blue-500/10 border-blue-500/30' :
-          'bg-dark-700/50 border-dark-400/30'
-        }`}>
-          <AlertTriangle size={16} className="text-yellow-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-white font-semibold text-sm">You already have a bid on this load</p>
-            <p className="text-dark-300 text-sm mt-0.5">
-              ${existingBid.amount?.toLocaleString()} — <span className="capitalize">{existingBid.status}</span>
-              {existingBid.status === 'countered' && existingBid.counter_amount && (
-                <> · Broker countered at <strong className="text-blue-300">${existingBid.counter_amount.toLocaleString()}</strong></>
-              )}
-            </p>
-          </div>
-        </div>
+        <Alert
+          severity={
+            existingBid.status === 'accepted' ? 'success' :
+            existingBid.status === 'countered' ? 'info' :
+            'warning'
+          }
+          icon={<WarningAmberIcon />}
+        >
+          <Typography variant="body2" fontWeight={600}>You already have a bid on this load</Typography>
+          <Typography variant="body2">
+            ${existingBid.amount?.toLocaleString()} — <Box component="span" sx={{ textTransform: 'capitalize' }}>{existingBid.status}</Box>
+            {existingBid.status === 'countered' && existingBid.counter_amount && (
+              <> · Broker countered at <strong>${existingBid.counter_amount.toLocaleString()}</strong></>
+            )}
+          </Typography>
+        </Alert>
       )}
 
       {/* Success state */}
       {submitted ? (
-        <div className="glass rounded-xl p-10 border border-brand-500/30 text-center">
-          <CheckCircle size={48} className="text-brand-400 mx-auto mb-4" />
-          <h2 className="text-white text-xl font-bold mb-2">Bid Submitted!</h2>
-          <p className="text-dark-300 text-sm mb-6">
-            Your bid of <span className="text-white font-semibold">${parsed.toLocaleString()}</span> has been sent to the broker.
-            You'll be notified when they respond.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <Link to={`/carrier/loads/${id}`} className="btn-secondary px-6 py-2.5 text-sm">
-              Back to Load
-            </Link>
-            <Link to="/carrier/loads" className="btn-primary px-6 py-2.5 text-sm">
-              Browse More Loads
-            </Link>
-          </div>
-        </div>
+        <Card sx={{ border: '1px solid', borderColor: 'primary.main' }}>
+          <CardContent sx={{ textAlign: 'center', py: 8 }}>
+            <CheckCircleIcon sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h5" fontWeight={700} gutterBottom>Bid Submitted!</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+              Your bid of <strong>${parsed.toLocaleString()}</strong> has been sent to the broker.
+              You'll be notified when they respond.
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+              <Button component={Link} to={`/carrier/loads/${id}`} variant="outlined">
+                Back to Load
+              </Button>
+              <Button component={Link} to="/carrier/loads" variant="contained">
+                Browse More Loads
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
       ) : (
         /* Bid form */
-        <form onSubmit={handleSubmit} className="glass rounded-xl p-6 border border-dark-400/40 space-y-5">
-          <div>
-            <h2 className="text-white font-bold text-lg">Place Your Bid</h2>
-            <p className="text-dark-400 text-sm mt-0.5">Submit a rate to the broker for this load.</p>
-          </div>
+        <Card component="form" onSubmit={handleSubmit}>
+          <CardContent>
+            <Typography variant="h6" fontWeight={700} gutterBottom>Place Your Bid</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Submit a rate to the broker for this load.
+            </Typography>
 
-          {/* Amount */}
-          <div>
-            <label className="block text-dark-200 text-sm font-medium mb-2">
-              Bid Amount <span className="text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium">
-                <DollarSign size={16} />
-              </span>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                className="input pl-10 text-lg font-semibold"
-                placeholder={String(load.rate)}
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-            {pctDiff !== null && (
-              <p className={`text-xs mt-2 font-medium ${parseFloat(pctDiff) >= 0 ? 'text-brand-400' : 'text-yellow-400'}`}>
-                {parseFloat(pctDiff) >= 0 ? `+${pctDiff}%` : `${pctDiff}%`} vs listed rate of ${load.rate.toLocaleString()}
-              </p>
-            )}
-            {valid && (
-              <p className="text-dark-400 text-xs mt-1">
-                ${(parsed / load.miles).toFixed(2)}/mi
-              </p>
-            )}
-          </div>
+            <Stack spacing={3}>
+              {/* Amount */}
+              <Box>
+                <TextField
+                  fullWidth
+                  size="small"
+                  type="number"
+                  label="Bid Amount"
+                  required
+                  inputProps={{ min: 1, step: 1 }}
+                  placeholder={String(load.rate)}
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
+                  autoFocus
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AttachMoneyIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ '& input': { fontSize: '1.1rem', fontWeight: 600 } }}
+                />
+                {pctDiff !== null && (
+                  <Typography
+                    variant="caption"
+                    sx={{ mt: 0.75, display: 'block', fontWeight: 600, color: parseFloat(pctDiff) >= 0 ? 'success.main' : 'warning.main' }}
+                  >
+                    {parseFloat(pctDiff) >= 0 ? `+${pctDiff}%` : `${pctDiff}%`} vs listed rate of ${load.rate.toLocaleString()}
+                  </Typography>
+                )}
+                {valid && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    ${(parsed / load.miles).toFixed(2)}/mi
+                  </Typography>
+                )}
+              </Box>
 
-          {/* Note */}
-          <div>
-            <label className="block text-dark-200 text-sm font-medium mb-2">
-              Note to Broker <span className="text-dark-500 font-normal">(optional)</span>
-            </label>
-            <textarea
-              className="input resize-none text-sm"
-              rows={4}
-              placeholder="Tell the broker why you're the best carrier for this load — experience, equipment, availability..."
-              value={note}
-              onChange={e => setNote(e.target.value)}
-            />
-            <p className="text-dark-500 text-xs mt-1">{note.length}/500</p>
-          </div>
+              {/* Note */}
+              <Box>
+                <TextField
+                  fullWidth
+                  size="small"
+                  multiline
+                  rows={4}
+                  label="Note to Broker (optional)"
+                  placeholder="Tell the broker why you're the best carrier for this load — experience, equipment, availability..."
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  inputProps={{ maxLength: 500 }}
+                  helperText={`${note.length}/500`}
+                />
+              </Box>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-center gap-2 text-red-400 text-sm">
-              <AlertTriangle size={14} /> {error}
-            </div>
-          )}
+              {error && (
+                <Alert severity="error" icon={<WarningAmberIcon />}>
+                  {error}
+                </Alert>
+              )}
 
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/carrier/loads/${id}`)}
-              className="flex-1 btn-secondary py-3"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!valid || submitting}
-              className="flex-1 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white py-3 rounded-xl font-semibold transition-colors"
-            >
-              {submitting
-                ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
-                : 'Submit Bid'
-              }
-            </button>
-          </div>
-        </form>
+              <Box sx={{ display: 'flex', gap: 2, pt: 1 }}>
+                <Button
+                  type="button"
+                  onClick={() => navigate(`/carrier/loads/${id}`)}
+                  variant="outlined"
+                  fullWidth
+                  size="large"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!valid || submitting}
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : null}
+                >
+                  {submitting ? 'Submitting...' : 'Submit Bid'}
+                </Button>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   );
 }

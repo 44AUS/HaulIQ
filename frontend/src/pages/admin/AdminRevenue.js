@@ -1,112 +1,156 @@
 import React from 'react';
-import { DollarSign, ArrowUpRight } from 'lucide-react';
+import {
+  Box, Typography, Card, CardContent, Grid,
+  Table, TableHead, TableBody, TableRow, TableCell,
+  LinearProgress,
+} from '@mui/material';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { ADMIN_STATS } from '../../data/sampleData';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const PLAN_REVENUE = [
-  { plan: 'Carrier Basic', subs: 680, price: 0, mrr: 0 },
-  { plan: 'Carrier Pro', subs: 420, price: 49, mrr: 20580 },
-  { plan: 'Carrier Elite', subs: 184, price: 99, mrr: 18216 },
-  { plan: 'Broker Basic', subs: 420, price: 0, mrr: 0 },
-  { plan: 'Broker Pro', subs: 248, price: 79, mrr: 19592 },
-  { plan: 'Broker Elite', subs: 136, price: 149, mrr: 20264 },
+  { plan: 'Carrier Basic', subs: 680,  price: 0,   mrr: 0 },
+  { plan: 'Carrier Pro',   subs: 420,  price: 49,  mrr: 20580 },
+  { plan: 'Carrier Elite', subs: 184,  price: 99,  mrr: 18216 },
+  { plan: 'Broker Basic',  subs: 420,  price: 0,   mrr: 0 },
+  { plan: 'Broker Pro',    subs: 248,  price: 79,  mrr: 19592 },
+  { plan: 'Broker Elite',  subs: 136,  price: 149, mrr: 20264 },
 ];
 
-const ChartTooltipStyle = { contentStyle: { background: '#161b22', border: '1px solid #30363d', borderRadius: 8, fontSize: 12 } };
+const ChartTooltipStyle = {
+  contentStyle: { background: '#1e1e2e', border: '1px solid #333', borderRadius: 8, fontSize: 12 },
+};
 
 export default function AdminRevenue() {
   const totalMRR = PLAN_REVENUE.reduce((s, p) => s + p.mrr, 0);
   const arr = totalMRR * 12;
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2"><DollarSign size={22} className="text-brand-400" />Revenue Analytics</h1>
-        <p className="text-dark-300 text-sm mt-1">Subscription revenue breakdown and growth trends</p>
-      </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {/* Header */}
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+          <AttachMoneyIcon color="primary" />
+          <Typography variant="h5" fontWeight={700}>Revenue Analytics</Typography>
+        </Box>
+        <Typography variant="body2" color="text.secondary">Subscription revenue breakdown and growth trends</Typography>
+      </Box>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Grid container spacing={2}>
         {[
-          { label: 'MRR', value: `$${(totalMRR/1000).toFixed(1)}K`, change: '+12.4%' },
-          { label: 'ARR (projected)', value: `$${(arr/1000).toFixed(0)}K`, change: '+12.4%' },
-          { label: 'Avg Revenue/User', value: '$37.5', change: '+4.2%' },
-          { label: 'LTV (est.)', value: '$2,250', change: '+8.1%' },
+          { label: 'MRR',              value: `$${(totalMRR / 1000).toFixed(1)}K`, change: '+12.4%' },
+          { label: 'ARR (projected)',  value: `$${(arr / 1000).toFixed(0)}K`,      change: '+12.4%' },
+          { label: 'Avg Revenue/User', value: '$37.5',                              change: '+4.2%' },
+          { label: 'LTV (est.)',       value: '$2,250',                             change: '+8.1%' },
         ].map(({ label, value, change }) => (
-          <div key={label} className="stat-card">
-            <div className="flex justify-between items-start">
-              <p className="text-dark-300 text-xs">{label}</p>
-              <span className="flex items-center gap-0.5 text-brand-400 text-xs font-semibold"><ArrowUpRight size={10} />{change}</span>
-            </div>
-            <p className="text-white text-2xl font-bold">{value}</p>
-          </div>
+          <Grid item xs={6} sm={3} key={label}>
+            <Card variant="outlined">
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Typography variant="body2" color="text.secondary">{label}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, color: 'success.main' }}>
+                    <ArrowUpwardIcon sx={{ fontSize: 11 }} />
+                    <Typography variant="caption" fontWeight={700} color="success.main">{change}</Typography>
+                  </Box>
+                </Box>
+                <Typography variant="h4" fontWeight={800}>{value}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* MRR trend */}
-      <div className="glass rounded-xl p-6 border border-dark-400/40">
-        <h2 className="text-white font-semibold mb-5">MRR Trend</h2>
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={ADMIN_STATS.revenueByMonth}>
-            <defs>
-              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#22c55e" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#22c55e" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#21262d" />
-            <XAxis dataKey="month" tick={{ fill: '#6e7681', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#6e7681', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
-            <Tooltip {...ChartTooltipStyle} formatter={(v) => [`$${v.toLocaleString()}`, 'MRR']} />
-            <Area type="monotone" dataKey="mrr" stroke="#22c55e" strokeWidth={2.5} fill="url(#revGrad)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {/* MRR trend chart */}
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="subtitle1" fontWeight={700} mb={2.5}>MRR Trend</Typography>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={ADMIN_STATS.revenueByMonth}>
+              <defs>
+                <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1565C0" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="#1565C0" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+              <XAxis dataKey="month" tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+              <Tooltip {...ChartTooltipStyle} formatter={(v) => [`$${v.toLocaleString()}`, 'MRR']} />
+              <Area type="monotone" dataKey="mrr" stroke="#1565C0" strokeWidth={2.5} fill="url(#revGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       {/* Revenue by plan table */}
-      <div className="glass rounded-xl border border-dark-400/40 overflow-hidden">
-        <div className="p-5 border-b border-dark-400/40">
-          <h2 className="text-white font-semibold">Revenue by Plan</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-dark-700/50 text-dark-300 text-xs uppercase tracking-wider">
-              <tr>
+      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+        <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider' }}>
+          <Typography variant="subtitle1" fontWeight={700}>Revenue by Plan</Typography>
+        </Box>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'action.hover' }}>
                 {['Plan', 'Subscribers', 'Price', 'MRR', 'MRR Share'].map(h => (
-                  <th key={h} className="px-5 py-3 text-left font-medium">{h}</th>
+                  <TableCell
+                    key={h}
+                    sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main' }}
+                  >
+                    {h}
+                  </TableCell>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-dark-400/20">
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {PLAN_REVENUE.map(p => (
-                <tr key={p.plan} className="hover:bg-dark-700/20 transition-colors">
-                  <td className="px-5 py-4 text-white font-medium">{p.plan}</td>
-                  <td className="px-5 py-4 text-dark-200">{p.subs.toLocaleString()}</td>
-                  <td className="px-5 py-4 text-dark-200">{p.price === 0 ? <span className="text-dark-500">Free</span> : `$${p.price}/mo`}</td>
-                  <td className="px-5 py-4 text-white font-bold">{p.mrr === 0 ? <span className="text-dark-500">$0</span> : `$${p.mrr.toLocaleString()}`}</td>
-                  <td className="px-5 py-4">
+                <TableRow key={p.plan} hover>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={600}>{p.plan}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" color="text.secondary">{p.subs.toLocaleString()}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    {p.price === 0
+                      ? <Typography variant="body2" color="text.disabled">Free</Typography>
+                      : <Typography variant="body2" color="text.secondary">${p.price}/mo</Typography>
+                    }
+                  </TableCell>
+                  <TableCell>
+                    {p.mrr === 0
+                      ? <Typography variant="body2" color="text.disabled">$0</Typography>
+                      : <Typography variant="body2" fontWeight={700}>${p.mrr.toLocaleString()}</Typography>
+                    }
+                  </TableCell>
+                  <TableCell sx={{ minWidth: 140 }}>
                     {p.mrr > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 bg-dark-600 rounded-full h-1.5">
-                          <div className="h-1.5 bg-brand-500 rounded-full" style={{ width: `${(p.mrr / totalMRR * 100).toFixed(0)}%` }} />
-                        </div>
-                        <span className="text-dark-300 text-xs">{(p.mrr / totalMRR * 100).toFixed(0)}%</span>
-                      </div>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={parseFloat((p.mrr / totalMRR * 100).toFixed(0))}
+                          sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                        />
+                        <Typography variant="caption" color="text.secondary" sx={{ width: 32, flexShrink: 0 }}>
+                          {(p.mrr / totalMRR * 100).toFixed(0)}%
+                        </Typography>
+                      </Box>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-              <tr className="bg-dark-700/40 border-t border-dark-400/40 font-bold">
-                <td className="px-5 py-4 text-white">Total</td>
-                <td className="px-5 py-4 text-white">{PLAN_REVENUE.reduce((s, p) => s + p.subs, 0).toLocaleString()}</td>
-                <td className="px-5 py-4 text-dark-400">—</td>
-                <td className="px-5 py-4 text-brand-400 text-lg">${totalMRR.toLocaleString()}</td>
-                <td className="px-5 py-4 text-dark-400">100%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+              <TableRow sx={{ bgcolor: 'action.hover' }}>
+                <TableCell><Typography variant="body2" fontWeight={700}>Total</Typography></TableCell>
+                <TableCell><Typography variant="body2" fontWeight={700}>{PLAN_REVENUE.reduce((s, p) => s + p.subs, 0).toLocaleString()}</Typography></TableCell>
+                <TableCell><Typography variant="body2" color="text.secondary">—</Typography></TableCell>
+                <TableCell><Typography variant="body2" fontWeight={800} color="primary.main">${totalMRR.toLocaleString()}</Typography></TableCell>
+                <TableCell><Typography variant="body2" color="text.secondary">100%</Typography></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </Box>
+      </Card>
+    </Box>
   );
 }

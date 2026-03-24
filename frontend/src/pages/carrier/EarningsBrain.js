@@ -1,48 +1,98 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, ChevronRight, Lock, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, Chip,
+  CircularProgress, Alert, Stack, IconButton
+} from '@mui/material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import LockIcon from '@mui/icons-material/Lock';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { analyticsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
 
-const TAG_COLORS = {
-  'high-profit': 'badge-green',
-  'warning':     'badge-red',
-  'timing':      'badge-yellow',
-  'insight':     'badge-blue',
-  'savings':     'badge-green',
+const TAG_COLOR_MAP = {
+  'high-profit': 'success',
+  'warning':     'error',
+  'timing':      'warning',
+  'insight':     'info',
+  'savings':     'success',
 };
 
 function InsightCard({ insight, locked, onRead }) {
   return (
-    <div
-      className={`glass rounded-xl p-5 border transition-all ${locked ? 'border-dark-400/20 opacity-60' : 'border-dark-400/40 hover:border-brand-500/20'} relative overflow-hidden`}
+    <Card
       onClick={() => !locked && onRead && onRead(insight.id)}
+      sx={{
+        position: 'relative',
+        overflow: 'hidden',
+        cursor: locked ? 'default' : 'pointer',
+        opacity: locked ? 0.7 : 1,
+        transition: 'all 0.2s',
+        ...(!locked && {
+          '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
+        }),
+      }}
     >
       {locked && (
-        <div className="absolute inset-0 flex items-center justify-center bg-dark-800/70 backdrop-blur-sm z-10 rounded-xl">
-          <div className="text-center">
-            <Lock size={20} className="text-dark-400 mx-auto mb-2" />
-            <p className="text-dark-300 text-xs">Pro or Elite required</p>
-            <Link to="/carrier/dashboard" className="text-brand-400 text-xs hover:text-brand-300 mt-1 inline-block">Upgrade plan →</Link>
-          </div>
-        </div>
+        <Box sx={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'rgba(0,0,0,0.55)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 1,
+          borderRadius: 'inherit',
+        }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <LockIcon sx={{ color: 'text.secondary', mb: 1 }} />
+            <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+              Pro or Elite required
+            </Typography>
+            <Button
+              component={Link}
+              to="/carrier/dashboard"
+              variant="text"
+              size="small"
+            >
+              Upgrade plan
+            </Button>
+          </Box>
+        </Box>
       )}
-      <div className="flex items-start gap-4">
-        <div className="text-2xl flex-shrink-0">{insight.icon || '💡'}</div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 className="text-white font-semibold text-sm">{insight.title}</h3>
-            <span className={TAG_COLORS[insight.tag] || 'badge-blue'}>{insight.tag}</span>
-          </div>
-          <p className="text-dark-200 text-sm leading-relaxed">{insight.body}</p>
-          {insight.action_label && (
-            <button className="text-brand-400 text-xs hover:text-brand-300 mt-2 flex items-center gap-1">
-              {insight.action_label} <ChevronRight size={12} />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+          <Typography variant="h5" sx={{ flexShrink: 0, lineHeight: 1 }}>
+            {insight.icon || '💡'}
+          </Typography>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+              <Typography variant="body2" fontWeight={600}>{insight.title}</Typography>
+              <Chip
+                label={insight.tag}
+                size="small"
+                color={TAG_COLOR_MAP[insight.tag] || 'info'}
+              />
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              {insight.body}
+            </Typography>
+            {insight.action_label && (
+              <Button
+                variant="text"
+                size="small"
+                endIcon={<ChevronRightIcon />}
+                sx={{ mt: 1, px: 0, fontSize: '0.75rem' }}
+              >
+                {insight.action_label}
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -82,80 +132,118 @@ export default function EarningsBrain() {
   const lockedInsights  = isPro ? [] : insights.slice(1);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Brain size={22} className="text-brand-400" /> Driver Earnings Brain
-          </h1>
-          <p className="text-dark-300 text-sm mt-1">AI-powered insights that learn your patterns and maximize your earnings</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button onClick={handleRefresh} disabled={refreshing}
-            className="flex items-center gap-2 text-dark-300 hover:text-white text-sm border border-dark-400/40 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50">
-            <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} /> Refresh
-          </button>
-          <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
-            isElite ? 'badge-blue' : isPro ? 'badge-green' : 'badge-yellow'
-          }`}>
-            {isElite ? '⚡ Elite — Full Access' : isPro ? '✅ Pro — Basic Insights' : '🔒 Basic — Limited'}
-          </span>
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <PsychologyIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+            <Typography variant="h5" fontWeight={700}>Driver Earnings Brain</Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            AI-powered insights that learn your patterns and maximize your earnings
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            variant="outlined"
+            size="small"
+            startIcon={<RefreshIcon sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none', '@keyframes spin': { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } } }} />}
+          >
+            Refresh
+          </Button>
+          <Chip
+            label={isElite ? 'Elite — Full Access' : isPro ? 'Pro — Basic Insights' : 'Basic — Limited'}
+            size="small"
+            color={isElite ? 'info' : isPro ? 'success' : 'warning'}
+          />
+        </Box>
+      </Box>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Grid container spacing={3}>
         {[
           { label: 'Insights Generated', value: insights.length || '—', sub: 'Available now' },
           { label: 'Estimated Savings', value: '$—', sub: 'From avoided bad loads' },
           { label: 'Brokers Flagged', value: '—', sub: 'Based on your history' },
           { label: 'Best Lane Found', value: '—', sub: 'Run more loads to unlock' },
         ].map(({ label, value, sub }) => (
-          <div key={label} className="stat-card">
-            <p className="text-dark-300 text-xs">{label}</p>
-            <p className="text-white font-bold text-xl">{value}</p>
-            <p className="text-dark-400 text-xs">{sub}</p>
-          </div>
+          <Grid item xs={6} md={3} key={label}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                  {label}
+                </Typography>
+                <Typography variant="h4" fontWeight={800}>{value}</Typography>
+                <Typography variant="caption" color="text.disabled">{sub}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
       {/* Insights grid */}
-      <div>
-        <h2 className="text-white font-semibold mb-4">This Week's Insights</h2>
+      <Box>
+        <Typography variant="subtitle1" fontWeight={600} gutterBottom>This Week's Insights</Typography>
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-          </div>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+            <CircularProgress />
+          </Box>
         ) : error ? (
-          <div className="glass rounded-xl border border-red-500/20 p-8 text-center">
-            <p className="text-red-400">{error}</p>
-          </div>
+          <Alert severity="error">{error}</Alert>
         ) : insights.length === 0 ? (
-          <div className="glass rounded-xl border border-dark-400/40 p-10 text-center">
-            <Brain size={32} className="text-dark-500 mx-auto mb-3" />
-            <p className="text-dark-300">No insights yet. Complete more loads to generate personalized insights.</p>
-          </div>
+          <Card>
+            <CardContent sx={{ textAlign: 'center', py: 8 }}>
+              <PsychologyIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body1" color="text.secondary">
+                No insights yet. Complete more loads to generate personalized insights.
+              </Typography>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="grid md:grid-cols-2 gap-4">
-            {visibleInsights.map(i => <InsightCard key={i.id} insight={i} locked={false} onRead={handleMarkRead} />)}
-            {lockedInsights.map(i => <InsightCard key={i.id} insight={i} locked={true} onRead={null} />)}
-          </div>
+          <Grid container spacing={3}>
+            {visibleInsights.map(i => (
+              <Grid item xs={12} md={6} key={i.id}>
+                <InsightCard insight={i} locked={false} onRead={handleMarkRead} />
+              </Grid>
+            ))}
+            {lockedInsights.map(i => (
+              <Grid item xs={12} md={6} key={i.id}>
+                <InsightCard insight={i} locked={true} onRead={null} />
+              </Grid>
+            ))}
+          </Grid>
         )}
-      </div>
+      </Box>
 
       {/* Upgrade CTA if not elite */}
       {!isElite && (
-        <div className="glass rounded-xl p-6 border border-purple-500/20 bg-purple-500/3 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h3 className="text-white font-bold mb-1">Unlock the Full Driver Earnings Brain</h3>
-            <p className="text-dark-300 text-sm">Get predictive lane intelligence, broker blacklists, and weekly AI profit reports with Elite.</p>
-          </div>
-          <Link to="/carrier/dashboard" className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-all flex-shrink-0 text-sm">
-            Upgrade to Elite
-          </Link>
-        </div>
+        <Card sx={{ border: '1px solid', borderColor: 'secondary.main', bgcolor: 'rgba(230,81,0,0.04)' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'center' }, justifyContent: 'space-between', gap: 2 }}>
+              <Box>
+                <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+                  Unlock the Full Driver Earnings Brain
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Get predictive lane intelligence, broker blacklists, and weekly AI profit reports with Elite.
+                </Typography>
+              </Box>
+              <Button
+                component={Link}
+                to="/carrier/dashboard"
+                variant="contained"
+                color="secondary"
+                sx={{ flexShrink: 0 }}
+              >
+                Upgrade to Elite
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </Box>
   );
 }

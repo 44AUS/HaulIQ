@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { Box, Typography, Button, Paper } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -57,31 +59,53 @@ export default function MapView() {
 
   if (isNaN(parsedLat) || isNaN(parsedLng)) {
     return (
-      <div className="flex items-center justify-center py-20 text-dark-400">
-        Invalid location coordinates.
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Typography color="text.secondary">Invalid location coordinates.</Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-dark-300 hover:text-white text-sm transition-colors">
-        <ArrowLeft size={16} /> Back
-      </button>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Button
+        variant="text"
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate(-1)}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Back
+      </Button>
 
-      <div className="glass rounded-xl p-4 border border-dark-400/40 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-          <MapPin size={15} className="text-emerald-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold text-sm">{decodedName}</p>
-          {decodedCity && <p className="text-dark-400 text-xs">Currently near {decodedCity}</p>}
-        </div>
-      </div>
+      <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            width: 36, height: 36, borderRadius: '50%',
+            bgcolor: 'rgba(46,125,50,0.12)', border: 1, borderColor: 'success.main',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}
+        >
+          <LocationOnIcon sx={{ fontSize: 18, color: 'success.main' }} />
+        </Box>
+        <Box>
+          <Typography variant="body2" fontWeight={700}>{decodedName}</Typography>
+          {decodedCity && (
+            <Typography variant="caption" color="text.secondary">Currently near {decodedCity}</Typography>
+          )}
+        </Box>
+      </Paper>
 
-      <div className="rounded-xl overflow-hidden border border-dark-400/40" style={{ height: 'calc(100vh - 220px)', minHeight: 400 }}>
+      <Box
+        sx={{
+          borderRadius: 2,
+          overflow: 'hidden',
+          border: 1,
+          borderColor: 'divider',
+          height: 'calc(100vh - 220px)',
+          minHeight: 400,
+        }}
+      >
         <div ref={containerRef} style={{ height: '100%', width: '100%', background: '#0d1117' }} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
