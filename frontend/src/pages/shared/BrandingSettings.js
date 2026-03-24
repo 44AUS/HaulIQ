@@ -44,7 +44,7 @@ export default function BrandingSettings() {
     <Box sx={{ maxWidth: 640 }}>
       {/* Back header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <IconButton size="small" onClick={() => navigate('/settings')}>
+        <IconButton size="small" onClick={() => navigate('/preferences')}>
           <ArrowBackIcon fontSize="small" />
         </IconButton>
         <Typography variant="h5" fontWeight={700}>Branding</Typography>

@@ -41,7 +41,7 @@ import Network from './pages/shared/Network';
 import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
-import ProfileSettings from './pages/shared/ProfileSettings';
+import Preferences from './pages/shared/Preferences';
 import BrandingSettings from './pages/shared/BrandingSettings';
 import MapView from './pages/shared/MapView';
 
@@ -173,12 +173,12 @@ function AppRoutes() {
           <DashboardLayout><Settings /></DashboardLayout>
         </ProtectedRoute>
       } />
-      <Route path="/settings/profile" element={
+      <Route path="/preferences" element={
         <ProtectedRoute>
-          <DashboardLayout><ProfileSettings /></DashboardLayout>
+          <DashboardLayout><Preferences /></DashboardLayout>
         </ProtectedRoute>
       } />
-      <Route path="/settings/branding" element={
+      <Route path="/preferences/branding" element={
         <ProtectedRoute>
           <DashboardLayout><BrandingSettings /></DashboardLayout>
         </ProtectedRoute>
