@@ -125,7 +125,7 @@ export default function Messages() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
   const [sharingLocation, setSharingLocation] = useState(null);
   const [blockLoading, setBlockLoading] = useState(false);
 
@@ -282,17 +282,16 @@ export default function Messages() {
 
   const handleDeleteConvo = (e, id) => {
     e.stopPropagation();
-    if (confirmDeleteId === id) {
-      messagesApi.deleteConvo(id)
-        .then(() => {
-          setConversations(prev => prev.filter(c => c.id !== id));
-          if (activeConvoId === id) { setActiveConvoId(null); setActiveMessages([]); }
-          setConfirmDeleteId(null);
-        })
-        .catch(() => setConfirmDeleteId(null));
-    } else {
-      setConfirmDeleteId(id);
-    }
+    // Optimistic update — remove immediately then fire API
+    setConversations(prev => prev.filter(c => c.id !== id));
+    if (activeConvoId === id) { setActiveConvoId(null); setActiveMessages([]); }
+    setDeletingId(id);
+    messagesApi.deleteConvo(id)
+      .catch(() => {
+        // Restore on failure by reloading
+        messagesApi.conversations().then(data => setConversations(Array.isArray(data) ? data : [])).catch(() => {});
+      })
+      .finally(() => setDeletingId(null));
   };
 
   const getConvoLabel = (c) => {
@@ -457,14 +456,14 @@ export default function Messages() {
                     </ListItemButton>
                     <IconButton
                       size="small"
+                      disabled={deletingId === c.id}
                       sx={{
                         mr: 0.5,
-                        color: confirmDeleteId === c.id ? 'error.main' : 'text.disabled',
-                        bgcolor: confirmDeleteId === c.id ? 'error.dark' : 'transparent',
+                        color: 'text.disabled',
                         '&:hover': { color: 'error.main' },
                       }}
                       onClick={(e) => handleDeleteConvo(e, c.id)}
-                      title={confirmDeleteId === c.id ? 'Click again to confirm' : 'Delete conversation'}
+                      title="Delete conversation"
                     >
                       <DeleteOutlineIcon sx={{ fontSize: 14 }} />
                     </IconButton>
