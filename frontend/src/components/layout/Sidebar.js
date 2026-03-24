@@ -84,6 +84,13 @@ function NavItem({ item, collapsed, badgeCount, active, onClick }) {
         py: 1.25,
         justifyContent: collapsed ? 'center' : 'flex-start',
         minHeight: 48,
+        color: 'rgba(255,255,255,0.65)',
+        '&:hover': { bgcolor: 'rgba(255,255,255,0.07)', color: '#fff' },
+        '&.Mui-selected': {
+          bgcolor: 'rgba(255,255,255,0.12)',
+          color: '#fff',
+          '&:hover': { bgcolor: 'rgba(255,255,255,0.16)' },
+        },
       }}
     >
       <ListItemIcon sx={{ justifyContent: 'center', minWidth: collapsed ? 0 : 40 }}>
@@ -332,8 +339,8 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                   borderRadius: '0 !important',
                   justifyContent: 'center',
                   py: 1.25,
-                  color: 'error.light',
-                  '&:hover': { bgcolor: 'rgba(239,83,80,0.1)' },
+                  color: '#ef9a9a',
+                  '&:hover': { bgcolor: 'rgba(239,83,80,0.15)', color: '#ef5350' },
                 }}
               >
                 <ListItemIcon sx={{ justifyContent: 'center', minWidth: 0, color: 'inherit' }}>
@@ -348,8 +355,8 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                 borderRadius: '0 !important',
                 px: 2.5,
                 py: 1.25,
-                color: 'error.light',
-                '&:hover': { bgcolor: 'rgba(239,83,80,0.1)' },
+                color: '#ef9a9a',
+                '&:hover': { bgcolor: 'rgba(239,83,80,0.15)', color: '#ef5350' },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
