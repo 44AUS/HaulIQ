@@ -135,9 +135,9 @@ export const waitlistApi = {
 
 // ─── Locations ────────────────────────────────────────────────────────────────
 export const locationsApi = {
-  update: (bookingId, data) => request(`/api/locations/${bookingId}`, { method: 'POST', body: JSON.stringify(data) }),
-  get:    (bookingId)       => request(`/api/locations/${bookingId}`),
-  clear:  (bookingId)       => request(`/api/locations/${bookingId}`, { method: 'DELETE' }),
+  request: (bookingId)       => request(`/api/locations/request/${bookingId}`, { method: 'POST' }),
+  share:   (bookingId, data) => request(`/api/locations/share/${bookingId}`,   { method: 'POST', body: JSON.stringify(data) }),
+  get:     (bookingId)       => request(`/api/locations/${bookingId}`),
 };
 
 const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi };

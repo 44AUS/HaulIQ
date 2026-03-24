@@ -1,8 +1,65 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2 } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
+import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2, MapPin, Navigation, Loader } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { messagesApi, networkApi } from '../../services/api';
+import { messagesApi, networkApi, locationsApi } from '../../services/api';
+
+function parseSpecial(body) {
+  try {
+    const obj = JSON.parse(body);
+    if (obj.__type) return obj;
+  } catch {}
+  return null;
+}
+
+function LocationRequestCard({ data, isMe, onShare }) {
+  return (
+    <div className={`rounded-xl border p-3.5 max-w-[75%] ${isMe ? 'ml-auto bg-brand-500/10 border-brand-500/30' : 'bg-dark-700/80 border-dark-500/40'}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <Navigation size={14} className="text-brand-400 flex-shrink-0" />
+        <p className="text-white text-sm font-semibold">Location Requested</p>
+      </div>
+      <p className="text-dark-300 text-xs leading-relaxed mb-3">
+        {isMe
+          ? `You asked ${data.requester_name ? 'the carrier' : 'them'} to share their location.`
+          : `${data.requester_name || 'The broker'} is asking for your current location.`}
+      </p>
+      {!isMe && (
+        <button
+          onClick={() => onShare(data.booking_id)}
+          className="w-full py-2 rounded-lg bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+        >
+          <MapPin size={12} /> Share My Location
+        </button>
+      )}
+    </div>
+  );
+}
+
+function LocationShareCard({ data, isMe }) {
+  const city = data.city || 'Unknown location';
+  const name = isMe ? 'You are' : `${data.carrier_name || 'Carrier'} is`;
+  return (
+    <div className={`rounded-xl border p-3.5 max-w-[75%] ${isMe ? 'ml-auto bg-emerald-500/10 border-emerald-500/30' : 'bg-dark-700/80 border-dark-500/40'}`}>
+      <div className="flex items-center gap-2 mb-1.5">
+        <MapPin size={14} className="text-emerald-400 flex-shrink-0" />
+        <p className="text-white text-sm font-semibold">Location Shared</p>
+      </div>
+      <p className="text-dark-300 text-sm mb-3">
+        <span className="text-white font-medium">{name} currently near </span>
+        <span className="text-emerald-400 font-bold">{city}</span>
+      </p>
+      {data.lat && data.lng && (
+        <Link
+          to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
+          className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+        >
+          <MapPin size={12} /> View Map
+        </Link>
+      )}
+    </div>
+  );
+}
 
 export default function Messages() {
   const { user } = useAuth();
@@ -14,6 +71,41 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [sharingLocation, setSharingLocation] = useState(null); // booking_id being shared
+
+  const handleShareLocation = (bookingId) => {
+    if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
+    setSharingLocation(bookingId);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await locationsApi.share(bookingId, {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          });
+          // Refresh the active conversation
+          if (activeConvoId) {
+            messagesApi.conversation(activeConvoId)
+              .then(data => setActiveMessages(data.messages || (Array.isArray(data) ? data : [])))
+              .catch(() => {});
+          }
+          // Navigate to messages for the conversation
+          if (res.conversation_id) {
+            const convoId = res.conversation_id;
+            setConversations(prev => prev.find(c => c.id === convoId) ? prev : prev);
+            setActiveConvoId(convoId);
+          }
+        } catch (e) {
+          alert('Failed to share location: ' + e.message);
+        } finally {
+          setSharingLocation(null);
+        }
+      },
+      (err) => { alert('Location access denied: ' + err.message); setSharingLocation(null); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // New message composer
   const [composing, setComposing] = useState(false);
@@ -284,6 +376,27 @@ export default function Messages() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {activeMessages.map(msg => {
               const isMe = msg.sender_id === user?.id;
+              const special = parseSpecial(msg.body);
+
+              if (special?.__type === 'location_request') {
+                return (
+                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    {sharingLocation === special.booking_id
+                      ? <div className="flex items-center gap-2 text-dark-400 text-xs py-2"><Loader size={13} className="animate-spin" /> Getting your location…</div>
+                      : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
+                    }
+                  </div>
+                );
+              }
+
+              if (special?.__type === 'location_share') {
+                return (
+                  <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    <LocationShareCard data={special} isMe={isMe} />
+                  </div>
+                );
+              }
+
               return (
                 <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
