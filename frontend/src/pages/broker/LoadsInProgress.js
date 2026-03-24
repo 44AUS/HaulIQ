@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, MessageSquare } from 'lucide-react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, MessageSquare, Navigation } from 'lucide-react';
 import { bookingsApi } from '../../services/api';
 
 const STATUS_CONFIG = {
@@ -154,6 +154,20 @@ function BrokerLoadCard({ load }) {
       )}
 
       <StatusTimeline status={load.status} />
+
+      {(load.status === 'in_transit' || load.status === 'booked') && load.booking_id && (
+        <Link
+          to={`/broker/track/${load.booking_id}`}
+          className={`mt-4 w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+            load.status === 'in_transit'
+              ? 'bg-brand-500 hover:bg-brand-600 text-white'
+              : 'border border-dark-500 text-dark-300 hover:text-white hover:border-dark-400'
+          }`}
+        >
+          <Navigation size={14} />
+          {load.status === 'in_transit' ? 'Track Live Location' : 'View Tracking'}
+        </Link>
+      )}
     </div>
   );
 }

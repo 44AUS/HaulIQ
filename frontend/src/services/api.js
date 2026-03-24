@@ -132,5 +132,12 @@ export const waitlistApi = {
   remove: (id)   => request(`/api/waitlist/${id}`, { method: 'DELETE' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi };
+// ─── Locations ────────────────────────────────────────────────────────────────
+export const locationsApi = {
+  update: (bookingId, data) => request(`/api/locations/${bookingId}`, { method: 'POST', body: JSON.stringify(data) }),
+  get:    (bookingId)       => request(`/api/locations/${bookingId}`),
+  clear:  (bookingId)       => request(`/api/locations/${bookingId}`, { method: 'DELETE' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi };
 export default api;

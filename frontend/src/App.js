@@ -30,6 +30,7 @@ import BrokerAnalytics from './pages/broker/BrokerAnalytics';
 import BookingRequests from './pages/broker/BookingRequests';
 import InstantBookSettings from './pages/broker/InstantBookSettings';
 import BrokerLoadsInProgress from './pages/broker/LoadsInProgress';
+import TrackLoad from './pages/broker/TrackLoad';
 import BrokerLoadDetail from './pages/broker/LoadDetail';
 
 // Pages — Shared
@@ -115,6 +116,7 @@ function BrokerRoutes() {
           <Route path="bookings" element={<BookingRequests />} />
           <Route path="instant-book" element={<InstantBookSettings />} />
           <Route path="active" element={<BrokerLoadsInProgress />} />
+          <Route path="track/:bookingId" element={<TrackLoad />} />
           <Route path="network" element={<Network />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />

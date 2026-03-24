@@ -1,11 +1,11 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Calendar, Package, DollarSign,
   Truck, MessageSquare, CheckCircle, Navigation, Flag, Phone, Mail,
   AlertTriangle, Clock, ChevronRight
 } from 'lucide-react';
-import { bookingsApi, bidsApi } from '../../services/api';
+import { bookingsApi, bidsApi, locationsApi } from '../../services/api';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
@@ -64,6 +64,10 @@ export default function ActiveLoadDetail() {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [myBid, setMyBid] = useState(null);
+  const [trackingActive, setTrackingActive] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+  const watchIdRef = useRef(null);
+  const lastSentRef = useRef(0);
 
   const load = booking?.load;
 
@@ -89,6 +93,36 @@ export default function ActiveLoadDetail() {
       .finally(() => setLoading(false));
   }, [bookingId]);
 
+  // Start/stop GPS tracking based on in_transit status
+  useEffect(() => {
+    if (booking?.status !== 'in_transit') return;
+    if (!navigator.geolocation) return;
+
+    const sendLocation = (pos) => {
+      const now = Date.now();
+      if (now - lastSentRef.current < 30000) return; // throttle to 30s
+      lastSentRef.current = now;
+      locationsApi.update(bookingId, {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+      }).catch(() => {});
+    };
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => { setTrackingActive(true); setLocationError(null); sendLocation(pos); },
+      (err) => { setLocationError(err.message); setTrackingActive(false); },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+
+    return () => {
+      if (watchIdRef.current != null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, [booking?.status, bookingId]);
+
   const handlePickup = async () => {
     setActionLoading(true);
     try {
@@ -106,6 +140,7 @@ export default function ActiveLoadDetail() {
     try {
       await bookingsApi.deliver(bookingId);
       setBooking(b => ({ ...b, status: 'completed' }));
+      locationsApi.clear(bookingId).catch(() => {});
     } catch (e) {
       alert(e.message);
     } finally {
@@ -166,6 +201,33 @@ export default function ActiveLoadDetail() {
 
         {/* Timeline */}
         <StatusTimeline status={timelineStatus} />
+
+        {/* Live tracking status */}
+        {booking?.status === 'in_transit' && (
+          <div className={`mt-5 rounded-xl border px-4 py-3 flex items-center gap-3 ${
+            trackingActive
+              ? 'bg-emerald-500/10 border-emerald-500/30'
+              : locationError
+              ? 'bg-red-500/10 border-red-500/30'
+              : 'bg-dark-700/50 border-dark-500/30'
+          }`}>
+            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+              trackingActive ? 'bg-emerald-400 animate-pulse' : locationError ? 'bg-red-400' : 'bg-dark-400'
+            }`} />
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-medium ${trackingActive ? 'text-emerald-400' : locationError ? 'text-red-400' : 'text-dark-300'}`}>
+                {trackingActive ? 'Sharing live location with broker' : locationError ? 'Location access denied' : 'Starting GPS…'}
+              </p>
+              <p className="text-dark-500 text-xs mt-0.5">
+                {trackingActive
+                  ? 'Broker can see your position in real time. Keep this page open.'
+                  : locationError
+                  ? 'Allow location access in your browser to share tracking.'
+                  : 'Waiting for GPS signal…'}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Action buttons */}
         <div className="mt-6">
