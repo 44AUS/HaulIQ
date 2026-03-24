@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageSquare, Send, ArrowLeft, Check, CheckCheck, SquarePen, Search, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi } from '../../services/api';
 
 export default function Messages() {
   const { user } = useAuth();
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
@@ -19,11 +21,31 @@ export default function Messages() {
   const [networkQuery, setNetworkQuery] = useState('');
 
   useEffect(() => {
+    const targetUserId = new URLSearchParams(location.search).get('userId');
     messagesApi.conversations()
-      .then(data => setConversations(Array.isArray(data) ? data : []))
+      .then(data => {
+        const convos = Array.isArray(data) ? data : [];
+        setConversations(convos);
+        if (targetUserId) {
+          const existing = convos.find(c =>
+            String(c.carrier_id) === String(targetUserId) || String(c.broker_id) === String(targetUserId)
+          );
+          if (existing) {
+            setActiveConvoId(existing.id);
+          } else {
+            messagesApi.direct(targetUserId)
+              .then(convo => {
+                setConversations(prev => [convo, ...prev]);
+                setActiveConvoId(convo.id);
+                setActiveMessages(convo.messages || []);
+              })
+              .catch(() => {});
+          }
+        }
+      })
       .catch(() => setConversations([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     if (!composing) return;

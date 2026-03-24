@@ -156,7 +156,7 @@ export default function ActiveLoadDetail() {
           {/* Message broker */}
           {load?.broker_user_id && (
             <Link
-              to="/carrier/messages"
+              to={`/carrier/messages?userId=${load.broker_user_id}`}
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dark-400/40 text-dark-200 hover:text-white hover:border-dark-300 text-sm transition-colors"
             >
               <MessageSquare size={15} /> Message Broker
@@ -346,7 +346,7 @@ export default function ActiveLoadDetail() {
               </div>
               {load.broker_user_id && (
                 <Link
-                  to="/carrier/messages"
+                  to={`/carrier/messages?userId=${load.broker_user_id}`}
                   className="mt-3 w-full py-2 rounded-lg border border-dark-500 text-dark-200 hover:text-white text-sm flex items-center justify-center gap-2 transition-colors"
                 >
                   <MessageSquare size={13} /> Open Messages <ChevronRight size={13} />
