@@ -1,7 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  ArrowLeft, MapPin, Calendar, Package, Weight, DollarSign,
+  ArrowLeft, MapPin, Calendar, Package, DollarSign,
   Truck, MessageSquare, CheckCircle, Navigation, Flag, Phone,
   AlertTriangle, Clock, ChevronRight
 } from 'lucide-react';
