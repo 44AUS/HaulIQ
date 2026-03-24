@@ -101,9 +101,9 @@ export const lightTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          margin: '1px 8px',
-          padding: '8px 12px',
+          borderRadius: 0,
+          margin: 0,
+          padding: '10px 20px',
           color: 'rgba(255,255,255,0.65)',
           '&:hover': {
             background: 'rgba(255,255,255,0.07)',
@@ -187,9 +187,9 @@ export const darkTheme = createTheme({
     MuiListItemButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          margin: '1px 8px',
-          padding: '8px 12px',
+          borderRadius: 0,
+          margin: 0,
+          padding: '10px 20px',
           color: 'rgba(255,255,255,0.55)',
           '&:hover': {
             background: 'rgba(255,255,255,0.05)',

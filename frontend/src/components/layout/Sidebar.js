@@ -39,7 +39,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, bookingsApi, networkApi } from '../../services/api';
 
-export const DRAWER_WIDTH = 260;
+export const DRAWER_WIDTH = 280;
 export const DRAWER_COLLAPSED_WIDTH = 72;
 
 const CARRIER_LINKS = [
