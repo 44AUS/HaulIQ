@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
-  Stack, Divider
+  Stack
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';

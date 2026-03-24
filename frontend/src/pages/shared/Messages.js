@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   Box, Paper, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
-  Avatar, IconButton, TextField, Divider, CircularProgress, Button, Chip,
+  Avatar, IconButton, TextField, CircularProgress, Button,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

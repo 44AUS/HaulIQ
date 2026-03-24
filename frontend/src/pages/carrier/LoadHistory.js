@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, CircularProgress, Alert,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';

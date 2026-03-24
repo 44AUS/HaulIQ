@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Button, TextField,
-  InputAdornment, Stack, Divider
+  InputAdornment, Stack
 } from '@mui/material';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';

@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip,
-  CircularProgress, Divider, IconButton, TextField, Alert, Stack
+  CircularProgress, IconButton, TextField, Alert, Stack
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';

@@ -4,7 +4,7 @@ import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress,
-  Divider, Paper, Alert,
+  Paper, Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlaceIcon from '@mui/icons-material/Place';

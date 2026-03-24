@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Button, Chip,
-  CircularProgress, Alert, Stack, IconButton
+  CircularProgress, Alert
 } from '@mui/material';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';

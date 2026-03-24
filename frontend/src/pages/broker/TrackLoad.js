@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bookingsApi, locationsApi } from '../../services/api';
 import {
-  Box, Typography, Button, Card, CardContent, CircularProgress, Paper, Alert,
+  Box, Typography, Button, Card, CardContent, CircularProgress, Alert,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlaceIcon from '@mui/icons-material/Place';

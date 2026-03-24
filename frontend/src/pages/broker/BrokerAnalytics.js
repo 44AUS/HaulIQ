@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { analyticsApi } from '../../services/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import {
-  Box, Typography, Card, CardContent, Grid, CircularProgress, Alert, Paper,
+  Box, Typography, Card, CardContent, Grid, Alert,
   Table, TableHead, TableRow, TableCell, TableBody, Skeleton,
 } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';

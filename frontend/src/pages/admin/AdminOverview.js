@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, Paper,
+  Box, Typography, Card, CardContent, Grid, Chip,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';

@@ -5,7 +5,7 @@ import { adaptLoad } from '../../services/adapters';
 import {
   Box, Typography, Button, Card, CardContent, Chip, CircularProgress, Alert,
   Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  Tabs, Tab, Divider, InputAdornment,
+  Tabs, Tab, InputAdornment,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';

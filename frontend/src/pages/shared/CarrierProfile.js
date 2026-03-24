@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress,
-  FormControlLabel, Checkbox, Paper,
+  FormControlLabel, Checkbox,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';

@@ -463,7 +463,7 @@ export default function ActiveLoadDetail() {
                     <Typography variant="body2" fontWeight={700}>${myBid.amount?.toLocaleString()}</Typography>
                   </Box>
                   {myBid.status === 'countered' && myBid.counter_amount && (
-                    <Box sx={{ bgcolor: 'info.main', bgcolor: 'rgba(2,136,209,0.08)', borderRadius: 1, p: 1.5 }}>
+                    <Box sx={{ bgcolor: 'rgba(2,136,209,0.08)', borderRadius: 1, p: 1.5 }}>
                       <Typography variant="caption" color="info.main" display="block" gutterBottom>Broker counter offer</Typography>
                       <Typography variant="body2" fontWeight={700}>${myBid.counter_amount.toLocaleString()}</Typography>
                       {myBid.counter_note && (

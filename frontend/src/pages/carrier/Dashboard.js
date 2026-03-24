@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Box, Typography, Button, Card, CardContent, Grid, Chip
+  Box, Typography, Button, Card, CardContent, Grid
 } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -17,13 +17,7 @@ import LoadCard from '../../components/carrier/LoadCard';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 
 const StatCard = ({ icon: Icon, label, value, sub, color = 'primary' }) => {
-  const colorMap = {
-    primary: { bg: 'primary.main', icon: 'primary.light' },
-    blue: { bg: '#1565C0', icon: '#90CAF9' },
-    warning: { bg: 'warning.main', icon: 'warning.light' },
-    secondary: { bg: 'secondary.main', icon: 'secondary.light' },
-  };
-  const c = colorMap[color] || colorMap.primary;
+
 
   return (
     <Card>

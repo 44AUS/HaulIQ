@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { bookingsApi } from '../../services/api';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, Paper,
-  Divider, Button,
+  Button,
 } from '@mui/material';
 import PlaceIcon from '@mui/icons-material/Place';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -35,7 +35,7 @@ function StatusTimeline({ status }) {
       {TIMELINE_STEPS.map((step, idx) => {
         const done   = idx < current;
         const active = idx === current;
-        const future = idx > current;
+
         return (
           <React.Fragment key={step}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
