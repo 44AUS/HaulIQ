@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle } from 'lucide-react';
+import { MapPin, ArrowRight, Calendar, Package, Weight, Activity, User, AlertCircle, MessageSquare } from 'lucide-react';
 import { bookingsApi } from '../../services/api';
 
 const STATUS_CONFIG = {
@@ -124,6 +124,13 @@ function BrokerLoadCard({ load }) {
               </Link>
               {load.carrier_mc && <span className="text-dark-400 text-xs ml-2">MC-{load.carrier_mc}</span>}
             </div>
+            <Link
+              to={`/broker/messages?userId=${load.carrier_id}`}
+              className="flex items-center gap-1 text-dark-400 hover:text-brand-400 text-xs transition-colors flex-shrink-0"
+              title="Message carrier"
+            >
+              <MessageSquare size={13} /> Message
+            </Link>
           </div>
         ) : (
           <div className="flex items-center gap-2">

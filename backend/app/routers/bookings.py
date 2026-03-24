@@ -11,6 +11,7 @@ from app.models.user import User
 from app.models.booking import Booking, BookingStatus
 from app.models.load import Load, LoadStatus
 from app.models.broker import Broker
+from app.models.messaging import Conversation, Message
 
 router = APIRouter()
 
@@ -171,21 +172,40 @@ def broker_active_loads(
     )
     result = []
     for load in loads:
-        approved = (
+        # Find the active booking (approved, in_transit, or completed)
+        booking = (
             db.query(Booking)
-            .filter(Booking.load_id == load.id, Booking.status == BookingStatus.approved)
+            .filter(
+                Booking.load_id == load.id,
+                Booking.status.in_([
+                    BookingStatus.approved,
+                    BookingStatus.in_transit,
+                    BookingStatus.completed,
+                ]),
+            )
+            .order_by(Booking.created_at.desc())
             .first()
         )
         carrier_id = carrier_name = carrier_mc = None
-        if approved:
-            carrier = db.query(User).filter(User.id == approved.carrier_id).first()
+        if booking:
+            carrier = db.query(User).filter(User.id == booking.carrier_id).first()
             if carrier:
                 carrier_id = str(carrier.id)
                 carrier_name = carrier.company or carrier.name
                 carrier_mc = carrier.mc_number
-        status = "booked" if load.status == LoadStatus.filled and approved else "available"
+
+        if booking and booking.status == BookingStatus.in_transit:
+            status = "in_transit"
+        elif booking and booking.status == BookingStatus.completed:
+            status = "delivered"
+        elif booking:
+            status = "booked"
+        else:
+            status = "available"
+
         result.append({
             "id": str(load.id),
+            "booking_id": str(booking.id) if booking else None,
             "status": status,
             "load_type": load.load_type.value if load.load_type else None,
             "origin": load.origin,
@@ -262,6 +282,32 @@ def get_booking(
     }
 
 
+def _notify_broker(db, booking, load, carrier_user, body: str):
+    """Find or create a conversation for this load and send a system message from carrier to broker."""
+    if not load or not load.broker_user_id:
+        return
+    convo = db.query(Conversation).filter(
+        Conversation.load_id == load.id,
+        Conversation.carrier_id == carrier_user.id,
+        Conversation.broker_id == load.broker_user_id,
+    ).first()
+    if not convo:
+        convo = Conversation(
+            load_id=load.id,
+            carrier_id=carrier_user.id,
+            broker_id=load.broker_user_id,
+        )
+        db.add(convo)
+        db.flush()
+    msg = Message(
+        conversation_id=convo.id,
+        sender_id=carrier_user.id,
+        body=body,
+        is_read=False,
+    )
+    db.add(msg)
+
+
 @router.patch("/{booking_id}/pickup", summary="Carrier: confirm load pickup → in transit")
 def confirm_pickup(
     booking_id: UUID,
@@ -276,6 +322,11 @@ def confirm_pickup(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found or not in approved state")
     booking.status = BookingStatus.in_transit
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    carrier_name = current_user.company or current_user.name
+    route = f"{load.origin} → {load.destination}" if load else "your load"
+    _notify_broker(db, booking, load, current_user,
+        f"✅ Pickup confirmed — {carrier_name} has picked up {route} and is now in transit.")
     db.commit()
     return {"status": booking.status}
 
@@ -294,6 +345,11 @@ def confirm_delivery(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found or not in transit")
     booking.status = BookingStatus.completed
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    carrier_name = current_user.company or current_user.name
+    route = f"{load.origin} → {load.destination}" if load else "your load"
+    _notify_broker(db, booking, load, current_user,
+        f"🏁 Delivery confirmed — {carrier_name} has delivered {route}. Load complete.")
     db.commit()
     return {"status": booking.status}
 
