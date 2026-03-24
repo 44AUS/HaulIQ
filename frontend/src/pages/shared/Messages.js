@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
-  Box, Paper, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
-  Avatar, IconButton, TextField, CircularProgress, Button,
+  Box, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
+  Avatar, IconButton, TextField, CircularProgress, Button, useTheme, useMediaQuery, Paper,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -119,6 +119,10 @@ function LocationShareCard({ data, isMe }) {
 export default function Messages() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
@@ -128,6 +132,9 @@ export default function Messages() {
   const [deletingId, setDeletingId] = useState(null);
   const [sharingLocation, setSharingLocation] = useState(null);
   const [blockLoading, setBlockLoading] = useState(false);
+  const [composing, setComposing] = useState(false);
+  const [network, setNetwork] = useState([]);
+  const [networkQuery, setNetworkQuery] = useState('');
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported by your browser.'); return; }
@@ -175,10 +182,6 @@ export default function Messages() {
       setBlockLoading(false);
     }
   };
-
-  const [composing, setComposing] = useState(false);
-  const [network, setNetwork] = useState([]);
-  const [networkQuery, setNetworkQuery] = useState('');
 
   useEffect(() => {
     const targetUserId = new URLSearchParams(location.search).get('userId');
@@ -282,13 +285,11 @@ export default function Messages() {
 
   const handleDeleteConvo = (e, id) => {
     e.stopPropagation();
-    // Optimistic update — remove immediately then fire API
     setConversations(prev => prev.filter(c => c.id !== id));
     if (activeConvoId === id) { setActiveConvoId(null); setActiveMessages([]); }
     setDeletingId(id);
     messagesApi.deleteConvo(id)
       .catch(() => {
-        // Restore on failure by reloading
         messagesApi.conversations().then(data => setConversations(Array.isArray(data) ? data : [])).catch(() => {});
       })
       .finally(() => setDeletingId(null));
@@ -317,328 +318,415 @@ export default function Messages() {
 
   const otherParty = getOtherParty(activeConvo);
 
-  return (
-    <Paper
-      variant="outlined"
+  const handleClose = () => {
+    const dash = user?.role === 'carrier' ? '/carrier/dashboard'
+               : user?.role === 'broker'  ? '/broker/dashboard'
+               : '/admin';
+    navigate(dash);
+  };
+
+  // ── Left sidebar (conversation list) ─────────────────────────────────────
+  const ConvoPanel = (
+    <Box
       sx={{
-        height: 'calc(100vh - 140px)',
-        display: 'flex',
-        overflow: 'hidden',
-        bgcolor: 'background.paper',
+        width: { xs: '100%', md: 300 },
+        flexShrink: 0,
+        borderRight: 1,
+        borderColor: 'divider',
+        display: { xs: activeConvoId ? 'none' : 'flex', md: 'flex' },
+        flexDirection: 'column',
+        bgcolor: isMobile ? 'background.paper' : 'rgba(0,0,0,0.25)',
       }}
     >
-      {/* Conversation list panel */}
-      <Box
-        sx={{
-          width: { xs: '100%', md: 300 },
-          flexShrink: 0,
-          borderRight: 1,
-          borderColor: 'divider',
-          display: { xs: activeConvoId ? 'none' : 'flex', md: 'flex' },
-          flexDirection: 'column',
-        }}
-      >
-        {/* Panel header */}
-        <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-            <Typography variant="subtitle2" fontWeight={700}>Messages</Typography>
-          </Box>
-          <IconButton size="small" onClick={() => setComposing(true)} title="New Message">
-            <EditNoteIcon fontSize="small" />
+      {/* Header */}
+      <Box sx={{ px: 2, py: 1.75, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
+        <Typography variant="subtitle1" fontWeight={700} sx={{ flex: 1, color: isMobile ? 'text.primary' : '#fff' }}>
+          Message Center
+        </Typography>
+        {!isMobile && (
+          <IconButton size="small" onClick={handleClose} sx={{ color: 'rgba(255,255,255,0.5)', '&:hover': { color: '#fff' } }}>
+            <CloseIcon fontSize="small" />
           </IconButton>
-        </Box>
-
-        {/* Compose panel */}
-        {composing && (
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 1.5, bgcolor: 'action.hover' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="caption" fontWeight={600} sx={{ flex: 1 }}>New Message</Typography>
-              <IconButton size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
-                <CloseIcon sx={{ fontSize: 14 }} />
-              </IconButton>
-            </Box>
-            <TextField
-              size="small"
-              fullWidth
-              placeholder="Search your network..."
-              value={networkQuery}
-              onChange={e => setNetworkQuery(e.target.value)}
-              autoFocus
-              InputProps={{ startAdornment: <SearchIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
-              sx={{ mb: 1, '& .MuiInputBase-input': { fontSize: 12 } }}
-            />
-            {filteredNetwork.length === 0 ? (
-              <Typography variant="caption" color="text.disabled" sx={{ px: 0.5 }}>
-                {network.length === 0 ? 'No connections yet.' : 'No matches.'}
-              </Typography>
-            ) : (
-              <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
-                {filteredNetwork.map(contact => (
-                  <ListItemButton key={contact.user_id} dense onClick={() => handleStartDirect(contact)} sx={{ borderRadius: 1 }}>
-                    <ListItemAvatar sx={{ minWidth: 36 }}>
-                      <UserAvatar name={contact.name} size={28} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={<Typography variant="caption" fontWeight={600}>{contact.name}</Typography>}
-                      secondary={contact.company ? <Typography variant="caption" color="text.secondary">{contact.company}</Typography> : null}
-                    />
-                  </ListItemButton>
-                ))}
-              </Box>
-            )}
-          </Box>
         )}
-
-        {/* Conversations list */}
-        <Box sx={{ flex: 1, overflowY: 'auto' }}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <CircularProgress size={24} />
-            </Box>
-          ) : conversations.length === 0 ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
-              <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
-              <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
-              <Typography variant="caption" color="text.disabled" mt={0.5}>Use the compose button to start one</Typography>
-            </Box>
-          ) : (
-            <List disablePadding>
-              {conversations.map(c => {
-                const lastMsg = getLastMsg(c);
-                const unread = hasUnread(c);
-                const label = getConvoLabel(c);
-                const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-                const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
-                return (
-                  <Box
-                    key={c.id}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderBottom: 1,
-                      borderColor: 'divider',
-                      bgcolor: activeConvoId === c.id ? 'action.selected' : 'transparent',
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
-                      <ListItemAvatar sx={{ minWidth: 42 }}>
-                        <Box
-                          component={Link}
-                          to={otherRole === 'carrier' ? `/carrier-profile/${otherId}` : `/broker-profile/${otherId}`}
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <UserAvatar name={label} size={32} />
-                        </Box>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
-                            {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
-                            <Typography variant="caption" fontWeight={unread ? 700 : 500} noWrap>{label}</Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            {c.load_id && <Typography variant="caption" color="text.disabled" display="block">Load #{c.load_id.slice(0, 8)}</Typography>}
-                            {lastMsg && <Typography variant="caption" color="text.secondary" noWrap display="block">{lastMsg.body}</Typography>}
-                          </Box>
-                        }
-                        secondaryTypographyProps={{ component: 'div' }}
-                      />
-                      {lastMsg && (
-                        <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10 }}>
-                          {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </Typography>
-                      )}
-                    </ListItemButton>
-                    <IconButton
-                      size="small"
-                      disabled={deletingId === c.id}
-                      sx={{
-                        mr: 0.5,
-                        color: 'text.disabled',
-                        '&:hover': { color: 'error.main' },
-                      }}
-                      onClick={(e) => handleDeleteConvo(e, c.id)}
-                      title="Delete conversation"
-                    >
-                      <DeleteOutlineIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
-                  </Box>
-                );
-              })}
-            </List>
-          )}
-        </Box>
       </Box>
 
-      {/* Chat area */}
-      {activeConvo ? (
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          {/* Chat header */}
-          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <IconButton size="small" onClick={() => setActiveConvoId(null)} sx={{ display: { md: 'none' } }}>
-              <ArrowBackIcon fontSize="small" />
-            </IconButton>
-            {otherParty && (
-              <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0 }}>
-                <UserAvatar name={otherParty.name} size={32} />
-              </Box>
-            )}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              {otherParty ? (
-                <Typography
-                  component={Link}
-                  to={getProfileLink(otherParty)}
-                  variant="body2"
-                  fontWeight={700}
-                  sx={{ textDecoration: 'none', color: 'text.primary', '&:hover': { color: 'primary.main' } }}
-                >
-                  {otherParty.name}
-                </Typography>
-              ) : (
-                <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
-              )}
-              {activeConvo.load_id && (
-                <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
-              )}
-            </Box>
-            {user?.role === 'broker' && activeConvo.active_booking_id && (
-              <Button
-                component={Link}
-                to={`/broker/track/${activeConvo.active_booking_id}`}
-                variant="outlined"
-                size="small"
-                color="success"
-                startIcon={<NavigationIcon />}
-                sx={{ fontSize: 11, flexShrink: 0 }}
-              >
-                Locate Load
-              </Button>
-            )}
-            {otherParty && (
-              <IconButton
-                size="small"
-                onClick={() => handleToggleBlock(otherParty.id)}
-                disabled={blockLoading}
-                title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
-                sx={{
-                  flexShrink: 0,
-                  color: activeConvo.is_blocked_by_me ? 'error.main' : 'text.disabled',
-                  '&:hover': { color: 'error.main' },
-                }}
-              >
-                {blockLoading
-                  ? <CircularProgress size={14} color="inherit" />
-                  : activeConvo.is_blocked_by_me
-                    ? <GppBadIcon sx={{ fontSize: 18 }} />
-                    : <BlockIcon sx={{ fontSize: 18 }} />
-                }
-              </IconButton>
-            )}
-          </Box>
+      {/* New Message button */}
+      <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+        <Button
+          fullWidth
+          variant="contained"
+          size="small"
+          startIcon={<EditNoteIcon />}
+          onClick={() => setComposing(v => !v)}
+          sx={{ fontWeight: 700, letterSpacing: 0.5, fontSize: '0.78rem' }}
+        >
+          New Message
+        </Button>
+      </Box>
 
-          {/* Blocked notice */}
-          {activeConvo.is_blocked_by_me && (
-            <Box sx={{ mx: 2, mt: 1.5, px: 2, py: 1, borderRadius: 2, bgcolor: 'error.dark', border: 1, borderColor: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-              <BlockIcon sx={{ fontSize: 14, color: 'error.light' }} />
-              <Typography variant="caption" color="error.light">You have blocked this user. They can no longer message you.</Typography>
+      {/* Compose panel */}
+      {composing && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 1.5, bgcolor: 'action.hover' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Typography variant="caption" fontWeight={600} sx={{ flex: 1 }}>New Message</Typography>
+            <IconButton size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
+              <CloseIcon sx={{ fontSize: 14 }} />
+            </IconButton>
+          </Box>
+          <TextField
+            size="small"
+            fullWidth
+            placeholder="Search your network..."
+            value={networkQuery}
+            onChange={e => setNetworkQuery(e.target.value)}
+            autoFocus
+            InputProps={{ startAdornment: <SearchIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
+            sx={{ mb: 1, '& .MuiInputBase-input': { fontSize: 12 } }}
+          />
+          {filteredNetwork.length === 0 ? (
+            <Typography variant="caption" color="text.disabled" sx={{ px: 0.5 }}>
+              {network.length === 0 ? 'No connections yet.' : 'No matches.'}
+            </Typography>
+          ) : (
+            <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
+              {filteredNetwork.map(contact => (
+                <ListItemButton key={contact.user_id} dense onClick={() => handleStartDirect(contact)} sx={{ borderRadius: 1 }}>
+                  <ListItemAvatar sx={{ minWidth: 36 }}>
+                    <UserAvatar name={contact.name} size={28} />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={<Typography variant="caption" fontWeight={600}>{contact.name}</Typography>}
+                    secondary={contact.company ? <Typography variant="caption" color="text.secondary">{contact.company}</Typography> : null}
+                  />
+                </ListItemButton>
+              ))}
             </Box>
           )}
+        </Box>
+      )}
 
-          {/* Messages */}
-          <Box sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {activeMessages.map(msg => {
-              const isMe = msg.sender_id === user?.id;
-              const special = parseSpecial(msg.body);
-              const senderName = getSenderName(msg.sender_id, activeConvo);
-
-              if (special?.__type === 'location_request') {
-                return (
-                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <UserAvatar name={senderName} size={26} />}
-                    {sharingLocation === special.booking_id
-                      ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><CircularProgress size={13} /><Typography variant="caption" color="text.secondary">Getting your location…</Typography></Box>
-                      : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
-                    }
-                    {isMe && <UserAvatar name={senderName} size={26} />}
-                  </Box>
-                );
-              }
-
-              if (special?.__type === 'location_share') {
-                return (
-                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <UserAvatar name={senderName} size={26} />}
-                    <LocationShareCard data={special} isMe={isMe} />
-                    {isMe && <UserAvatar name={senderName} size={26} />}
-                  </Box>
-                );
-              }
-
+      {/* Conversations list */}
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : conversations.length === 0 ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
+            <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'rgba(255,255,255,0.2)', mb: 1.5 }} />
+            <Typography variant="body2" sx={{ color: isMobile ? 'text.secondary' : 'rgba(255,255,255,0.5)' }}>No conversations yet</Typography>
+            <Typography variant="caption" sx={{ color: isMobile ? 'text.disabled' : 'rgba(255,255,255,0.3)', mt: 0.5 }}>
+              Use New Message to start one
+            </Typography>
+          </Box>
+        ) : (
+          <List disablePadding>
+            {conversations.map(c => {
+              const lastMsg = getLastMsg(c);
+              const unread = hasUnread(c);
+              const label = getConvoLabel(c);
+              const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+              const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+              const isActive = activeConvoId === c.id;
               return (
-                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} size={26} />}
-                  <Box
-                    sx={{
-                      maxWidth: '72%',
-                      px: 2,
-                      py: 1.25,
-                      borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                      bgcolor: isMe ? 'primary.main' : 'action.hover',
-                    }}
-                  >
-                    <Typography variant="body2" sx={{ lineHeight: 1.5 }}>{msg.body}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, justifyContent: 'flex-end' }}>
-                      <Typography variant="caption" sx={{ fontSize: 10, color: isMe ? 'primary.light' : 'text.disabled' }}>
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <Box
+                  key={c.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    bgcolor: isActive
+                      ? isMobile ? 'action.selected' : 'rgba(255,255,255,0.1)'
+                      : 'transparent',
+                    '&:hover': { bgcolor: isMobile ? 'action.hover' : 'rgba(255,255,255,0.06)' },
+                  }}
+                >
+                  <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
+                    <ListItemAvatar sx={{ minWidth: 42 }}>
+                      <Box
+                        component={Link}
+                        to={otherRole === 'carrier' ? `/carrier-profile/${otherId}` : `/broker-profile/${otherId}`}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <UserAvatar name={label} size={34} />
+                      </Box>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
+                          {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
+                          <Typography
+                            variant="body2"
+                            fontWeight={unread ? 700 : 500}
+                            noWrap
+                            sx={{ color: isMobile ? 'text.primary' : '#fff' }}
+                          >
+                            {label}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          {c.load_id && (
+                            <Typography variant="caption" display="block" noWrap
+                              sx={{ color: isMobile ? 'text.disabled' : 'rgba(255,255,255,0.35)' }}>
+                              Load #{c.load_id.slice(0, 8)}
+                            </Typography>
+                          )}
+                          {lastMsg && (
+                            <Typography variant="caption" display="block" noWrap
+                              sx={{ color: isMobile ? 'text.secondary' : 'rgba(255,255,255,0.5)' }}>
+                              {lastMsg.body}
+                            </Typography>
+                          )}
+                        </Box>
+                      }
+                      secondaryTypographyProps={{ component: 'div' }}
+                    />
+                    {lastMsg && (
+                      <Typography variant="caption" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10, color: isMobile ? 'text.disabled' : 'rgba(255,255,255,0.35)' }}>
+                        {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Typography>
-                      {isMe && (msg.is_read
-                        ? <DoneAllIcon sx={{ fontSize: 12, color: 'primary.light' }} />
-                        : <DoneIcon sx={{ fontSize: 12, color: 'primary.light', opacity: 0.6 }} />
-                      )}
-                    </Box>
-                  </Box>
-                  {isMe && <UserAvatar name={senderName} size={26} />}
+                    )}
+                  </ListItemButton>
+                  <IconButton
+                    size="small"
+                    disabled={deletingId === c.id}
+                    sx={{
+                      mr: 0.5,
+                      color: isMobile ? 'text.disabled' : 'rgba(255,255,255,0.25)',
+                      '&:hover': { color: 'error.main' },
+                    }}
+                    onClick={(e) => handleDeleteConvo(e, c.id)}
+                    title="Delete conversation"
+                  >
+                    <DeleteOutlineIcon sx={{ fontSize: 14 }} />
+                  </IconButton>
                 </Box>
               );
             })}
-            <div ref={messagesEndRef} />
-          </Box>
+          </List>
+        )}
+      </Box>
+    </Box>
+  );
 
-          {/* Input */}
-          <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 1 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="Type a message..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              disabled={activeConvo.is_blocked_by_me}
-            />
-            <IconButton
-              color="primary"
-              onClick={handleSend}
-              disabled={!input.trim() || activeConvo.is_blocked_by_me}
-              sx={{ bgcolor: 'primary.main', color: '#fff', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' }, '&:disabled': { bgcolor: 'action.disabledBackground' } }}
+  // ── Chat area ─────────────────────────────────────────────────────────────
+  const ChatArea = activeConvo ? (
+    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, bgcolor: 'background.paper' }}>
+      {/* Header */}
+      <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: 'background.paper' }}>
+        <IconButton size="small" onClick={() => setActiveConvoId(null)} sx={{ display: { md: 'none' } }}>
+          <ArrowBackIcon fontSize="small" />
+        </IconButton>
+        {otherParty && (
+          <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0 }}>
+            <UserAvatar name={otherParty.name} size={34} />
+          </Box>
+        )}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {otherParty ? (
+            <Typography
+              component={Link}
+              to={getProfileLink(otherParty)}
+              variant="body2"
+              fontWeight={700}
+              sx={{ textDecoration: 'none', color: 'text.primary', '&:hover': { color: 'primary.main' } }}
             >
-              <SendIcon fontSize="small" />
-            </IconButton>
-          </Box>
+              {otherParty.name}
+            </Typography>
+          ) : (
+            <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
+          )}
+          {activeConvo.load_id && (
+            <Typography variant="caption" color="text.secondary" display="block">
+              Load #{activeConvo.load_id.slice(0, 8)}
+            </Typography>
+          )}
         </Box>
-      ) : (
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <ChatBubbleOutlineIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body2" color="text.secondary">Select a conversation</Typography>
-            <Typography variant="caption" color="text.disabled">or use the compose button to start a new one</Typography>
-          </Box>
+        {user?.role === 'broker' && activeConvo.active_booking_id && (
+          <Button
+            component={Link}
+            to={`/broker/track/${activeConvo.active_booking_id}`}
+            variant="outlined"
+            size="small"
+            color="success"
+            startIcon={<NavigationIcon />}
+            sx={{ fontSize: 11, flexShrink: 0 }}
+          >
+            Locate Load
+          </Button>
+        )}
+        {otherParty && (
+          <IconButton
+            size="small"
+            onClick={() => handleToggleBlock(otherParty.id)}
+            disabled={blockLoading}
+            title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
+            sx={{
+              flexShrink: 0,
+              color: activeConvo.is_blocked_by_me ? 'error.main' : 'text.disabled',
+              '&:hover': { color: 'error.main' },
+            }}
+          >
+            {blockLoading
+              ? <CircularProgress size={14} color="inherit" />
+              : activeConvo.is_blocked_by_me
+                ? <GppBadIcon sx={{ fontSize: 18 }} />
+                : <BlockIcon sx={{ fontSize: 18 }} />
+            }
+          </IconButton>
+        )}
+        {!isMobile && (
+          <IconButton size="small" onClick={handleClose} sx={{ color: 'text.disabled', '&:hover': { color: 'text.primary' } }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )}
+      </Box>
+
+      {/* Blocked notice */}
+      {activeConvo.is_blocked_by_me && (
+        <Box sx={{ mx: 2, mt: 1.5, px: 2, py: 1, borderRadius: 2, bgcolor: 'error.dark', border: 1, borderColor: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <BlockIcon sx={{ fontSize: 14, color: 'error.light' }} />
+          <Typography variant="caption" color="error.light">You have blocked this user. They can no longer message you.</Typography>
         </Box>
       )}
-    </Paper>
+
+      {/* Messages */}
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {activeMessages.map(msg => {
+          const isMe = msg.sender_id === user?.id;
+          const special = parseSpecial(msg.body);
+          const senderName = getSenderName(msg.sender_id, activeConvo);
+
+          if (special?.__type === 'location_request') {
+            return (
+              <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                {!isMe && <UserAvatar name={senderName} size={26} />}
+                {sharingLocation === special.booking_id
+                  ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><CircularProgress size={13} /><Typography variant="caption" color="text.secondary">Getting your location…</Typography></Box>
+                  : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
+                }
+                {isMe && <UserAvatar name={senderName} size={26} />}
+              </Box>
+            );
+          }
+
+          if (special?.__type === 'location_share') {
+            return (
+              <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                {!isMe && <UserAvatar name={senderName} size={26} />}
+                <LocationShareCard data={special} isMe={isMe} />
+                {isMe && <UserAvatar name={senderName} size={26} />}
+              </Box>
+            );
+          }
+
+          return (
+            <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+              {!isMe && <UserAvatar name={senderName} size={26} />}
+              <Box
+                sx={{
+                  maxWidth: '72%',
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                  bgcolor: isMe ? 'primary.main' : 'action.hover',
+                }}
+              >
+                <Typography variant="body2" sx={{ lineHeight: 1.5, color: isMe ? '#fff' : 'text.primary' }}>
+                  {msg.body}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, justifyContent: 'flex-end' }}>
+                  <Typography variant="caption" sx={{ fontSize: 10, color: isMe ? 'rgba(255,255,255,0.6)' : 'text.disabled' }}>
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
+                  {isMe && (msg.is_read
+                    ? <DoneAllIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }} />
+                    : <DoneIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />
+                  )}
+                </Box>
+              </Box>
+              {isMe && <UserAvatar name={senderName} size={26} />}
+            </Box>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </Box>
+
+      {/* Input */}
+      <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 1, bgcolor: 'background.paper' }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Type a message..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          disabled={activeConvo.is_blocked_by_me}
+        />
+        <IconButton
+          color="primary"
+          onClick={handleSend}
+          disabled={!input.trim() || activeConvo.is_blocked_by_me}
+          sx={{ bgcolor: 'primary.main', color: '#fff', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' }, '&:disabled': { bgcolor: 'action.disabledBackground' } }}
+        >
+          <SendIcon fontSize="small" />
+        </IconButton>
+      </Box>
+    </Box>
+  ) : (
+    <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper' }}>
+      <Box sx={{ textAlign: 'center' }}>
+        <ChatBubbleOutlineIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
+        <Typography variant="body2" color="text.secondary">Select a conversation</Typography>
+        <Typography variant="caption" color="text.disabled">or use New Message to start one</Typography>
+      </Box>
+    </Box>
+  );
+
+  // ── Mobile: normal page layout ────────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <Paper variant="outlined" sx={{ height: 'calc(100vh - 80px)', display: 'flex', overflow: 'hidden', bgcolor: 'background.paper' }}>
+        {ConvoPanel}
+        {ChatArea}
+      </Paper>
+    );
+  }
+
+  // ── Desktop: full-screen modal overlay ────────────────────────────────────
+  return (
+    <Box
+      sx={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1200,
+        display: 'flex',
+        alignItems: 'stretch',
+        bgcolor: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(4px)',
+      }}
+    >
+      <Box
+        sx={{
+          m: 'auto',
+          width: '90vw',
+          maxWidth: 1100,
+          height: '85vh',
+          display: 'flex',
+          overflow: 'hidden',
+          borderRadius: 2,
+          boxShadow: 24,
+          bgcolor: '#111827',
+        }}
+      >
+        {ConvoPanel}
+        {ChatArea}
+      </Box>
+    </Box>
   );
 }
