@@ -219,11 +219,12 @@ def get_booking(
             raise HTTPException(status_code=403, detail="Forbidden")
 
     load = db.query(Load).filter(Load.id == booking.load_id).first()
-    broker_name = broker_mc = broker_phone = None
+    broker_name = broker_mc = broker_phone = broker_email = None
     if load and load.broker:
         broker_name = load.broker.name
         broker_mc = load.broker.mc_number
         broker_phone = load.broker.phone
+        broker_email = load.broker.user.email if load.broker.user else None
 
     carrier = db.query(User).filter(User.id == booking.carrier_id).first()
 
@@ -254,6 +255,7 @@ def get_booking(
             "broker_name": broker_name,
             "broker_mc": broker_mc,
             "broker_phone": broker_phone,
+            "broker_email": broker_email,
             "broker_user_id": str(load.broker_user_id) if load.broker_user_id else None,
         } if load else None,
         "carrier_name": (carrier.company or carrier.name) if carrier else None,

@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Calendar, Package, DollarSign,
-  Truck, MessageSquare, CheckCircle, Navigation, Flag, Phone,
+  Truck, MessageSquare, CheckCircle, Navigation, Flag, Phone, Mail,
   AlertTriangle, Clock, ChevronRight
 } from 'lucide-react';
 import { bookingsApi, bidsApi } from '../../services/api';
@@ -333,8 +333,13 @@ export default function ActiveLoadDetail() {
               <div className="space-y-2">
                 <p className="text-white font-medium">{load.broker_name}</p>
                 {load.broker_mc && <p className="text-dark-400 text-xs">MC# {load.broker_mc}</p>}
+                {load.broker_email && (
+                  <a href={`mailto:${load.broker_email}`} className="flex items-center gap-2 text-brand-400 text-sm hover:text-brand-300 transition-colors mt-2">
+                    <Mail size={13} /> {load.broker_email}
+                  </a>
+                )}
                 {load.broker_phone && (
-                  <a href={`tel:${load.broker_phone}`} className="flex items-center gap-2 text-brand-400 text-sm hover:text-brand-300 transition-colors mt-2">
+                  <a href={`tel:${load.broker_phone}`} className="flex items-center gap-2 text-brand-400 text-sm hover:text-brand-300 transition-colors mt-1">
                     <Phone size={13} /> {load.broker_phone}
                   </a>
                 )}
