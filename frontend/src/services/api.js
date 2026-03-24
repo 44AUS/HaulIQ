@@ -123,5 +123,11 @@ export const networkApi = {
   respond:  (id, accepted)      => request(`/api/network/${id}/respond`, { method: 'PATCH', body: JSON.stringify({ accepted }) }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi };
+export const waitlistApi = {
+  join:   (data) => request('/api/waitlist/', { method: 'POST', body: JSON.stringify(data) }),
+  list:   ()     => request('/api/waitlist/'),
+  remove: (id)   => request(`/api/waitlist/${id}`, { method: 'DELETE' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi };
 export default api;

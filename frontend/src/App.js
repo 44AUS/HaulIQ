@@ -43,6 +43,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminRevenue from './pages/admin/AdminRevenue';
 import AdminLoads from './pages/admin/AdminLoads';
+import AdminWaitlist from './pages/admin/AdminWaitlist';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -130,6 +131,7 @@ function AdminRoutes() {
           <Route path="loads" element={<AdminLoads />} />
           <Route path="subscriptions" element={<AdminSubscriptions />} />
           <Route path="revenue" element={<AdminRevenue />} />
+          <Route path="waitlist" element={<AdminWaitlist />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </DashboardLayout>

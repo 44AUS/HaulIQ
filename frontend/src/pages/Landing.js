@@ -3,163 +3,125 @@ import { Link } from 'react-router-dom';
 import {
   Truck, Brain, Calculator, Star, TrendingUp, Shield, Zap, ArrowRight,
   Check, X, ChevronRight, BarChart2, Users, Flame,
-  AlertTriangle
+  AlertTriangle, Mail, User
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
+import { waitlistApi } from '../services/api';
 
-// ─── TRUCK MAP ANIMATION ────────────────────────────────────────────────────────
-function TruckMap() {
-  const routes = [
-    // I-90: Seattle → Minneapolis → Chicago → Detroit → Boston
-    { id: 'r1', d: 'M 108,108 C 240,98 368,108 456,116 C 512,122 536,172 600,184 C 665,192 728,166 786,156' },
-    // I-80: SF → Salt Lake → Denver → Chicago
-    { id: 'r2', d: 'M 84,278 C 155,268 222,244 296,246 C 388,246 462,216 536,190' },
-    // I-40: LA → Albuquerque → Memphis → Charlotte
-    { id: 'r3', d: 'M 114,368 C 196,354 272,338 312,362 C 396,376 468,354 546,332 C 598,314 652,296 700,293' },
-    // I-10: LA → Houston → New Orleans → Jacksonville
-    { id: 'r4', d: 'M 114,372 C 198,362 280,378 312,378 C 400,378 464,412 526,414 C 572,414 622,398 666,388' },
-    // I-75: Detroit → Atlanta → Miami
-    { id: 'r5', d: 'M 600,182 C 598,215 592,244 588,248 C 582,272 562,302 556,334 C 578,344 645,344 646,346 C 654,372 664,388 666,390 C 674,414 684,440 690,460' },
-    // I-35: Minneapolis → Kansas City → Dallas
-    { id: 'r6', d: 'M 456,114 C 462,166 464,212 464,252 C 464,304 456,344 446,370' },
-    // I-95: Boston → NYC → Charlotte → Miami
-    { id: 'r7', d: 'M 786,154 C 770,170 754,188 750,200 C 742,218 734,236 722,256 C 710,274 702,293 700,295 C 686,326 672,360 666,390 C 672,416 682,440 690,460' },
-    // I-70: Denver → Kansas City → St Louis
-    { id: 'r8', d: 'M 296,246 C 362,246 430,254 478,268 C 510,270 538,270 562,268' },
-    // I-20: Dallas → Atlanta
-    { id: 'r9', d: 'M 446,370 C 498,374 548,364 590,350 C 618,342 638,344 646,344' },
-  ];
+// ─── WAITLIST MODAL ────────────────────────────────────────────────────────────
+function WaitlistModal({ onClose }) {
+  const [role, setRole] = useState('carrier');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState(null);
 
-  const cities = [
-    { x: 108, y: 108, label: 'Seattle' },
-    { x: 84, y: 278, label: 'San Francisco' },
-    { x: 114, y: 370, label: 'Los Angeles' },
-    { x: 456, y: 114, label: 'Minneapolis' },
-    { x: 536, y: 190, label: 'Chicago' },
-    { x: 600, y: 182, label: 'Detroit' },
-    { x: 786, y: 154, label: 'Boston' },
-    { x: 750, y: 200, label: 'New York' },
-    { x: 700, y: 293, label: 'Charlotte' },
-    { x: 446, y: 370, label: 'Dallas' },
-    { x: 464, y: 412, label: 'Houston' },
-    { x: 646, y: 344, label: 'Atlanta' },
-    { x: 690, y: 460, label: 'Miami' },
-    { x: 296, y: 246, label: 'Denver' },
-    { x: 562, y: 268, label: 'St. Louis' },
-  ];
-
-  const trucks = routes.flatMap((r, i) => [
-    { rid: r.id, dur: `${10 + i * 1.4}s`, begin: `${i * 1.1}s`, rev: false },
-    { rid: r.id, dur: `${13 + i * 1.1}s`, begin: `${4 + i * 0.9}s`, rev: true },
-  ]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError(null);
+    waitlistApi.join({ email, name, role })
+      .then(() => setDone(true))
+      .catch(err => { setError(err.message); setSubmitting(false); });
+  };
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <svg viewBox="0 0 900 520" className="w-full h-full" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <filter id="cglow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="4" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="tglow" x="-150%" y="-150%" width="400%" height="400%">
-            <feGaussianBlur stdDeviation="2" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative glass rounded-2xl border border-dark-400/40 w-full max-w-md p-8 animate-fade-in">
+        <button onClick={onClose} className="absolute top-4 right-4 text-dark-400 hover:text-white transition-colors">
+          <X size={18} />
+        </button>
 
-        {/* Route glow halos */}
-        {routes.map(r => (
-          <path key={`halo-${r.id}`} d={r.d} fill="none"
-            stroke="#22c55e" strokeWidth="6" strokeOpacity="0.04" strokeLinecap="round"/>
-        ))}
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5 glow-green">
+              <Check size={28} className="text-brand-400" />
+            </div>
+            <h3 className="text-white font-bold text-xl mb-2">You're on the list!</h3>
+            <p className="text-dark-300 text-sm">We'll reach out as soon as your spot opens up.</p>
+            <button onClick={onClose} className="mt-6 btn-primary px-8 py-2.5 text-sm">Done</button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <h3 className="text-white font-bold text-xl mb-1">Join the Waitlist</h3>
+              <p className="text-dark-300 text-sm">Get early access to HaulIQ and be first in line when we launch.</p>
+            </div>
 
-        {/* Route path definitions (referenced by mpath) */}
-        {routes.map(r => (
-          <path key={r.id} id={r.id} d={r.d} fill="none"
-            stroke="#22c55e" strokeWidth="0.8" strokeOpacity="0.28"
-            strokeDasharray="6 10" strokeLinecap="round"/>
-        ))}
+            {/* Role toggle */}
+            <div className="flex gap-2 p-1 bg-dark-800 rounded-xl border border-dark-400/40 mb-6">
+              {[
+                { key: 'carrier', label: '🚛 I\'m a Carrier' },
+                { key: 'broker',  label: '📋 I\'m a Broker' },
+              ].map(opt => (
+                <button key={opt.key} type="button" onClick={() => setRole(opt.key)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                    role === opt.key ? 'bg-brand-500 text-white' : 'text-dark-300 hover:text-white'
+                  }`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
 
-        {/* Trucks */}
-        {trucks.map((t, i) => (
-          <g key={i} filter="url(#tglow)">
-            {/* Trailer */}
-            <rect x="-10" y="-2.8" width="10" height="5.6" rx="0.6" fill="#14532d" opacity="0.95"/>
-            <line x1="-9" y1="-2.8" x2="-9" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.4"/>
-            <line x1="-6" y1="-2.8" x2="-6" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.3"/>
-            <line x1="-3" y1="-2.8" x2="-3" y2="2.8" stroke="#22c55e" strokeWidth="0.3" opacity="0.3"/>
-            {/* Cab */}
-            <rect x="0" y="-3.8" width="6" height="7.6" rx="1.2" fill="#166534" opacity="0.95"/>
-            {/* Windshield */}
-            <rect x="0.8" y="-2.8" width="3.2" height="2.8" rx="0.4" fill="#4ade80" opacity="0.5"/>
-            {/* Headlight */}
-            <circle cx="6" cy="-0.6" r="0.9" fill="#fef08a" opacity="0.95"/>
-            <circle cx="6" cy="0.6" r="0.6" fill="#fde68a" opacity="0.7"/>
-            {/* Light beam */}
-            <line x1="6.5" y1="-0.6" x2="18" y2="-2" stroke="#fef08a" strokeWidth="0.4" opacity="0.25"/>
-            <line x1="6.5" y1="0.5" x2="18" y2="1.5" stroke="#fef08a" strokeWidth="0.3" opacity="0.15"/>
-            {/* Wheels */}
-            <circle cx="-7" cy="2.8" r="1.6" fill="#0f172a" stroke="#22c55e" strokeWidth="0.4"/>
-            <circle cx="-2" cy="2.8" r="1.6" fill="#0f172a" stroke="#22c55e" strokeWidth="0.4"/>
-            <circle cx="3.5" cy="3.8" r="1.6" fill="#0f172a" stroke="#166534" strokeWidth="0.4"/>
-            <animateMotion dur={t.dur} repeatCount="indefinite" begin={t.begin}
-              rotate="auto"
-              keyPoints={t.rev ? '1;0' : '0;1'}
-              keyTimes="0;1" calcMode="linear">
-              <mpath href={`#${t.rid}`}/>
-            </animateMotion>
-          </g>
-        ))}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Name</label>
+                <div className="relative">
+                  <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
+                  <input className="input pl-9" placeholder="Your name" value={name}
+                    onChange={e => setName(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Email <span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
+                  <input className="input pl-9" type="email" placeholder="you@example.com" value={email}
+                    onChange={e => setEmail(e.target.value)} required />
+                </div>
+              </div>
 
-        {/* City dots */}
-        {cities.map((c, i) => (
-          <g key={c.label}>
-            {/* Outer pulse */}
-            <circle cx={c.x} cy={c.y} r="3" fill="none" stroke="#22c55e" strokeWidth="0.5">
-              <animate attributeName="r" values="3;10;3"
-                dur={`${2.8 + (i % 4) * 0.6}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
-              <animate attributeName="opacity" values="0.5;0;0.5"
-                dur={`${2.8 + (i % 4) * 0.6}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
-            </circle>
-            {/* Core dot */}
-            <circle cx={c.x} cy={c.y} r="2.2" fill="#22c55e" opacity="0.85" filter="url(#cglow)"/>
-            {/* City label */}
-            <text x={c.x + 4} y={c.y - 4} fill="#4ade80" fontSize="6" opacity="0.55"
-              fontFamily="monospace" letterSpacing="0.3">{c.label}</text>
-          </g>
-        ))}
-      </svg>
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+
+              <button type="submit" disabled={submitting}
+                className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
+                {submitting ? 'Joining…' : <><span>Join Waitlist</span><ArrowRight size={16} /></>}
+              </button>
+            </form>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
 // ─── HERO ──────────────────────────────────────────────────────────────────────
-function Hero() {
+function Hero({ onWaitlist }) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Dark base gradient */}
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark-900 via-dark-900 to-dark-800" />
 
-      {/* Animated truck map */}
-      <TruckMap />
+      {/* Subtle grid */}
+      <div className="absolute inset-0 opacity-[0.03]"
+        style={{ backgroundImage: 'linear-gradient(#22c55e 1px,transparent 1px),linear-gradient(90deg,#22c55e 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
 
-      {/* Radial green glow over map */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_60%,rgba(34,197,94,0.07)_0%,transparent_70%)] pointer-events-none" />
+      {/* Radial glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(34,197,94,0.08)_0%,transparent_70%)] pointer-events-none" />
 
-      {/* Top vignette so text stays crisp */}
-      <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-dark-900 via-dark-900/80 to-transparent pointer-events-none" />
-      {/* Bottom vignette */}
+      {/* Edge vignettes */}
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-dark-900 to-transparent pointer-events-none" />
       <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-dark-900 to-transparent pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto px-6 text-center">
-        {/* Badge */}
         <div className="inline-flex items-center gap-2 badge-green mb-8 text-sm px-4 py-1.5 animate-fade-in">
           <Flame size={14} className="text-brand-400" />
           <span>The Load Board Built for Driver Profit</span>
           <ChevronRight size={14} />
         </div>
 
-        {/* Headline */}
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight mb-6 animate-slide-up">
           Stop Hauling.<br />
           Start <span className="gradient-text">Earning Smarter.</span>
@@ -169,17 +131,15 @@ function Hero() {
           HaulIQ replaces the old load board with an AI-powered profit engine that tells you exactly which loads to take, which brokers to avoid, and when to wait for better rates.
         </p>
 
-        {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-in">
-          <Link to="/signup" className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
-            Start for Free <ArrowRight size={18} />
-          </Link>
+          <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
+            Join the Waitlist <ArrowRight size={18} />
+          </button>
           <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
             View Live Demo
           </Link>
         </div>
 
-        {/* Social proof */}
         <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-dark-200 mb-8">
           {[['2,100+', 'Active Drivers'], ['$48K+', 'Monthly Savings'], ['4.9★', 'App Rating'], ['No CC', 'Required']].map(([val, label]) => (
             <div key={label} className="text-center">
@@ -270,7 +230,7 @@ function Features() {
 }
 
 // ─── PRICING ──────────────────────────────────────────────────────────────────
-function Pricing() {
+function Pricing({ onWaitlist }) {
   const [tab, setTab] = useState('carrier');
 
   const plans = {
@@ -318,8 +278,6 @@ function Pricing() {
           <span className="badge-green text-sm mb-4 inline-block">Pricing</span>
           <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Simple, transparent pricing.<br /><span className="gradient-text">No hidden fees.</span></h2>
           <p className="text-dark-200 text-lg">Start free. Upgrade when you're ready to maximize earnings.</p>
-
-          {/* Tab */}
           <div className="inline-flex glass rounded-xl p-1 mt-8">
             {['carrier', 'broker'].map(t => (
               <button key={t} onClick={() => setTab(t)}
@@ -369,9 +327,9 @@ function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/signup" className={`block text-center w-full py-3 rounded-lg font-semibold transition-all text-sm ${c.btn}`}>
-                  {plan.price === 0 ? 'Get Started Free' : `Start ${plan.name}`}
-                </Link>
+                <button onClick={onWaitlist} className={`block text-center w-full py-3 rounded-lg font-semibold transition-all text-sm ${c.btn}`}>
+                  Join Waitlist
+                </button>
               </div>
             );
           })}
@@ -405,9 +363,7 @@ function Comparison() {
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-12">
           <span className="badge-green text-sm mb-4 inline-block">Comparison</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">
-            HaulIQ vs. The Old Guard
-          </h2>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">HaulIQ vs. The Old Guard</h2>
           <p className="text-dark-200 text-lg">DAT and Truckstop were built in the 90s. We built HaulIQ for 2026.</p>
         </div>
 
@@ -423,7 +379,6 @@ function Comparison() {
             <div className="p-4 text-center text-dark-300 text-sm font-medium">DAT</div>
             <div className="p-4 text-center text-dark-300 text-sm font-medium">Truckstop</div>
           </div>
-
           {rows.map(({ feature, hauliq, dat, truckstop }, i) => (
             <div key={feature} className={`grid grid-cols-4 border-b border-dark-400/20 ${i % 2 === 0 ? 'bg-dark-800/30' : ''} hover:bg-dark-700/20 transition-colors`}>
               <div className="p-4 text-dark-100 text-sm">{feature}</div>
@@ -474,9 +429,7 @@ function Testimonials() {
               </div>
               <p className="text-dark-100 text-sm leading-relaxed mb-4">"{text}"</p>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-brand-500/20 rounded-full flex items-center justify-center text-brand-400 text-xs font-bold">
-                  {avatar}
-                </div>
+                <div className="w-8 h-8 bg-brand-500/20 rounded-full flex items-center justify-center text-brand-400 text-xs font-bold">{avatar}</div>
                 <div>
                   <p className="text-white text-sm font-medium">{name}</p>
                   <p className="text-dark-300 text-xs">{role}</p>
@@ -491,7 +444,7 @@ function Testimonials() {
 }
 
 // ─── VIRAL FEATURE ─────────────────────────────────────────────────────────────
-function ViralFeature() {
+function ViralFeature({ onWaitlist }) {
   return (
     <section className="py-20">
       <div className="max-w-4xl mx-auto px-6">
@@ -499,9 +452,7 @@ function ViralFeature() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.06)_0%,transparent_70%)]" />
           <div className="relative">
             <span className="badge-green text-sm mb-5 inline-block">🔥 Viral Feature</span>
-            <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">
-              The "Worst Loads of the Day" Feed
-            </h2>
+            <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">The "Worst Loads of the Day" Feed</h2>
             <p className="text-dark-200 text-lg mb-6 max-w-2xl mx-auto">
               Every day, HaulIQ publishes the 10 worst loads on the market — embarrassingly low rates, sketchy brokers, and money-losing miles. Share it. Laugh about it. Never take one.
             </p>
@@ -517,9 +468,9 @@ function ViralFeature() {
                 </div>
               ))}
             </div>
-            <Link to="/signup" className="btn-primary inline-flex items-center gap-2 px-8 py-3 glow-green">
-              See Today's Worst Loads <ArrowRight size={16} />
-            </Link>
+            <button onClick={onWaitlist} className="btn-primary inline-flex items-center gap-2 px-8 py-3 glow-green">
+              Join the Waitlist <ArrowRight size={16} />
+            </button>
           </div>
         </div>
       </div>
@@ -528,25 +479,23 @@ function ViralFeature() {
 }
 
 // ─── CTA ──────────────────────────────────────────────────────────────────────
-function CTA() {
+function CTA({ onWaitlist }) {
   return (
     <section className="py-24">
       <div className="max-w-4xl mx-auto px-6 text-center">
         <div className="relative">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.08)_0%,transparent_70%)]" />
           <div className="relative">
-            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">
-              Ready to earn smarter?
-            </h2>
+            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">Ready to earn smarter?</h2>
             <p className="text-dark-200 text-lg mb-10 max-w-xl mx-auto">
-              Join 2,100+ drivers already using HaulIQ to maximize their earnings per mile. Start free today.
+              Join 2,100+ drivers already using HaulIQ to maximize their earnings per mile.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup?role=carrier" className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
-                I'm a Driver <ArrowRight size={18} />
-              </Link>
-              <Link to="/signup?role=broker" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
-                I'm a Broker <ArrowRight size={18} />
+              <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
+                Join the Waitlist <ArrowRight size={18} />
+              </button>
+              <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
+                View Live Demo
               </Link>
             </div>
           </div>
@@ -596,17 +545,19 @@ function Footer() {
 
 // ─── MAIN LANDING PAGE ────────────────────────────────────────────────────────
 export default function Landing() {
+  const [showWaitlist, setShowWaitlist] = useState(false);
   return (
     <div className="bg-dark-900 min-h-screen">
       <Navbar />
-      <Hero />
+      <Hero onWaitlist={() => setShowWaitlist(true)} />
       <Features />
-      <Pricing />
+      <Pricing onWaitlist={() => setShowWaitlist(true)} />
       <Comparison />
       <Testimonials />
-      <ViralFeature />
-      <CTA />
+      <ViralFeature onWaitlist={() => setShowWaitlist(true)} />
+      <CTA onWaitlist={() => setShowWaitlist(true)} />
       <Footer />
+      {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </div>
   );
 }

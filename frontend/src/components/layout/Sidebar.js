@@ -4,7 +4,7 @@ import {
   Truck, LayoutDashboard, Search, Calculator, Brain, BookmarkCheck,
   History, TrendingUp, BarChart2, PlusCircle, Package, Users,
   CreditCard, DollarSign, Settings, LogOut, ChevronLeft, ChevronRight, Menu,
-  MessageSquare, Calendar, Zap, Activity, Network
+  MessageSquare, Calendar, Zap, Activity, Network, ListChecks
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, bookingsApi, networkApi } from '../../services/api';
@@ -40,6 +40,7 @@ const ADMIN_LINKS = [
   { icon: Package,         label: 'Load Moderation',   path: '/admin/loads' },
   { icon: CreditCard,      label: 'Subscriptions',      path: '/admin/subscriptions' },
   { icon: DollarSign,      label: 'Revenue',            path: '/admin/revenue' },
+  { icon: ListChecks,      label: 'Waitlist',           path: '/admin/waitlist' },
 ];
 
 export default function Sidebar() {
