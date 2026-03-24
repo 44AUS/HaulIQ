@@ -77,7 +77,7 @@ function BrokerLoadCard({ load }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.available;
 
   return (
-    <Card variant="outlined">
+    <Card variant="outlined" sx={{ height: '100%' }}>
       <CardContent>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
@@ -240,7 +240,7 @@ export default function BrokerLoadsInProgress() {
   const availableCount = loads.filter(l => l.status === 'available').length;
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
+    <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
         <ActivityIcon color="primary" />
         <Typography variant="h5" fontWeight={700}>Loads in Progress</Typography>
@@ -273,9 +273,13 @@ export default function BrokerLoadsInProgress() {
           <Typography variant="body2" color="text.secondary">Post a load to see it tracked here.</Typography>
         </Paper>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {loads.map(load => <BrokerLoadCard key={load.id} load={load} />)}
-        </Box>
+        <Grid container spacing={2}>
+          {loads.map(load => (
+            <Grid item xs={12} md={6} key={load.id}>
+              <BrokerLoadCard load={load} />
+            </Grid>
+          ))}
+        </Grid>
       )}
     </Box>
   );

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
-  Stack
 } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -86,6 +85,7 @@ function LoadProgressCard({ load, onClick }) {
     <Card
       onClick={onClick}
       sx={{
+        height: '100%',
         cursor: 'pointer',
         '&:hover': { boxShadow: 4, transform: 'translateY(-2px)', transition: 'all 0.2s' },
         transition: 'all 0.2s',
@@ -203,7 +203,7 @@ export default function CarrierLoadsInProgress() {
   const quotedCount    = loads.filter(l => l.status === 'quoted').length;
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <ActivityIcon sx={{ color: 'primary.main', fontSize: 26 }} />
@@ -244,15 +244,16 @@ export default function CarrierLoadsInProgress() {
           </CardContent>
         </Card>
       ) : (
-        <Stack spacing={2}>
+        <Grid container spacing={2}>
           {loads.map(load => (
-            <LoadProgressCard
-              key={load.id}
-              load={load}
-              onClick={() => navigate(`/carrier/active/${load.booking_id}`)}
-            />
+            <Grid item xs={12} md={6} key={load.id}>
+              <LoadProgressCard
+                load={load}
+                onClick={() => navigate(`/carrier/active/${load.booking_id}`)}
+              />
+            </Grid>
           ))}
-        </Stack>
+        </Grid>
       )}
     </Box>
   );
