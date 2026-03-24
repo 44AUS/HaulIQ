@@ -241,10 +241,12 @@ def get_booking(
     load = db.query(Load).filter(Load.id == booking.load_id).first()
     broker_name = broker_mc = broker_phone = broker_email = None
     if load and load.broker:
-        broker_name = load.broker.name
-        broker_mc = load.broker.mc_number
-        broker_phone = load.broker.phone
-        broker_email = load.broker.user.email if load.broker.user else None
+        broker = load.broker
+        broker_user = broker.user
+        broker_name  = broker.name
+        broker_mc    = broker.mc_number or (broker_user.mc_number if broker_user else None)
+        broker_phone = (broker_user.phone if broker_user else None)
+        broker_email = (broker_user.email if broker_user else None)
 
     carrier = db.query(User).filter(User.id == booking.carrier_id).first()
 

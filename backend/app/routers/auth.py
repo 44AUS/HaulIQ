@@ -91,6 +91,15 @@ def update_me(
         current_user.password_hash = hash_password(data.pop("password"))
     for field, value in data.items():
         setattr(current_user, field, value)
+
+    # Keep Broker profile in sync when a broker updates their name/MC
+    if current_user.role.value == "broker" and current_user.broker_profile:
+        bp = current_user.broker_profile
+        if "company" in data or "name" in data:
+            bp.name = current_user.company or current_user.name
+        if "mc_number" in data:
+            bp.mc_number = current_user.mc_number
+
     db.commit()
     db.refresh(current_user)
     return current_user
