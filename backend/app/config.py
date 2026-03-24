@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     # EIA API key for live diesel prices (DEMO_KEY works at low traffic)
     eia_api_key: str = "DEMO_KEY"
 
+    # FMCSA API key for MC number verification (free at ai.fmcsa.dot.gov)
+    fmcsa_api_key: str = ""
+
     @field_validator("database_url", mode="before")
     @classmethod
     def fix_postgres_url(cls, v: str) -> str:

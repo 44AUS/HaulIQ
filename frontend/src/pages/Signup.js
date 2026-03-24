@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Truck, ArrowRight, ArrowLeft, Check, AlertCircle } from 'lucide-react';
+import { Truck, ArrowRight, ArrowLeft, Check, AlertCircle, Loader } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../services/api';
 
 const CARRIER_PLANS_BRIEF = [
   { id: 'basic', name: 'Basic', price: '$0/mo', perks: ['20 loads/day', 'Basic calculator'] },
@@ -24,10 +25,34 @@ export default function Signup() {
   const { signup, loading, error, setError } = useAuth();
   const navigate = useNavigate();
 
+  // MC verification state
+  const [mcState, setMcState] = useState(null); // null | 'checking' | {valid, legal_name, error}
+  const mcTimerRef = useRef(null);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { setError && setError(null); }, [step]);
 
   const updateForm = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleMcChange = (val) => {
+    updateForm('mc', val);
+    setMcState(null);
+    clearTimeout(mcTimerRef.current);
+    const stripped = val.replace(/[^0-9]/g, '');
+    if (stripped.length < 4) return;
+    setMcState('checking');
+    mcTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await authApi.verifyMc(val);
+        setMcState({ valid: true, legal_name: res.legal_name, operating_status: res.operating_status });
+      } catch (err) {
+        setMcState({ valid: false, error: err.message });
+      }
+    }, 700);
+  };
+
+  // Block advancing if MC was entered but is invalid
+  const mcBlocking = form.mc && mcState && mcState !== 'checking' && !mcState.valid;
 
   const plans = role === 'broker' ? BROKER_PLANS_BRIEF : CARRIER_PLANS_BRIEF;
   const selectedPlanObj = plans.find(p => p.id === plan);
@@ -132,13 +157,41 @@ export default function Signup() {
                   <input className="input" placeholder={role === 'broker' ? 'FastFreight LLC' : 'Rodriguez Trucking'}
                     value={form.company} onChange={e => updateForm('company', e.target.value)} />
                 </div>
-                {role === 'carrier' && (
-                  <div>
-                    <label className="block text-dark-100 text-sm font-medium mb-1.5">MC Number <span className="text-dark-400">(optional)</span></label>
-                    <input className="input" placeholder="MC-123456" value={form.mc}
-                      onChange={e => updateForm('mc', e.target.value)} />
+                <div>
+                  <label className="block text-dark-100 text-sm font-medium mb-1.5">
+                    MC Number
+                    <span className="text-dark-400 font-normal"> (optional)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      className={`input pr-10 ${
+                        mcState === 'checking' ? '' :
+                        mcState?.valid   ? 'border-brand-500/60' :
+                        mcState?.error   ? 'border-red-500/60' : ''
+                      }`}
+                      placeholder="MC-123456"
+                      value={form.mc}
+                      onChange={e => handleMcChange(e.target.value)}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {mcState === 'checking' && <Loader size={15} className="text-dark-400 animate-spin" />}
+                      {mcState?.valid  && <Check size={15} className="text-brand-400" />}
+                      {mcState?.error  && <AlertCircle size={15} className="text-red-400" />}
+                    </div>
                   </div>
-                )}
+                  {mcState?.valid && mcState.legal_name && (
+                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-brand-400">
+                      <Check size={11} />
+                      <span className="font-medium">{mcState.legal_name}</span>
+                      {mcState.operating_status && <span className="text-brand-400/60">· {mcState.operating_status}</span>}
+                    </div>
+                  )}
+                  {mcState?.error && (
+                    <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1">
+                      <AlertCircle size={11} /> {mcState.error}
+                    </p>
+                  )}
+                </div>
                 <div>
                   <label className="block text-dark-100 text-sm font-medium mb-1.5">Phone Number</label>
                   <input type="tel" className="input" placeholder="+1 (555) 000-0000" value={form.phone}
@@ -156,9 +209,10 @@ export default function Signup() {
                 </div>
               </div>
               <button
-                onClick={() => { if (form.name && form.phone && form.email && form.password) setStep(2); }}
-                className="btn-primary w-full mt-6 flex items-center justify-center gap-2 py-3 glow-green">
-                Continue <ArrowRight size={16} />
+                onClick={() => { if (form.name && form.phone && form.email && form.password && !mcBlocking) setStep(2); }}
+                disabled={mcBlocking || mcState === 'checking'}
+                className="btn-primary w-full mt-6 flex items-center justify-center gap-2 py-3 glow-green disabled:opacity-50 disabled:cursor-not-allowed">
+                {mcState === 'checking' ? <Loader size={16} className="animate-spin" /> : <>Continue <ArrowRight size={16} /></>}
               </button>
             </div>
           )}

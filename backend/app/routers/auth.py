@@ -1,13 +1,48 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+import re
 from app.database import get_db
 from app.models.user import User, UserRole, UserPlan
 from app.schemas.user import UserCreate, UserLogin, UserOut, UserUpdate, Token
 from app.utils.password import hash_password, verify_password
 from app.utils.jwt import create_access_token
+from app.utils.fmcsa import verify_mc, _strip_mc
 from app.middleware.auth import get_current_user
+from app.config import get_settings
 
 router = APIRouter()
+
+
+@router.get("/verify-mc/{mc_number}", summary="Check if an MC number is valid and not already registered")
+async def verify_mc_number(mc_number: str, db: Session = Depends(get_db)):
+    settings = get_settings()
+    mc_clean = _strip_mc(mc_number)
+    if not mc_clean:
+        raise HTTPException(status_code=400, detail="Invalid MC number format")
+
+    # Duplicate check
+    duplicate = db.query(User).filter(
+        User.mc_number.ilike(f"%{mc_clean}%")
+    ).first()
+    if duplicate:
+        raise HTTPException(status_code=409, detail="This MC number is already registered to another account")
+
+    # FMCSA verification
+    result = await verify_mc(mc_number, settings.fmcsa_api_key)
+
+    if not result.found:
+        raise HTTPException(status_code=404, detail=result.error or "MC number not found in FMCSA database")
+
+    if not result.authorized:
+        raise HTTPException(status_code=422, detail=result.error or "Carrier is not authorized to operate")
+
+    return {
+        "valid": True,
+        "legal_name": result.legal_name,
+        "operating_status": result.operating_status,
+        "dot_number": result.dot_number,
+        "mc_number": mc_clean,
+    }
 
 
 @router.post("/signup", response_model=Token, status_code=status.HTTP_201_CREATED,
@@ -20,6 +55,16 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="An account with this email already exists.",
         )
+
+    # Check MC number not already in use
+    if payload.mc_number:
+        mc_clean = _strip_mc(payload.mc_number)
+        mc_dupe = db.query(User).filter(User.mc_number.ilike(f"%{mc_clean}%")).first()
+        if mc_dupe:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This MC number is already registered to another account.",
+            )
 
     user = User(
         email=payload.email.lower(),

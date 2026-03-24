@@ -21,10 +21,11 @@ async function request(path, options = {}) {
 
 // ─── Auth ──────────────────────────────────────────────────────────────────────
 export const authApi = {
-  signup: (data) => request('/api/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
-  login:  (data) => request('/api/auth/login',  { method: 'POST', body: JSON.stringify(data) }),
-  me:     ()     => request('/api/auth/me'),
-  update: (data) => request('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  signup:   (data) => request('/api/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
+  login:    (data) => request('/api/auth/login',  { method: 'POST', body: JSON.stringify(data) }),
+  me:       ()     => request('/api/auth/me'),
+  update:   (data) => request('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
+  verifyMc: (mc)   => request(`/api/auth/verify-mc/${encodeURIComponent(mc)}`),
 };
 
 // ─── Loads ─────────────────────────────────────────────────────────────────────
