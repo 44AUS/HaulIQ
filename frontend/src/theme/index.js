@@ -42,7 +42,9 @@ const baseTokens = {
   },
 };
 
-export const lightTheme = createTheme({
+export function buildLightTheme(brandColor) {
+  const drawerBg = brandColor || '#0D1B2A';
+  return createTheme({
   ...baseTokens,
   palette: {
     mode: 'light',
@@ -69,7 +71,7 @@ export const lightTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: '#0D1B2A',
+          background: drawerBg,
           color: '#FFFFFF',
           borderRight: 'none',
           borderRadius: 0,
@@ -113,9 +115,15 @@ export const lightTheme = createTheme({
       },
     },
   },
-});
+  });
+}
 
-export const darkTheme = createTheme({
+// Legacy static exports kept for any existing imports
+export const lightTheme = buildLightTheme(null);
+
+export function buildDarkTheme(brandColor) {
+  const drawerBg = brandColor || '#0D1120';
+  return createTheme({
   ...baseTokens,
   palette: {
     mode: 'dark',
@@ -142,7 +150,7 @@ export const darkTheme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: '#0D1120',
+          background: drawerBg,
           color: '#FFFFFF',
           borderRight: 'none',
           borderRadius: 0,
@@ -192,4 +200,7 @@ export const darkTheme = createTheme({
       },
     },
   },
-});
+  });
+}
+
+export const darkTheme = buildDarkTheme(null);

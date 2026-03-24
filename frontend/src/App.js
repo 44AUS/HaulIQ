@@ -41,6 +41,8 @@ import Network from './pages/shared/Network';
 import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
+import ProfileSettings from './pages/shared/ProfileSettings';
+import BrandingSettings from './pages/shared/BrandingSettings';
 import MapView from './pages/shared/MapView';
 
 // Pages — Admin
@@ -169,6 +171,16 @@ function AppRoutes() {
       <Route path="/settings" element={
         <ProtectedRoute>
           <DashboardLayout><Settings /></DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/profile" element={
+        <ProtectedRoute>
+          <DashboardLayout><ProfileSettings /></DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/settings/branding" element={
+        <ProtectedRoute>
+          <DashboardLayout><BrandingSettings /></DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/map/:lat/:lng/:city/:name" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />

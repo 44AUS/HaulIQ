@@ -1,249 +1,105 @@
-import { useState } from 'react';
-import {
-  Box, Typography, Card, CardContent, TextField, Button, Alert,
-  Grid, Divider,
-} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Grid, Card, CardContent, CardActionArea } from '@mui/material';
+import PaletteIcon from '@mui/icons-material/Palette';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
-import BusinessIcon from '@mui/icons-material/Business';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import DescriptionIcon from '@mui/icons-material/Description';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import SecurityIcon from '@mui/icons-material/Security';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PhoneIcon from '@mui/icons-material/Phone';
-import SaveIcon from '@mui/icons-material/Save';
+import BusinessIcon from '@mui/icons-material/Business';
+import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
+import TuneIcon from '@mui/icons-material/Tune';
 import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../services/api';
 
-export default function Settings() {
-  const { user, updateUser } = useAuth();
+const CARRIER_CARDS = [
+  { icon: PaletteIcon,   title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',  path: '/settings/branding', active: true },
+  { icon: PersonIcon,    title: 'Profile',         desc: 'Update your name, contact info, and account details.',      path: '/settings/profile',   active: true },
+  { icon: LockIcon,      title: 'Security',        desc: 'Change your password and manage login security.',           path: '/settings/profile',   active: true },
+  { icon: NotificationsIcon, title: 'Notifications', desc: 'Control which email and push alerts you receive.',        path: null },
+  { icon: LocalShippingIcon, title: 'Equipment',   desc: 'Add and manage your trucks, trailers, and load capacity.', path: null },
+  { icon: DescriptionIcon,   title: 'Documents',   desc: 'Upload your CDL, MC authority, insurance, and more.',      path: null },
+  { icon: CreditCardIcon,    title: 'Billing',     desc: 'Manage your subscription plan and payment method.',        path: null },
+  { icon: SecurityIcon,      title: 'Privacy',     desc: 'Control your data sharing and visibility settings.',       path: null },
+  { icon: SupportAgentIcon,  title: 'Support',     desc: 'Get help, submit a ticket, or browse the help center.',    path: null },
+];
 
-  const [profile, setProfile] = useState({
-    name:    user?.name    || '',
-    email:   user?.email   || '',
-    phone:   user?.phone   || '',
-    company: user?.company || '',
-    mc:      user?.mc      || '',
-    dot:     user?.dot     || '',
-  });
+const BROKER_CARDS = [
+  { icon: PaletteIcon,   title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',  path: '/settings/branding', active: true },
+  { icon: PersonIcon,    title: 'Profile',         desc: 'Update your name, contact info, and account details.',      path: '/settings/profile',   active: true },
+  { icon: BusinessIcon,  title: 'Company',         desc: 'Set your company name, DOT/MC number, and business info.', path: null },
+  { icon: NotificationsIcon, title: 'Notifications', desc: 'Control which email and push alerts you receive.',        path: null },
+  { icon: TuneIcon,      title: 'Load Defaults',   desc: 'Set default values for new load postings.',                path: null },
+  { icon: DescriptionIcon,   title: 'Documents',   desc: 'Upload broker authority, W-9, and compliance documents.',  path: null },
+  { icon: CreditCardIcon,    title: 'Billing',     desc: 'Manage your subscription plan and payment method.',        path: null },
+  { icon: IntegrationInstructionsIcon, title: 'Integrations', desc: 'Connect your TMS, ELD, or third-party tools.', path: null },
+  { icon: SupportAgentIcon,  title: 'Support',     desc: 'Get help, submit a ticket, or browse the help center.',    path: null },
+];
 
-  const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
-  const [status, setStatus] = useState(null);
-  const [saving, setSaving] = useState(false);
+function SettingCard({ icon: Icon, title, desc, path, onClick }) {
+  const content = (
+    <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
+        <Icon sx={{ fontSize: 22, color: path ? 'primary.main' : 'text.disabled' }} />
+        <Typography variant="subtitle2" fontWeight={700} color={path ? 'text.primary' : 'text.secondary'}>
+          {title}
+        </Typography>
+      </Box>
+      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, fontSize: '0.8rem' }}>
+        {desc}
+      </Typography>
+      {!path && (
+        <Typography variant="caption" color="text.disabled" sx={{ mt: 'auto', pt: 1.5 }}>
+          Coming soon
+        </Typography>
+      )}
+    </CardContent>
+  );
 
-  async function saveProfile(e) {
-    e.preventDefault();
-    setSaving(true);
-    setStatus(null);
-    try {
-      const updated = await authApi.update({
-        name:       profile.name    || undefined,
-        phone:      profile.phone   || undefined,
-        company:    profile.company || undefined,
-        mc_number:  profile.mc     || undefined,
-        dot_number: profile.dot    || undefined,
-      });
-      updateUser({
-        name:    updated.name,
-        phone:   updated.phone   || null,
-        company: updated.company || updated.name,
-        mc:      updated.mc_number  || null,
-        dot:     updated.dot_number || null,
-        avatar:  updated.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
-      });
-      setStatus({ type: 'success', msg: 'Profile updated successfully.' });
-    } catch (err) {
-      setStatus({ type: 'error', msg: err.message || 'Failed to save changes.' });
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function changePassword(e) {
-    e.preventDefault();
-    if (passwords.next !== passwords.confirm) {
-      setStatus({ type: 'error', msg: 'New passwords do not match.' });
-      return;
-    }
-    if (passwords.next.length < 8) {
-      setStatus({ type: 'error', msg: 'Password must be at least 8 characters.' });
-      return;
-    }
-    setSaving(true);
-    setStatus(null);
-    try {
-      await authApi.update({ password: passwords.next });
-      setPasswords({ current: '', next: '', confirm: '' });
-      setStatus({ type: 'success', msg: 'Password changed successfully.' });
-    } catch (err) {
-      setStatus({ type: 'error', msg: err.message || 'Failed to change password.' });
-    } finally {
-      setSaving(false);
-    }
+  if (path) {
+    return (
+      <Card variant="outlined" sx={{ height: '100%', '&:hover': { borderColor: 'primary.main', boxShadow: 2 }, transition: 'all 0.15s' }}>
+        <CardActionArea onClick={onClick} sx={{ height: '100%', alignItems: 'flex-start' }}>
+          {content}
+        </CardActionArea>
+      </Card>
+    );
   }
 
   return (
-    <Box sx={{ maxWidth: 640, mx: 'auto', py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Typography variant="h5" fontWeight={700}>Account Settings</Typography>
+    <Card variant="outlined" sx={{ height: '100%', opacity: 0.6 }}>
+      {content}
+    </Card>
+  );
+}
 
-      {status && (
-        <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>
-          {status.msg}
-        </Alert>
-      )}
+export default function Settings() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-      {/* Profile form */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <PersonIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Profile Information</Typography>
-          </Box>
-          <Box component="form" onSubmit={saveProfile}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Full Name"
-                  size="small"
-                  fullWidth
-                  value={profile.name}
-                  onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Email"
-                  size="small"
-                  fullWidth
-                  value={profile.email}
-                  disabled
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Phone Number"
-                  size="small"
-                  fullWidth
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={profile.phone}
-                  onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))}
-                  InputProps={{ startAdornment: <PhoneIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Company Name"
-                  size="small"
-                  fullWidth
-                  value={profile.company}
-                  onChange={e => setProfile(p => ({ ...p, company: e.target.value }))}
-                  InputProps={{ startAdornment: <BusinessIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
-                />
-              </Grid>
-              {user?.role === 'carrier' && (
-                <>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="MC Number"
-                      size="small"
-                      fullWidth
-                      placeholder="MC-000000"
-                      value={profile.mc}
-                      onChange={e => setProfile(p => ({ ...p, mc: e.target.value }))}
-                      InputProps={{ startAdornment: <LocalShippingIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="DOT Number"
-                      size="small"
-                      fullWidth
-                      placeholder="DOT-000000"
-                      value={profile.dot}
-                      onChange={e => setProfile(p => ({ ...p, dot: e.target.value }))}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={saving}
-                startIcon={<SaveIcon />}
-              >
-                {saving ? 'Saving…' : 'Save Changes'}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+  const cards = user?.role === 'broker' ? BROKER_CARDS : CARRIER_CARDS;
 
-      {/* Password form */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <LockIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Change Password</Typography>
-          </Box>
-          <Box component="form" onSubmit={changePassword}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="New Password"
-                  size="small"
-                  fullWidth
-                  type="password"
-                  placeholder="Min. 8 characters"
-                  value={passwords.next}
-                  onChange={e => setPasswords(p => ({ ...p, next: e.target.value }))}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Confirm New Password"
-                  size="small"
-                  fullWidth
-                  type="password"
-                  value={passwords.confirm}
-                  onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
-                />
-              </Grid>
-            </Grid>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={saving || !passwords.next}
-                startIcon={<LockIcon />}
-              >
-                {saving ? 'Saving…' : 'Change Password'}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+  return (
+    <Box>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" fontWeight={700}>Preferences</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Manage your account settings and customize your HaulIQ experience.
+        </Typography>
+      </Box>
 
-      {/* Account info */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={700} mb={2}>Account Info</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {[
-              { label: 'Role', value: user?.role },
-              { label: 'Plan', value: user?.plan },
-              ...(user?.joined ? [{ label: 'Member since', value: user.joined }] : []),
-            ].map(({ label, value }, i, arr) => (
-              <Box key={label}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">{label}</Typography>
-                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{value}</Typography>
-                </Box>
-                {i < arr.length - 1 && <Divider sx={{ mt: 1.5 }} />}
-              </Box>
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
+      <Grid container spacing={2}>
+        {cards.map(card => (
+          <Grid item xs={12} sm={6} lg={3} key={card.title}>
+            <SettingCard
+              {...card}
+              onClick={() => card.path && navigate(card.path)}
+            />
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }

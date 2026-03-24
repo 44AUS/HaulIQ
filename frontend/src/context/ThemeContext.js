@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useMemo } from 'react';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
-import { lightTheme, darkTheme } from '../theme';
+import { buildLightTheme, buildDarkTheme } from '../theme';
 
-const ThemeContext = createContext({ mode: 'light', toggleTheme: () => {} });
+const ThemeContext = createContext({ mode: 'light', toggleTheme: () => {}, brandColor: null, setBrandColor: () => {} });
 
 export function useThemeMode() {
   return useContext(ThemeContext);
@@ -10,6 +10,7 @@ export function useThemeMode() {
 
 export function AppThemeProvider({ children }) {
   const [mode, setMode] = useState(() => localStorage.getItem('hauliq_theme') || 'light');
+  const [brandColor, setBrandColorState] = useState(() => localStorage.getItem('hauliq_brand_color') || null);
 
   const toggleTheme = () => {
     setMode(prev => {
@@ -19,10 +20,22 @@ export function AppThemeProvider({ children }) {
     });
   };
 
-  const theme = useMemo(() => (mode === 'dark' ? darkTheme : lightTheme), [mode]);
+  const setBrandColor = (color) => {
+    if (color) {
+      localStorage.setItem('hauliq_brand_color', color);
+    } else {
+      localStorage.removeItem('hauliq_brand_color');
+    }
+    setBrandColorState(color || null);
+  };
+
+  const theme = useMemo(
+    () => mode === 'dark' ? buildDarkTheme(brandColor) : buildLightTheme(brandColor),
+    [mode, brandColor]
+  );
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
+    <ThemeContext.Provider value={{ mode, toggleTheme, brandColor, setBrandColor }}>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         {children}
