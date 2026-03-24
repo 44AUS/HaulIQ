@@ -36,11 +36,17 @@ async def _reverse_geocode(lat: float, lng: float) -> str:
 
 
 def _get_or_create_convo(db, load, carrier_id, broker_user_id):
+    # Prefer load-specific conversation, fall back to any thread between these two users
     convo = db.query(Conversation).filter(
-        Conversation.load_id == load.id,
         Conversation.carrier_id == carrier_id,
         Conversation.broker_id == broker_user_id,
+        Conversation.load_id == load.id,
     ).first()
+    if not convo:
+        convo = db.query(Conversation).filter(
+            Conversation.carrier_id == carrier_id,
+            Conversation.broker_id == broker_user_id,
+        ).first()
     if not convo:
         convo = Conversation(
             load_id=load.id,

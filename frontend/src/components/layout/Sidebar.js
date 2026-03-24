@@ -24,7 +24,6 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Menu as MenuIcon,
-  Message as MessageIcon,
   Event as EventIcon,
   FlashOn as ZapIcon,
   ShowChart as ActivityIcon,
@@ -52,7 +51,6 @@ const CARRIER_LINKS = [
   { icon: ActivityIcon,  label: 'In Progress',       path: '/carrier/active' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },
-  { icon: MessageIcon,   label: 'Messages',          path: '/carrier/messages', badge: 'unread' },
 ];
 
 const BROKER_LINKS = [
@@ -62,7 +60,6 @@ const BROKER_LINKS = [
   { icon: ActivityIcon,  label: 'In Progress',       path: '/broker/active' },
   { icon: BarChartIcon,  label: 'Analytics',         path: '/broker/analytics' },
   { icon: NetworkIcon,   label: 'Network',           path: '/broker/network' },
-  { icon: MessageIcon,   label: 'Messages',          path: '/broker/messages', badge: 'unread' },
   { icon: EventIcon,     label: 'Booking Requests',  path: '/broker/bookings', badge: 'bookings' },
   { icon: ZapIcon,       label: 'Instant Book',      path: '/broker/instant-book' },
 ];
