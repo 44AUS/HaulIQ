@@ -224,6 +224,55 @@ def broker_active_loads(
     return result
 
 
+@router.get("/load/{load_id}", summary="Get active booking for a load (broker view)")
+def booking_for_load(
+    load_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    load = db.query(Load).filter(Load.id == load_id).first()
+    if not load:
+        raise HTTPException(status_code=404, detail="Load not found")
+
+    booking = (
+        db.query(Booking)
+        .filter(
+            Booking.load_id == load_id,
+            Booking.status.in_([
+                BookingStatus.pending,
+                BookingStatus.approved,
+                BookingStatus.in_transit,
+                BookingStatus.completed,
+            ]),
+        )
+        .order_by(Booking.created_at.desc())
+        .first()
+    )
+    if not booking:
+        return {"booking": None, "location": None}
+
+    carrier = db.query(User).filter(User.id == booking.carrier_id).first()
+
+    from app.models.location import CarrierLocation
+    loc = db.query(CarrierLocation).filter(CarrierLocation.booking_id == booking.id).first()
+
+    return {
+        "booking": {
+            "id":           str(booking.id),
+            "status":       booking.status.value,
+            "carrier_id":   str(carrier.id) if carrier else None,
+            "carrier_name": (carrier.company or carrier.name) if carrier else None,
+            "carrier_mc":   carrier.mc_number if carrier else None,
+            "created_at":   booking.created_at,
+        },
+        "location": {
+            "lat":        loc.lat,
+            "lng":        loc.lng,
+            "updated_at": loc.updated_at,
+        } if loc else None,
+    }
+
+
 @router.get("/{booking_id}", summary="Get single booking with load details")
 def get_booking(
     booking_id: UUID,

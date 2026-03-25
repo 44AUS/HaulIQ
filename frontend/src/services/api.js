@@ -83,6 +83,7 @@ export const bookingsApi = {
   pending:       ()         => request('/api/bookings/pending'),
   inProgress:    ()         => request('/api/bookings/in-progress'),
   brokerActive:  ()         => request('/api/bookings/broker-active'),
+  forLoad:       (loadId)   => request(`/api/bookings/load/${loadId}`),
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
