@@ -413,13 +413,6 @@ export default function Messages() {
                         </Typography>
                       )}
                     </ListItemButton>
-                    <IconButton
-                      size="small" disabled={deletingId === c.id}
-                      sx={{ mr: 0.5, color: 'text.disabled', '&:hover': { color: 'error.main' } }}
-                      onClick={(e) => handleDeleteConvo(e, c.id)} title="Delete conversation"
-                    >
-                      <DeleteOutlineIcon sx={{ fontSize: 14 }} />
-                    </IconButton>
                   </Box>
                 );
               })}
@@ -458,6 +451,14 @@ export default function Messages() {
                 Locate Load
               </Button>
             )}
+            <IconButton
+              size="small" disabled={deletingId === activeConvoId}
+              title="Delete conversation"
+              sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'error.main' } }}
+              onClick={(e) => handleDeleteConvo(e, activeConvoId)}
+            >
+              <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+            </IconButton>
             {otherParty && (
               <IconButton size="small" onClick={() => handleToggleBlock(otherParty.id)} disabled={blockLoading}
                 title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
