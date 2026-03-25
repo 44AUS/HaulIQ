@@ -379,7 +379,7 @@ export default function BrokerLoadDetail() {
       <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
 
         {/* ── LEFT: Trip info ── */}
-        <Card sx={{ flex: '0 0 400px', minWidth: 0 }}>
+        <Card sx={{ flex: '0 0 550px', minWidth: 0 }}>
           <CardContent sx={{ pt: 2.5 }}>
             <LoadStepper load={load} bookingStatus={bookingStatus} />
             <Divider sx={{ my: 2 }} />
