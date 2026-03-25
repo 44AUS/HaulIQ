@@ -375,11 +375,11 @@ export default function BrokerLoadDetail() {
         </Box>
       </Box>
 
-      {/* ── Content ── */}
-      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* ── Two-column content ── */}
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
 
-        {/* Load info card: stepper + details */}
-        <Card>
+        {/* ── LEFT: Trip info ── */}
+        <Card sx={{ flex: '0 0 400px', minWidth: 0 }}>
           <CardContent sx={{ pt: 2.5 }}>
             <LoadStepper load={load} bookingStatus={bookingStatus} />
             <Divider sx={{ my: 2 }} />
@@ -417,7 +417,7 @@ export default function BrokerLoadDetail() {
                 { label: 'Views',    value: load.viewCount || 0,  icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
                 { label: 'Bids',     value: bids.length,          icon: <GroupIcon sx={{ fontSize: 14 }} /> },
               ].map(({ label, value, icon }) => (
-                <Grid item xs={6} sm={3} key={label}>
+                <Grid item xs={6} key={label}>
                   <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
                       {icon}{label}
@@ -434,7 +434,7 @@ export default function BrokerLoadDetail() {
                 { label: 'Pickup',   addr: load.pickupAddress || load.origin,   city: load.pickupAddress ? load.origin : null,   date: load.pickup,   dot: '#22c55e' },
                 { label: 'Delivery', addr: load.deliveryAddress || load.dest,   city: load.deliveryAddress ? load.dest : null,   date: load.delivery, dot: '#ef4444' },
               ].map(({ label, addr, city, date, dot }) => (
-                <Grid item xs={12} sm={6} key={label}>
+                <Grid item xs={12} key={label}>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
                     <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
                     <Box>
@@ -479,78 +479,82 @@ export default function BrokerLoadDetail() {
           </CardContent>
         </Card>
 
-        {/* Bids */}
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-              <GroupIcon color="primary" />
-              <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
-              {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
-            </Box>
-            {bids.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>No bids yet</Typography>
-            ) : (
-              <Stack spacing={1.5}>
-                {bids.map(bid => (
-                  <Paper key={bid.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                          <Typography component={Link} to={`/carrier-profile/${bid.carrier_id}`} variant="body2" fontWeight={600}
-                            sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                            {bid.carrier_name || 'Carrier'}
-                          </Typography>
-                          {bid.carrier_mc && <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>}
-                          {bidStatusChip(bid.status)}
+        {/* ── RIGHT: Bids + Documents ── */}
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+          {/* Bids */}
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+                <GroupIcon color="primary" />
+                <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
+                {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
+              </Box>
+              {bids.length === 0 ? (
+                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>No bids yet</Typography>
+              ) : (
+                <Stack spacing={1.5}>
+                  {bids.map(bid => (
+                    <Paper key={bid.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                            <Typography component={Link} to={`/carrier-profile/${bid.carrier_id}`} variant="body2" fontWeight={600}
+                              sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                              {bid.carrier_name || 'Carrier'}
+                            </Typography>
+                            {bid.carrier_mc && <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>}
+                            {bidStatusChip(bid.status)}
+                          </Box>
+                          <Typography variant="h6" fontWeight={700} color="primary.main">${(bid.amount || 0).toLocaleString()}</Typography>
+                          {bid.note && (
+                            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+                              "{bid.note}"
+                            </Typography>
+                          )}
+                          {bid.counter_amount && (
+                            <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
+                              Counter offer: ${bid.counter_amount.toLocaleString()}{bid.counter_note && ` — ${bid.counter_note}`}
+                            </Typography>
+                          )}
                         </Box>
-                        <Typography variant="h6" fontWeight={700} color="primary.main">${(bid.amount || 0).toLocaleString()}</Typography>
-                        {bid.note && (
-                          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
-                            "{bid.note}"
-                          </Typography>
-                        )}
-                        {bid.counter_amount && (
-                          <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
-                            Counter offer: ${bid.counter_amount.toLocaleString()}{bid.counter_note && ` — ${bid.counter_note}`}
-                          </Typography>
-                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                          <Button component={Link} to="/broker/messages" variant="text" size="small" sx={{ minWidth: 0, px: 1 }} title="Message carrier">
+                            <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
+                          </Button>
+                          {bid.status === 'pending' && load.status === 'active' && (
+                            <>
+                              <Button size="small" variant="outlined" color="success" onClick={() => handleAcceptBid(bid.id)} disabled={!!actionLoading}
+                                startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}>
+                                Accept
+                              </Button>
+                              <Button size="small" variant="outlined" color="error" onClick={() => handleRejectBid(bid.id)} disabled={!!actionLoading}
+                                startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}>
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </Box>
                       </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-                        <Button component={Link} to="/broker/messages" variant="text" size="small" sx={{ minWidth: 0, px: 1 }} title="Message carrier">
-                          <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
-                        </Button>
-                        {bid.status === 'pending' && load.status === 'active' && (
-                          <>
-                            <Button size="small" variant="outlined" color="success" onClick={() => handleAcceptBid(bid.id)} disabled={!!actionLoading}
-                              startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}>
-                              Accept
-                            </Button>
-                            <Button size="small" variant="outlined" color="error" onClick={() => handleRejectBid(bid.id)} disabled={!!actionLoading}
-                              startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}>
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </Box>
-                    </Box>
-                  </Paper>
-                ))}
-              </Stack>
-            )}
-          </CardContent>
-        </Card>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Documents */}
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-              <DescriptionIcon color="primary" fontSize="small" />
-              <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
-            </Box>
-            <DocumentPanel loadId={id} />
-          </CardContent>
-        </Card>
+          {/* Documents */}
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+                <DescriptionIcon color="primary" fontSize="small" />
+                <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
+              </Box>
+              <DocumentPanel loadId={id} />
+            </CardContent>
+          </Card>
 
+        </Box>
       </Box>
     </Box>
   );
