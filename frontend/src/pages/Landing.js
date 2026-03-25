@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import {
   Truck, Brain, Calculator, Star, TrendingUp, Shield, Zap, ArrowRight,
   Check, X, ChevronRight, BarChart2, Users, Flame,
-  AlertTriangle, Mail, User
+  AlertTriangle, Mail, User,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { waitlistApi } from '../services/api';
 
-// ─── WAITLIST MODAL ────────────────────────────────────────────────────────────
+// ─── WAITLIST MODAL ─────────────────────────────────────────────────────────────
 function WaitlistModal({ onClose }) {
   const [role, setRole] = useState('carrier');
   const [name, setName] = useState('');
@@ -33,7 +33,6 @@ function WaitlistModal({ onClose }) {
         <button onClick={onClose} className="absolute top-4 right-4 text-dark-400 hover:text-white transition-colors">
           <X size={18} />
         </button>
-
         {done ? (
           <div className="text-center py-4">
             <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5 glow-green">
@@ -49,42 +48,30 @@ function WaitlistModal({ onClose }) {
               <h3 className="text-white font-bold text-xl mb-1">Join the Waitlist</h3>
               <p className="text-dark-300 text-sm">Get early access to HaulIQ and be first in line when we launch.</p>
             </div>
-
-            {/* Role toggle */}
             <div className="flex gap-2 p-1 bg-dark-800 rounded-xl border border-dark-400/40 mb-6">
-              {[
-                { key: 'carrier', label: '🚛 I\'m a Carrier' },
-                { key: 'broker',  label: '📋 I\'m a Broker' },
-              ].map(opt => (
+              {[{ key: 'carrier', label: "🚛 I'm a Carrier" }, { key: 'broker', label: "📋 I'm a Broker" }].map(opt => (
                 <button key={opt.key} type="button" onClick={() => setRole(opt.key)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                    role === opt.key ? 'bg-brand-500 text-white' : 'text-dark-300 hover:text-white'
-                  }`}>
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${role === opt.key ? 'bg-brand-500 text-white' : 'text-dark-300 hover:text-white'}`}>
                   {opt.label}
                 </button>
               ))}
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-dark-100 text-sm font-medium mb-1.5">Name</label>
                 <div className="relative">
                   <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
-                  <input className="input pl-9" placeholder="Your name" value={name}
-                    onChange={e => setName(e.target.value)} />
+                  <input className="input pl-9" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
                 </div>
               </div>
               <div>
                 <label className="block text-dark-100 text-sm font-medium mb-1.5">Email <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
-                  <input className="input pl-9" type="email" placeholder="you@example.com" value={email}
-                    onChange={e => setEmail(e.target.value)} required />
+                  <input className="input pl-9" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
               </div>
-
               {error && <p className="text-red-400 text-sm">{error}</p>}
-
               <button type="submit" disabled={submitting}
                 className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
                 {submitting ? 'Joining…' : <><span>Join Waitlist</span><ArrowRight size={16} /></>}
@@ -97,130 +84,312 @@ function WaitlistModal({ onClose }) {
   );
 }
 
-// ─── HERO ──────────────────────────────────────────────────────────────────────
+// ─── APP MOCKUPS ────────────────────────────────────────────────────────────────
+function MockLoadBoard() {
+  return (
+    <div style={{ background: '#0d1117', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(34,197,94,0.06)' }}>
+      {/* Window chrome */}
+      <div style={{ background: '#161b22', padding: '11px 16px', borderBottom: '1px solid rgba(48,54,61,0.5)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f57' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
+        </div>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <span style={{ color: '#6e7681', fontSize: 11 }}>Load Board — HaulIQ</span>
+        </div>
+      </div>
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, padding: '12px 12px 8px' }}>
+        {[
+          { l: "Today's Profit", v: '+$1,247', c: '#22c55e' },
+          { l: 'Loads Available', v: '142', c: '#e6edf3' },
+          { l: 'Avg $/mi', v: '$3.18', c: '#60a5fa' },
+        ].map(({ l, v, c }) => (
+          <div key={l} style={{ background: '#1c2330', borderRadius: 8, padding: '9px 11px' }}>
+            <p style={{ color: '#6e7681', fontSize: 9, marginBottom: 3 }}>{l}</p>
+            <p style={{ color: c, fontWeight: 700, fontSize: 15 }}>{v}</p>
+          </div>
+        ))}
+      </div>
+      {/* Load cards */}
+      <div style={{ padding: '0 12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {[
+          { from: 'Chicago, IL', to: 'Detroit, MI', mi: '281 mi', rate: '$1,240', profit: '+$412', green: true },
+          { from: 'Dallas, TX', to: 'Houston, TX', mi: '239 mi', rate: '$680', profit: '+$178', green: false },
+          { from: 'Atlanta, GA', to: 'Nashville, TN', mi: '249 mi', rate: '$940', profit: '+$306', green: true },
+          { from: 'Phoenix, AZ', to: 'Los Angeles, CA', mi: '372 mi', rate: '$1,560', profit: '+$498', green: true },
+        ].map(({ from, to, mi, rate, profit, green }) => (
+          <div key={from} style={{ background: '#161b22', borderRadius: 8, padding: '9px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid rgba(48,54,61,0.4)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: green ? '#22c55e' : '#eab308', flexShrink: 0 }} />
+              <div>
+                <p style={{ color: '#e6edf3', fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{from} → {to}</p>
+                <p style={{ color: '#6e7681', fontSize: 9 }}>{mi} · {rate}</p>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ color: green ? '#22c55e' : '#eab308', fontWeight: 700, fontSize: 13 }}>{profit}</p>
+              <p style={{ color: green ? '#22c55e' : '#eab308', fontSize: 8, opacity: 0.65 }}>{green ? 'HIGH PROFIT' : 'FAIR'}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MockCalculator() {
+  return (
+    <div style={{ background: '#0d1117', borderRadius: 16, border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', padding: 28 }}>
+      <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Profit Calculator</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+        {[
+          { label: 'Load Rate', value: '$1,240' },
+          { label: 'Distance', value: '281 miles' },
+          { label: 'Fuel Cost (est.)', value: '$312' },
+          { label: 'Deadhead Miles', value: '22 miles' },
+          { label: 'Deadhead Cost', value: '$38' },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#161b22', borderRadius: 8, padding: '9px 14px' }}>
+            <span style={{ color: '#6e7681', fontSize: 12 }}>{label}</span>
+            <span style={{ color: '#e6edf3', fontWeight: 600, fontSize: 12 }}>{value}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '20px 24px', textAlign: 'center' }}>
+        <p style={{ color: '#6e7681', fontSize: 11, marginBottom: 6 }}>Estimated Net Profit</p>
+        <p style={{ color: '#22c55e', fontWeight: 800, fontSize: 38, lineHeight: 1 }}>+$412</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 10 }}>
+          <span style={{ color: '#4ade80', fontSize: 11 }}>$1.47 / mile</span>
+          <span style={{ color: '#22c55e', fontSize: 11, fontWeight: 700 }}>✓ TAKE THIS LOAD</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MockBrain() {
+  return (
+    <div style={{ background: '#0d1117', borderRadius: 16, border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', padding: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+        <div style={{ width: 40, height: 40, background: 'rgba(34,197,94,0.12)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Brain size={20} style={{ color: '#22c55e' }} />
+        </div>
+        <div>
+          <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 15 }}>Earnings Brain</p>
+          <p style={{ color: '#6e7681', fontSize: 11 }}>AI insights for your route</p>
+        </div>
+        <span style={{ marginLeft: 'auto', background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 20, border: '1px solid rgba(34,197,94,0.2)' }}>LIVE</span>
+      </div>
+      <div style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 10, borderLeft: '3px solid #22c55e' }}>
+        <p style={{ color: '#4ade80', fontSize: 10, fontWeight: 700, marginBottom: 5 }}>💡 TOP RECOMMENDATION</p>
+        <p style={{ color: '#e6edf3', fontSize: 12, lineHeight: 1.5 }}>Chicago → Detroit is your most profitable lane this week. Rates are 23% above average.</p>
+      </div>
+      <div style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 14, borderLeft: '3px solid #ef4444' }}>
+        <p style={{ color: '#f87171', fontSize: 10, fontWeight: 700, marginBottom: 5 }}>⚠️ BROKER ALERT</p>
+        <p style={{ color: '#e6edf3', fontSize: 12, lineHeight: 1.5 }}>FastFreight LLC — 3 delayed payments this week. Community flagged. Avoid.</p>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {[
+          { label: 'Best Day to Haul', val: 'Tuesday' },
+          { label: 'Weekly Earnings', val: '+$3,840' },
+          { label: 'Top Lane', val: 'CHI → DET' },
+          { label: 'Profit vs Last Wk', val: '+18%' },
+        ].map(({ label, val }) => (
+          <div key={label} style={{ background: '#1c2330', borderRadius: 8, padding: '10px 12px' }}>
+            <p style={{ color: '#6e7681', fontSize: 9, marginBottom: 4 }}>{label}</p>
+            <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 14 }}>{val}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MockBrokers() {
+  return (
+    <div style={{ background: '#0d1117', borderRadius: 16, border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', padding: 28 }}>
+      <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Broker Trust Scores</p>
+      {[
+        { name: 'RoadMaster Freight', score: 94, pay: '2.1 days avg', reviews: 312, badge: 'TRUSTED', c: '#22c55e' },
+        { name: 'Swift Logistics Co.', score: 78, pay: '4.3 days avg', reviews: 187, badge: 'GOOD', c: '#eab308' },
+        { name: 'FastFreight LLC', score: 31, pay: '11+ days avg', reviews: 94, badge: 'AVOID', c: '#ef4444' },
+      ].map(({ name, score, pay, reviews, badge, c }) => (
+        <div key={name} style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', border: `2.5px solid ${c}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ color: c, fontWeight: 800, fontSize: 15 }}>{score}</span>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ color: '#e6edf3', fontWeight: 600, fontSize: 13, marginBottom: 3 }}>{name}</p>
+            <p style={{ color: '#6e7681', fontSize: 10 }}>⏱ {pay} · {reviews} reviews</p>
+          </div>
+          <span style={{ background: `${c}18`, color: c, fontSize: 9, fontWeight: 700, padding: '4px 10px', borderRadius: 6, border: `1px solid ${c}35`, flexShrink: 0 }}>{badge}</span>
+        </div>
+      ))}
+      <div style={{ background: '#1c2330', borderRadius: 10, padding: '12px 16px', marginTop: 4 }}>
+        <p style={{ color: '#6e7681', fontSize: 10, marginBottom: 6 }}>Community Red Flags This Week</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {['Late payment ×3', 'No response ×2', 'Rate cut ×1'].map(f => (
+            <span key={f} style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', fontSize: 10, padding: '3px 8px', borderRadius: 6, border: '1px solid rgba(239,68,68,0.2)' }}>{f}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HERO ───────────────────────────────────────────────────────────────────────
 function Hero({ onWaitlist }) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-dark-900 via-dark-900 to-dark-800" />
+    <section className="relative overflow-hidden pt-16" style={{ background: '#080c10' }}>
+      <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px,transparent 1px),linear-gradient(90deg,#22c55e 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 20% 50%, rgba(34,197,94,0.07) 0%, transparent 70%)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, #080c10, transparent)' }} />
 
-      {/* Subtle grid */}
-      <div className="absolute inset-0 opacity-[0.03]"
-        style={{ backgroundImage: 'linear-gradient(#22c55e 1px,transparent 1px),linear-gradient(90deg,#22c55e 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
-
-      {/* Radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(34,197,94,0.08)_0%,transparent_70%)] pointer-events-none" />
-
-      {/* Edge vignettes */}
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-dark-900 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-dark-900 to-transparent pointer-events-none" />
-
-      <div className="relative max-w-6xl mx-auto px-6 text-center">
-        <div className="inline-flex items-center gap-2 badge-green mb-8 text-sm px-4 py-1.5 animate-fade-in">
-          <Flame size={14} className="text-brand-400" />
-          <span>The Load Board Built for Driver Profit</span>
-          <ChevronRight size={14} />
-        </div>
-
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight mb-6 animate-slide-up">
-          Stop Hauling.<br />
-          Start <span className="gradient-text">Earning Smarter.</span>
-        </h1>
-
-        <p className="text-xl text-dark-100 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up">
-          HaulIQ replaces the old load board with an AI-powered profit engine that tells you exactly which loads to take, which brokers to avoid, and when to wait for better rates.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-fade-in">
-          <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
-            Join the Waitlist <ArrowRight size={18} />
-          </button>
-          <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
-            View Live Demo
-          </Link>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-dark-200 mb-8">
-          {[['2,100+', 'Active Drivers'], ['$48K+', 'Monthly Savings'], ['4.9★', 'App Rating'], ['No CC', 'Required']].map(([val, label]) => (
-            <div key={label} className="text-center">
-              <p className="text-white font-bold text-lg">{val}</p>
-              <p className="text-dark-300 text-xs mt-0.5">{label}</p>
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28">
+        <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+          {/* Left: Text */}
+          <div>
+            <div className="inline-flex items-center gap-2 badge-green mb-7 text-sm px-4 py-1.5">
+              <Flame size={13} className="text-brand-400" />
+              <span>The Load Board Built for Driver Profit</span>
             </div>
-          ))}
+            <h1 className="text-5xl lg:text-[3.75rem] font-black text-white leading-[1.05] tracking-tight mb-6">
+              Stop Hauling.<br />
+              Start <span className="gradient-text">Earning Smarter.</span>
+            </h1>
+            <p className="text-lg text-dark-100 mb-9 leading-relaxed" style={{ maxWidth: 480 }}>
+              HaulIQ is the AI-powered profit engine that tells you exactly which loads to take,
+              which brokers to avoid, and when to wait for better rates.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+              <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
+                Join the Waitlist <ArrowRight size={18} />
+              </button>
+              <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
+                View Live Demo
+              </Link>
+            </div>
+            {/* Social proof */}
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <div className="flex items-center gap-1.5">
+                {[1,2,3,4,5].map(i => <Star key={i} size={15} className="text-yellow-400 fill-yellow-400" />)}
+                <span className="text-white font-bold text-sm ml-1">4.9</span>
+                <span className="text-dark-300 text-sm">· 1,284 reviews</span>
+              </div>
+              <div className="flex items-center gap-6 text-sm">
+                <div><span className="text-white font-bold">2,100+</span><span className="text-dark-300 ml-1">active drivers</span></div>
+                <div><span className="text-white font-bold">$48K+</span><span className="text-dark-300 ml-1">saved/mo</span></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: App mockup */}
+          <div className="relative">
+            <div className="absolute -inset-6 rounded-3xl blur-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.1) 0%, transparent 70%)' }} />
+            <div className="relative">
+              <MockLoadBoard />
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-// ─── FEATURES ─────────────────────────────────────────────────────────────────
-function Features() {
+// ─── FEATURE ROW ────────────────────────────────────────────────────────────────
+function FeatureRow({ flip = false, light = false, label, title, desc, bullets, onWaitlist, visual }) {
+  const bg     = light ? '#f7f8fa' : '#0d1117';
+  const headC  = light ? '#111827' : '#ffffff';
+  const bodyC  = light ? '#6b7280' : '#8b949e';
+  const bulletC = light ? '#374151' : '#8b949e';
+  const learnC = light ? '#111827' : '#e6edf3';
+
+  return (
+    <section style={{ background: bg, padding: '100px 0' }}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className={`grid lg:grid-cols-2 gap-14 lg:gap-20 items-center`}>
+          {/* Text */}
+          <div className={flip ? 'lg:order-2' : ''}>
+            <span style={{ color: '#22c55e', fontWeight: 700, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 14 }}>
+              {label}
+            </span>
+            <h2 style={{ color: headC, fontWeight: 800, fontSize: 42, lineHeight: 1.1, marginBottom: 18 }}>
+              {title}
+            </h2>
+            <p style={{ color: bodyC, fontSize: 17, lineHeight: 1.75, marginBottom: 28 }}>
+              {desc}
+            </p>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 36 }}>
+              {bullets.map(b => (
+                <li key={b} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Check size={11} style={{ color: '#22c55e' }} />
+                  </div>
+                  <span style={{ color: bulletC, fontSize: 15 }}>{b}</span>
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button onClick={onWaitlist} className="btn-primary flex items-center gap-2">
+                Get Started <ArrowRight size={16} />
+              </button>
+              <Link to="/login" style={{ color: learnC, fontWeight: 600, fontSize: 15, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                See how it works <ChevronRight size={16} />
+              </Link>
+            </div>
+          </div>
+
+          {/* Visual */}
+          <div className={flip ? 'lg:order-1' : ''}>
+            {visual}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── REMAINING FEATURES GRID ────────────────────────────────────────────────────
+function MoreFeatures() {
   const features = [
     {
-      icon: Brain, title: 'Driver Earnings Brain',
-      desc: 'AI that learns your routes, spots patterns, and tells you when to haul, when to wait, and which brokers to ghost.',
-      tag: 'AI-Powered', tagColor: 'badge-blue',
-      bullets: ['Lane profit patterns', 'Broker performance history', 'Market rate alerts'],
-    },
-    {
-      icon: Calculator, title: 'Profit Calculator',
-      desc: 'Every load is color-coded green, yellow, or red before you commit. Fuel, deadhead, and net profit — calculated in seconds.',
-      tag: 'Core Feature', tagColor: 'badge-green',
-      bullets: ['Fuel cost estimator', 'Deadhead penalty', 'Real-time net profit'],
-    },
-    {
-      icon: Shield, title: 'Broker Trust System',
-      desc: 'Know who pays fast and who ghosts you. Verified ratings, payment speed data, and community red flags.',
-      tag: 'Driver-First', tagColor: 'badge-green',
-      bullets: ['Payment speed ratings', 'Community reviews', 'Warning flags'],
-    },
-    {
-      icon: Zap, title: 'Hot Load Feed',
+      icon: Zap, title: 'Hot Load Feed', tag: 'Elite', tagColor: 'badge-red',
       desc: 'First access to the best loads before they disappear. Elite members see high-profit loads minutes ahead of the market.',
-      tag: 'Elite', tagColor: 'badge-red',
-      bullets: ['Real-time notifications', 'Priority access', 'Profitability filter'],
     },
     {
-      icon: TrendingUp, title: 'Rate Intelligence',
+      icon: TrendingUp, title: 'Rate Intelligence', tag: 'Pro+', tagColor: 'badge-yellow',
       desc: 'See instantly if a load is above or below market rate. Never get lowballed again with live market comparison.',
-      tag: 'Pro+', tagColor: 'badge-yellow',
-      bullets: ['Market rate vs posted', 'Underpriced load alerts', 'Trend analysis'],
     },
     {
-      icon: BarChart2, title: 'Earnings Analytics',
+      icon: BarChart2, title: 'Earnings Analytics', tag: 'Pro+', tagColor: 'badge-yellow',
       desc: 'Weekly profit reports, best lane breakdowns, and monthly earnings trends — all in one clean dashboard.',
-      tag: 'Pro+', tagColor: 'badge-yellow',
-      bullets: ['Weekly profit reports', 'Lane rankings', 'Broker history'],
     },
   ];
 
   return (
-    <section id="features" className="py-24 relative">
+    <section style={{ background: '#080c10', padding: '100px 0' }}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-          <span className="badge-green text-sm mb-4 inline-block">Features</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Everything a driver needs.<br /><span className="gradient-text">Nothing they don't.</span></h2>
-          <p className="text-dark-200 text-lg max-w-xl mx-auto">Every feature is designed around one goal: put more money in your pocket per mile driven.</p>
+          <span className="badge-green text-sm mb-5 inline-block">More Features</span>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">
+            Everything else you need.<br />
+            <span className="gradient-text">Nothing you don't.</span>
+          </h2>
+          <p className="text-dark-200 text-lg max-w-xl mx-auto">Every feature is designed around one goal: put more money in your pocket per mile.</p>
         </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map(({ icon: Icon, title, desc, tag, tagColor, bullets }) => (
-            <div key={title} className="glass rounded-xl p-6 border border-dark-400/40 hover:border-brand-500/20 transition-all duration-200 hover:-translate-y-1 group">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 bg-brand-500/10 rounded-lg flex items-center justify-center group-hover:bg-brand-500/20 transition-colors">
-                  <Icon size={20} className="text-brand-400" />
+        <div className="grid md:grid-cols-3 gap-6">
+          {features.map(({ icon: Icon, title, tag, tagColor, desc }) => (
+            <div key={title} className="glass rounded-2xl p-8 border border-dark-400/40 hover:border-brand-500/20 transition-all hover:-translate-y-1 group">
+              <div className="flex items-start justify-between mb-5">
+                <div className="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center group-hover:bg-brand-500/20 transition-colors">
+                  <Icon size={22} className="text-brand-400" />
                 </div>
                 <span className={tagColor + ' text-xs'}>{tag}</span>
               </div>
-              <h3 className="text-white font-bold text-lg mb-2">{title}</h3>
-              <p className="text-dark-200 text-sm leading-relaxed mb-4">{desc}</p>
-              <ul className="space-y-1.5">
-                {bullets.map(b => (
-                  <li key={b} className="flex items-center gap-2 text-dark-100 text-xs">
-                    <Check size={12} className="text-brand-400 flex-shrink-0" />{b}
-                  </li>
-                ))}
-              </ul>
+              <h3 className="text-white font-bold text-xl mb-3">{title}</h3>
+              <p className="text-dark-200 text-sm leading-relaxed">{desc}</p>
             </div>
           ))}
         </div>
@@ -229,7 +398,50 @@ function Features() {
   );
 }
 
-// ─── PRICING ──────────────────────────────────────────────────────────────────
+// ─── TESTIMONIALS ───────────────────────────────────────────────────────────────
+function Testimonials() {
+  const reviews = [
+    { name: 'Marcus T.', role: 'Owner-Operator · 5 years', avatar: 'MT', text: "HaulIQ's Earnings Brain told me to avoid a broker I'd been using for years. Turned out they had 3 delayed payments that week. Saved me $2,400 in headaches.", stars: 5 },
+    { name: 'Jessica R.', role: 'Fleet Owner · 4 trucks', avatar: 'JR', text: 'The profit calculator alone is worth the Pro subscription. I rejected 6 loads last week that looked good on paper but were actually losing money after fuel and deadhead.', stars: 5 },
+    { name: 'Derek L.', role: 'OTR Driver · 3 years', avatar: 'DL', text: "Finally a load board that doesn't just show me loads — it shows me which ones will actually make me money. My weekly net is up 34% since switching.", stars: 5 },
+    { name: 'Priya S.', role: 'Freight Broker', avatar: 'PS', text: 'As a broker, the Elite plan gave me access to serious, high-volume carriers. My load acceptance rate went from 31% to 67% in 6 weeks.', stars: 5 },
+  ];
+
+  return (
+    <section style={{ background: '#0d1117', padding: '100px 0' }}>
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <span className="badge-green text-sm mb-5 inline-block">Reviews</span>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Drivers trust HaulIQ.</h2>
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            {[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />)}
+            <span className="text-white font-bold ml-2">4.9</span>
+            <span className="text-dark-300 text-sm ml-1">from 1,284 reviews</span>
+          </div>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {reviews.map(({ name, role, avatar, text, stars }) => (
+            <div key={name} className="glass rounded-2xl p-6 border border-dark-400/40 hover:border-brand-500/20 transition-all">
+              <div className="flex items-center gap-1 mb-4">
+                {[...Array(stars)].map((_, i) => <Star key={i} size={13} className="text-yellow-400 fill-yellow-400" />)}
+              </div>
+              <p className="text-dark-100 text-sm leading-relaxed mb-5">"{text}"</p>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-brand-500/20 rounded-full flex items-center justify-center text-brand-400 text-xs font-bold">{avatar}</div>
+                <div>
+                  <p className="text-white text-sm font-semibold">{name}</p>
+                  <p className="text-dark-300 text-xs">{role}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── PRICING ────────────────────────────────────────────────────────────────────
 function Pricing({ onWaitlist }) {
   const [tab, setTab] = useState('carrier');
 
@@ -237,30 +449,24 @@ function Pricing({ onWaitlist }) {
     carrier: [
       { name: 'Basic', price: 0, period: 'forever', desc: 'Just getting started', color: 'default',
         features: ['20 load views/day', 'Basic profit calculator', 'Standard filters', 'Email support'],
-        missing: ['Broker ratings', 'Earnings Brain', 'Hot load alerts', 'Analytics'],
-      },
+        missing: ['Broker ratings', 'Earnings Brain', 'Hot load alerts', 'Analytics'] },
       { name: 'Pro', price: 49, period: 'month', desc: 'Most popular for owner-operators', color: 'brand', popular: true,
         features: ['Unlimited load views', 'Full profit calculator', 'Broker ratings & reviews', 'Basic Earnings Brain', 'Hot load notifications', '90-day load history', 'Priority support'],
-        missing: ['Advanced AI insights', 'Early load access', 'Full analytics'],
-      },
+        missing: ['Advanced AI insights', 'Early load access', 'Full analytics'] },
       { name: 'Elite', price: 99, period: 'month', desc: 'Maximum earning power', color: 'purple',
         features: ['Everything in Pro', 'Full Driver Earnings Brain', 'Priority load access', 'Early hot load alerts', 'Advanced analytics', 'Weekly profit reports', 'Dedicated account rep'],
-        missing: [],
-      },
+        missing: [] },
     ],
     broker: [
       { name: 'Basic', price: 0, period: 'forever', desc: 'Post and be discovered', color: 'default',
         features: ['10 active postings', 'Standard visibility', 'Basic dashboard'],
-        missing: ['Enhanced visibility', 'Carrier analytics', 'Priority placement', 'API access'],
-      },
+        missing: ['Enhanced visibility', 'Carrier analytics', 'Priority placement', 'API access'] },
       { name: 'Pro', price: 79, period: 'month', desc: 'More reach, better conversions', color: 'brand', popular: true,
         features: ['50 active postings', 'Enhanced visibility', 'Carrier engagement data', 'Performance dashboard', 'Priority support'],
-        missing: ['Priority placement', 'API access', 'Unlimited postings'],
-      },
+        missing: ['Priority placement', 'API access', 'Unlimited postings'] },
       { name: 'Elite', price: 149, period: 'month', desc: 'Dominate the board', color: 'purple',
         features: ['Unlimited postings', 'Priority placement', 'Full conversion analytics', 'Premium carrier exposure', 'Dedicated account rep', 'API access'],
-        missing: [],
-      },
+        missing: [] },
     ],
   };
 
@@ -271,12 +477,14 @@ function Pricing({ onWaitlist }) {
   };
 
   return (
-    <section id="pricing" className="py-24 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(34,197,94,0.05)_0%,transparent_60%)]" />
+    <section id="pricing" style={{ background: '#080c10', padding: '100px 0' }}>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom, rgba(34,197,94,0.04) 0%, transparent 60%)' }} />
       <div className="max-w-6xl mx-auto px-6 relative">
-        <div className="text-center mb-12">
-          <span className="badge-green text-sm mb-4 inline-block">Pricing</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Simple, transparent pricing.<br /><span className="gradient-text">No hidden fees.</span></h2>
+        <div className="text-center mb-14">
+          <span className="badge-green text-sm mb-5 inline-block">Pricing</span>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">
+            Simple, transparent pricing.<br /><span className="gradient-text">No hidden fees.</span>
+          </h2>
           <p className="text-dark-200 text-lg">Start free. Upgrade when you're ready to maximize earnings.</p>
           <div className="inline-flex glass rounded-xl p-1 mt-8">
             {['carrier', 'broker'].map(t => (
@@ -294,7 +502,7 @@ function Pricing({ onWaitlist }) {
             return (
               <div key={plan.name} className={`glass rounded-2xl p-7 border ${c.border} relative flex flex-col ${plan.popular ? 'scale-105 shadow-2xl shadow-brand-500/10' : ''}`}>
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
                     <span className="badge-green text-xs px-3 py-1">Most Popular</span>
                   </div>
                 )}
@@ -321,7 +529,7 @@ function Pricing({ onWaitlist }) {
                     </li>
                   ))}
                   {plan.missing.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm opacity-40">
+                    <li key={f} className="flex items-start gap-2 text-sm opacity-35">
                       <X size={14} className="text-dark-400 flex-shrink-0 mt-0.5" />
                       <span className="text-dark-300 line-through">{f}</span>
                     </li>
@@ -334,167 +542,30 @@ function Pricing({ onWaitlist }) {
             );
           })}
         </div>
-        <p className="text-center text-dark-300 text-sm mt-8">All plans include 14-day free trial on paid tiers. No credit card required.</p>
+        <p className="text-center text-dark-300 text-sm mt-10">All plans include 14-day free trial on paid tiers. No credit card required.</p>
       </div>
     </section>
   );
 }
 
-// ─── COMPARISON TABLE ─────────────────────────────────────────────────────────
-function Comparison() {
-  const rows = [
-    { feature: 'Real-time profit calculator',      hauliq: true,  dat: false, truckstop: false },
-    { feature: 'AI-powered lane insights',          hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Broker payment speed ratings',      hauliq: true,  dat: true,  truckstop: true  },
-    { feature: 'Color-coded profitability score',   hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Deadhead cost calculator',          hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Hot load early access',             hauliq: true,  dat: false, truckstop: false },
-    { feature: '"Worst loads" warning feed',        hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Driver earnings brain (AI)',        hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Weekly profit reports',             hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Anonymous driver insights',         hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Modern, mobile-first UI',           hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Free starter plan',                 hauliq: true,  dat: false, truckstop: false },
-    { feature: 'Starts at',                         hauliq: '$0/mo', dat: '$45/mo', truckstop: '$39/mo' },
-  ];
-
-  return (
-    <section id="compare" className="py-24">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <span className="badge-green text-sm mb-4 inline-block">Comparison</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">HaulIQ vs. The Old Guard</h2>
-          <p className="text-dark-200 text-lg">DAT and Truckstop were built in the 90s. We built HaulIQ for 2026.</p>
-        </div>
-
-        <div className="glass rounded-2xl border border-dark-400/40 overflow-hidden">
-          <div className="grid grid-cols-4 bg-dark-700/60 border-b border-dark-400/40">
-            <div className="p-4 text-dark-300 text-sm font-medium">Feature</div>
-            <div className="p-4 text-center">
-              <div className="flex items-center justify-center gap-1.5">
-                <Truck size={16} className="text-brand-400" />
-                <span className="text-brand-400 font-bold text-sm">HaulIQ</span>
-              </div>
-            </div>
-            <div className="p-4 text-center text-dark-300 text-sm font-medium">DAT</div>
-            <div className="p-4 text-center text-dark-300 text-sm font-medium">Truckstop</div>
-          </div>
-          {rows.map(({ feature, hauliq, dat, truckstop }, i) => (
-            <div key={feature} className={`grid grid-cols-4 border-b border-dark-400/20 ${i % 2 === 0 ? 'bg-dark-800/30' : ''} hover:bg-dark-700/20 transition-colors`}>
-              <div className="p-4 text-dark-100 text-sm">{feature}</div>
-              {[['hauliq', hauliq], ['dat', dat], ['truckstop', truckstop]].map(([key, val]) => (
-                <div key={key} className={`p-4 flex justify-center items-center ${key === 'hauliq' ? 'bg-brand-500/3' : ''}`}>
-                  {typeof val === 'boolean' ? (
-                    val ? <Check size={18} className={key === 'hauliq' ? 'text-brand-400' : 'text-dark-500'} />
-                        : <X size={18} className="text-dark-600" />
-                  ) : (
-                    <span className={`text-sm font-semibold ${key === 'hauliq' ? 'text-brand-400' : 'text-dark-400'}`}>{val}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── TESTIMONIALS ─────────────────────────────────────────────────────────────
-function Testimonials() {
-  const reviews = [
-    { name: 'Marcus T.', role: 'Owner-Operator · 5 years', avatar: 'MT', text: 'HaulIQ\'s Earnings Brain told me to avoid a broker I\'d been using for years. Turned out they had 3 delayed payments that week. Saved me $2,400 in headaches.', stars: 5 },
-    { name: 'Jessica R.', role: 'Fleet Owner · 4 trucks', avatar: 'JR', text: 'The profit calculator alone is worth the Pro subscription. I rejected 6 loads last week that looked good on paper but were actually losing money after fuel and deadhead.', stars: 5 },
-    { name: 'Derek L.', role: 'OTR Driver · 3 years', avatar: 'DL', text: 'Finally a load board that doesn\'t just show me loads — it shows me which ones will actually make me money. My weekly net is up 34% since switching.', stars: 5 },
-    { name: 'Priya S.', role: 'Freight Broker', avatar: 'PS', text: 'As a broker, the Elite plan gave me access to serious, high-volume carriers. My load acceptance rate went from 31% to 67% in 6 weeks.', stars: 5 },
-  ];
-
-  return (
-    <section className="py-24">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-14">
-          <span className="badge-green text-sm mb-4 inline-block">Reviews</span>
-          <h2 className="text-4xl font-black text-white mb-4">Drivers trust HaulIQ.</h2>
-          <div className="flex items-center justify-center gap-1 mt-2">
-            {[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />)}
-            <span className="text-white font-bold ml-2">4.9</span>
-            <span className="text-dark-300 text-sm ml-1">from 1,284 reviews</span>
-          </div>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {reviews.map(({ name, role, avatar, text, stars }) => (
-            <div key={name} className="glass rounded-xl p-5 border border-dark-400/40 hover:border-brand-500/20 transition-all">
-              <div className="flex items-center gap-1 mb-3">
-                {[...Array(stars)].map((_, i) => <Star key={i} size={12} className="text-yellow-400 fill-yellow-400" />)}
-              </div>
-              <p className="text-dark-100 text-sm leading-relaxed mb-4">"{text}"</p>
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-brand-500/20 rounded-full flex items-center justify-center text-brand-400 text-xs font-bold">{avatar}</div>
-                <div>
-                  <p className="text-white text-sm font-medium">{name}</p>
-                  <p className="text-dark-300 text-xs">{role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── VIRAL FEATURE ─────────────────────────────────────────────────────────────
-function ViralFeature({ onWaitlist }) {
-  return (
-    <section className="py-20">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="glass rounded-2xl border border-brand-500/20 p-8 lg:p-12 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.06)_0%,transparent_70%)]" />
-          <div className="relative">
-            <span className="badge-green text-sm mb-5 inline-block">🔥 Viral Feature</span>
-            <h2 className="text-3xl lg:text-4xl font-black text-white mb-4">The "Worst Loads of the Day" Feed</h2>
-            <p className="text-dark-200 text-lg mb-6 max-w-2xl mx-auto">
-              Every day, HaulIQ publishes the 10 worst loads on the market — embarrassingly low rates, sketchy brokers, and money-losing miles. Share it. Laugh about it. Never take one.
-            </p>
-            <div className="grid sm:grid-cols-3 gap-4 mb-8">
-              {[
-                { icon: AlertTriangle, label: 'Exposes bad actors', color: 'text-red-400' },
-                { icon: Users, label: 'Drivers share it daily', color: 'text-brand-400' },
-                { icon: TrendingUp, label: 'Viral growth loop', color: 'text-blue-400' },
-              ].map(({ icon: Icon, label, color }) => (
-                <div key={label} className="glass-light rounded-lg p-4">
-                  <Icon size={20} className={`${color} mx-auto mb-2`} />
-                  <p className="text-white text-sm font-medium">{label}</p>
-                </div>
-              ))}
-            </div>
-            <button onClick={onWaitlist} className="btn-primary inline-flex items-center gap-2 px-8 py-3 glow-green">
-              Join the Waitlist <ArrowRight size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── CTA ──────────────────────────────────────────────────────────────────────
+// ─── CTA ────────────────────────────────────────────────────────────────────────
 function CTA({ onWaitlist }) {
   return (
-    <section className="py-24">
+    <section style={{ background: '#0d1117', padding: '100px 0' }}>
       <div className="max-w-4xl mx-auto px-6 text-center">
-        <div className="relative">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(34,197,94,0.08)_0%,transparent_70%)]" />
+        <div className="glass rounded-3xl border border-brand-500/15 p-12 lg:p-16 relative overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.07) 0%, transparent 70%)' }} />
           <div className="relative">
-            <h2 className="text-4xl lg:text-5xl font-black text-white mb-6">Ready to earn smarter?</h2>
+            <span className="badge-green text-sm mb-6 inline-block">Start Today</span>
+            <h2 className="text-4xl lg:text-5xl font-black text-white mb-5">Ready to earn smarter?</h2>
             <p className="text-dark-200 text-lg mb-10 max-w-xl mx-auto">
               Join 2,100+ drivers already using HaulIQ to maximize their earnings per mile.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
+              <button onClick={onWaitlist} className="btn-primary text-base px-10 py-4 flex items-center justify-center gap-2 glow-green">
                 Join the Waitlist <ArrowRight size={18} />
               </button>
-              <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
+              <Link to="/login" className="btn-secondary text-base px-10 py-4 flex items-center justify-center gap-2">
                 View Live Demo
               </Link>
             </div>
@@ -505,12 +576,12 @@ function CTA({ onWaitlist }) {
   );
 }
 
-// ─── FOOTER ───────────────────────────────────────────────────────────────────
+// ─── FOOTER ─────────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="border-t border-dark-400/40 py-12">
+    <footer style={{ background: '#080c10', borderTop: '1px solid rgba(48,54,61,0.4)', padding: '60px 0 32px' }}>
       <div className="max-w-6xl mx-auto px-6">
-        <div className="grid sm:grid-cols-4 gap-8 mb-10">
+        <div className="grid sm:grid-cols-4 gap-10 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center">
@@ -527,7 +598,7 @@ function Footer() {
           ].map(({ title, links }) => (
             <div key={title}>
               <h4 className="text-white font-semibold text-sm mb-4">{title}</h4>
-              <ul className="space-y-2.5">
+              <ul className="space-y-3">
                 {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                 {links.map(l => <li key={l}><a href="#" className="text-dark-300 hover:text-white text-sm transition-colors">{l}</a></li>)}
               </ul>
@@ -543,19 +614,65 @@ function Footer() {
   );
 }
 
-// ─── MAIN LANDING PAGE ────────────────────────────────────────────────────────
+// ─── MAIN ───────────────────────────────────────────────────────────────────────
 export default function Landing() {
   const [showWaitlist, setShowWaitlist] = useState(false);
+  const open = () => setShowWaitlist(true);
+
   return (
-    <div className="bg-dark-900 min-h-screen">
+    <div style={{ background: '#080c10', minHeight: '100vh' }}>
       <Navbar />
-      <Hero onWaitlist={() => setShowWaitlist(true)} />
-      <Features />
-      <Pricing onWaitlist={() => setShowWaitlist(true)} />
-      <Comparison />
+      <Hero onWaitlist={open} />
+
+      <FeatureRow
+        light
+        label="Profit Calculator"
+        title={<>Know your profit<br />before you commit.</>}
+        desc="Every load is color-coded green, yellow, or red. Fuel, deadhead, and net profit — all calculated in seconds before you ever call back."
+        bullets={[
+          'Fuel cost estimator built in',
+          'Deadhead miles penalty included',
+          'Real-time net profit display',
+          'Color-coded score: green / yellow / red',
+        ]}
+        visual={<MockCalculator />}
+        onWaitlist={open}
+      />
+
+      <FeatureRow
+        flip
+        label="Earnings Brain"
+        title={<>AI that learns your lanes<br />and works while you drive.</>}
+        desc="Our Driver Earnings Brain analyzes your history, spots patterns, and tells you when to haul, when to wait, and which brokers to ghost."
+        bullets={[
+          'Lane profit pattern analysis',
+          'Broker performance history',
+          'Market rate alerts in real time',
+          'Weekly earnings recommendations',
+        ]}
+        visual={<MockBrain />}
+        onWaitlist={open}
+      />
+
+      <FeatureRow
+        light
+        label="Broker Trust System"
+        title={<>Know who pays fast<br />and who ghosts you.</>}
+        desc="Verified ratings, payment speed data, and community red flags on every broker on the board. Never get burned by a slow-pay broker again."
+        bullets={[
+          'Payment speed ratings per broker',
+          'Community-verified reviews',
+          'Red flag warnings before you call',
+          'Dispute and non-payment history',
+        ]}
+        visual={<MockBrokers />}
+        onWaitlist={open}
+      />
+
+      <MoreFeatures />
       <Testimonials />
-      <ViralFeature onWaitlist={() => setShowWaitlist(true)} />
-      <CTA onWaitlist={() => setShowWaitlist(true)} />
+      <Pricing onWaitlist={open} />
+      <CTA onWaitlist={open} />
       <Footer />
       {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </div>
