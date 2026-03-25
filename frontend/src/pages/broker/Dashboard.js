@@ -97,8 +97,10 @@ export default function BrokerDashboard() {
         </Button>
       </Box>
 
-      {/* Stats */}
+      {/* Single Grid so all rows share the same gutters and align flush */}
       <Grid container spacing={3}>
+
+        {/* Row 1 — Stat cards */}
         {stats.map(({ icon, label, value }) => (
           <Grid item xs={6} md={3} key={label}>
             <Card>
@@ -118,10 +120,8 @@ export default function BrokerDashboard() {
             </Card>
           </Grid>
         ))}
-      </Grid>
 
-      {/* Chart + Rating — equal 50/50 split */}
-      <Grid container spacing={3}>
+        {/* Row 2 — Load Views (50%) + Broker Rating (50%) */}
         <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
@@ -169,63 +169,64 @@ export default function BrokerDashboard() {
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
 
-      {/* Recent Loads */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600}>My Recent Loads</Typography>
-          <Button
-            component={Link}
-            to="/broker/loads"
-            variant="text"
-            endIcon={<ArrowForwardIcon />}
-            size="small"
-          >
-            Manage all
-          </Button>
-        </Box>
-
-        {loads.length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-            <InventoryIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              No loads posted yet.
-            </Typography>
-            <Button component={Link} to="/broker/post" variant="text" size="small">
-              Post your first load
+        {/* Row 3 — Recent Loads (full width) */}
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="subtitle1" fontWeight={600}>My Recent Loads</Typography>
+            <Button
+              component={Link}
+              to="/broker/loads"
+              variant="text"
+              endIcon={<ArrowForwardIcon />}
+              size="small"
+            >
+              Manage all
             </Button>
-          </Paper>
-        ) : (
-          <Card>
-            <Box sx={{ overflowX: 'auto' }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    {['Route', 'Type', 'Rate', 'Views', 'Status', 'Posted'].map(h => (
-                      <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                        {h}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentLoads.map((load, idx) => (
-                    <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
-                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{load.origin} → {load.dest}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary' }}>{load.type}</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
-                      <TableCell>{load.viewCount || 0}</TableCell>
-                      <TableCell>{statusChip(load.status)}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{load.posted}</TableCell>
+          </Box>
+
+          {loads.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <InventoryIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                No loads posted yet.
+              </Typography>
+              <Button component={Link} to="/broker/post" variant="text" size="small">
+                Post your first load
+              </Button>
+            </Paper>
+          ) : (
+            <Card>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'action.hover' }}>
+                      {['Route', 'Type', 'Rate', 'Views', 'Status', 'Posted'].map(h => (
+                        <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          {h}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Card>
-        )}
-      </Box>
+                  </TableHead>
+                  <TableBody>
+                    {recentLoads.map((load, idx) => (
+                      <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                        <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{load.origin} → {load.dest}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary' }}>{load.type}</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
+                        <TableCell>{load.viewCount || 0}</TableCell>
+                        <TableCell>{statusChip(load.status)}</TableCell>
+                        <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{load.posted}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Card>
+          )}
+        </Grid>
+
+      </Grid>
     </Box>
   );
 }
