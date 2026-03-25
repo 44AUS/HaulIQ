@@ -221,7 +221,11 @@ export default function Messages() {
       messagesApi.conversation(activeConvoId)
         .then(data => {
           const incoming = data.messages || (Array.isArray(data) ? data : []);
-          setActiveMessages(prev => incoming.length !== prev.length ? incoming : prev);
+          setActiveMessages(prev => {
+            if (incoming.length !== prev.length) return incoming;
+            const changed = incoming.some((m, i) => m.is_read !== prev[i]?.is_read);
+            return changed ? incoming : prev;
+          });
         })
         .catch(() => {});
     }, 3000);
