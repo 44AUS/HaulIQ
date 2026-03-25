@@ -218,48 +218,73 @@ function stepIndex(loadStatus, bookingStatus) {
 
 function LoadStepper({ load, bookingStatus }) {
   const active = stepIndex(load.status, bookingStatus);
+  const CIRCLE = 32;
 
   return (
-    <Box sx={{ py: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-        {/* Track line */}
+    <Box sx={{ py: 1.5 }}>
+      {/* Circles row — line lives here so it's always centered on the circles */}
+      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', mb: 1 }}>
+        {/* Background track */}
         <Box sx={{
-          position: 'absolute', top: '50%', left: 16, right: 16,
+          position: 'absolute',
+          top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
           height: 3, bgcolor: 'action.selected', borderRadius: 2,
+          transform: 'translateY(-50%)',
+        }} />
+        {/* Filled progress */}
+        <Box sx={{
+          position: 'absolute',
+          top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
+          height: 3, borderRadius: 2,
           transform: 'translateY(-50%)',
           '&::after': {
             content: '""', position: 'absolute', top: 0, left: 0, height: '100%',
             width: `${(active / (STEPS.length - 1)) * 100}%`,
             bgcolor: 'primary.main', borderRadius: 2,
-            transition: 'width 0.4s ease',
+            transition: 'width 0.5s ease',
           },
         }} />
 
         {STEPS.map((step, i) => {
-          const done = i < active;
+          const done    = i < active;
           const current = i === active;
           return (
-            <Box key={step.key} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <Box key={step.key} sx={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
               <Box sx={{
-                width: 36, height: 36, borderRadius: '50%',
+                width: CIRCLE, height: CIRCLE, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: done || current ? 'primary.main' : 'background.paper',
-                border: '3px solid',
-                borderColor: done || current ? 'primary.main' : 'action.selected',
-                color: done || current ? 'primary.contrastText' : 'text.disabled',
+                bgcolor: done ? 'primary.main' : current ? 'primary.main' : 'background.paper',
+                border: '2.5px solid',
+                borderColor: done || current ? 'primary.main' : 'action.disabled',
+                color: done || current ? '#fff' : 'text.disabled',
                 transition: 'all 0.3s ease',
-                boxShadow: current ? '0 0 0 4px rgba(25,118,210,0.2)' : 'none',
+                boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none',
               }}>
-                {done ? <CheckCircleIcon sx={{ fontSize: 18 }} /> : (current ? step.icon : <RadioButtonUncheckedIcon sx={{ fontSize: 18 }} />)}
+                {done
+                  ? <CheckCircleIcon sx={{ fontSize: 16 }} />
+                  : current
+                    ? step.icon
+                    : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />
+                }
               </Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  mt: 0.75, fontWeight: current ? 700 : done ? 500 : 400,
-                  color: done || current ? 'text.primary' : 'text.disabled',
-                  textAlign: 'center', lineHeight: 1.2,
-                }}
-              >
+            </Box>
+          );
+        })}
+      </Box>
+
+      {/* Labels row — separate so they never affect circle alignment */}
+      <Box sx={{ display: 'flex' }}>
+        {STEPS.map((step, i) => {
+          const done    = i < active;
+          const current = i === active;
+          return (
+            <Box key={step.key} sx={{ flex: 1, textAlign: 'center' }}>
+              <Typography variant="caption" sx={{
+                fontSize: '0.7rem',
+                fontWeight: current ? 700 : done ? 500 : 400,
+                color: current ? 'primary.main' : done ? 'text.primary' : 'text.disabled',
+                letterSpacing: current ? 0.3 : 0,
+              }}>
                 {step.label}
               </Typography>
             </Box>
