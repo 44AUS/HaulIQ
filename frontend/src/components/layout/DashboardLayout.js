@@ -34,7 +34,7 @@ export default function DashboardLayout({ children }) {
         }}
       >
         {/* Scroll container — pages scroll here, not the viewport */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, maxWidth: 1280, mx: 'auto', width: '100%' }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
           {children}
         </Box>
       </Box>
