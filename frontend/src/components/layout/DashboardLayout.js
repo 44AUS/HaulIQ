@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}>
       <Sidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
@@ -23,9 +23,13 @@ export default function DashboardLayout({ children }) {
           flexGrow: 1,
           minWidth: 0,
           pt: isMobile ? 6 : 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
         }}
       >
-        <Box sx={{ p: { xs: 2, sm: 3, lg: 4 }, maxWidth: 1280, mx: 'auto' }}>
+        {/* Scroll container — pages scroll here, not the viewport */}
+        <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, maxWidth: 1280, mx: 'auto', width: '100%' }}>
           {children}
         </Box>
       </Box>

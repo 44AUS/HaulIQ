@@ -237,7 +237,9 @@ export default function Messages() {
       sx={{
         mx: { xs: -2, sm: -3, lg: -4 },
         mt: { xs: -2, sm: -3, lg: -4 },
-        height: '100vh',
+        mb: { xs: -2, sm: -3, lg: -4 },
+        // On xs/sm/md the layout has a 48px top bar (pt:6); subtract it so we don't overflow
+        height: { xs: 'calc(100vh - 48px)', lg: '100vh' },
         display: 'flex',
         overflow: 'hidden',
         bgcolor: 'background.paper',
