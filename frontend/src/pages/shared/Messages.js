@@ -218,7 +218,13 @@ export default function Messages() {
       messagesApi.typingStatus(activeConvoId)
         .then(d => setOtherIsTyping(!!d?.is_typing))
         .catch(() => {});
-    }, 2000);
+      messagesApi.conversation(activeConvoId)
+        .then(data => {
+          const incoming = data.messages || (Array.isArray(data) ? data : []);
+          setActiveMessages(prev => incoming.length !== prev.length ? incoming : prev);
+        })
+        .catch(() => {});
+    }, 3000);
     return () => clearInterval(poll);
   }, [activeConvoId]);
 
