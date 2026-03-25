@@ -114,7 +114,7 @@ function LoadHeroMap({ load, carrierLocation }) {
 
   if (!isLoaded) {
     return (
-      <Box sx={{ height: 320, bgcolor: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ height: 420, bgcolor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress size={28} sx={{ color: '#22c55e' }} />
       </Box>
     );
@@ -123,7 +123,7 @@ function LoadHeroMap({ load, carrierLocation }) {
   return (
     <Box sx={{ position: 'relative' }}>
       <GoogleMap
-        mapContainerStyle={{ height: 320, width: '100%' }}
+        mapContainerStyle={{ height: 420, width: '100%' }}
         options={MAP_OPTIONS}
         zoom={6}
         onLoad={onMapLoad}
@@ -347,20 +347,36 @@ export default function BrokerLoadDetail() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* Back button — aligned with content */}
-      <Box sx={{ maxWidth: 760, mx: 'auto', width: '100%', pb: 2 }}>
-        <Button startIcon={<ArrowBackIcon />} variant="text" onClick={() => navigate(-1)} sx={{ pl: 0 }}>
-          Back to Manage Loads
-        </Button>
-      </Box>
-
-      {/* ── Full-bleed map ── */}
-      <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden' }}>
+      {/* ── Full-bleed map — bleeds to edges and top ── */}
+      <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} carrierLocation={carrierLocation} />
+
+        {/* Floating back button over the map */}
+        <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(8px)',
+              color: 'text.primary',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              px: 1.75,
+              py: 0.75,
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              '&:hover': { bgcolor: 'rgba(255,255,255,1)' },
+            }}
+          >
+            Manage Loads
+          </Button>
+        </Box>
       </Box>
 
-      {/* ── Constrained content ── */}
-      <Box sx={{ maxWidth: 760, mx: 'auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* ── Content ── */}
+      <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
 
         {/* Load info card: stepper + details */}
         <Card>
