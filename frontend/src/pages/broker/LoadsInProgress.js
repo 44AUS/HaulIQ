@@ -288,7 +288,7 @@ export default function BrokerLoadsInProgress() {
       ) : (
         <Grid container spacing={2}>
           {loads.map(load => (
-            <Grid item xs={12} sm={6} key={load.id}>
+            <Grid item xs={6} key={load.id}>
               <BrokerLoadCard load={load} />
             </Grid>
           ))}
