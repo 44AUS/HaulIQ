@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, createContext } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import Sidebar from './Sidebar';
+import Sidebar, { DRAWER_WIDTH, DRAWER_COLLAPSED_WIDTH } from './Sidebar';
+
+export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
 
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
@@ -8,7 +10,10 @@ export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
+  const drawerWidth = isMobile ? 0 : (collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH);
+
   return (
+    <LayoutContext.Provider value={{ drawerWidth }}>
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}>
       <Sidebar
         mobileOpen={mobileOpen}
@@ -34,5 +39,6 @@ export default function DashboardLayout({ children }) {
         </Box>
       </Box>
     </Box>
+    </LayoutContext.Provider>
   );
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { LayoutContext } from '../../components/layout/DashboardLayout';
 import {
   Box, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
   Avatar, IconButton, TextField, CircularProgress, Button, Paper,
@@ -96,9 +97,34 @@ function LocationShareCard({ data, isMe }) {
   );
 }
 
+function TypingIndicator() {
+  return (
+    <>
+      <style>{`
+        @keyframes typingBounce {
+          0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+          30% { transform: translateY(-5px); opacity: 1; }
+        }
+      `}</style>
+      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, mt: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.5, py: 1, borderRadius: '16px 16px 16px 4px', bgcolor: 'action.hover', width: 'fit-content' }}>
+          {[0, 1, 2].map(i => (
+            <Box key={i} sx={{
+              width: 7, height: 7, borderRadius: '50%', bgcolor: 'text.secondary',
+              animation: 'typingBounce 1.2s ease-in-out infinite',
+              animationDelay: `${i * 0.2}s`,
+            }} />
+          ))}
+        </Box>
+      </Box>
+    </>
+  );
+}
+
 export default function Messages() {
   const { user } = useAuth();
   const location = useLocation();
+  const { drawerWidth } = useContext(LayoutContext);
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
@@ -111,6 +137,8 @@ export default function Messages() {
   const [composing, setComposing] = useState(false);
   const [network, setNetwork] = useState([]);
   const [networkQuery, setNetworkQuery] = useState('');
+  const [otherIsTyping, setOtherIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
@@ -183,6 +211,17 @@ export default function Messages() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [activeMessages.length]);
 
+  // Poll for other user typing status
+  useEffect(() => {
+    if (!activeConvoId) return;
+    const poll = setInterval(() => {
+      messagesApi.typingStatus(activeConvoId)
+        .then(d => setOtherIsTyping(!!d?.is_typing))
+        .catch(() => {});
+    }, 2000);
+    return () => clearInterval(poll);
+  }, [activeConvoId]);
+
   const activeConvo = conversations.find(c => c.id === activeConvoId);
 
   const getOtherParty = (convo) => {
@@ -199,8 +238,14 @@ export default function Messages() {
   const getLastMsg = (c) => { const msgs = c.messages || []; return msgs[msgs.length - 1] || null; };
   const hasUnread = (c) => (c.messages || []).some(m => m.sender_id !== user?.id && !m.is_read);
 
+  const handleTyping = (convoId) => {
+    messagesApi.typing(convoId).catch(() => {});
+    clearTimeout(typingTimeoutRef.current);
+  };
+
   const handleSend = () => {
     if (!input.trim() || !activeConvo) return;
+    clearTimeout(typingTimeoutRef.current);
     messagesApi.send(activeConvo.load_id || null, user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id, input.trim())
       .then(msg => { setActiveMessages(prev => [...prev, msg]); setInput(''); })
       .catch(() => {});
@@ -235,16 +280,17 @@ export default function Messages() {
     <Paper
       variant="outlined"
       sx={{
-        mx: { xs: -2, sm: -3, lg: -4 },
-        mt: { xs: -2, sm: -3, lg: -4 },
-        mb: { xs: -2, sm: -3, lg: -4 },
-        // On xs/sm/md the layout has a 48px top bar (pt:6); subtract it so we don't overflow
-        height: { xs: 'calc(100vh - 48px)', lg: '100vh' },
+        position: 'fixed',
+        top: { xs: '48px', lg: 0 },
+        left: drawerWidth,
+        right: 0,
+        bottom: 0,
         display: 'flex',
         overflow: 'hidden',
         bgcolor: 'background.paper',
         borderRadius: 0,
         border: 'none',
+        zIndex: 1,
       }}
     >
       {/* ── Conversation list panel ── */}
@@ -471,6 +517,7 @@ export default function Messages() {
                 </Box>
               );
             })}
+            {otherIsTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
           </Box>
 
@@ -478,7 +525,8 @@ export default function Messages() {
           <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 1 }}>
             <TextField
               fullWidth size="small" placeholder="Type a message..." value={input}
-              onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onChange={e => { setInput(e.target.value); if (activeConvoId) handleTyping(activeConvoId); }}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
               disabled={activeConvo.is_blocked_by_me}
             />
             <IconButton color="primary" onClick={handleSend} disabled={!input.trim() || activeConvo.is_blocked_by_me}

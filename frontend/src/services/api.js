@@ -56,6 +56,8 @@ export const messagesApi = {
   direct:         (otherUserId, body = null)  => request('/api/messages/direct', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId, body }) }),
   deleteConvo:    (id)                        => request(`/api/messages/conversations/${id}`, { method: 'DELETE' }),
   unreadCount:    ()                          => request('/api/messages/unread-count'),
+  typing:         (id)                        => request(`/api/messages/conversations/${id}/typing`, { method: 'POST' }),
+  typingStatus:   (id)                        => request(`/api/messages/conversations/${id}/typing`),
 };
 
 // ─── Bids ──────────────────────────────────────────────────────────────────────

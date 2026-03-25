@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from uuid import UUID
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
+import time
 
 from app.database import get_db
 from app.middleware.auth import get_current_user
@@ -14,6 +15,9 @@ from app.models.booking import Booking, BookingStatus
 from app.models.load import Load
 
 router = APIRouter()
+
+# In-memory typing state: {convo_id: {user_id: timestamp}}
+_typing: dict[str, dict[str, float]] = {}
 
 
 class SendMessageRequest(BaseModel):
@@ -247,6 +251,35 @@ def delete_conversation(
     db.query(Message).filter(Message.conversation_id == convo_id).delete()
     db.delete(convo)
     db.commit()
+
+
+@router.post("/conversations/{convo_id}/typing", status_code=204)
+def set_typing(
+    convo_id: UUID,
+    current_user: User = Depends(get_current_user),
+):
+    cid = str(convo_id)
+    if cid not in _typing:
+        _typing[cid] = {}
+    _typing[cid][str(current_user.id)] = time.time()
+
+
+@router.get("/conversations/{convo_id}/typing")
+def get_typing(
+    convo_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns whether the OTHER participant in the conversation is currently typing."""
+    convo = db.query(Conversation).filter(Conversation.id == convo_id).first()
+    if not convo:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+    other_id = str(convo.broker_id) if str(convo.carrier_id) == str(current_user.id) else str(convo.carrier_id)
+    cid = str(convo_id)
+    ts = _typing.get(cid, {}).get(other_id)
+    is_typing = ts is not None and (time.time() - ts) < 4
+    return {"is_typing": is_typing}
 
 
 @router.get("/unread-count")
