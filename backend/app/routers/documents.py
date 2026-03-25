@@ -42,7 +42,8 @@ def upload_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if not db.query(Load).filter(Load.id == load_id).first():
+    load = db.query(Load).filter(Load.id == load_id).first()
+    if not load:
         raise HTTPException(status_code=404, detail="Load not found")
 
     doc = LoadDocument(
@@ -56,6 +57,28 @@ def upload_document(
         page_count=len(payload.pages),
     )
     db.add(doc)
+    db.flush()
+
+    # Notify all conversations linked to this load with a structured message
+    import json
+    notification = json.dumps({
+        "__type": "doc_upload",
+        "doc_id": str(doc.id),
+        "load_id": str(load_id),
+        "file_name": payload.file_name,
+        "doc_type": payload.doc_type,
+        "page_count": len(payload.pages),
+        "uploader_name": current_user.name,
+        "uploader_role": current_user.role.value,
+    })
+    convos = db.query(Conversation).filter(Conversation.load_id == load_id).all()
+    for convo in convos:
+        db.add(Message(
+            conversation_id=convo.id,
+            sender_id=current_user.id,
+            body=notification,
+        ))
+
     db.commit()
     db.refresh(doc)
     return doc

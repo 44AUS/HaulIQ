@@ -19,7 +19,14 @@ import BlockIcon from '@mui/icons-material/Block';
 import GppBadIcon from '@mui/icons-material/GppBad';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useAuth } from '../../context/AuthContext';
-import { messagesApi, networkApi, locationsApi, blocksApi } from '../../services/api';
+import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
+import DescriptionIcon from '@mui/icons-material/Description';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import Chip from '@mui/material/Chip';
 
 function parseSpecial(body) {
   try {
@@ -97,6 +104,79 @@ function LocationShareCard({ data, isMe }) {
   );
 }
 
+const DOC_TYPE_COLOR = {
+  BOL: 'primary', POD: 'success', receipt: 'warning',
+  rate_confirmation: 'info', other: 'default',
+};
+
+function DocUploadCard({ data, isMe, onView }) {
+  const label = (data.doc_type || 'other').replace('_', ' ').toUpperCase();
+  return (
+    <Paper variant="outlined" sx={{
+      p: 1.5, maxWidth: '75%', ml: isMe ? 'auto' : 0,
+      bgcolor: isMe ? 'primary.dark' : 'background.paper',
+      borderColor: isMe ? 'primary.main' : 'divider', borderRadius: 2,
+    }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+        <DescriptionIcon sx={{ fontSize: 14, color: 'primary.light' }} />
+        <Typography variant="body2" fontWeight={600} color="text.primary">Document Uploaded</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+        <Chip label={label} size="small" color={DOC_TYPE_COLOR[data.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
+        {data.page_count > 1 && <Typography variant="caption" color="text.secondary">{data.page_count} pages</Typography>}
+      </Box>
+      <Typography variant="body2" color="text.primary" sx={{ mb: 1, fontWeight: 500 }} noWrap>{data.file_name}</Typography>
+      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+        {data.uploader_name} · {data.uploader_role}
+      </Typography>
+      <Button variant="contained" size="small" fullWidth startIcon={<DescriptionIcon />} onClick={onView} sx={{ fontSize: 11 }}>
+        View Document
+      </Button>
+    </Paper>
+  );
+}
+
+function DocViewer({ doc, onClose }) {
+  const [page, setPage] = useState(0);
+  if (!doc) return null;
+  return (
+    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.5 }}>
+        <Chip label={(doc.doc_type || 'other').replace('_', ' ').toUpperCase()} size="small"
+          color={DOC_TYPE_COLOR[doc.doc_type] || 'default'} />
+        <Typography variant="subtitle2" fontWeight={600} sx={{ flex: 1 }} noWrap>{doc.file_name}</Typography>
+        {doc.page_count > 1 && (
+          <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>{page + 1} / {doc.page_count}</Typography>
+        )}
+        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ p: 0 }}>
+        <Box sx={{ position: 'relative', bgcolor: '#111' }}>
+          <Box component="img" src={doc.pages[page]}
+            sx={{ width: '100%', display: 'block', maxHeight: '72vh', objectFit: 'contain' }} />
+          {doc.page_count > 1 && (
+            <Box sx={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 1 }}>
+              <IconButton size="small" disabled={page === 0} onClick={() => setPage(p => p - 1)}
+                sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
+                <NavigateBeforeIcon />
+              </IconButton>
+              <IconButton size="small" disabled={page >= doc.page_count - 1} onClick={() => setPage(p => p + 1)}
+                sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
+                <NavigateNextIcon />
+              </IconButton>
+            </Box>
+          )}
+        </Box>
+        <Box sx={{ px: 2, py: 1.25 }}>
+          <Typography variant="caption" color="text.secondary">
+            Uploaded by <strong>{doc.uploader_name}</strong> ({doc.uploader_role})
+          </Typography>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function TypingIndicator() {
   return (
     <>
@@ -139,6 +219,7 @@ export default function Messages() {
   const [networkQuery, setNetworkQuery] = useState('');
   const [otherIsTyping, setOtherIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
+  const [viewerDoc, setViewerDoc] = useState(null);
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
@@ -247,6 +328,14 @@ export default function Messages() {
   const getConvoLabel = (c) => String(c.carrier_id) === String(user?.id) ? (c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`) : (c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`);
   const getLastMsg = (c) => { const msgs = c.messages || []; return msgs[msgs.length - 1] || null; };
   const hasUnread = (c) => (c.messages || []).some(m => m.sender_id !== user?.id && !m.is_read);
+
+  const handleViewDoc = async (data) => {
+    try {
+      const docs = await documentsApi.list(data.load_id);
+      const doc = docs.find(d => String(d.id) === String(data.doc_id));
+      if (doc) setViewerDoc(doc);
+    } catch {}
+  };
 
   const handleTyping = (convoId) => {
     messagesApi.typing(convoId).catch(() => {});
@@ -504,6 +593,14 @@ export default function Messages() {
                 </Box>
               );
 
+              if (special?.__type === 'doc_upload') return (
+                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} />
+                  {isMe && <UserAvatar name={senderName} size={26} />}
+                </Box>
+              );
+
               if (special?.__type === 'location_share') return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                   {!isMe && <UserAvatar name={senderName} size={26} />}
@@ -556,5 +653,6 @@ export default function Messages() {
         </Box>
       )}
     </Paper>
+    {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
   );
 }
