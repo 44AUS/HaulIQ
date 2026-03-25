@@ -36,6 +36,15 @@ function parseSpecial(body) {
   return null;
 }
 
+function getPreview(body) {
+  const obj = parseSpecial(body);
+  if (!obj) return body;
+  if (obj.__type === 'doc_upload') return `📄 Document uploaded: ${obj.file_name}`;
+  if (obj.__type === 'location_share') return `📍 Location shared`;
+  if (obj.__type === 'location_request') return `📍 Location requested`;
+  return body;
+}
+
 function UserAvatar({ name, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   return (
@@ -376,6 +385,7 @@ export default function Messages() {
   const otherParty = getOtherParty(activeConvo);
 
   return (
+    <>
     <Paper
       variant="outlined"
       sx={{
@@ -501,7 +511,7 @@ export default function Messages() {
                         secondary={
                           <Box>
                             {c.load_id && <Typography variant="caption" color="text.disabled" display="block" noWrap>Load #{c.load_id.slice(0, 8)}</Typography>}
-                            {lastMsg && <Typography variant="caption" color="text.secondary" display="block" noWrap>{lastMsg.body}</Typography>}
+                            {lastMsg && <Typography variant="caption" color="text.secondary" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
                           </Box>
                         }
                         secondaryTypographyProps={{ component: 'div' }}
@@ -654,5 +664,6 @@ export default function Messages() {
       )}
     </Paper>
     {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+    </>
   );
 }
