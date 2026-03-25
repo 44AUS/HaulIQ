@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
-import CityAutocomplete from '../../components/shared/CityAutocomplete';
-import { getDrivingMiles } from '../../services/routing';
+import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
+import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
   Box, Typography, Button, Card, Table, TableHead, TableRow, TableCell, TableBody,
   Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -32,18 +32,24 @@ function statusChip(status) {
 function EditModal({ load, onClose, onSaved }) {
   const raw = load._raw;
   const [form, setForm] = useState({
-    origin:    raw.origin || '',
-    dest:      raw.destination || '',
-    miles:     raw.miles || '',
-    deadhead:  raw.deadhead_miles || '',
-    pickup:    raw.pickup_date || '',
-    delivery:  raw.delivery_date || '',
-    equipment: raw.load_type || 'Dry Van',
-    weight:    raw.weight_lbs || '',
-    commodity: raw.commodity || '',
-    dims:      raw.dimensions || '48x102',
-    rate:      raw.rate || '',
-    notes:     raw.notes || '',
+    originCity:      raw.origin || '',
+    destCity:        raw.destination || '',
+    pickupAddress:   raw.pickup_address || '',
+    deliveryAddress: raw.delivery_address || '',
+    pickupLat:       raw.pickup_lat || null,
+    pickupLng:       raw.pickup_lng || null,
+    deliveryLat:     raw.delivery_lat || null,
+    deliveryLng:     raw.delivery_lng || null,
+    miles:           raw.miles || '',
+    deadhead:        raw.deadhead_miles || '',
+    pickup:          raw.pickup_date || '',
+    delivery:        raw.delivery_date || '',
+    equipment:       raw.load_type || 'Dry Van',
+    weight:          raw.weight_lbs || '',
+    commodity:       raw.commodity || '',
+    dims:            raw.dimensions || '48x102',
+    rate:            raw.rate || '',
+    notes:           raw.notes || '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -52,36 +58,67 @@ function EditModal({ load, onClose, onSaved }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   useEffect(() => {
-    const { origin, dest } = form;
-    if (!origin.includes(',') || !dest.includes(',')) return;
     clearTimeout(milesTimer.current);
+    const { pickupLat, pickupLng, deliveryLat, deliveryLng, originCity, destCity } = form;
+    const hasCoords = pickupLat && pickupLng && deliveryLat && deliveryLng;
+    const hasCities = originCity?.includes(',') && destCity?.includes(',');
+    if (!hasCoords && !hasCities) return;
     milesTimer.current = setTimeout(() => {
       setCalcingMiles(true);
-      getDrivingMiles(origin, dest)
+      const promise = hasCoords
+        ? getDrivingMilesByCoords(pickupLat, pickupLng, deliveryLat, deliveryLng)
+        : getDrivingMiles(originCity, destCity);
+      promise
         .then(miles => { if (miles) set('miles', String(miles)); })
         .finally(() => setCalcingMiles(false));
     }, 600);
     return () => clearTimeout(milesTimer.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.origin, form.dest]);
+  }, [form.pickupLat, form.pickupLng, form.deliveryLat, form.deliveryLng, form.originCity, form.destCity]);
+
+  const handlePickup = ({ address, cityState, lat, lng }) => {
+    setForm(f => ({
+      ...f,
+      pickupAddress: address || f.pickupAddress,
+      originCity:    cityState || address || f.originCity,
+      pickupLat:     lat ?? null,
+      pickupLng:     lng ?? null,
+    }));
+  };
+
+  const handleDelivery = ({ address, cityState, lat, lng }) => {
+    setForm(f => ({
+      ...f,
+      deliveryAddress: address || f.deliveryAddress,
+      destCity:        cityState || address || f.destCity,
+      deliveryLat:     lat ?? null,
+      deliveryLng:     lng ?? null,
+    }));
+  };
 
   const handleSave = (e) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
     loadsApi.update(raw.id, {
-      origin:         form.origin,
-      destination:    form.dest,
-      miles:          parseInt(form.miles) || undefined,
-      deadhead_miles: parseInt(form.deadhead) || 0,
-      load_type:      form.equipment,
-      weight_lbs:     form.weight ? parseInt(form.weight) : null,
-      commodity:      form.commodity || null,
-      dimensions:     form.dims,
-      pickup_date:    form.pickup || undefined,
-      delivery_date:  form.delivery || undefined,
-      rate:           parseFloat(form.rate) || undefined,
-      notes:          form.notes || null,
+      origin:           form.originCity,
+      destination:      form.destCity,
+      miles:            parseInt(form.miles) || undefined,
+      deadhead_miles:   parseInt(form.deadhead) || 0,
+      load_type:        form.equipment,
+      weight_lbs:       form.weight ? parseInt(form.weight) : null,
+      commodity:        form.commodity || null,
+      dimensions:       form.dims,
+      pickup_date:      form.pickup || undefined,
+      delivery_date:    form.delivery || undefined,
+      rate:             parseFloat(form.rate) || undefined,
+      notes:            form.notes || null,
+      pickup_address:   form.pickupAddress || null,
+      delivery_address: form.deliveryAddress || null,
+      pickup_lat:       form.pickupLat || null,
+      pickup_lng:       form.pickupLng || null,
+      delivery_lat:     form.deliveryLat || null,
+      delivery_lng:     form.deliveryLng || null,
     })
       .then(() => { onSaved(); onClose(); })
       .catch(err => { setError(err.message); setSaving(false); });
@@ -97,12 +134,20 @@ function EditModal({ load, onClose, onSaved }) {
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Origin *</Typography>
-              <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} required />
+              <AddressAutocomplete
+                label="Pickup Address *"
+                value={form.pickupAddress || form.originCity}
+                onChange={handlePickup}
+                required
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Destination *</Typography>
-              <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} required />
+              <AddressAutocomplete
+                label="Delivery Address *"
+                value={form.deliveryAddress || form.destCity}
+                onChange={handleDelivery}
+                required
+              />
             </Grid>
           </Grid>
 

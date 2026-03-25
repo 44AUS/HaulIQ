@@ -169,9 +169,9 @@ export default function LoadDetail() {
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>Route Details</Typography>
                 <Stack spacing={2}>
                   {[
-                    { label: 'Pickup', value: load.origin, sub: load.pickup, color: 'primary.main' },
-                    { label: 'Delivery', value: load.dest, sub: load.delivery, color: 'error.main' },
-                  ].map(({ label, value, sub, color }) => (
+                    { label: 'Pickup', value: load.origin, fullAddress: load.pickupAddress, sub: load.pickup, color: 'primary.main' },
+                    { label: 'Delivery', value: load.dest, fullAddress: load.deliveryAddress, sub: load.delivery, color: 'error.main' },
+                  ].map(({ label, value, fullAddress, sub, color }) => (
                     <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Box sx={{
                         width: 36, height: 36, borderRadius: 1.5,
@@ -183,8 +183,11 @@ export default function LoadDetail() {
                       </Box>
                       <Box>
                         <Typography variant="caption" color="text.secondary">{label}</Typography>
-                        <Typography variant="body2" fontWeight={600}>{value}</Typography>
-                        <Typography variant="caption" color="text.disabled">{sub}</Typography>
+                        <Typography variant="body2" fontWeight={600}>{fullAddress || value}</Typography>
+                        {fullAddress && fullAddress !== value && (
+                          <Typography variant="caption" color="text.secondary">{value}</Typography>
+                        )}
+                        <Typography variant="caption" color="text.disabled" display="block">{sub}</Typography>
                       </Box>
                     </Box>
                   ))}
@@ -211,7 +214,15 @@ export default function LoadDetail() {
                       <CircularProgress size={24} />
                     </Box>
                   }>
-                    <RouteMap origin={load.origin} dest={load.dest} miles={load._raw?.miles} />
+                    <RouteMap
+                      origin={load.origin}
+                      dest={load.dest}
+                      miles={load._raw?.miles}
+                      pickupLat={load.pickupLat}
+                      pickupLng={load.pickupLng}
+                      deliveryLat={load.deliveryLat}
+                      deliveryLng={load.deliveryLng}
+                    />
                   </Suspense>
                 </Box>
               </CardContent>

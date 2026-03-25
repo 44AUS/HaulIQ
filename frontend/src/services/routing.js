@@ -1,3 +1,7 @@
+/**
+ * Get driving miles between two city/state strings via geocoding + OSRM.
+ * Used when lat/lng coords are not available.
+ */
 async function geocode(query) {
   const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=${encodeURIComponent(query)}`;
   const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
@@ -9,7 +13,15 @@ async function geocode(query) {
 export async function getDrivingMiles(origin, dest) {
   const [o, d] = await Promise.all([geocode(origin), geocode(dest)]);
   if (!o || !d) return null;
-  const url = `https://router.project-osrm.org/route/v1/driving/${o.lon},${o.lat};${d.lon},${d.lat}?overview=false`;
+  return getDrivingMilesByCoords(o.lat, o.lon, d.lat, d.lon);
+}
+
+/**
+ * Get driving miles directly from lat/lng coordinates via OSRM.
+ * Use this when coords are already known (e.g. from Google Places).
+ */
+export async function getDrivingMilesByCoords(lat1, lng1, lat2, lng2) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=false`;
   const res = await fetch(url);
   const data = await res.json();
   if (data.code !== 'Ok' || !data.routes?.length) return null;

@@ -28,6 +28,22 @@ async def lifespan(app: FastAPI):
             conn.commit()
         except Exception:
             conn.rollback()
+    # Add new address columns to loads table if not present
+    address_cols = [
+        ("pickup_address",   "TEXT"),
+        ("delivery_address", "TEXT"),
+        ("pickup_lat",       "FLOAT"),
+        ("pickup_lng",       "FLOAT"),
+        ("delivery_lat",     "FLOAT"),
+        ("delivery_lng",     "FLOAT"),
+    ]
+    with engine.connect() as conn:
+        for col, col_type in address_cols:
+            try:
+                conn.execute(text(f"ALTER TABLE loads ADD COLUMN IF NOT EXISTS {col} {col_type}"))
+                conn.commit()
+            except Exception:
+                conn.rollback()
     yield
 
 

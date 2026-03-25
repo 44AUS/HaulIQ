@@ -12,12 +12,38 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
+// Ensure ISO string is treated as UTC even if it lacks a Z suffix
+function toUtc(iso) {
+  if (!iso) return null;
+  return iso.endsWith('Z') || iso.includes('+') ? new Date(iso) : new Date(iso + 'Z');
+}
+
 function timeAgo(iso) {
   if (!iso) return null;
-  const s = Math.round((Date.now() - new Date(iso)) / 1000);
-  if (s < 60)   return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  return `${Math.floor(s / 3600)}h ago`;
+  const s = Math.round((Date.now() - toUtc(iso)) / 1000);
+  if (s < 5)    return 'just now';
+  if (s < 60)   return `${s} sec ago`;
+  if (s < 120)  return '1 min ago';
+  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
+  if (s < 7200) return '1 hr ago';
+  if (s < 86400) return `${Math.floor(s / 3600)} hrs ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    const addr = data.address || {};
+    const city = addr.city || addr.town || addr.village || addr.county || '';
+    const state = addr.state || '';
+    return city && state ? `${city}, ${state}` : city || state || null;
+  } catch {
+    return null;
+  }
 }
 
 export default function TrackLoad() {
@@ -26,6 +52,7 @@ export default function TrackLoad() {
 
   const [booking, setBooking] = useState(null);
   const [location, setLocation] = useState(null);
+  const [cityLabel, setCityLabel] = useState('');
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
   const [requested, setRequested] = useState(false);
@@ -42,6 +69,16 @@ export default function TrackLoad() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [bookingId]);
+
+  // Reverse-geocode coords to a readable city if the API didn't provide one
+  useEffect(() => {
+    if (!location?.available) return;
+    if (location.city) { setCityLabel(location.city); return; }
+    if (!location.lat || !location.lng) return;
+    reverseGeocode(location.lat, location.lng).then(label => {
+      setCityLabel(label || `${location.lat?.toFixed(4)}, ${location.lng?.toFixed(4)}`);
+    });
+  }, [location]);
 
   const handleLocate = async () => {
     setRequesting(true);
@@ -116,7 +153,7 @@ export default function TrackLoad() {
                   {booking?.carrier_name || 'Carrier'} is currently near
                 </Typography>
                 <Typography variant="h6" fontWeight={700} color="success.main">
-                  {location.city || `${location.lat?.toFixed(4)}, ${location.lng?.toFixed(4)}`}
+                  {cityLabel || '…'}
                 </Typography>
                 {location.updated_at && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
@@ -131,7 +168,7 @@ export default function TrackLoad() {
             {location.lat && location.lng && (
               <Button
                 component={Link}
-                to={`/map/${location.lat}/${location.lng}/${encodeURIComponent(location.city || '')}/${encodeURIComponent(booking?.carrier_name || 'Carrier')}`}
+                to={`/map/${location.lat}/${location.lng}/${encodeURIComponent(cityLabel || '')}/${encodeURIComponent(booking?.carrier_name || 'Carrier')}`}
                 variant="contained"
                 color="success"
                 fullWidth

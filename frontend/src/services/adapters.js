@@ -74,7 +74,13 @@ export function adaptLoad(l) {
     bookNow:      l.book_now !== false,
     notes:        l.notes          || '',
     viewCount:    l.view_count     || 0,
-    _raw:         l, // keep original for when we need the UUID
+    pickupAddress:   l.pickup_address   || null,
+    deliveryAddress: l.delivery_address || null,
+    pickupLat:       l.pickup_lat       ?? null,
+    pickupLng:       l.pickup_lng       ?? null,
+    deliveryLat:     l.delivery_lat     ?? null,
+    deliveryLng:     l.delivery_lng     ?? null,
+    _raw:            l, // keep original for when we need the UUID
   };
 }
 

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadsApi } from '../../services/api';
-import CityAutocomplete from '../../components/shared/CityAutocomplete';
-import { getDrivingMiles } from '../../services/routing';
+import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
+import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
   Box, Typography, Button, Paper, Grid, TextField, FormControl,
   InputLabel, Select, MenuItem, InputAdornment, CircularProgress, Alert,
@@ -17,7 +17,14 @@ const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 export default function PostLoad() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    origin: '', dest: '', pickup: '', delivery: '',
+    // City/state display values (for origin/destination fields)
+    originCity: '', destCity: '',
+    // Full addresses + coords
+    pickupAddress: '', deliveryAddress: '',
+    pickupLat: null, pickupLng: null,
+    deliveryLat: null, deliveryLng: null,
+    // Rest of form
+    pickup: '', delivery: '',
     equipment: 'Dry Van', weight: '', dims: '48x102',
     commodity: '', rate: '', miles: '', deadhead: '', notes: '',
   });
@@ -29,36 +36,71 @@ export default function PostLoad() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  // Auto-calculate miles when both addresses are set
   useEffect(() => {
-    const { origin, dest } = form;
-    if (!origin.includes(',') || !dest.includes(',')) return;
     clearTimeout(milesTimer.current);
+    const { pickupLat, pickupLng, deliveryLat, deliveryLng, originCity, destCity } = form;
+    const hasCoords = pickupLat && pickupLng && deliveryLat && deliveryLng;
+    const hasCities = originCity?.includes(',') && destCity?.includes(',');
+    if (!hasCoords && !hasCities) return;
+
     milesTimer.current = setTimeout(() => {
       setCalcingMiles(true);
-      getDrivingMiles(origin, dest)
+      const promise = hasCoords
+        ? getDrivingMilesByCoords(pickupLat, pickupLng, deliveryLat, deliveryLng)
+        : getDrivingMiles(originCity, destCity);
+      promise
         .then(miles => { if (miles) set('miles', String(miles)); })
         .finally(() => setCalcingMiles(false));
     }, 600);
     return () => clearTimeout(milesTimer.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.origin, form.dest]);
+  }, [form.pickupLat, form.pickupLng, form.deliveryLat, form.deliveryLng, form.originCity, form.destCity]);
+
+  const handlePickup = ({ address, cityState, lat, lng }) => {
+    setForm(f => ({
+      ...f,
+      pickupAddress: address || f.pickupAddress,
+      originCity: cityState || address || f.originCity,
+      pickupLat: lat ?? null,
+      pickupLng: lng ?? null,
+    }));
+  };
+
+  const handleDelivery = ({ address, cityState, lat, lng }) => {
+    setForm(f => ({
+      ...f,
+      deliveryAddress: address || f.deliveryAddress,
+      destCity: cityState || address || f.destCity,
+      deliveryLat: lat ?? null,
+      deliveryLng: lng ?? null,
+    }));
+  };
 
   const handlePost = (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
     loadsApi.post({
-      origin:         form.origin,
-      destination:    form.dest,
-      miles:          parseInt(form.miles) || 0,
-      deadhead_miles: parseInt(form.deadhead) || 0,
-      load_type:      form.equipment,
-      weight_lbs:     form.weight ? parseInt(form.weight) : null,
-      commodity:      form.commodity || null,
-      pickup_date:    form.pickup,
-      delivery_date:  form.delivery,
-      rate:           parseFloat(form.rate),
-      notes:          form.notes || null,
+      origin:           form.originCity,
+      destination:      form.destCity,
+      origin_state:     form.originCity.split(', ')[1] || null,
+      dest_state:       form.destCity.split(', ')[1] || null,
+      miles:            parseInt(form.miles) || 0,
+      deadhead_miles:   parseInt(form.deadhead) || 0,
+      load_type:        form.equipment,
+      weight_lbs:       form.weight ? parseInt(form.weight) : null,
+      commodity:        form.commodity || null,
+      pickup_date:      form.pickup,
+      delivery_date:    form.delivery,
+      rate:             parseFloat(form.rate),
+      notes:            form.notes || null,
+      pickup_address:   form.pickupAddress || null,
+      delivery_address: form.deliveryAddress || null,
+      pickup_lat:       form.pickupLat || null,
+      pickup_lng:       form.pickupLng || null,
+      delivery_lat:     form.deliveryLat || null,
+      delivery_lng:     form.deliveryLng || null,
     })
       .then(() => setPosted(true))
       .catch(err => { setError(err.message); setSubmitting(false); });
@@ -66,14 +108,6 @@ export default function PostLoad() {
 
   if (posted) return (
     <Box sx={{ maxWidth: 480, mx: 'auto', textAlign: 'center', py: 10 }}>
-      <Box sx={{
-        width: 72, height: 72, borderRadius: '50%',
-        bgcolor: 'success.main', opacity: 0.1,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 2,
-        position: 'relative',
-      }}>
-        <CheckCircleOutlineIcon sx={{ fontSize: 48, color: 'success.main', position: 'absolute', opacity: 10 }} />
-      </Box>
       <CheckCircleOutlineIcon sx={{ fontSize: 56, color: 'success.main', mb: 2 }} />
       <Typography variant="h5" fontWeight={700} sx={{ mb: 1 }}>Load Posted!</Typography>
       <Typography variant="body2" color="text.secondary">
@@ -82,7 +116,12 @@ export default function PostLoad() {
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
         <Button variant="outlined" onClick={() => {
           setPosted(false);
-          setForm({ origin: '', dest: '', pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102', commodity: '', rate: '', miles: '', deadhead: '', notes: '' });
+          setForm({
+            originCity: '', destCity: '', pickupAddress: '', deliveryAddress: '',
+            pickupLat: null, pickupLng: null, deliveryLat: null, deliveryLng: null,
+            pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102',
+            commodity: '', rate: '', miles: '', deadhead: '', notes: '',
+          });
         }}>
           Post Another
         </Button>
@@ -106,19 +145,32 @@ export default function PostLoad() {
 
       <Paper variant="outlined" sx={{ p: 3 }}>
         <Box component="form" onSubmit={handlePost} sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Route */}
+
+          {/* Pickup / Delivery full addresses */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Origin City, State *
+              <AddressAutocomplete
+                label="Pickup Address *"
+                placeholder="123 Main St, Chicago, IL"
+                value={form.pickupAddress}
+                onChange={handlePickup}
+                required
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                Full address — hidden from carriers until booked
               </Typography>
-              <CityAutocomplete value={form.origin} onChange={v => set('origin', v)} placeholder="Chicago, IL" required />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Destination City, State *
+              <AddressAutocomplete
+                label="Delivery Address *"
+                placeholder="456 Oak Ave, Atlanta, GA"
+                value={form.deliveryAddress}
+                onChange={handleDelivery}
+                required
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                Full address — hidden from carriers until booked
               </Typography>
-              <CityAutocomplete value={form.dest} onChange={v => set('dest', v)} placeholder="Atlanta, GA" required />
             </Grid>
           </Grid>
 
@@ -196,9 +248,7 @@ export default function PostLoad() {
               fullWidth size="small" label="Rate (All-In)" required
               type="number" value={form.rate} onChange={e => set('rate', e.target.value)}
               placeholder="2500"
-              InputProps={{
-                startAdornment: <InputAdornment position="start">$</InputAdornment>,
-              }}
+              InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
               helperText={
                 form.rate
                   ? `Market context: avg for similar loads is ~$2.80–3.20/mi${parseFloat(form.rate) < 1500 ? ' — May appear in "Worst Loads" feed' : ''}`

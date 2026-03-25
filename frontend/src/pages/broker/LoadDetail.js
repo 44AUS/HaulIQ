@@ -179,7 +179,15 @@ export default function BrokerLoadDetail() {
               <CircularProgress size={24} />
             </Box>
           }>
-            <RouteMap origin={load.origin} dest={load.dest} miles={load._raw?.miles} />
+            <RouteMap
+              origin={load.origin}
+              dest={load.dest}
+              miles={load._raw?.miles}
+              pickupLat={load.pickupLat}
+              pickupLng={load.pickupLng}
+              deliveryLat={load.deliveryLat}
+              deliveryLng={load.deliveryLng}
+            />
           </Suspense>
         </CardContent>
       </Card>

@@ -1,61 +1,48 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl:       require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl:     require('leaflet/dist/images/marker-shadow.png'),
-});
+const LIBRARIES = ['places'];
+const MAP_OPTIONS = {
+  disableDefaultUI: true,
+  zoomControl: true,
+  scrollwheel: true,
+  styles: [
+    { elementType: 'geometry', stylers: [{ color: '#1a1f2e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#9ca3af' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1f2e' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2d3748' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#374151' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+};
 
-const CARRIER_ICON = L.divIcon({
-  className: '',
-  html: `<div style="width:22px;height:22px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(34,197,94,0.25),0 2px 10px rgba(0,0,0,0.5)"></div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 11],
-});
+const CARRIER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="8" fill="#22c55e" stroke="#fff" stroke-width="3"/>
+  <circle cx="12" cy="12" r="12" fill="none" stroke="rgba(34,197,94,0.25)" stroke-width="2"/>
+</svg>`;
 
 export default function MapView() {
   const { lat, lng, city, name } = useParams();
   const navigate = useNavigate();
-  const containerRef = useRef(null);
   const mapRef = useRef(null);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
+    libraries: LIBRARIES,
+  });
 
   const parsedLat = parseFloat(lat);
   const parsedLng = parseFloat(lng);
   const decodedCity = city ? decodeURIComponent(city) : null;
   const decodedName = name ? decodeURIComponent(name) : 'Carrier';
 
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    if (isNaN(parsedLat) || isNaN(parsedLng)) return;
-
-    const map = L.map(containerRef.current, { zoomControl: true, scrollWheelZoom: true });
-    mapRef.current = map;
-
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CARTO',
-      maxZoom: 19,
-    }).addTo(map);
-
-    const marker = L.marker([parsedLat, parsedLng], { icon: CARRIER_ICON }).addTo(map);
-    marker.bindPopup(
-      `<div style="font-family:sans-serif;padding:2px 4px">
-        <strong style="color:#22c55e">${decodedName}</strong>
-        ${decodedCity ? `<br><span style="color:#9ca3af;font-size:12px">${decodedCity}</span>` : ''}
-      </div>`,
-      { className: 'dark-popup' }
-    ).openPopup();
-
-    map.setView([parsedLat, parsedLng], 14);
-
-    return () => { map.remove(); mapRef.current = null; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const onMapLoad = useCallback((map) => { mapRef.current = map; }, []);
 
   if (isNaN(parsedLat) || isNaN(parsedLng)) {
     return (
@@ -64,6 +51,13 @@ export default function MapView() {
       </Box>
     );
   }
+
+  const center = { lat: parsedLat, lng: parsedLng };
+  const carrierIcon = isLoaded ? {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(CARRIER_ICON_SVG)}`,
+    scaledSize: new window.google.maps.Size(24, 24),
+    anchor: new window.google.maps.Point(12, 12),
+  } : undefined;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -77,13 +71,11 @@ export default function MapView() {
       </Button>
 
       <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box
-          sx={{
-            width: 36, height: 36, borderRadius: '50%',
-            bgcolor: 'rgba(46,125,50,0.12)', border: 1, borderColor: 'success.main',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}
-        >
+        <Box sx={{
+          width: 36, height: 36, borderRadius: '50%',
+          bgcolor: 'rgba(46,125,50,0.12)', border: 1, borderColor: 'success.main',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
           <LocationOnIcon sx={{ fontSize: 18, color: 'success.main' }} />
         </Box>
         <Box>
@@ -94,17 +86,22 @@ export default function MapView() {
         </Box>
       </Paper>
 
-      <Box
-        sx={{
-          borderRadius: 2,
-          overflow: 'hidden',
-          border: 1,
-          borderColor: 'divider',
-          height: 'calc(100vh - 220px)',
-          minHeight: 400,
-        }}
-      >
-        <div ref={containerRef} style={{ height: '100%', width: '100%', background: '#0d1117' }} />
+      <Box sx={{ borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider', height: 'calc(100vh - 220px)', minHeight: 400 }}>
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={{ height: '100%', width: '100%' }}
+            center={center}
+            zoom={14}
+            options={MAP_OPTIONS}
+            onLoad={onMapLoad}
+          >
+            <Marker position={center} icon={carrierIcon} title={decodedName} />
+          </GoogleMap>
+        ) : (
+          <Box sx={{ height: '100%', bgcolor: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography color="text.secondary" variant="body2">Loading map…</Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );

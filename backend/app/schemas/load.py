@@ -21,6 +21,12 @@ class LoadCreate(BaseModel):
     delivery_date: date
     rate: float
     notes: Optional[str] = None
+    pickup_address: Optional[str] = None
+    delivery_address: Optional[str] = None
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    delivery_lat: Optional[float] = None
+    delivery_lng: Optional[float] = None
 
     @field_validator("rate")
     @classmethod
@@ -50,6 +56,12 @@ class LoadUpdate(BaseModel):
     delivery_date: Optional[date] = None
     rate: Optional[float] = None
     notes: Optional[str] = None
+    pickup_address: Optional[str] = None
+    delivery_address: Optional[str] = None
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    delivery_lat: Optional[float] = None
+    delivery_lng: Optional[float] = None
 
 
 class LoadOut(BaseModel):
@@ -81,6 +93,12 @@ class LoadOut(BaseModel):
     notes: Optional[str]
     posted_at: datetime
     broker: Optional[BrokerOut] = None
+    pickup_address: Optional[str] = None
+    delivery_address: Optional[str] = None
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    delivery_lat: Optional[float] = None
+    delivery_lng: Optional[float] = None
 
     model_config = {"from_attributes": True}
 

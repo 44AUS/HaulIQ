@@ -45,6 +45,14 @@ class Load(Base):
     miles            = Column(Integer, nullable=False)
     deadhead_miles   = Column(Integer, default=0)
 
+    # Full addresses (hidden from carriers until booked)
+    pickup_address   = Column(Text, nullable=True)
+    delivery_address = Column(Text, nullable=True)
+    pickup_lat       = Column(Float, nullable=True)
+    pickup_lng       = Column(Float, nullable=True)
+    delivery_lat     = Column(Float, nullable=True)
+    delivery_lng     = Column(Float, nullable=True)
+
     # Load details
     load_type        = Column(SAEnum(LoadType), nullable=False, default=LoadType.dry_van)
     weight_lbs       = Column(Integer, nullable=True)

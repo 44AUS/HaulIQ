@@ -22,6 +22,21 @@ PLAN_DAILY_LIMITS = {
 }
 
 
+def _mask_addresses(load: Load, current_user: User, db: Session) -> Load:
+    """Strip full pickup/delivery addresses from loads for carriers who haven't booked."""
+    if current_user.role.value != "carrier":
+        return load
+    from app.models.booking import Booking
+    has_booking = db.query(Booking).filter(
+        Booking.load_id == load.id,
+        Booking.carrier_id == current_user.id,
+    ).first()
+    if not has_booking:
+        load.pickup_address   = None
+        load.delivery_address = None
+    return load
+
+
 def _stamp_saved(loads: list, user_id, db: Session) -> list:
     """Set is_saved=True on any load the carrier has bookmarked."""
     saved_ids = {
@@ -121,6 +136,9 @@ def list_loads(
         enriched = [l for l in enriched if l.profit_score and l.profit_score.value == profit_score]
     _stamp_saved(enriched, current_user.id, db)
 
+    for load in enriched:
+        _mask_addresses(load, current_user, db)
+
     return LoadListOut(
         loads=enriched,
         total=total,
@@ -212,6 +230,7 @@ def get_load(
 
     enriched = _enrich_load(load)
     _stamp_saved([enriched], current_user.id, db)
+    _mask_addresses(enriched, current_user, db)
     return enriched
 
 

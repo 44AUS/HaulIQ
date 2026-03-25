@@ -1,105 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useEffect, useCallback } from 'react';
+import { GoogleMap, DirectionsRenderer, useJsApiLoader } from '@react-google-maps/api';
 
-// Fix leaflet default icon paths (broken in CRA)
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+const LIBRARIES = ['places'];
+const MAP_OPTIONS = {
+  disableDefaultUI: true,
+  zoomControl: true,
+  scrollwheel: false,
+  styles: [
+    { elementType: 'geometry', stylers: [{ color: '#1a1f2e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#9ca3af' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1f2e' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2d3748' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#374151' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+};
 
-const originIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
-});
-const destIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
-});
+const DIR_RENDERER_OPTIONS = {
+  suppressMarkers: false,
+  polylineOptions: { strokeColor: '#22c55e', strokeWeight: 3, strokeOpacity: 0.85 },
+};
 
-function FitBounds({ positions }) {
-  const map = useMap();
-  useEffect(() => {
-    if (positions.length === 2) {
-      const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [40, 40] });
-    }
-  }, [map, positions]);
-  return null;
-}
+/**
+ * Google Maps route map.
+ * Props: origin (string city/state), dest (string city/state), miles (number)
+ * If pickupLat/pickupLng/deliveryLat/deliveryLng provided, uses coords directly.
+ */
+export default function RouteMap({ origin, dest, miles, pickupLat, pickupLng, deliveryLat, deliveryLng }) {
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
+    libraries: LIBRARIES,
+  });
 
-async function geocode(query) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=${encodeURIComponent(query)}`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-  const data = await res.json();
-  if (data.length === 0) return null;
-  return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-}
-
-export default function RouteMap({ origin, dest, miles }) {
-  const [coords, setCoords] = useState(null); // { origin: [lat,lon], dest: [lat,lon] }
-  const [loading, setLoading] = useState(true);
+  const [directions, setDirections] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (!origin || !dest) return;
-    setLoading(true);
-    setError(null);
-    Promise.all([geocode(origin), geocode(dest)])
-      .then(([o, d]) => {
-        if (!o || !d) { setError('Could not locate one or both cities.'); return; }
-        setCoords({ origin: o, dest: d });
-      })
-      .catch(() => setError('Map unavailable.'))
-      .finally(() => setLoading(false));
-  }, [origin, dest]);
+  const fetchRoute = useCallback(() => {
+    if (!isLoaded || (!origin && !pickupLat) || (!dest && !deliveryLat)) return;
 
-  if (loading) return (
-    <div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-brand-500/30 border-t-brand-500 rounded-full animate-spin" />
-    </div>
-  );
+    const svc = new window.google.maps.DirectionsService();
+    const fromArg = pickupLat && pickupLng
+      ? new window.google.maps.LatLng(pickupLat, pickupLng)
+      : origin;
+    const toArg = deliveryLat && deliveryLng
+      ? new window.google.maps.LatLng(deliveryLat, deliveryLng)
+      : dest;
 
-  if (error) return (
-    <div className="h-56 rounded-lg bg-dark-700/50 flex items-center justify-center">
-      <p className="text-dark-400 text-sm">{error}</p>
-    </div>
-  );
+    svc.route(
+      {
+        origin: fromArg,
+        destination: toArg,
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === 'OK') {
+          setDirections(result);
+          setError(null);
+        } else {
+          setError('Route unavailable');
+        }
+      }
+    );
+  }, [isLoaded, origin, dest, pickupLat, pickupLng, deliveryLat, deliveryLng]);
 
-  const positions = [coords.origin, coords.dest];
+  useEffect(() => { fetchRoute(); }, [fetchRoute]);
+
+  if (!isLoaded || (!directions && !error)) {
+    return (
+      <div style={{ height: 220, borderRadius: 8, background: '#1a1f2e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 24, height: 24, border: '2px solid rgba(34,197,94,0.3)', borderTopColor: '#22c55e', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ height: 220, borderRadius: 8, background: '#1a1f2e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ color: '#6b7280', fontSize: 14 }}>{error}</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-dark-400/30" style={{ height: 220 }}>
-      <MapContainer
-        center={coords.origin}
+    <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(75,85,99,0.3)' }}>
+      <GoogleMap
+        mapContainerStyle={{ height: 220, width: '100%' }}
+        options={MAP_OPTIONS}
         zoom={5}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={true}
-        scrollWheelZoom={false}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
-        <FitBounds positions={positions} />
-        <Marker position={coords.origin} icon={originIcon}>
-          <Popup>{origin}</Popup>
-        </Marker>
-        <Marker position={coords.dest} icon={destIcon}>
-          <Popup>{dest}</Popup>
-        </Marker>
-        <Polyline
-          positions={positions}
-          pathOptions={{ color: '#22c55e', weight: 2.5, dashArray: '8 6', opacity: 0.85 }}
-        />
-      </MapContainer>
+        {directions && (
+          <DirectionsRenderer directions={directions} options={DIR_RENDERER_OPTIONS} />
+        )}
+      </GoogleMap>
       {miles && (
-        <div className="bg-dark-800/80 px-3 py-1.5 text-xs text-dark-300 text-center border-t border-dark-400/20">
+        <div style={{ background: 'rgba(26,31,46,0.9)', padding: '6px 12px', fontSize: 12, color: '#9ca3af', textAlign: 'center', borderTop: '1px solid rgba(75,85,99,0.2)' }}>
           ~{parseInt(miles).toLocaleString()} loaded miles
         </div>
       )}
