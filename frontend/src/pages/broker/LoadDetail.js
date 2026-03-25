@@ -6,6 +6,8 @@ import {
   Box, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress,
   Paper, Alert,
 } from '@mui/material';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DocumentPanel from '../../components/documents/DocumentPanel';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PlaceIcon from '@mui/icons-material/Place';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -274,6 +276,17 @@ export default function BrokerLoadDetail() {
               ))}
             </Box>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Documents & Load Messages */}
+      <Card>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+            <DescriptionIcon color="primary" fontSize="small" />
+            <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
+          </Box>
+          <DocumentPanel loadId={id} />
         </CardContent>
       </Card>
     </Box>

@@ -142,6 +142,14 @@ export const locationsApi = {
   get:     (bookingId)       => request(`/api/locations/${bookingId}`),
 };
 
+// ─── Documents ────────────────────────────────────────────────────────────────
+export const documentsApi = {
+  list:     (loadId)           => request(`/api/loads/${loadId}/documents`),
+  upload:   (loadId, data)     => request(`/api/loads/${loadId}/documents`, { method: 'POST', body: JSON.stringify(data) }),
+  delete:   (loadId, docId)    => request(`/api/loads/${loadId}/documents/${docId}`, { method: 'DELETE' }),
+  messages: (loadId)           => request(`/api/loads/${loadId}/messages`),
+};
+
 // ─── Blocks ───────────────────────────────────────────────────────────────────
 export const blocksApi = {
   block:   (userId) => request(`/api/blocks/${userId}`, { method: 'POST' }),

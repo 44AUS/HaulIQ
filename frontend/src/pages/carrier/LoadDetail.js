@@ -22,6 +22,8 @@ import { loadsApi, messagesApi, bidsApi, bookingsApi, instantBookApi } from '../
 import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
+import DocumentPanel from '../../components/documents/DocumentPanel';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
@@ -429,6 +431,17 @@ export default function LoadDetail() {
           </Stack>
         </Grid>
       </Grid>
+
+      {/* Documents & Load Messages */}
+      <Card sx={{ mt: 0 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+            <DescriptionIcon color="primary" fontSize="small" />
+            <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
+          </Box>
+          <DocumentPanel loadId={id} />
+        </CardContent>
+      </Card>
     </Box>
   );
 }
