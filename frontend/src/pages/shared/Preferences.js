@@ -57,7 +57,7 @@ function PrefCard({ icon: Icon, title, desc, path, onClick }) {
 
   if (path) {
     return (
-      <Card variant="outlined" sx={{ height: '100%', transition: 'all 0.15s', '&:hover': { borderColor: 'primary.main', boxShadow: 2 } }}>
+      <Card variant="outlined" sx={{ width: '100%', transition: 'all 0.15s', '&:hover': { borderColor: 'primary.main', boxShadow: 2 } }}>
         <CardActionArea onClick={onClick} sx={{ height: '100%', alignItems: 'flex-start' }}>
           {content}
         </CardActionArea>
@@ -66,7 +66,7 @@ function PrefCard({ icon: Icon, title, desc, path, onClick }) {
   }
 
   return (
-    <Card variant="outlined" sx={{ height: '100%', opacity: 0.6 }}>
+    <Card variant="outlined" sx={{ width: '100%', opacity: 0.6 }}>
       {content}
     </Card>
   );
@@ -87,7 +87,7 @@ export default function Preferences() {
       </Box>
       <Grid container spacing={2}>
         {cards.map(card => (
-          <Grid item xs={12} sm={6} lg={3} key={card.title}>
+          <Grid item xs={12} sm={6} lg={3} key={card.title} sx={{ display: 'flex' }}>
             <PrefCard {...card} onClick={() => card.path && navigate(card.path)} />
           </Grid>
         ))}
