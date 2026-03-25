@@ -30,16 +30,8 @@ const MAP_OPTIONS = {
   zoomControl: false,
   scrollwheel: false,
   styles: [
-    { elementType: 'geometry', stylers: [{ color: '#1a1f2e' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#9ca3af' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1f2e' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2d3748' }] },
-    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#374151' }] },
-    { featureType: 'road.highway', elementType: 'geometry.stroke', stylers: [{ color: '#1f2937' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
     { featureType: 'poi', stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#d1d5db' }] },
   ],
 };
 
@@ -353,242 +345,197 @@ export default function BrokerLoadDetail() {
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   return (
-    <Box sx={{ maxWidth: 760, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* Back button */}
-      <Box sx={{ px: { xs: 0, sm: 0 }, pt: 0, pb: 2 }}>
+      {/* Back button — aligned with content */}
+      <Box sx={{ maxWidth: 760, mx: 'auto', width: '100%', pb: 2 }}>
         <Button startIcon={<ArrowBackIcon />} variant="text" onClick={() => navigate(-1)} sx={{ pl: 0 }}>
           Back to Manage Loads
         </Button>
       </Box>
 
-      {/* ── Hero card: map + stepper + header ── */}
-      <Card sx={{ overflow: 'hidden', mb: 3 }}>
-        {/* Map */}
+      {/* ── Full-bleed map ── */}
+      <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden' }}>
         <LoadHeroMap load={load} carrierLocation={carrierLocation} />
+      </Box>
 
-        <CardContent sx={{ pt: 2.5 }}>
-          {/* Stepper */}
-          <LoadStepper load={load} bookingStatus={bookingStatus} />
+      {/* ── Constrained content ── */}
+      <Box sx={{ maxWidth: 760, mx: 'auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-          <Divider sx={{ my: 2 }} />
+        {/* Load info card: stepper + details */}
+        <Card>
+          <CardContent sx={{ pt: 2.5 }}>
+            <LoadStepper load={load} bookingStatus={bookingStatus} />
+            <Divider sx={{ my: 2 }} />
 
-          {/* Load headline */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: 2.5 }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
-                Load #{load.id.slice(0, 8).toUpperCase()}
-                {booking && <> · Carrier: <strong>{booking.carrier_name}</strong>{booking.carrier_mc ? ` (MC-${booking.carrier_mc})` : ''}</>}
-              </Typography>
-              <Typography variant="h6" fontWeight={700}>
-                {load.origin} → {load.dest}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">{load.type} · {load.miles} mi · Pickup {load.pickup}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-              {load.status === 'active' && <Chip label="Active" color="success" size="small" />}
-              {load.status === 'filled' && <Chip label="Filled" color="info" size="small" />}
-              {load.status === 'expired' && <Chip label="Expired" color="error" size="small" />}
-              {bookingStatus === 'in_transit' && (
-                <Chip
-                  icon={<FiberManualRecordIcon sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />}
-                  label="In Transit"
-                  size="small"
-                  sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
-                />
-              )}
-              {bookingStatus === 'completed' && <Chip label="Delivered" color="success" size="small" variant="outlined" />}
-            </Box>
-          </Box>
-
-          {/* Stats row */}
-          <Grid container spacing={1.5} sx={{ mb: 2 }}>
-            {[
-              { label: 'Rate', value: `$${(load.rate || 0).toLocaleString()}`, icon: <AttachMoneyIcon sx={{ fontSize: 14 }} /> },
-              { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` },
-              { label: 'Views', value: load.viewCount || 0, icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
-              { label: 'Bids', value: bids.length, icon: <GroupIcon sx={{ fontSize: 14 }} /> },
-            ].map(({ label, value, icon }) => (
-              <Grid item xs={6} sm={3} key={label}>
-                <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
-                    {icon}{label}
-                  </Typography>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Pickup / Delivery detail row */}
-          <Grid container spacing={2}>
-            {[
-              {
-                label: 'Pickup',
-                addr: load.pickupAddress || load.origin,
-                city: load.pickupAddress ? load.origin : null,
-                date: load.pickup,
-                color: 'success.main',
-                dot: '#22c55e',
-              },
-              {
-                label: 'Delivery',
-                addr: load.deliveryAddress || load.dest,
-                city: load.deliveryAddress ? load.dest : null,
-                date: load.delivery,
-                color: 'error.main',
-                dot: '#ef4444',
-              },
-            ].map(({ label, addr, city, date, color, dot }) => (
-              <Grid item xs={12} sm={6} key={label}>
-                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
-                  <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">{label}</Typography>
-                    <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr}</Typography>
-                    {city && <Typography variant="caption" color="text.secondary">{city}</Typography>}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                      <CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
-                      <Typography variant="caption" color="text.disabled">{date}</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Carrier location link */}
-          {carrierLocation && (
-            <Box sx={{ mt: 2 }}>
-              <Divider sx={{ mb: 1.5 }} />
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b' }} />
-                  <Typography variant="caption" color="text.secondary">
-                    Last location update · {booking?.carrier_name}
-                  </Typography>
-                </Box>
-                {booking && (
-                  <Button
-                    component={Link}
-                    to={`/broker/track/${booking.id}`}
-                    variant="text"
-                    size="small"
-                    startIcon={<NavigationIcon sx={{ fontSize: 14 }} />}
-                    sx={{ py: 0 }}
-                  >
-                    Full Tracking
-                  </Button>
+            {/* Load headline */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: 2.5 }}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
+                  Load #{load.id.slice(0, 8).toUpperCase()}
+                  {booking && <> · Carrier: <strong>{booking.carrier_name}</strong>{booking.carrier_mc ? ` (MC-${booking.carrier_mc})` : ''}</>}
+                </Typography>
+                <Typography variant="h6" fontWeight={700}>{load.origin} → {load.dest}</Typography>
+                <Typography variant="body2" color="text.secondary">{load.type} · {load.miles} mi · Pickup {load.pickup}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                {load.status === 'active' && <Chip label="Active" color="success" size="small" />}
+                {load.status === 'filled' && <Chip label="Filled" color="info" size="small" />}
+                {load.status === 'expired' && <Chip label="Expired" color="error" size="small" />}
+                {bookingStatus === 'in_transit' && (
+                  <Chip
+                    icon={<FiberManualRecordIcon sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />}
+                    label="In Transit" size="small"
+                    sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
+                  />
                 )}
+                {bookingStatus === 'completed' && <Chip label="Delivered" color="success" size="small" variant="outlined" />}
               </Box>
             </Box>
-          )}
 
-          {load.notes && (
-            <Paper variant="outlined" sx={{ p: 1.5, mt: 2, borderRadius: 2 }}>
-              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>Notes</Typography>
-              <Typography variant="body2">{load.notes}</Typography>
-            </Paper>
-          )}
-        </CardContent>
-      </Card>
+            {/* Stats */}
+            <Grid container spacing={1.5} sx={{ mb: 2 }}>
+              {[
+                { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}`, icon: <AttachMoneyIcon sx={{ fontSize: 14 }} /> },
+                { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` },
+                { label: 'Views',    value: load.viewCount || 0,  icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
+                { label: 'Bids',     value: bids.length,          icon: <GroupIcon sx={{ fontSize: 14 }} /> },
+              ].map(({ label, value, icon }) => (
+                <Grid item xs={6} sm={3} key={label}>
+                  <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
+                      {icon}{label}
+                    </Typography>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
 
-      {/* ── Bids ── */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-            <GroupIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
-            {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
-          </Box>
-
-          {bids.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>No bids yet</Typography>
-          ) : (
-            <Stack spacing={1.5}>
-              {bids.map(bid => (
-                <Paper key={bid.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                        <Typography
-                          component={Link}
-                          to={`/carrier-profile/${bid.carrier_id}`}
-                          variant="body2"
-                          fontWeight={600}
-                          sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
-                        >
-                          {bid.carrier_name || 'Carrier'}
-                        </Typography>
-                        {bid.carrier_mc && <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>}
-                        {bidStatusChip(bid.status)}
+            {/* Pickup / Delivery */}
+            <Grid container spacing={2}>
+              {[
+                { label: 'Pickup',   addr: load.pickupAddress || load.origin,   city: load.pickupAddress ? load.origin : null,   date: load.pickup,   dot: '#22c55e' },
+                { label: 'Delivery', addr: load.deliveryAddress || load.dest,   city: load.deliveryAddress ? load.dest : null,   date: load.delivery, dot: '#ef4444' },
+              ].map(({ label, addr, city, date, dot }) => (
+                <Grid item xs={12} sm={6} key={label}>
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                    <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">{label}</Typography>
+                      <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr}</Typography>
+                      {city && <Typography variant="caption" color="text.secondary" display="block">{city}</Typography>}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
+                        <CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+                        <Typography variant="caption" color="text.disabled">{date}</Typography>
                       </Box>
-                      <Typography variant="h6" fontWeight={700} color="primary.main">
-                        ${(bid.amount || 0).toLocaleString()}
-                      </Typography>
-                      {bid.note && (
-                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
-                          "{bid.note}"
-                        </Typography>
-                      )}
-                      {bid.counter_amount && (
-                        <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
-                          Counter offer: ${bid.counter_amount.toLocaleString()}
-                          {bid.counter_note && ` — ${bid.counter_note}`}
-                        </Typography>
-                      )}
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-                      <Button
-                        component={Link}
-                        to="/broker/messages"
-                        variant="text"
-                        size="small"
-                        sx={{ minWidth: 0, px: 1 }}
-                        title="Message carrier"
-                      >
-                        <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
-                      </Button>
-                      {bid.status === 'pending' && load.status === 'active' && (
-                        <>
-                          <Button
-                            size="small" variant="outlined" color="success"
-                            startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}
-                            onClick={() => handleAcceptBid(bid.id)}
-                            disabled={!!actionLoading}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            size="small" variant="outlined" color="error"
-                            startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}
-                            onClick={() => handleRejectBid(bid.id)}
-                            disabled={!!actionLoading}
-                          >
-                            Reject
-                          </Button>
-                        </>
-                      )}
                     </Box>
                   </Box>
-                </Paper>
+                </Grid>
               ))}
-            </Stack>
-          )}
-        </CardContent>
-      </Card>
+            </Grid>
 
-      {/* ── Documents ── */}
-      <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-            <DescriptionIcon color="primary" fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
-          </Box>
-          <DocumentPanel loadId={id} />
-        </CardContent>
-      </Card>
+            {/* Carrier location link */}
+            {carrierLocation && (
+              <Box sx={{ mt: 2 }}>
+                <Divider sx={{ mb: 1.5 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b' }} />
+                    <Typography variant="caption" color="text.secondary">Last location update · {booking?.carrier_name}</Typography>
+                  </Box>
+                  {booking && (
+                    <Button component={Link} to={`/broker/track/${booking.id}`} variant="text" size="small"
+                      startIcon={<NavigationIcon sx={{ fontSize: 14 }} />} sx={{ py: 0 }}>
+                      Full Tracking
+                    </Button>
+                  )}
+                </Box>
+              </Box>
+            )}
 
+            {load.notes && (
+              <Paper variant="outlined" sx={{ p: 1.5, mt: 2, borderRadius: 2 }}>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>Notes</Typography>
+                <Typography variant="body2">{load.notes}</Typography>
+              </Paper>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Bids */}
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+              <GroupIcon color="primary" />
+              <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
+              {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
+            </Box>
+            {bids.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>No bids yet</Typography>
+            ) : (
+              <Stack spacing={1.5}>
+                {bids.map(bid => (
+                  <Paper key={bid.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
+                          <Typography component={Link} to={`/carrier-profile/${bid.carrier_id}`} variant="body2" fontWeight={600}
+                            sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                            {bid.carrier_name || 'Carrier'}
+                          </Typography>
+                          {bid.carrier_mc && <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>}
+                          {bidStatusChip(bid.status)}
+                        </Box>
+                        <Typography variant="h6" fontWeight={700} color="primary.main">${(bid.amount || 0).toLocaleString()}</Typography>
+                        {bid.note && (
+                          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+                            "{bid.note}"
+                          </Typography>
+                        )}
+                        {bid.counter_amount && (
+                          <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
+                            Counter offer: ${bid.counter_amount.toLocaleString()}{bid.counter_note && ` — ${bid.counter_note}`}
+                          </Typography>
+                        )}
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                        <Button component={Link} to="/broker/messages" variant="text" size="small" sx={{ minWidth: 0, px: 1 }} title="Message carrier">
+                          <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
+                        </Button>
+                        {bid.status === 'pending' && load.status === 'active' && (
+                          <>
+                            <Button size="small" variant="outlined" color="success" onClick={() => handleAcceptBid(bid.id)} disabled={!!actionLoading}
+                              startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}>
+                              Accept
+                            </Button>
+                            <Button size="small" variant="outlined" color="error" onClick={() => handleRejectBid(bid.id)} disabled={!!actionLoading}
+                              startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}>
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </Box>
+                    </Box>
+                  </Paper>
+                ))}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Documents */}
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+              <DescriptionIcon color="primary" fontSize="small" />
+              <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
+            </Box>
+            <DocumentPanel loadId={id} />
+          </CardContent>
+        </Card>
+
+      </Box>
     </Box>
   );
 }
