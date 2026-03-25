@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Truck, Brain, Calculator, Star, TrendingUp, Shield, Zap, ArrowRight,
-  Check, X, ChevronRight, BarChart2, Users, Flame,
-  AlertTriangle, Mail, User,
+  Truck, Brain, Star, TrendingUp, Zap, ArrowRight,
+  Check, X, ChevronRight, BarChart2, Flame,
+  Mail, User,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { waitlistApi } from '../services/api';
