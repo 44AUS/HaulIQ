@@ -75,9 +75,22 @@ function StatusTimeline({ status }) {
 
 function BrokerLoadCard({ load }) {
   const cfg = STATUS_CONFIG[load.status] || STATUS_CONFIG.available;
+  const loadId = load.load_id || load.id;
 
   return (
-    <Card variant="outlined" sx={{ height: '100%' }}>
+    <Card
+      variant="outlined"
+      component={Link}
+      to={`/broker/loads/${loadId}`}
+      sx={{
+        height: '100%',
+        textDecoration: 'none',
+        display: 'block',
+        transition: 'box-shadow 0.15s, border-color 0.15s',
+        '&:hover': { boxShadow: 4, borderColor: 'primary.main' },
+        cursor: 'pointer',
+      }}
+    >
       <CardContent>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
@@ -275,7 +288,7 @@ export default function BrokerLoadsInProgress() {
       ) : (
         <Grid container spacing={2}>
           {loads.map(load => (
-            <Grid item xs={12} md={6} key={load.id}>
+            <Grid item xs={12} sm={6} key={load.id}>
               <BrokerLoadCard load={load} />
             </Grid>
           ))}
