@@ -277,11 +277,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                 fullWidth
                 variant="outlined"
                 size="small"
-                startIcon={
-                  <Badge badgeContent={unread > 0 ? (unread > 9 ? '9+' : unread) : null} color="error">
-                    <ChatIcon fontSize="small" />
-                  </Badge>
-                }
+                startIcon={<ChatIcon fontSize="small" />}
                 onClick={() => handleNav(messagesPath)}
                 sx={{
                   borderRadius: 1.5,
@@ -297,7 +293,14 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                   },
                 }}
               >
-                Message Center
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  Message Center
+                  {unread > 0 && (
+                    <Box sx={{
+                      width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main', flexShrink: 0,
+                    }} />
+                  )}
+                </Box>
               </Button>
             )}
           </Box>
