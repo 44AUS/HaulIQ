@@ -195,7 +195,17 @@ export default function BrokerDashboard() {
                 </TableHead>
                 <TableBody>
                   {recentLoads.map((load, idx) => (
-                    <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                    <TableRow
+                      key={load.id}
+                      component={Link}
+                      to={`/broker/loads/${load.id}`}
+                      sx={{
+                        bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: 'action.selected' },
+                      }}
+                    >
                       <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{load.origin} → {load.dest}</TableCell>
                       <TableCell sx={{ color: 'text.secondary' }}>{load.type}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
