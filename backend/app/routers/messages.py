@@ -46,8 +46,10 @@ class ConversationOut(BaseModel):
     load_id: Optional[UUID]
     carrier_id: UUID
     carrier_name: Optional[str] = None
+    carrier_avatar_url: Optional[str] = None
     broker_id: UUID
     broker_name: Optional[str] = None
+    broker_avatar_url: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     messages: list[MessageOut]
@@ -85,8 +87,10 @@ def _enrich(c: Conversation, db: Session = None, current_user_id=None) -> Conver
         load_id=c.load_id,
         carrier_id=c.carrier_id,
         carrier_name=c.carrier.name if c.carrier else None,
+        carrier_avatar_url=c.carrier.avatar_url if c.carrier else None,
         broker_id=c.broker_id,
         broker_name=c.broker.name if c.broker else None,
+        broker_avatar_url=c.broker.avatar_url if c.broker else None,
         created_at=c.created_at,
         updated_at=c.updated_at,
         messages=[MessageOut.model_validate(m, from_attributes=True) for m in c.messages],

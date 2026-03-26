@@ -45,11 +45,11 @@ function getPreview(body) {
   return body;
 }
 
-function UserAvatar({ name, size = 32 }) {
+function UserAvatar({ name, src, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   return (
-    <Avatar sx={{ width: size, height: size, bgcolor: 'primary.dark', fontSize: size < 30 ? 11 : 13, fontWeight: 700, flexShrink: 0 }}>
-      {initials}
+    <Avatar src={src || undefined} sx={{ width: size, height: size, bgcolor: 'primary.dark', fontSize: size < 30 ? 11 : 13, fontWeight: 700, flexShrink: 0 }}>
+      {!src && initials}
     </Avatar>
   );
 }
@@ -326,12 +326,16 @@ export default function Messages() {
 
   const getOtherParty = (convo) => {
     if (!convo || !user) return null;
-    if (String(convo.carrier_id) === String(user.id)) return { id: convo.broker_id, name: convo.broker_name, role: 'broker' };
-    return { id: convo.carrier_id, name: convo.carrier_name, role: 'carrier' };
+    if (String(convo.carrier_id) === String(user.id)) return { id: convo.broker_id, name: convo.broker_name, role: 'broker', avatar_url: convo.broker_avatar_url };
+    return { id: convo.carrier_id, name: convo.carrier_name, role: 'carrier', avatar_url: convo.carrier_avatar_url };
   };
   const getSenderName = (senderId, convo) => {
     if (!convo) return '';
     return String(senderId) === String(convo.carrier_id) ? convo.carrier_name || 'Carrier' : convo.broker_name || 'Broker';
+  };
+  const getSenderAvatar = (senderId, convo) => {
+    if (!convo) return null;
+    return String(senderId) === String(convo.carrier_id) ? convo.carrier_avatar_url : convo.broker_avatar_url;
   };
   const getProfileLink = (party) => party?.role === 'carrier' ? `/c/${party.id?.slice(0,8)}` : `/broker-profile/${party.id}`;
   const getConvoLabel = (c) => String(c.carrier_id) === String(user?.id) ? (c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`) : (c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`);
@@ -453,7 +457,7 @@ export default function Messages() {
               <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
                 {filteredNetwork.map(contact => (
                   <ListItemButton key={contact.user_id} dense onClick={() => handleStartDirect(contact)} sx={{ borderRadius: 1 }}>
-                    <ListItemAvatar sx={{ minWidth: 36 }}><UserAvatar name={contact.name} size={28} /></ListItemAvatar>
+                    <ListItemAvatar sx={{ minWidth: 36 }}><UserAvatar name={contact.name} src={contact.avatar_url} size={28} /></ListItemAvatar>
                     <ListItemText
                       primary={<Typography variant="caption" fontWeight={600}>{contact.name}</Typography>}
                       secondary={contact.company ? <Typography variant="caption" color="text.secondary">{contact.company}</Typography> : null}
@@ -485,6 +489,7 @@ export default function Messages() {
                 const label = getConvoLabel(c);
                 const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
                 const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+                const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
                 return (
                   <Box
                     key={c.id}
@@ -497,7 +502,7 @@ export default function Messages() {
                     <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
                       <ListItemAvatar sx={{ minWidth: 42 }}>
                         <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/broker-profile/${otherId}`} onClick={e => e.stopPropagation()}>
-                          <UserAvatar name={label} size={34} />
+                          <UserAvatar name={label} src={otherAvatar} size={34} />
                         </Box>
                       </ListItemAvatar>
                       <ListItemText
@@ -540,7 +545,7 @@ export default function Messages() {
             </IconButton>
             {otherParty && (
               <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0 }}>
-                <UserAvatar name={otherParty.name} size={34} />
+                <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={34} />
               </Box>
             )}
             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -591,37 +596,38 @@ export default function Messages() {
               const isMe = msg.sender_id === user?.id;
               const special = parseSpecial(msg.body);
               const senderName = getSenderName(msg.sender_id, activeConvo);
+              const senderAvatar = getSenderAvatar(msg.sender_id, activeConvo);
 
               if (special?.__type === 'location_request') return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                   {sharingLocation === special.booking_id
                     ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><CircularProgress size={13} /><Typography variant="caption" color="text.secondary">Getting your location…</Typography></Box>
                     : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
                   }
-                  {isMe && <UserAvatar name={senderName} size={26} />}
+                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                 </Box>
               );
 
               if (special?.__type === 'doc_upload') return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                   <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} />
-                  {isMe && <UserAvatar name={senderName} size={26} />}
+                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                 </Box>
               );
 
               if (special?.__type === 'location_share') return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                   <LocationShareCard data={special} isMe={isMe} />
-                  {isMe && <UserAvatar name={senderName} size={26} />}
+                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                 </Box>
               );
 
               return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} size={26} />}
+                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                   <Box sx={{ maxWidth: '72%', px: 2, py: 1.25, borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px', bgcolor: isMe ? 'primary.main' : 'action.hover' }}>
                     <Typography variant="body2" sx={{ lineHeight: 1.5, color: isMe ? '#fff' : 'text.primary' }}>{msg.body}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, justifyContent: 'flex-end' }}>
@@ -631,7 +637,7 @@ export default function Messages() {
                       {isMe && (msg.is_read ? <DoneAllIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }} /> : <DoneIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />)}
                     </Box>
                   </Box>
-                  {isMe && <UserAvatar name={senderName} size={26} />}
+                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
                 </Box>
               );
             })}
