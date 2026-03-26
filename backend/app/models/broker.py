@@ -49,6 +49,10 @@ class Broker(Base):
     def phone(self):
         return self.user.phone if self.user else None
 
+    @property
+    def logo(self):
+        return self.user.avatar_url if self.user else None
+
     def __repr__(self):
         return f"<Broker {self.name} ({self.avg_rating}★)>"
 

@@ -33,6 +33,7 @@ class User(Base):
     phone          = Column(String(20), nullable=True)
     mc_number      = Column(String(50), nullable=True)
     dot_number     = Column(String(50), nullable=True)
+    avatar_url     = Column(String, nullable=True)
     is_active      = Column(Boolean, default=True)
     is_verified    = Column(Boolean, default=False)
     created_at     = Column(DateTime, default=datetime.utcnow)

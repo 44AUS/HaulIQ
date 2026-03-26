@@ -35,6 +35,7 @@ class UserUpdate(BaseModel):
     mc_number: Optional[str] = None
     dot_number: Optional[str] = None
     password: Optional[str] = None
+    avatar_url: Optional[str] = None
 
 
 class UserOut(BaseModel):
@@ -47,6 +48,7 @@ class UserOut(BaseModel):
     company: Optional[str]
     mc_number: Optional[str]
     dot_number: Optional[str]
+    avatar_url: Optional[str] = None
     is_active: bool
     created_at: datetime
 

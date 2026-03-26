@@ -17,8 +17,9 @@ function mapUser(apiUser) {
     company: apiUser.company || apiUser.name,
     mc:      apiUser.mc_number  || null,
     dot:     apiUser.dot_number || null,
-    joined:  apiUser.created_at ? apiUser.created_at.split('T')[0] : null,
-    avatar:  apiUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+    joined:     apiUser.created_at ? apiUser.created_at.split('T')[0] : null,
+    avatar:     apiUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
+    avatar_url: apiUser.avatar_url || null,
   };
 }
 

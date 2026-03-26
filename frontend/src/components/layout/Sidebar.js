@@ -225,14 +225,14 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
       <Box sx={{ px: collapsed ? 1 : 2, py: 1.5, flexShrink: 0 }}>
         {collapsed ? (
           <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-            <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.8rem', fontWeight: 700 }}>
-              {user.avatar || user.name?.charAt(0)}
+            <Avatar src={user.avatar_url || undefined} sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: '0.8rem', fontWeight: 700 }}>
+              {!user.avatar_url && (user.avatar || user.name?.charAt(0))}
             </Avatar>
           </Box>
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.85rem', fontWeight: 700 }}>
-              {user.avatar || user.name?.charAt(0)}
+            <Avatar src={user.avatar_url || undefined} sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.85rem', fontWeight: 700 }}>
+              {!user.avatar_url && (user.avatar || user.name?.charAt(0))}
             </Avatar>
             <Box sx={{ minWidth: 0, flexGrow: 1 }}>
               <Typography variant="body2" fontWeight={700} noWrap sx={{ color: '#fff', lineHeight: 1.3 }}>

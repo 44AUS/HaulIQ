@@ -175,8 +175,11 @@ export default function CarrierProfile() {
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.dark', fontSize: 22, fontWeight: 900, flexShrink: 0 }}>
-                {displayName.charAt(0)}
+              <Avatar
+                src={stats?.avatar_url || undefined}
+                sx={{ width: 56, height: 56, bgcolor: 'primary.dark', fontSize: 22, fontWeight: 900, flexShrink: 0 }}
+              >
+                {!stats?.avatar_url && displayName.charAt(0)}
               </Avatar>
               <Box>
                 <Typography variant="h5" fontWeight={700} mb={0.25}>{displayName}</Typography>

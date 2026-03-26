@@ -22,7 +22,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import BlockIcon from '@mui/icons-material/Block';
 import GppBadIcon from '@mui/icons-material/GppBad';
 import { useAuth } from '../../context/AuthContext';
-import { brokersApi, blocksApi } from '../../services/api';
+import { brokersApi, blocksApi, authApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
 
 function StarInput({ value, onChange, size = 24 }) {
@@ -64,16 +64,39 @@ function SubRating({ label, value }) {
   );
 }
 
+function resizeToDataUrl(file, size = 256) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - min) / 2, (img.height - min) / 2, min, min, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = url;
+  });
+}
+
 function BrokerLogoCircle({ logo, name, size = 64, isOwner = false, onUpload }) {
   const ref = useRef();
+  const [uploading, setUploading] = useState(false);
   const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onUpload(ev.target.result);
-    reader.readAsDataURL(file);
+    setUploading(true);
+    try {
+      const dataUrl = await resizeToDataUrl(file, 256);
+      await onUpload(dataUrl);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -85,14 +108,17 @@ function BrokerLogoCircle({ logo, name, size = 64, isOwner = false, onUpload }) 
       {isOwner && (
         <>
           <Box
-            onClick={() => ref.current.click()}
+            onClick={() => !uploading && ref.current.click()}
             sx={{
               position: 'absolute', inset: 0, borderRadius: '50%',
               bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              opacity: 0, '&:hover': { opacity: 1 }, cursor: 'pointer', transition: 'opacity 0.2s',
+              opacity: uploading ? 1 : 0, '&:hover': { opacity: 1 }, cursor: 'pointer', transition: 'opacity 0.2s',
             }}
           >
-            <CameraAltIcon sx={{ color: '#fff', fontSize: 20 }} />
+            {uploading
+              ? <CircularProgress size={18} sx={{ color: '#fff' }} />
+              : <CameraAltIcon sx={{ color: '#fff', fontSize: 20 }} />
+            }
           </Box>
           <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
         </>
@@ -156,8 +182,11 @@ export default function BrokerProfile() {
   };
 
   const isOwner = user?.id === brokerId;
-  const logo = isOwner ? (user?.logo ?? broker?.logo) : broker?.logo;
-  const handleLogoUpload = (dataUrl) => updateUser({ logo: dataUrl });
+  const logo = isOwner ? (user?.avatar_url ?? broker?.logo) : broker?.logo;
+  const handleLogoUpload = async (dataUrl) => {
+    await authApi.update({ avatar_url: dataUrl });
+    updateUser({ avatar_url: dataUrl });
+  };
 
   const [tab, setTab] = useState(0);
   const [showForm, setShowForm] = useState(false);

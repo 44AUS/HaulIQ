@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Box, Typography, Card, CardContent, TextField, Button, Alert,
-  Grid, Divider,
+  Grid, Divider, Avatar, CircularProgress,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -9,11 +9,51 @@ import BusinessIcon from '@mui/icons-material/Business';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PhoneIcon from '@mui/icons-material/Phone';
 import SaveIcon from '@mui/icons-material/Save';
+import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 
+function resizeToDataUrl(file, size = 256) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      // Crop to square from center
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = url;
+  });
+}
+
 export default function Settings() {
   const { user, updateUser } = useAuth();
+  const fileRef = useRef();
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setAvatarUploading(true);
+    try {
+      const dataUrl = await resizeToDataUrl(file, 256);
+      await authApi.update({ avatar_url: dataUrl });
+      updateUser({ avatar_url: dataUrl });
+    } catch (err) {
+      alert('Failed to upload photo.');
+    } finally {
+      setAvatarUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const [profile, setProfile] = useState({
     name:    user?.name    || '',
@@ -88,6 +128,54 @@ export default function Settings() {
           {status.msg}
         </Alert>
       )}
+
+      {/* Avatar upload */}
+      <Card variant="outlined">
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+            <PersonIcon color="primary" />
+            <Typography variant="subtitle1" fontWeight={700}>Profile Photo</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Box sx={{ position: 'relative', flexShrink: 0 }}>
+              <Avatar
+                src={user?.avatar_url || undefined}
+                sx={{ width: 80, height: 80, bgcolor: 'primary.dark', fontSize: 28, fontWeight: 700 }}
+              >
+                {!user?.avatar_url && user?.avatar}
+              </Avatar>
+              <Box
+                onClick={() => !avatarUploading && fileRef.current.click()}
+                sx={{
+                  position: 'absolute', inset: 0, borderRadius: '50%',
+                  bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', opacity: 0,
+                  '&:hover': { opacity: 1 }, cursor: 'pointer', transition: 'opacity 0.2s',
+                }}
+              >
+                {avatarUploading
+                  ? <CircularProgress size={20} sx={{ color: '#fff' }} />
+                  : <CameraAltIcon sx={{ color: '#fff', fontSize: 22 }} />
+                }
+              </Box>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+            </Box>
+            <Box>
+              <Typography variant="body2" fontWeight={600}>
+                {user?.avatar_url ? 'Change photo' : 'Upload a photo'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Hover over the circle and click to upload. JPG, PNG or GIF, max ~5 MB. Will be cropped to a square.
+              </Typography>
+              <Box sx={{ mt: 1 }}>
+                <Button size="small" variant="outlined" onClick={() => fileRef.current.click()} disabled={avatarUploading}>
+                  {avatarUploading ? 'Uploading…' : 'Choose File'}
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Profile form */}
       <Card variant="outlined">

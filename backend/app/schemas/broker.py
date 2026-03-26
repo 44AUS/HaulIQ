@@ -18,6 +18,7 @@ class BrokerOut(BaseModel):
     pay_speed_verified: bool = False
     mc_number: Optional[str] = None
     phone: Optional[str] = None
+    logo: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
