@@ -154,7 +154,7 @@ export default function CarrierProfile() {
       .catch(err => alert(err.message));
   };
 
-  const displayName = stats?.carrier_name || `Carrier ${carrierId.slice(0, 8)}`;
+  const displayName = stats?.company || stats?.name || `Carrier ${carrierId.slice(0, 8)}`;
 
   return (
     <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -172,8 +172,8 @@ export default function CarrierProfile() {
               </Avatar>
               <Box>
                 <Typography variant="h5" fontWeight={700} mb={0.25}>{displayName}</Typography>
-                {stats?.company_name && (
-                  <Typography variant="body2" color="text.secondary">{stats.company_name}</Typography>
+                {stats?.company && stats?.name && stats.company !== stats.name && (
+                  <Typography variant="body2" color="text.secondary">{stats.name}</Typography>
                 )}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5, flexWrap: 'wrap' }}>
                   {stats?.mc_number && (
