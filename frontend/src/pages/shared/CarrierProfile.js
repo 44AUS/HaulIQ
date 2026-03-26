@@ -148,7 +148,7 @@ export default function CarrierProfile() {
   const handleSubmit = () => {
     if (form.rating === 0) return;
     carrierReviewsApi.post({
-      carrier_id: carrierId,
+      carrier_id: stats?.carrier_id || carrierId,
       rating: form.rating,
       communication: form.communication || null,
       on_time_pickup: form.onTimePickup || null,
