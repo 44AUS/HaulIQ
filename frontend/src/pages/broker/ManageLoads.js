@@ -314,6 +314,7 @@ export default function ManageLoads() {
                       <Typography
                         component={Link}
                         to={`/broker/loads/${load._raw.id}`}
+                        state={{ from: 'Manage Loads' }}
                         variant="body2"
                         fontWeight={600}
                         sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}

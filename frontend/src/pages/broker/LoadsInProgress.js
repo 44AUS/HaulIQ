@@ -82,6 +82,7 @@ function BrokerLoadCard({ load }) {
       variant="outlined"
       component={Link}
       to={`/broker/loads/${loadId}`}
+      state={{ from: 'Loads in Progress' }}
       sx={{
         height: '100%',
         textDecoration: 'none',

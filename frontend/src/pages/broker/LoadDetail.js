@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { loadsApi, bidsApi, bookingsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import {
@@ -311,6 +311,8 @@ function bidStatusChip(status) {
 export default function BrokerLoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const fromLabel = state?.from || 'Back';
 
   const [load, setLoad]           = useState(null);
   const [bids, setBids]           = useState([]);
@@ -394,7 +396,7 @@ export default function BrokerLoadDetail() {
               '&:hover': { bgcolor: 'rgba(255,255,255,1)' },
             }}
           >
-            Manage Loads
+            {fromLabel}
           </Button>
         </Box>
       </Box>

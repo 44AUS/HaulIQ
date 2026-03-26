@@ -199,6 +199,7 @@ export default function BrokerDashboard() {
                       key={load.id}
                       component={Link}
                       to={`/broker/loads/${load.id}`}
+                      state={{ from: 'Dashboard' }}
                       sx={{
                         bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit',
                         textDecoration: 'none',
