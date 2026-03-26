@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Truck, Brain, Star, TrendingUp, Zap, ArrowRight,
+  Brain, Star, TrendingUp, Zap, ArrowRight,
   Check, X, ChevronRight, BarChart2, Flame,
   Mail, User,
 } from 'lucide-react';

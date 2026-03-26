@@ -29,7 +29,6 @@ import {
   ShowChart as ActivityIcon,
   Hub as NetworkIcon,
   ListAlt as ListChecksIcon,
-  LocalShipping as TruckIcon,
   Brightness4 as DarkIcon,
   Brightness7 as LightIcon,
   ChatBubbleOutline as ChatIcon,
