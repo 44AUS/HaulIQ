@@ -162,7 +162,8 @@ function BrokerLoadCard({ load }) {
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography
                   component={Link}
-                  to={`/carrier-profile/${load.carrier_id}`}
+                  to={`/c/${load.carrier_id?.slice(0,8)}`}
+                  state={{ carrierId: load.carrier_id }}
                   variant="body2"
                   fontWeight={600}
                   sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}

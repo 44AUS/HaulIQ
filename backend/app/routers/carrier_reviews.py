@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, cast, String as SAString
 from uuid import UUID
 from typing import Optional
 from datetime import datetime
@@ -12,6 +12,20 @@ from app.models.user import User, UserRole
 from app.models.carrier_review import CarrierReview
 
 router = APIRouter()
+
+
+def _resolve_carrier_id(carrier_id_str: str, db: Session) -> UUID:
+    """Accept full UUID or 8-char prefix; return full UUID or raise 404."""
+    try:
+        return UUID(carrier_id_str)
+    except ValueError:
+        pass
+    row = db.query(User.id).filter(
+        cast(User.id, SAString).like(f"{carrier_id_str}%")
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Carrier not found")
+    return row[0]
 
 
 class CarrierReviewCreate(BaseModel):
@@ -109,13 +123,14 @@ def submit_carrier_review(
 
 @router.get("/carrier/{carrier_id}", response_model=list[CarrierReviewOut])
 def get_carrier_reviews(
-    carrier_id: UUID,
+    carrier_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    full_id = _resolve_carrier_id(carrier_id, db)
     return (
         db.query(CarrierReview)
-        .filter(CarrierReview.carrier_id == carrier_id)
+        .filter(CarrierReview.carrier_id == full_id)
         .order_by(desc(CarrierReview.created_at))
         .limit(50)
         .all()
@@ -124,18 +139,19 @@ def get_carrier_reviews(
 
 @router.get("/carrier/{carrier_id}/stats", response_model=CarrierStatsOut)
 def get_carrier_stats(
-    carrier_id: UUID,
+    carrier_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    carrier = db.query(User).filter(User.id == carrier_id).first()
+    full_id = _resolve_carrier_id(carrier_id, db)
+    carrier = db.query(User).filter(User.id == full_id).first()
     if not carrier:
         raise HTTPException(status_code=404, detail="Carrier not found")
 
-    reviews = db.query(CarrierReview).filter(CarrierReview.carrier_id == carrier_id).all()
+    reviews = db.query(CarrierReview).filter(CarrierReview.carrier_id == full_id).all()
     if not reviews:
         return CarrierStatsOut(
-            carrier_id=carrier_id, name=carrier.name,
+            carrier_id=full_id, name=carrier.name,
             company=carrier.company, mc_number=carrier.mc_number,
             phone=carrier.phone,
             avg_rating=0.0, reviews_count=0,
@@ -146,7 +162,7 @@ def get_carrier_stats(
 
     wwa = [r.would_work_again for r in reviews if r.would_work_again is not None]
     return CarrierStatsOut(
-        carrier_id=carrier_id,
+        carrier_id=full_id,
         name=carrier.name,
         company=carrier.company,
         mc_number=carrier.mc_number,

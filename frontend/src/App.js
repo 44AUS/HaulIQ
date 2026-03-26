@@ -163,7 +163,7 @@ function AppRoutes() {
           <DashboardLayout><BrokerProfile /></DashboardLayout>
         </ProtectedRoute>
       } />
-      <Route path="/carrier-profile/:carrierId" element={
+      <Route path="/c/:carrierId" element={
         <ProtectedRoute>
           <DashboardLayout><CarrierProfile /></DashboardLayout>
         </ProtectedRoute>

@@ -525,7 +525,7 @@ export default function BrokerLoadDetail() {
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                            <Typography component={Link} to={`/carrier-profile/${bid.carrier_id}`} variant="body2" fontWeight={600}
+                            <Typography component={Link} to={`/c/${bid.carrier_id?.slice(0,8)}`} state={{ carrierId: bid.carrier_id }} variant="body2" fontWeight={600}
                               sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                               {bid.carrier_name || 'Carrier'}
                             </Typography>

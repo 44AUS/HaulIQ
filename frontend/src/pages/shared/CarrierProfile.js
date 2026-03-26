@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress,
@@ -61,7 +61,11 @@ function MiniBar({ value, max = 5 }) {
 }
 
 export default function CarrierProfile() {
-  const { carrierId } = useParams();
+  const { carrierId: carrierIdParam } = useParams();
+  const { state } = useLocation();
+  // Use full UUID from state when available (e.g. navigated via link);
+  // fall back to URL param which may be a short 8-char prefix.
+  const carrierId = state?.carrierId || carrierIdParam;
   const { user } = useAuth();
 
   const [reviews, setReviews] = useState([]);
