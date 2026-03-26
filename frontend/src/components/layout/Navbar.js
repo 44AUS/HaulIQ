@@ -4,10 +4,11 @@ import { Menu, X, ChevronDown, LogOut, Settings, BarChart2 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext';
 
 const NAV_LINKS = [
-  { label: 'Features',  href: '#features' },
-  { label: 'Pricing',   href: '#pricing' },
+  { label: 'Features',    href: '#features' },
   { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Compare',   href: '#compare' },
+  { label: 'For Carriers', href: '#carriers' },
+  { label: 'For Brokers', href: '#brokers' },
+  { label: 'Pricing',     href: '#pricing' },
 ];
 
 export default function Navbar() {
@@ -29,8 +30,7 @@ export default function Navbar() {
     ? user.role === 'admin' ? '/admin' : `/${user.role}/dashboard`
     : '/login';
 
-  // Scrolled (or logged-in dashboard) style
-  const scrolledBg = 'bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/[0.06]';
+  const scrolledBg = 'bg-[#000000] border-b border-white/[0.08]';
   const transparentBg = 'bg-transparent';
 
   return (
@@ -40,7 +40,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
-            <img src="/urload-logo.png" alt="UrLoad" style={{ height: 30, width: 'auto' }} />
+            <img src="/urload-logo.png" alt="UrLoad" style={{ height: 40, width: 'auto' }} />
           </Link>
 
           {/* Center nav links */}
@@ -99,13 +99,13 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="hidden sm:block px-4 py-2 text-sm font-medium text-white/80 hover:text-white rounded-lg hover:bg-white/[0.06] transition-all"
+                  className="hidden sm:block px-4 py-2 text-sm font-semibold text-white hover:text-white/70 transition-colors"
                 >
                   Login
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-5 py-2 text-sm font-semibold text-white rounded-lg border border-white/25 hover:border-white/50 hover:bg-white/[0.07] transition-all"
+                  className="px-5 py-2 text-sm font-bold text-black bg-white hover:bg-white/90 rounded-lg transition-all"
                 >
                   Get Started
                 </Link>
