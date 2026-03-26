@@ -46,7 +46,7 @@ function WaitlistModal({ onClose }) {
           <>
             <div className="mb-6">
               <h3 className="text-white font-bold text-xl mb-1">Join the Waitlist</h3>
-              <p className="text-dark-300 text-sm">Get early access to HaulIQ and be first in line when we launch.</p>
+              <p className="text-dark-300 text-sm">Get early access to UrLoad and be first in line when we launch.</p>
             </div>
             <div className="flex gap-2 p-1 bg-dark-800 rounded-xl border border-dark-400/40 mb-6">
               {[{ key: 'carrier', label: "🚛 I'm a Carrier" }, { key: 'broker', label: "📋 I'm a Broker" }].map(opt => (
@@ -87,7 +87,7 @@ function WaitlistModal({ onClose }) {
 // ─── APP MOCKUPS ────────────────────────────────────────────────────────────────
 function MockLoadBoard() {
   return (
-    <div style={{ background: '#0d1117', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(34,197,94,0.06)' }}>
+    <div style={{ background: '#0d1117', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(14,165,233,0.06)' }}>
       {/* Window chrome */}
       <div style={{ background: '#161b22', padding: '11px 16px', borderBottom: '1px solid rgba(48,54,61,0.5)', display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -96,13 +96,13 @@ function MockLoadBoard() {
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#28c840' }} />
         </div>
         <div style={{ flex: 1, textAlign: 'center' }}>
-          <span style={{ color: '#6e7681', fontSize: 11 }}>Load Board — HaulIQ</span>
+          <span style={{ color: '#6e7681', fontSize: 11 }}>Load Board — UrLoad</span>
         </div>
       </div>
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, padding: '12px 12px 8px' }}>
         {[
-          { l: "Today's Profit", v: '+$1,247', c: '#22c55e' },
+          { l: "Today's Profit", v: '+$1,247', c: '#0ea5e9' },
           { l: 'Loads Available', v: '142', c: '#e6edf3' },
           { l: 'Avg $/mi', v: '$3.18', c: '#60a5fa' },
         ].map(({ l, v, c }) => (
@@ -122,15 +122,15 @@ function MockLoadBoard() {
         ].map(({ from, to, mi, rate, profit, green }) => (
           <div key={from} style={{ background: '#161b22', borderRadius: 8, padding: '9px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid rgba(48,54,61,0.4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: green ? '#22c55e' : '#eab308', flexShrink: 0 }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: green ? '#0ea5e9' : '#eab308', flexShrink: 0 }} />
               <div>
                 <p style={{ color: '#e6edf3', fontSize: 11, fontWeight: 600, marginBottom: 2 }}>{from} → {to}</p>
                 <p style={{ color: '#6e7681', fontSize: 9 }}>{mi} · {rate}</p>
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ color: green ? '#22c55e' : '#eab308', fontWeight: 700, fontSize: 13 }}>{profit}</p>
-              <p style={{ color: green ? '#22c55e' : '#eab308', fontSize: 8, opacity: 0.65 }}>{green ? 'HIGH PROFIT' : 'FAIR'}</p>
+              <p style={{ color: green ? '#0ea5e9' : '#eab308', fontWeight: 700, fontSize: 13 }}>{profit}</p>
+              <p style={{ color: green ? '#0ea5e9' : '#eab308', fontSize: 8, opacity: 0.65 }}>{green ? 'HIGH PROFIT' : 'FAIR'}</p>
             </div>
           </div>
         ))}
@@ -157,12 +157,12 @@ function MockCalculator() {
           </div>
         ))}
       </div>
-      <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '20px 24px', textAlign: 'center' }}>
+      <div style={{ background: 'rgba(14,165,233,0.08)', border: '1px solid rgba(14,165,233,0.25)', borderRadius: 12, padding: '20px 24px', textAlign: 'center' }}>
         <p style={{ color: '#6e7681', fontSize: 11, marginBottom: 6 }}>Estimated Net Profit</p>
-        <p style={{ color: '#22c55e', fontWeight: 800, fontSize: 38, lineHeight: 1 }}>+$412</p>
+        <p style={{ color: '#0ea5e9', fontWeight: 800, fontSize: 38, lineHeight: 1 }}>+$412</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 10 }}>
-          <span style={{ color: '#4ade80', fontSize: 11 }}>$1.47 / mile</span>
-          <span style={{ color: '#22c55e', fontSize: 11, fontWeight: 700 }}>✓ TAKE THIS LOAD</span>
+          <span style={{ color: '#38bdf8', fontSize: 11 }}>$1.47 / mile</span>
+          <span style={{ color: '#0ea5e9', fontSize: 11, fontWeight: 700 }}>✓ TAKE THIS LOAD</span>
         </div>
       </div>
     </div>
@@ -173,17 +173,17 @@ function MockBrain() {
   return (
     <div style={{ background: '#0d1117', borderRadius: 16, border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', padding: 28 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
-        <div style={{ width: 40, height: 40, background: 'rgba(34,197,94,0.12)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Brain size={20} style={{ color: '#22c55e' }} />
+        <div style={{ width: 40, height: 40, background: 'rgba(14,165,233,0.12)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Brain size={20} style={{ color: '#0ea5e9' }} />
         </div>
         <div>
           <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 15 }}>Earnings Brain</p>
           <p style={{ color: '#6e7681', fontSize: 11 }}>AI insights for your route</p>
         </div>
-        <span style={{ marginLeft: 'auto', background: 'rgba(34,197,94,0.1)', color: '#22c55e', fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 20, border: '1px solid rgba(34,197,94,0.2)' }}>LIVE</span>
+        <span style={{ marginLeft: 'auto', background: 'rgba(14,165,233,0.1)', color: '#0ea5e9', fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 20, border: '1px solid rgba(14,165,233,0.2)' }}>LIVE</span>
       </div>
-      <div style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 10, borderLeft: '3px solid #22c55e' }}>
-        <p style={{ color: '#4ade80', fontSize: 10, fontWeight: 700, marginBottom: 5 }}>💡 TOP RECOMMENDATION</p>
+      <div style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 10, borderLeft: '3px solid #0ea5e9' }}>
+        <p style={{ color: '#38bdf8', fontSize: 10, fontWeight: 700, marginBottom: 5 }}>💡 TOP RECOMMENDATION</p>
         <p style={{ color: '#e6edf3', fontSize: 12, lineHeight: 1.5 }}>Chicago → Detroit is your most profitable lane this week. Rates are 23% above average.</p>
       </div>
       <div style={{ background: '#161b22', borderRadius: 10, padding: '14px 16px', marginBottom: 14, borderLeft: '3px solid #ef4444' }}>
@@ -212,7 +212,7 @@ function MockBrokers() {
     <div style={{ background: '#0d1117', borderRadius: 16, border: '1px solid rgba(48,54,61,0.7)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)', padding: 28 }}>
       <p style={{ color: '#e6edf3', fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Broker Trust Scores</p>
       {[
-        { name: 'RoadMaster Freight', score: 94, pay: '2.1 days avg', reviews: 312, badge: 'TRUSTED', c: '#22c55e' },
+        { name: 'RoadMaster Freight', score: 94, pay: '2.1 days avg', reviews: 312, badge: 'TRUSTED', c: '#0ea5e9' },
         { name: 'Swift Logistics Co.', score: 78, pay: '4.3 days avg', reviews: 187, badge: 'GOOD', c: '#eab308' },
         { name: 'FastFreight LLC', score: 31, pay: '11+ days avg', reviews: 94, badge: 'AVOID', c: '#ef4444' },
       ].map(({ name, score, pay, reviews, badge, c }) => (
@@ -243,8 +243,8 @@ function MockBrokers() {
 function Hero({ onWaitlist }) {
   return (
     <section className="relative overflow-hidden pt-16" style={{ background: '#080c10' }}>
-      <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#22c55e 1px,transparent 1px),linear-gradient(90deg,#22c55e 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 20% 50%, rgba(34,197,94,0.07) 0%, transparent 70%)' }} />
+      <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#0ea5e9 1px,transparent 1px),linear-gradient(90deg,#0ea5e9 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 20% 50%, rgba(14,165,233,0.07) 0%, transparent 70%)' }} />
       <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, #080c10, transparent)' }} />
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28">
@@ -260,7 +260,7 @@ function Hero({ onWaitlist }) {
               Start <span className="gradient-text">Earning Smarter.</span>
             </h1>
             <p className="text-lg text-dark-100 mb-9 leading-relaxed" style={{ maxWidth: 480 }}>
-              HaulIQ is the AI-powered profit engine that tells you exactly which loads to take,
+              UrLoad is the AI-powered profit engine that tells you exactly which loads to take,
               which brokers to avoid, and when to wait for better rates.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 mb-10">
@@ -287,7 +287,7 @@ function Hero({ onWaitlist }) {
 
           {/* Right: App mockup */}
           <div className="relative">
-            <div className="absolute -inset-6 rounded-3xl blur-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.1) 0%, transparent 70%)' }} />
+            <div className="absolute -inset-6 rounded-3xl blur-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.1) 0%, transparent 70%)' }} />
             <div className="relative">
               <MockLoadBoard />
             </div>
@@ -312,7 +312,7 @@ function FeatureRow({ flip = false, light = false, label, title, desc, bullets, 
         <div className={`grid lg:grid-cols-2 gap-14 lg:gap-20 items-center`}>
           {/* Text */}
           <div className={flip ? 'lg:order-2' : ''}>
-            <span style={{ color: '#22c55e', fontWeight: 700, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 14 }}>
+            <span style={{ color: '#0ea5e9', fontWeight: 700, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 14 }}>
               {label}
             </span>
             <h2 style={{ color: headC, fontWeight: 800, fontSize: 42, lineHeight: 1.1, marginBottom: 18 }}>
@@ -324,8 +324,8 @@ function FeatureRow({ flip = false, light = false, label, title, desc, bullets, 
             <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 36 }}>
               {bullets.map(b => (
                 <li key={b} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Check size={11} style={{ color: '#22c55e' }} />
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(14,165,233,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Check size={11} style={{ color: '#0ea5e9' }} />
                   </div>
                   <span style={{ color: bulletC, fontSize: 15 }}>{b}</span>
                 </li>
@@ -401,7 +401,7 @@ function MoreFeatures() {
 // ─── TESTIMONIALS ───────────────────────────────────────────────────────────────
 function Testimonials() {
   const reviews = [
-    { name: 'Marcus T.', role: 'Owner-Operator · 5 years', avatar: 'MT', text: "HaulIQ's Earnings Brain told me to avoid a broker I'd been using for years. Turned out they had 3 delayed payments that week. Saved me $2,400 in headaches.", stars: 5 },
+    { name: 'Marcus T.', role: 'Owner-Operator · 5 years', avatar: 'MT', text: "UrLoad's Earnings Brain told me to avoid a broker I'd been using for years. Turned out they had 3 delayed payments that week. Saved me $2,400 in headaches.", stars: 5 },
     { name: 'Jessica R.', role: 'Fleet Owner · 4 trucks', avatar: 'JR', text: 'The profit calculator alone is worth the Pro subscription. I rejected 6 loads last week that looked good on paper but were actually losing money after fuel and deadhead.', stars: 5 },
     { name: 'Derek L.', role: 'OTR Driver · 3 years', avatar: 'DL', text: "Finally a load board that doesn't just show me loads — it shows me which ones will actually make me money. My weekly net is up 34% since switching.", stars: 5 },
     { name: 'Priya S.', role: 'Freight Broker', avatar: 'PS', text: 'As a broker, the Elite plan gave me access to serious, high-volume carriers. My load acceptance rate went from 31% to 67% in 6 weeks.', stars: 5 },
@@ -412,7 +412,7 @@ function Testimonials() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <span className="badge-green text-sm mb-5 inline-block">Reviews</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Drivers trust HaulIQ.</h2>
+          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Drivers trust UrLoad.</h2>
           <div className="flex items-center justify-center gap-1.5 mt-3">
             {[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />)}
             <span className="text-white font-bold ml-2">4.9</span>
@@ -478,7 +478,7 @@ function Pricing({ onWaitlist }) {
 
   return (
     <section id="pricing" style={{ background: '#080c10', padding: '100px 0' }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom, rgba(34,197,94,0.04) 0%, transparent 60%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom, rgba(14,165,233,0.04) 0%, transparent 60%)' }} />
       <div className="max-w-6xl mx-auto px-6 relative">
         <div className="text-center mb-14">
           <span className="badge-green text-sm mb-5 inline-block">Pricing</span>
@@ -554,12 +554,12 @@ function CTA({ onWaitlist }) {
     <section style={{ background: '#0d1117', padding: '100px 0' }}>
       <div className="max-w-4xl mx-auto px-6 text-center">
         <div className="glass rounded-3xl border border-brand-500/15 p-12 lg:p-16 relative overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(34,197,94,0.07) 0%, transparent 70%)' }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.07) 0%, transparent 70%)' }} />
           <div className="relative">
             <span className="badge-green text-sm mb-6 inline-block">Start Today</span>
             <h2 className="text-4xl lg:text-5xl font-black text-white mb-5">Ready to earn smarter?</h2>
             <p className="text-dark-200 text-lg mb-10 max-w-xl mx-auto">
-              Join 2,100+ drivers already using HaulIQ to maximize their earnings per mile.
+              Join 2,100+ drivers already using UrLoad to maximize their earnings per mile.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={onWaitlist} className="btn-primary text-base px-10 py-4 flex items-center justify-center gap-2 glow-green">
@@ -606,7 +606,7 @@ function Footer() {
           ))}
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-dark-400/40">
-          <p className="text-dark-400 text-sm">© 2026 HaulIQ, Inc. All rights reserved.</p>
+          <p className="text-dark-400 text-sm">© 2026 UrLoad, Inc. All rights reserved.</p>
           <p className="text-dark-400 text-sm mt-2 sm:mt-0">Built for the road. ⚡</p>
         </div>
       </div>

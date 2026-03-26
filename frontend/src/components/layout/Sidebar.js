@@ -193,7 +193,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
           </Box>
           {!collapsed && (
             <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
-              Haul<Box component="span" sx={{ color: 'primary.light' }}>IQ</Box>
+              Ur<Box component="span" sx={{ color: 'primary.light' }}>Load</Box>
             </Typography>
           )}
         </Box>

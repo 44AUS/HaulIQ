@@ -33,22 +33,22 @@
     border: 1px solid rgba(48, 54, 61, 0.4);
   }
   .gradient-text {
-    background: linear-gradient(135deg, #22c55e 0%, #4ade80 50%, #86efac 100%);
+    background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 50%, #7dd3fc 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .glow-green {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3), 0 0 60px rgba(34, 197, 94, 0.1);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.35), 0 0 60px rgba(14, 165, 233, 0.12);
   }
   .glow-green-sm {
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.25);
   }
   .card {
     @apply glass rounded-xl p-6;
   }
   .btn-primary {
-    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-green-500/20 active:scale-95;
+    @apply bg-brand-500 hover:bg-brand-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/20 active:scale-95;
   }
   .btn-secondary {
     @apply bg-dark-500 hover:bg-dark-400 text-white font-medium px-6 py-3 rounded-lg border border-dark-400 hover:border-dark-300 transition-all duration-200 active:scale-95;

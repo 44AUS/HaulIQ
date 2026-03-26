@@ -32,7 +32,7 @@ export default function Navbar() {
               <Truck size={18} className="text-white" />
             </div>
             <span className="text-white font-bold text-xl tracking-tight">
-              Haul<span className="gradient-text">IQ</span>
+              Ur<span className="gradient-text">Load</span>
             </span>
           </Link>
 
