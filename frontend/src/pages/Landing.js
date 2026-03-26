@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Brain, Star, TrendingUp, Zap, ArrowRight,
-  Check, X, ChevronRight, BarChart2, Flame,
+  Check, X, ChevronRight, BarChart2,
   Mail, User,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
@@ -239,59 +239,129 @@ function MockBrokers() {
   );
 }
 
+// ─── APP STORE BADGES ───────────────────────────────────────────────────────────
+function AppBadge({ type }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      background: '#000', border: '1.5px solid rgba(255,255,255,0.2)',
+      borderRadius: 10, padding: '8px 18px', cursor: 'pointer',
+    }}>
+      {type === 'google' ? (
+        <>
+          <svg width="20" height="22" viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.24.99.2l12.6-12.6L13.14 7.7 3.18 23.76z" fill="#EA4335"/><path d="M21.3 10.12l-2.94-1.68-3.6 3.56 3.6 3.56 2.97-1.7c.85-.48.85-1.74-.03-1.74z" fill="#FBBC05"/><path d="M2.17.24A1.56 1.56 0 0 0 2 1v22c0 .27.07.52.18.74l13.41-13.4L2.17.24z" fill="#4285F4"/><path d="M4.17.44L16.77 7 13.14 10.7 3.18.24a1.56 1.56 0 0 1 .99.2z" fill="#34A853"/></svg>
+          <div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, lineHeight: 1 }}>GET IT ON</div>
+            <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>Google Play</div>
+          </div>
+        </>
+      ) : (
+        <>
+          <svg width="18" height="22" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-109.2S70 700.1 70 610.6c0-176.6 114.8-269.9 227.1-269.9 59.9 0 109.6 40.8 147.2 40.8 35.8 0 92.1-43.2 162.8-43.2zm-166.9-180.4c28.3-37 48.9-88.6 48.9-140.2 0-7.1-.6-14.3-1.9-20.1-46.3 1.8-101.5 31.7-134.8 72.2-26.1 30.7-50.6 82.4-50.6 134.9 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.4 1.3 13.6 1.3 41.7 0 93.1-28.4 122.9-67.3z" fill="#fff"/></svg>
+          <div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, lineHeight: 1 }}>Download on the</div>
+            <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>App Store</div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── WAVE TRANSITION ────────────────────────────────────────────────────────────
+function WaveTransition() {
+  const features = ['Smart Load Matching', 'Profit Calculator', 'Broker Ratings', 'Live Tracking', 'Rate Intelligence'];
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx(i => (i + 1) % features.length), 2600);
+    return () => clearInterval(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div style={{ position: 'relative', background: '#060b12', lineHeight: 0 }}>
+      <svg viewBox="0 0 1440 110" style={{ display: 'block', width: '100%' }} preserveAspectRatio="none">
+        <path d="M0,110 C240,30 480,90 720,50 C960,10 1200,75 1440,35 L1440,110 Z" fill="white" />
+      </svg>
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: 'white',
+        borderRadius: 50, padding: '14px 30px',
+        boxShadow: '0 6px 40px rgba(0,0,0,0.14)',
+        display: 'flex', alignItems: 'center', gap: 10,
+        whiteSpace: 'nowrap', lineHeight: 'normal',
+      }}>
+        <span style={{ color: '#111', fontWeight: 700, fontSize: 16 }}>I'm Looking For</span>
+        <span style={{ color: '#0ea5e9', fontWeight: 700, fontSize: 16 }}>{features[idx]}</span>
+        <span style={{ color: '#0ea5e9', fontSize: 11 }}>▼</span>
+      </div>
+    </div>
+  );
+}
+
 // ─── HERO ───────────────────────────────────────────────────────────────────────
 function Hero({ onWaitlist }) {
   return (
-    <section className="relative overflow-hidden pt-16" style={{ background: '#080c10' }}>
-      <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: 'linear-gradient(#0ea5e9 1px,transparent 1px),linear-gradient(90deg,#0ea5e9 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 80% at 20% 50%, rgba(14,165,233,0.07) 0%, transparent 70%)' }} />
-      <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to top, #080c10, transparent)' }} />
+    <section style={{ background: '#060b12', position: 'relative', overflow: 'hidden', paddingTop: 62 }}>
+      {/* Blue radial glow — top left */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse 75% 85% at -5% 45%, rgba(14,165,233,0.32) 0%, rgba(6,182,212,0.14) 38%, transparent 65%)',
+      }} />
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-28">
-        <div className="grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
-          {/* Left: Text */}
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10" style={{ paddingTop: 80, paddingBottom: 100 }}>
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+          {/* ── Left ── */}
           <div>
-            <div className="inline-flex items-center gap-2 badge-green mb-7 text-sm px-4 py-1.5">
-              <Flame size={13} className="text-brand-400" />
-              <span>The Load Board Built for Driver Profit</span>
-            </div>
-            <h1 className="text-5xl lg:text-[3.75rem] font-black text-white leading-[1.05] tracking-tight mb-6">
-              Stop Hauling.<br />
-              Start <span className="gradient-text">Earning Smarter.</span>
+            <h1 style={{ color: '#fff', fontWeight: 900, fontSize: 'clamp(38px, 5vw, 62px)', lineHeight: 1.08, marginBottom: 24, letterSpacing: '-1px' }}>
+              Smart Load Board<br />Built for <span style={{ color: '#0ea5e9' }}>Driver Profit.</span>
             </h1>
-            <p className="text-lg text-dark-100 mb-9 leading-relaxed" style={{ maxWidth: 480 }}>
-              UrLoad is the AI-powered profit engine that tells you exactly which loads to take,
-              which brokers to avoid, and when to wait for better rates.
+            <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 17, lineHeight: 1.8, marginBottom: 14, maxWidth: 500 }}>
+              UrLoad is the AI-powered platform that tells you exactly which loads to take,
+              which brokers to trust, and how to maximize profit on every mile.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 mb-10">
-              <button onClick={onWaitlist} className="btn-primary text-base px-8 py-4 flex items-center justify-center gap-2 glow-green">
-                Join the Waitlist <ArrowRight size={18} />
+            <a href="#features" style={{ color: '#0ea5e9', fontWeight: 600, fontSize: 15, textDecoration: 'none', display: 'inline-block', marginBottom: 36 }}>
+              Show more »
+            </a>
+            <div style={{ marginBottom: 28 }}>
+              <button
+                onClick={onWaitlist}
+                style={{
+                  background: 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)',
+                  color: '#fff', fontWeight: 700, fontSize: 16,
+                  padding: '15px 40px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  boxShadow: '0 8px 32px rgba(14,165,233,0.4)',
+                }}
+              >
+                Get Started
               </button>
-              <Link to="/login" className="btn-secondary text-base px-8 py-4 flex items-center justify-center gap-2">
-                View Live Demo
-              </Link>
             </div>
-            {/* Social proof */}
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-              <div className="flex items-center gap-1.5">
-                {[1,2,3,4,5].map(i => <Star key={i} size={15} className="text-yellow-400 fill-yellow-400" />)}
-                <span className="text-white font-bold text-sm ml-1">4.9</span>
-                <span className="text-dark-300 text-sm">· 1,284 reviews</span>
-              </div>
-              <div className="flex items-center gap-6 text-sm">
-                <div><span className="text-white font-bold">2,100+</span><span className="text-dark-300 ml-1">active drivers</span></div>
-                <div><span className="text-white font-bold">$48K+</span><span className="text-dark-300 ml-1">saved/mo</span></div>
-              </div>
+            {/* Stars */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 18 }}>
+              {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 22, lineHeight: 1 }}>★</span>)}
+              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: 500, marginLeft: 6 }}>400+ five star reviews</span>
+            </div>
+            {/* Badges */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <AppBadge type="google" />
+              <AppBadge type="apple" />
             </div>
           </div>
 
-          {/* Right: App mockup */}
-          <div className="relative">
-            <div className="absolute -inset-6 rounded-3xl blur-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.1) 0%, transparent 70%)' }} />
-            <div className="relative">
+          {/* ── Right: mockup ── */}
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'absolute', inset: -24, borderRadius: 32,
+              background: 'radial-gradient(ellipse at center, rgba(14,165,233,0.12) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'relative' }}>
               <MockLoadBoard />
             </div>
           </div>
+
         </div>
       </div>
     </section>
@@ -620,6 +690,7 @@ export default function Landing() {
     <div style={{ background: '#080c10', minHeight: '100vh' }}>
       <Navbar />
       <Hero onWaitlist={open} />
+      <WaveTransition />
 
       <FeatureRow
         light
