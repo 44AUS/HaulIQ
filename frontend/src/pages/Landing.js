@@ -280,8 +280,8 @@ function WaveTransition() {
 
   return (
     <div style={{ position: 'relative', background: '#060b12', lineHeight: 0 }}>
-      <svg viewBox="0 0 1440 110" style={{ display: 'block', width: '100%' }} preserveAspectRatio="none">
-        <path d="M0,110 C240,30 480,90 720,50 C960,10 1200,75 1440,35 L1440,110 Z" fill="white" />
+      <svg viewBox="0 0 1440 200" style={{ display: 'block', width: '100%' }} preserveAspectRatio="none">
+        <path d="M0,200 C200,60 500,170 720,90 C940,10 1200,140 1440,60 L1440,200 Z" fill="white" />
       </svg>
       <div style={{
         position: 'absolute', top: '50%', left: '50%',
