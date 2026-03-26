@@ -143,7 +143,8 @@ export default function BookingRequests() {
                       </Typography>
                       <Button
                         component={Link}
-                        to={`/carrier-profile/${booking.carrier_id}`}
+                        to={`/c/${booking.carrier_id?.slice(0,8)}`}
+                        state={{ carrierId: booking.carrier_id }}
                         variant="text"
                         size="small"
                         endIcon={<OpenInNewIcon sx={{ fontSize: 12 }} />}
@@ -271,7 +272,8 @@ export default function BookingRequests() {
               </Typography>
               <Button
                 component={Link}
-                to={`/carrier-profile/${reviewModal.item.carrier_id}`}
+                to={`/c/${reviewModal.item.carrier_id?.slice(0,8)}`}
+                state={{ carrierId: reviewModal.item.carrier_id }}
                 variant="text"
                 size="small"
                 endIcon={<OpenInNewIcon sx={{ fontSize: 12 }} />}

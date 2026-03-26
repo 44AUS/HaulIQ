@@ -193,7 +193,8 @@ export default function InstantBookSettings() {
                               {entry.carrier_id ? (
                                 <Typography
                                   component={Link}
-                                  to={`/carrier-profile/${entry.carrier_id}`}
+                                  to={`/c/${entry.carrier_id?.slice(0,8)}`}
+                                  state={{ carrierId: entry.carrier_id }}
                                   variant="body2"
                                   fontWeight={600}
                                   sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
