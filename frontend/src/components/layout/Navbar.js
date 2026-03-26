@@ -27,13 +27,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center group-hover:bg-brand-400 transition-colors glow-green-sm">
-              <Truck size={18} className="text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">
-              Ur<span className="gradient-text">Load</span>
-            </span>
+          <Link to="/" className="flex items-center group">
+            <img src="/urload-logo.png" alt="UrLoad" style={{ height: 32, width: 'auto' }} />
           </Link>
 
           {/* Desktop Nav */}

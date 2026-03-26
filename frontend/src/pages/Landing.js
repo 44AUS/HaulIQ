@@ -583,11 +583,8 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid sm:grid-cols-4 gap-10 mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 bg-brand-500 rounded-lg flex items-center justify-center">
-                <Truck size={15} className="text-white" />
-              </div>
-              <span className="text-white font-bold text-lg">Haul<span className="gradient-text">IQ</span></span>
+            <div className="flex items-center mb-4">
+              <img src="/urload-logo.png" alt="UrLoad" style={{ height: 28, width: 'auto' }} />
             </div>
             <p className="text-dark-300 text-sm leading-relaxed">The driver profit optimization platform. Built by truckers, for truckers.</p>
           </div>

@@ -184,18 +184,11 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
         }}
       >
         {/* Logo */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{
-            width: 34, height: 34, borderRadius: 1.5, bgcolor: 'primary.main',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <TruckIcon sx={{ color: '#fff', fontSize: 18 }} />
-          </Box>
-          {!collapsed && (
-            <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
-              Ur<Box component="span" sx={{ color: 'primary.light' }}>Load</Box>
-            </Typography>
-          )}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {collapsed
+            ? <img src="/urload-logo.png" alt="UrLoad" style={{ height: 28, width: 'auto' }} />
+            : <img src="/urload-logo.png" alt="UrLoad" style={{ height: 30, width: 'auto' }} />
+          }
         </Box>
 
         {/* Right icons: theme + collapse */}
