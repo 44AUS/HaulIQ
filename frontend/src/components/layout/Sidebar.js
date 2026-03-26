@@ -33,6 +33,7 @@ import {
   Brightness7 as LightIcon,
   ChatBubbleOutline as ChatIcon,
   Tune as PreferencesIcon,
+  Folder as FolderIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -51,6 +52,7 @@ const CARRIER_LINKS = [
   { icon: ActivityIcon,  label: 'In Progress',       path: '/carrier/active' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: NetworkIcon,      label: 'Network',        path: '/carrier/network', badge: 'network' },
+  { icon: FolderIcon,       label: 'Documents',      path: '/carrier/documents' },
   { icon: PreferencesIcon,  label: 'Preferences',    path: '/preferences' },
 ];
 
@@ -61,6 +63,7 @@ const BROKER_LINKS = [
   { icon: ActivityIcon,  label: 'In Progress',       path: '/broker/active' },
   { icon: BarChartIcon,  label: 'Analytics',         path: '/broker/analytics' },
   { icon: NetworkIcon,   label: 'Network',           path: '/broker/network' },
+  { icon: FolderIcon,    label: 'Documents',         path: '/broker/documents' },
   { icon: EventIcon,     label: 'Booking Requests',  path: '/broker/bookings', badge: 'bookings' },
   { icon: ZapIcon,          label: 'Instant Book',   path: '/broker/instant-book' },
   { icon: PreferencesIcon,  label: 'Preferences',    path: '/preferences' },

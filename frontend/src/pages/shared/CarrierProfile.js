@@ -74,6 +74,7 @@ export default function CarrierProfile() {
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [networkState, setNetworkState] = useState({ status: 'none', entry_id: null, loading: true });
+  const [canReview, setCanReview] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   const [form, setForm] = useState({
@@ -98,6 +99,9 @@ export default function CarrierProfile() {
       blocksApi.check(carrierId)
         .then(data => setIsBlocked(data.is_blocked))
         .catch(() => {});
+      carrierReviewsApi.canReview(carrierId)
+        .then(data => setCanReview(data.can_review))
+        .catch(() => setCanReview(false));
     } else {
       setNetworkState(prev => ({ ...prev, loading: false }));
     }
@@ -222,7 +226,7 @@ export default function CarrierProfile() {
                       </Button>
                     )
                   )}
-                  {!submitted && (
+                  {canReview && !submitted && (
                     <Button
                       variant="contained"
                       size="small"

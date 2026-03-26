@@ -35,6 +35,22 @@ class DocumentOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class DocumentWithLoadOut(BaseModel):
+    id: UUID
+    load_id: UUID
+    uploader_id: UUID
+    uploader_name: Optional[str]
+    uploader_role: Optional[str]
+    file_name: str
+    doc_type: str
+    page_count: int
+    pages: list[str]
+    created_at: datetime
+    load_origin: Optional[str]
+    load_destination: Optional[str]
+    model_config = {"from_attributes": True}
+
+
 @router.post("/{load_id}/documents", response_model=DocumentOut)
 def upload_document(
     load_id: UUID,

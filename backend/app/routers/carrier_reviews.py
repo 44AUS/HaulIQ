@@ -10,6 +10,8 @@ from app.database import get_db
 from app.middleware.auth import get_current_user, require_broker
 from app.models.user import User, UserRole
 from app.models.carrier_review import CarrierReview
+from app.models.booking import Booking, BookingStatus
+from app.models.load import Load
 
 router = APIRouter()
 
@@ -95,6 +97,19 @@ def submit_carrier_review(
     if not carrier:
         raise HTTPException(status_code=404, detail="Carrier not found")
 
+    completed = (
+        db.query(Booking)
+        .join(Load, Load.id == Booking.load_id)
+        .filter(
+            Booking.carrier_id == payload.carrier_id,
+            Booking.status == BookingStatus.completed,
+            Load.broker_user_id == current_user.id,
+        )
+        .first()
+    )
+    if not completed:
+        raise HTTPException(status_code=403, detail="You can only review carriers you have completed a load with.")
+
     existing = db.query(CarrierReview).filter(
         CarrierReview.carrier_id == payload.carrier_id,
         CarrierReview.broker_id == current_user.id,
@@ -119,6 +134,36 @@ def submit_carrier_review(
     db.commit()
     db.refresh(review)
     return review
+
+
+@router.get("/carrier/{carrier_id}/can-review")
+def can_review_carrier(
+    carrier_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    full_id = _resolve_carrier_id(carrier_id, db)
+    already_reviewed = db.query(CarrierReview).filter(
+        CarrierReview.carrier_id == full_id,
+        CarrierReview.broker_id == current_user.id,
+    ).first()
+    if already_reviewed:
+        return {"can_review": False, "reason": "already_reviewed"}
+
+    completed = (
+        db.query(Booking)
+        .join(Load, Load.id == Booking.load_id)
+        .filter(
+            Booking.carrier_id == full_id,
+            Booking.status == BookingStatus.completed,
+            Load.broker_user_id == current_user.id,
+        )
+        .first()
+    )
+    if not completed:
+        return {"can_review": False, "reason": "no_completed_load"}
+
+    return {"can_review": True, "reason": None}
 
 
 @router.get("/carrier/{carrier_id}", response_model=list[CarrierReviewOut])

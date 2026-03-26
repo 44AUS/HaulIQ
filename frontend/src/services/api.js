@@ -105,9 +105,10 @@ export const subscriptionsApi = {
 
 // ─── Carrier reviews ──────────────────────────────────────────────────────────
 export const carrierReviewsApi = {
-  post:  (data) => request('/api/carrier-reviews', { method: 'POST', body: JSON.stringify(data) }),
-  get:   (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}`),
-  stats: (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/stats`),
+  post:      (data)     => request('/api/carrier-reviews', { method: 'POST', body: JSON.stringify(data) }),
+  get:       (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}`),
+  stats:     (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/stats`),
+  canReview: (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/can-review`),
 };
 
 // ─── Instant Book ─────────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@ export const documentsApi = {
   upload:   (loadId, data)     => request(`/api/loads/${loadId}/documents`, { method: 'POST', body: JSON.stringify(data) }),
   delete:   (loadId, docId)    => request(`/api/loads/${loadId}/documents/${docId}`, { method: 'DELETE' }),
   messages: (loadId)           => request(`/api/loads/${loadId}/messages`),
+  mine:     ()                 => request('/api/documents/my'),
 };
 
 // ─── Blocks ───────────────────────────────────────────────────────────────────
