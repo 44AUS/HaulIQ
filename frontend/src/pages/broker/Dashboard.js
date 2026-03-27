@@ -186,7 +186,7 @@ export default function BrokerDashboard() {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    {['Route', 'Type', 'Rate', 'Pickup', 'Views', 'Bids', 'Status'].map(h => (
+                    {['Load #', 'Route', 'Type', 'Rate', 'Pickup', 'Views', 'Bids', 'Status'].map(h => (
                       <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
                         {h}
                       </TableCell>
@@ -196,6 +196,9 @@ export default function BrokerDashboard() {
                 <TableBody>
                   {recentLoads.map((load, idx) => (
                     <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                      <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.72rem', fontWeight: 700, color: 'text.secondary', whiteSpace: 'nowrap', letterSpacing: '0.04em' }}>
+                        {String(load._raw?.id || load.id).slice(0, 8).toUpperCase()}
+                      </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap' }}>
                         <Typography
                           component={Link}
@@ -206,9 +209,6 @@ export default function BrokerDashboard() {
                           sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
                         >
                           {load.origin} → {load.dest}
-                          <Box component="span" sx={{ ml: 1, fontSize: '0.65rem', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.05em' }}>
-                            {String(load._raw?.id || load.id).slice(0, 8).toUpperCase()}
-                          </Box>
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>{load.type}</TableCell>
