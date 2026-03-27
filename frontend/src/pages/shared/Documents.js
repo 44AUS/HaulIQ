@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Chip, CircularProgress,
-  Avatar, IconButton, Dialog, DialogContent, DialogTitle,
+  Avatar, IconButton, Dialog, DialogContent, DialogTitle, DialogActions,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   TextField, InputAdornment, MenuItem, Select, FormControl, InputLabel,
-  Tooltip,
+  Tooltip, Button,
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -15,6 +15,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../../context/AuthContext';
 import { documentsApi } from '../../services/api';
 
@@ -118,6 +119,8 @@ export default function Documents() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [viewing, setViewing] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // doc to delete
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     documentsApi.mine()
@@ -125,6 +128,18 @@ export default function Documents() {
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleDelete = () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    documentsApi.delete(confirmDelete.load_id, confirmDelete.id)
+      .then(() => {
+        setDocs(prev => prev.filter(d => d.id !== confirmDelete.id));
+        setConfirmDelete(null);
+      })
+      .catch(() => {})
+      .finally(() => setDeleting(false));
+  };
 
   const loadPath = (loadId) =>
     user?.role === 'broker' ? `/broker/loads/${loadId}` : `/carrier/active`;
@@ -248,7 +263,7 @@ export default function Documents() {
                         <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Type</TableCell>
                         <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Pages</TableCell>
                         <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Uploaded</TableCell>
-                        <TableCell sx={{ width: 40 }} />
+                        <TableCell sx={{ width: 72 }} />
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -275,11 +290,18 @@ export default function Documents() {
                             </Typography>
                           </TableCell>
                           <TableCell onClick={e => e.stopPropagation()}>
-                            <Tooltip title="Preview">
-                              <IconButton size="small" onClick={() => setViewing(doc)}>
-                                <OpenInNewIcon sx={{ fontSize: 14 }} />
-                              </IconButton>
-                            </Tooltip>
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <Tooltip title="Preview">
+                                <IconButton size="small" onClick={() => setViewing(doc)}>
+                                  <OpenInNewIcon sx={{ fontSize: 14 }} />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete">
+                                <IconButton size="small" color="error" onClick={() => setConfirmDelete(doc)}>
+                                  <DeleteIcon sx={{ fontSize: 14 }} />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -293,6 +315,28 @@ export default function Documents() {
       )}
 
       <DocViewer doc={viewing} open={!!viewing} onClose={() => setViewing(null)} />
+
+      {/* Delete confirmation */}
+      <Dialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)} maxWidth="xs" fullWidth>
+        <DialogTitle>Delete Document?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Are you sure you want to delete <strong>{confirmDelete?.file_name}</strong>? This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setConfirmDelete(null)} variant="outlined">Cancel</Button>
+          <Button
+            onClick={handleDelete}
+            variant="contained"
+            color="error"
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : <DeleteIcon />}
+          >
+            {deleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
