@@ -60,10 +60,10 @@ function StatusTimeline({ status }) {
             </Box>
             {idx < TIMELINE_STEPS.length - 1 && (
               <Box sx={{
-                flex: 1, height: 1, mx: 0.5, mb: 2,
-                bgcolor: done ? 'success.main' : 'divider',
-                borderTop: done ? 'none' : '1px dashed',
-                borderColor: 'divider',
+                flex: 1, mx: 0.5, mb: 2,
+                height: 0,
+                borderTop: done ? '2px solid' : '2px dashed',
+                borderColor: done ? 'success.main' : 'divider',
               }} />
             )}
           </React.Fragment>
