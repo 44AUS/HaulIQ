@@ -288,13 +288,11 @@ export default function BrokerLoadsInProgress() {
           <Typography variant="body2" color="text.secondary">Post a load to see it tracked here.</Typography>
         </Paper>
       ) : (
-        <Grid container spacing={2}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
           {loads.map(load => (
-            <Grid item xs={12} sm={6} key={load.id}>
-              <BrokerLoadCard load={load} />
-            </Grid>
+            <BrokerLoadCard key={load.id} load={load} />
           ))}
-        </Grid>
+        </Box>
       )}
     </Box>
   );
