@@ -115,7 +115,7 @@ function BrokerLoadCard({ load }) {
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
           <Box>
-            <Typography variant="caption" color="text.secondary">Load #{load.id.slice(0, 8)}</Typography>
+            <Typography variant="caption" color="text.secondary">Load #{load.id.slice(0, 8).toUpperCase()}</Typography>
             <Typography variant="subtitle2" fontWeight={600}>{load.load_type}</Typography>
           </Box>
           <Chip label={cfg.label} size="small" color={cfg.color} />
