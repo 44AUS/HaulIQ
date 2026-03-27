@@ -48,7 +48,24 @@ export default function InstantBookSettings() {
 
   useEffect(() => {
     instantBookApi.allowlist()
-      .then(data => setAllowlist(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        setAllowlist(list);
+        // Pre-load network status for all carriers that have an account
+        list.forEach(entry => {
+          if (!entry.carrier_id) return;
+          networkApi.check(entry.carrier_id)
+            .then(res => {
+              if (res?.status) {
+                setNetworkStatus(prev => ({
+                  ...prev,
+                  [entry.carrier_id]: { status: res.status, entry_id: res.id },
+                }));
+              }
+            })
+            .catch(() => {});
+        });
+      })
       .catch(err => setListError(err.message))
       .finally(() => setListLoading(false));
   }, []);
@@ -204,7 +221,7 @@ export default function InstantBookSettings() {
                               ) : (
                                 <Typography variant="body2" fontWeight={600}>{entry.carrier_name || '—'}</Typography>
                               )}
-                              <Typography variant="caption" color="text.secondary">{entry.carrier_email}</Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: 'block' }}>{entry.carrier_email}</Typography>
                             </Box>
                           </Box>
                         </TableCell>
