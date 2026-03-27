@@ -320,6 +320,9 @@ export default function ManageLoads() {
                         sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
                       >
                         {load.origin} → {load.dest}
+                        <Box component="span" sx={{ ml: 1, fontSize: '0.65rem', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.05em' }}>
+                          {String(load._raw.id).slice(0, 8).toUpperCase()}
+                        </Box>
                       </Typography>
                     </TableCell>
                     <TableCell sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>{load.type}</TableCell>
