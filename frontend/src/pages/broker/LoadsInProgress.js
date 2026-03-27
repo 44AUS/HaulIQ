@@ -350,7 +350,7 @@ function makeMarkerSvg(color) {
   )}`;
 }
 
-function LoadsMap({ loads }) {
+function LoadsMap({ loads, stats }) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
     libraries: LIBRARIES,
@@ -358,77 +358,101 @@ function LoadsMap({ loads }) {
 
   const mapRef = useRef(null);
   const [selectedLoad, setSelectedLoad] = useState(null);
+  // geocodedCoords: { [loadId]: { lat, lng } } for loads without stored coords
+  const [geocodedCoords, setGeocodedCoords] = useState({});
 
-  // Only show non-delivered loads that have coordinates
-  const mappable = loads.filter(
-    l => l.status !== 'delivered' && l.pickup_lat && l.pickup_lng
-  );
+  const activLoads = loads.filter(l => l.status !== 'delivered');
+
+  // Geocode any loads that are missing pickup coordinates
+  useEffect(() => {
+    if (!isLoaded) return;
+    const geocoder = new window.google.maps.Geocoder();
+    activLoads.forEach(load => {
+      if (load.pickup_lat && load.pickup_lng) return;
+      if (!load.origin) return;
+      geocoder.geocode({ address: load.origin + ', USA' }, (results, status) => {
+        if (status === 'OK' && results[0]) {
+          const loc = results[0].geometry.location;
+          setGeocodedCoords(prev => ({
+            ...prev,
+            [load.id]: { lat: loc.lat(), lng: loc.lng() },
+          }));
+        }
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, loads]);
+
+  const getCoords = (load) => {
+    if (load.pickup_lat && load.pickup_lng) {
+      return { lat: Number(load.pickup_lat), lng: Number(load.pickup_lng) };
+    }
+    return geocodedCoords[load.id] || null;
+  };
+
+  const mappable = activLoads.filter(l => getCoords(l) !== null);
+
+  const fitBounds = useCallback((map) => {
+    if (mappable.length === 0) return;
+    const bounds = new window.google.maps.LatLngBounds();
+    mappable.forEach(l => bounds.extend(getCoords(l)));
+    map.fitBounds(bounds, 60);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mappable]);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
-    if (mappable.length === 0) return;
-    const bounds = new window.google.maps.LatLngBounds();
-    mappable.forEach(l => bounds.extend({ lat: Number(l.pickup_lat), lng: Number(l.pickup_lng) }));
-    map.fitBounds(bounds, 80);
-  }, [mappable]); // eslint-disable-line react-hooks/exhaustive-deps
+    fitBounds(map);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const unmapped = loads.filter(l => l.status !== 'delivered' && (!l.pickup_lat || !l.pickup_lng));
+  // Re-fit when geocoding resolves new coords
+  useEffect(() => {
+    if (mapRef.current && mappable.length > 0) fitBounds(mapRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geocodedCoords]);
 
   if (!isLoaded) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 520, bgcolor: '#1a1f2e', borderRadius: 2 }}>
-        <CircularProgress size={32} sx={{ color: '#22c55e' }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 600 }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box>
-      {/* Legend */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 1.5, flexWrap: 'wrap' }}>
-        {[
-          { color: MARKER_COLOR.in_transit, label: 'In Transit' },
-          { color: MARKER_COLOR.booked,     label: 'Booked' },
-          { color: MARKER_COLOR.available,  label: 'No Carrier' },
-        ].map(({ color, label }) => (
-          <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color, border: '2px solid white', boxShadow: 1 }} />
-            <Typography variant="caption" color="text.secondary">{label}</Typography>
-          </Box>
-        ))}
-        <Typography variant="caption" color="text.disabled" sx={{ ml: 'auto' }}>
-          Showing pickup locations · Completed loads hidden
-        </Typography>
-      </Box>
+    <Box sx={{ position: 'relative' }}>
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: 'calc(100vh - 200px)', minHeight: 500 }}
+        zoom={5}
+        center={{ lat: 39.5, lng: -98.35 }}
+        options={MAP_OPTIONS}
+        onLoad={onMapLoad}
+      >
+        {mappable.map(load => {
+          const pos = getCoords(load);
+          const color = MARKER_COLOR[load.status] || MARKER_COLOR.available;
+          const icon = {
+            url: makeMarkerSvg(color),
+            scaledSize: new window.google.maps.Size(28, 36),
+            anchor: new window.google.maps.Point(14, 36),
+          };
+          return (
+            <Marker
+              key={load.id}
+              position={pos}
+              icon={icon}
+              onClick={() => setSelectedLoad(load)}
+            />
+          );
+        })}
 
-      <Box sx={{ border: '1px solid', borderColor: 'divider' }}>
-        <GoogleMap
-          mapContainerStyle={{ width: '100%', height: 640 }}
-          zoom={5}
-          center={{ lat: 39.5, lng: -98.35 }}
-          options={MAP_OPTIONS}
-          onLoad={onMapLoad}
-        >
-          {mappable.map(load => {
-            const color = MARKER_COLOR[load.status] || MARKER_COLOR.available;
-            const icon = {
-              url: makeMarkerSvg(color),
-              scaledSize: new window.google.maps.Size(28, 36),
-              anchor: new window.google.maps.Point(14, 36),
-            };
-            return (
-              <Marker
-                key={load.id}
-                position={{ lat: Number(load.pickup_lat), lng: Number(load.pickup_lng) }}
-                icon={icon}
-                onClick={() => setSelectedLoad(load)}
-              />
-            );
-          })}
-
-          {selectedLoad && (
+        {selectedLoad && (() => {
+          const pos = getCoords(selectedLoad);
+          if (!pos) return null;
+          return (
             <InfoWindow
-              position={{ lat: Number(selectedLoad.pickup_lat), lng: Number(selectedLoad.pickup_lng) }}
+              position={pos}
               onCloseClick={() => setSelectedLoad(null)}
               options={{ pixelOffset: new window.google.maps.Size(0, -36) }}
             >
@@ -459,17 +483,43 @@ function LoadsMap({ loads }) {
                 </Button>
               </Box>
             </InfoWindow>
-          )}
-        </GoogleMap>
+          );
+        })()}
+      </GoogleMap>
+
+      {/* Stats overlay — top-left corner */}
+      <Box sx={{
+        position: 'absolute', top: 12, left: 12, zIndex: 10,
+        display: 'flex', flexDirection: 'column', gap: 1,
+      }}>
+        {stats.map(({ label, value, color, dot }) => (
+          <Paper key={label} elevation={3} sx={{ px: 1.5, py: 0.75, display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
+            <Box>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1 }}>{label}</Typography>
+              <Typography variant="subtitle1" fontWeight={800} sx={{ color, lineHeight: 1.2 }}>{value}</Typography>
+            </Box>
+          </Paper>
+        ))}
       </Box>
 
-      {unmapped.length > 0 && (
-        <Paper variant="outlined" sx={{ mt: 1.5, px: 2, py: 1 }}>
-          <Typography variant="caption" color="text.secondary">
-            {unmapped.length} load{unmapped.length > 1 ? 's' : ''} not shown — no pickup coordinates saved.
-          </Typography>
+      {/* Legend overlay — bottom-left */}
+      <Box sx={{
+        position: 'absolute', bottom: 12, left: 12, zIndex: 10,
+      }}>
+        <Paper elevation={3} sx={{ px: 1.5, py: 1, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          {[
+            { color: MARKER_COLOR.in_transit, label: 'In Transit' },
+            { color: MARKER_COLOR.booked,     label: 'Booked' },
+            { color: MARKER_COLOR.available,  label: 'No Carrier' },
+          ].map(({ color, label }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, border: '2px solid white', boxShadow: 1 }} />
+              <Typography variant="caption">{label}</Typography>
+            </Box>
+          ))}
         </Paper>
-      )}
+      </Box>
     </Box>
   );
 }
@@ -490,6 +540,12 @@ export default function BrokerLoadsInProgress() {
   const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
   const bookedCount    = loads.filter(l => l.status === 'booked').length;
   const availableCount = loads.filter(l => l.status === 'available').length;
+
+  const mapStats = [
+    { label: 'In Transit', value: inTransitCount, color: 'success.main', dot: MARKER_COLOR.in_transit },
+    { label: 'Booked',     value: bookedCount,    color: 'info.main',    dot: MARKER_COLOR.booked },
+    { label: 'No Carrier', value: availableCount, color: 'text.secondary', dot: MARKER_COLOR.available },
+  ];
 
   return (
     <Box>
@@ -519,23 +575,25 @@ export default function BrokerLoadsInProgress() {
         </ToggleButtonGroup>
       </Box>
 
-      {/* Stats */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        {[
-          { label: 'In Transit', value: inTransitCount, color: 'success.main' },
-          { label: 'Booked',     value: bookedCount,    color: 'info.main' },
-          { label: 'Not Filled', value: availableCount, color: 'text.secondary' },
-        ].map(({ label, value, color }) => (
-          <Grid item xs={4} key={label}>
-            <Card>
-              <CardContent sx={{ textAlign: 'center', py: '16px !important' }}>
-                <Typography variant="caption" color="text.secondary">{label}</Typography>
-                <Typography variant="h4" fontWeight={800} sx={{ color }}>{value}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {/* Stats — hidden on map view (shown as overlay instead) */}
+      {view !== 'map' && (
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {[
+            { label: 'In Transit', value: inTransitCount, color: 'success.main' },
+            { label: 'Booked',     value: bookedCount,    color: 'info.main' },
+            { label: 'Not Filled', value: availableCount, color: 'text.secondary' },
+          ].map(({ label, value, color }) => (
+            <Grid item xs={4} key={label}>
+              <Card>
+                <CardContent sx={{ textAlign: 'center', py: '16px !important' }}>
+                  <Typography variant="caption" color="text.secondary">{label}</Typography>
+                  <Typography variant="h4" fontWeight={800} sx={{ color }}>{value}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       {/* Content */}
       {loading ? (
@@ -553,7 +611,7 @@ export default function BrokerLoadsInProgress() {
       ) : view === 'table' ? (
         <TableView loads={loads.filter(l => l.status !== 'delivered')} />
       ) : (
-        <LoadsMap loads={loads} />
+        <LoadsMap loads={loads} stats={mapStats} />
       )}
     </Box>
   );
