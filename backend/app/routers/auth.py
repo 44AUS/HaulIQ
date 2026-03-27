@@ -13,6 +13,36 @@ from app.config import get_settings
 router = APIRouter()
 
 
+@router.post("/create-admin", response_model=Token, status_code=status.HTTP_201_CREATED,
+             summary="Bootstrap an admin account (requires ADMIN_SECRET env var)")
+def create_admin(
+    email: str,
+    password: str,
+    name: str,
+    secret: str,
+    db: Session = Depends(get_db),
+):
+    settings = get_settings()
+    if not settings.admin_secret or secret != settings.admin_secret:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid admin secret.")
+    existing = db.query(User).filter(User.email == email.lower()).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered.")
+    user = User(
+        email=email.lower(),
+        password_hash=hash_password(password),
+        name=name,
+        role=UserRole.admin,
+        plan=UserPlan.admin,
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    token = create_access_token({"sub": str(user.id), "role": user.role.value})
+    return Token(access_token=token, user=UserOut.model_validate(user))
+
+
 @router.get("/verify-mc/{mc_number}", summary="Check if an MC number is valid and not already registered")
 async def verify_mc_number(mc_number: str, db: Session = Depends(get_db)):
     settings = get_settings()

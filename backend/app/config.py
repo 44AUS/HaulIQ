@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # FMCSA API key for MC number verification (free at ai.fmcsa.dot.gov)
     fmcsa_api_key: str = ""
 
+    # Admin bootstrap secret — set this in Railway env vars, then POST to /api/auth/create-admin
+    admin_secret: str = ""
+
     @field_validator("database_url", mode="before")
     @classmethod
     def fix_postgres_url(cls, v: str) -> str:
