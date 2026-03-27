@@ -13,7 +13,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
 
-function ConnectionRow({ conn, onRemove, profilePath }) {
+function ConnectionRow({ conn, onRemove, profilePath, userRole }) {
   const [anchor, setAnchor] = useState(null);
 
   return (
@@ -23,6 +23,7 @@ function ConnectionRow({ conn, onRemove, profilePath }) {
         <Avatar
           component={Link}
           to={profilePath(conn)}
+          src={conn.avatar_url || undefined}
           sx={{ width: 56, height: 56, fontWeight: 700, fontSize: '1.2rem', textDecoration: 'none', flexShrink: 0, bgcolor: 'primary.dark' }}
         >
           {conn.name?.charAt(0) || '?'}
@@ -54,7 +55,7 @@ function ConnectionRow({ conn, onRemove, profilePath }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
           <Button
             component={Link}
-            to={`/${conn.role === 'broker' ? 'broker' : 'carrier'}/messages?userId=${conn.user_id}`}
+            to={`/${userRole}/messages?userId=${conn.user_id}`}
             variant="outlined"
             size="small"
             startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 15 }} />}
@@ -95,6 +96,7 @@ function PendingRow({ req, onRespond, responding, profilePath }) {
         <Avatar
           component={Link}
           to={profilePath(req)}
+          src={req.avatar_url || undefined}
           sx={{ width: 56, height: 56, fontWeight: 700, fontSize: '1.2rem', textDecoration: 'none', flexShrink: 0, bgcolor: 'warning.dark' }}
         >
           {req.name?.charAt(0) || '?'}
@@ -245,6 +247,7 @@ export default function Network() {
               conn={conn}
               onRemove={handleRemove}
               profilePath={profilePath}
+              userRole={user?.role}
             />
           ))
         )}
