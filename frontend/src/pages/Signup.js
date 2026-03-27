@@ -107,7 +107,7 @@ export default function Signup() {
           {/* Step 0: Role */}
           {step === 0 && (
             <div>
-              <h1 className="text-2xl font-bold text-white mb-1">Join HaulIQ</h1>
+              <h1 className="text-2xl font-bold text-white mb-1">Join Urload</h1>
               <p className="text-dark-200 text-sm mb-7">What best describes you?</p>
               <div className="grid gap-4">
                 {[
@@ -271,7 +271,7 @@ export default function Signup() {
               <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5 glow-green">
                 <Check size={28} className="text-brand-400" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-2">Welcome to HaulIQ!</h1>
+              <h1 className="text-2xl font-bold text-white mb-2">Welcome to Urload!</h1>
               <p className="text-dark-200 text-sm mb-8">Your account is ready. Let's start making you more money.</p>
               <button
                 onClick={() => navigate(role === 'broker' ? '/broker/dashboard' : '/carrier/dashboard')}

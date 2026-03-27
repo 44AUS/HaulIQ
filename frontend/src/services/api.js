@@ -2,7 +2,7 @@ const BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────
 async function request(path, options = {}) {
-  const token = localStorage.getItem('hauliq_token');
+  const token = localStorage.getItem('urload_token');
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 

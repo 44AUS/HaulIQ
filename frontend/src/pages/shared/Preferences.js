@@ -82,7 +82,7 @@ export default function Preferences() {
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>Preferences</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Customize your HaulIQ experience and manage app-wide settings.
+          Customize your Urload experience and manage app-wide settings.
         </Typography>
       </Box>
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>

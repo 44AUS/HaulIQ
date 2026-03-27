@@ -253,8 +253,8 @@ const EMPTY_CHART = CHART_DATES.map(date => ({ date, trials: 0, pro: 0, enterpri
 function ReferralsTab({ user, currentSub }) {
   const [copied, setCopied] = useState(false);
   const hasActivePlan = currentSub && currentSub.status !== 'cancelled';
-  const referralCode = `HAULIQ-${(user?.name || 'USER').split(' ')[0].toUpperCase().slice(0, 6)}`;
-  const referralLink = `https://hauliq.app/join?ref=${referralCode}`;
+  const referralCode = `URLOAD-${(user?.name || 'USER').split(' ')[0].toUpperCase().slice(0, 6)}`;
+  const referralLink = `https://urload.app/join?ref=${referralCode}`;
   const maskedLink = '•'.repeat(36);
 
   const copy = () => {
@@ -271,16 +271,16 @@ function ReferralsTab({ user, currentSub }) {
       <Card variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5 }}>
-            HaulIQ Referral Program
+            Urload Referral Program
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
-            Get HaulIQ to credit you! If a broker or carrier uses your referral link to sign up, they'll enjoy{' '}
+            Get Urload to credit you! If a broker or carrier uses your referral link to sign up, they'll enjoy{' '}
             <strong>10% off their first billing cycle</strong> when they subscribe. And you'll get a{' '}
             <strong>10% credit</strong> towards your next billing cycle!
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
             For example, if someone using your referral link subscribes to the annual Enterprise plan, they will
-            get a 10% discount and HaulIQ will apply a credit towards your subscription automatically.
+            get a 10% discount and Urload will apply a credit towards your subscription automatically.
           </Typography>
 
           <Divider sx={{ my: 2 }} />
@@ -334,7 +334,7 @@ function ReferralsTab({ user, currentSub }) {
                   bgcolor: 'error.main', display: 'inline-block',
                 }}>
                   <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                    You must have an active HaulIQ subscription to unlock your referral link
+                    You must have an active Urload subscription to unlock your referral link
                   </Typography>
                 </Box>
               </>
@@ -576,8 +576,8 @@ export default function Billing() {
               {currentSub && currentSub.status !== 'cancelled' && currentKey !== 'starter' && (
                 <Alert severity="warning" sx={{ maxWidth: 500 }}>
                   To cancel your plan, contact{' '}
-                  <Typography component="a" href="mailto:support@hauliq.app" variant="body2" color="warning.main">
-                    support@hauliq.app
+                  <Typography component="a" href="mailto:support@urload.app" variant="body2" color="warning.main">
+                    support@urload.app
                   </Typography>
                   . You'll keep access until the end of your billing period.
                 </Alert>

@@ -9,22 +9,22 @@ export function useThemeMode() {
 }
 
 export function AppThemeProvider({ children }) {
-  const [mode, setMode] = useState(() => localStorage.getItem('hauliq_theme') || 'light');
-  const [brandColor, setBrandColorState] = useState(() => localStorage.getItem('hauliq_brand_color') || null);
+  const [mode, setMode] = useState(() => localStorage.getItem('urload_theme') || 'light');
+  const [brandColor, setBrandColorState] = useState(() => localStorage.getItem('urload_brand_color') || null);
 
   const toggleTheme = () => {
     setMode(prev => {
       const next = prev === 'light' ? 'dark' : 'light';
-      localStorage.setItem('hauliq_theme', next);
+      localStorage.setItem('urload_theme', next);
       return next;
     });
   };
 
   const setBrandColor = (color) => {
     if (color) {
-      localStorage.setItem('hauliq_brand_color', color);
+      localStorage.setItem('urload_brand_color', color);
     } else {
-      localStorage.removeItem('hauliq_brand_color');
+      localStorage.removeItem('urload_brand_color');
     }
     setBrandColorState(color || null);
   };

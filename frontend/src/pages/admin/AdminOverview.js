@@ -30,7 +30,7 @@ export default function AdminOverview() {
             <ShieldIcon color="primary" />
             <Typography variant="h5" fontWeight={700}>Admin Dashboard</Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary">Platform overview — HaulIQ Operations</Typography>
+          <Typography variant="body2" color="text.secondary">Platform overview — Urload Operations</Typography>
         </Box>
         <Chip label="All systems operational" color="success" size="small" />
       </Box>

@@ -166,7 +166,7 @@ export default function InstantBookSettings() {
       {/* Tabs */}
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tab icon={<GroupIcon sx={{ fontSize: 16 }} />} iconPosition="start" label={`Allowlist (${allowlist.length})`} />
-        <Tab icon={<SearchIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Add from HaulIQ" />
+        <Tab icon={<SearchIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Add from Urload" />
         <Tab icon={<UploadIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Upload a list" />
       </Tabs>
 
@@ -302,7 +302,7 @@ export default function InstantBookSettings() {
           {query.length >= 2 && !searching && searchResults.length === 0 && (
             <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">No carriers found matching "{query}"</Typography>
-              <Typography variant="caption" color="text.disabled">Only registered HaulIQ carriers appear here</Typography>
+              <Typography variant="caption" color="text.disabled">Only registered Urload carriers appear here</Typography>
             </Paper>
           )}
 
@@ -348,7 +348,7 @@ export default function InstantBookSettings() {
           {query.length < 2 && (
             <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
               <SearchIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body2" color="text.secondary">Search HaulIQ's carrier database</Typography>
+              <Typography variant="body2" color="text.secondary">Search Urload's carrier database</Typography>
               <Typography variant="caption" color="text.disabled">
                 Type at least 2 characters to search by name, email, or MC number
               </Typography>

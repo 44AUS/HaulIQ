@@ -20,7 +20,7 @@ export default function Login() {
     e.preventDefault();
     const ok = await login(email, password, role || undefined);
     if (ok) {
-      const resolvedRole = role || (email === 'admin@hauliq.com' ? 'admin' : 'carrier');
+      const resolvedRole = role || (email === 'admin@urload.app' ? 'admin' : 'carrier');
       if (resolvedRole === ROLES.ADMIN) navigate('/admin');
       else if (resolvedRole === ROLES.BROKER) navigate('/broker/dashboard');
       else navigate('/carrier/dashboard');
@@ -30,7 +30,7 @@ export default function Login() {
   const DEMO_ACCOUNTS = [
     { role: 'carrier', email: 'carrier@demo.com', pw: 'demo1234', label: 'Carrier Demo' },
     { role: 'broker',  email: 'broker@demo.com',  pw: 'demo1234', label: 'Broker Demo' },
-    { role: 'admin',   email: 'admin@hauliq.com', pw: 'demo1234', label: 'Admin Demo' },
+    { role: 'admin',   email: 'admin@urload.app', pw: 'demo1234', label: 'Admin Demo' },
   ];
 
   const fillDemo = (acc) => {
@@ -50,12 +50,12 @@ export default function Login() {
           <div className="w-9 h-9 bg-brand-500 rounded-lg flex items-center justify-center glow-green-sm">
             <Truck size={20} className="text-white" />
           </div>
-          <span className="text-white font-bold text-2xl">Haul<span className="gradient-text">IQ</span></span>
+          <span className="text-white font-bold text-2xl">Ur<span className="gradient-text">load</span></span>
         </Link>
 
         <div className="glass rounded-2xl border border-dark-400/40 p-8">
           <h1 className="text-2xl font-bold text-white mb-1">Welcome back</h1>
-          <p className="text-dark-200 text-sm mb-6">Sign in to your HaulIQ account</p>
+          <p className="text-dark-200 text-sm mb-6">Sign in to your Urload account</p>
 
           {/* Role selector */}
           <div className="grid grid-cols-3 gap-2 mb-6">

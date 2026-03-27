@@ -30,11 +30,11 @@ export function AuthProvider({ children }) {
 
   // ── Rehydrate session from localStorage on mount ─────────────────────────
   useEffect(() => {
-    const token = localStorage.getItem('hauliq_token');
+    const token = localStorage.getItem('urload_token');
     if (!token) { setLoading(false); return; }
     authApi.me()
       .then(u => setUser(mapUser(u)))
-      .catch(() => localStorage.removeItem('hauliq_token'))
+      .catch(() => localStorage.removeItem('urload_token'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -44,11 +44,11 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const data = await authApi.login({ email, password });
-      localStorage.setItem('hauliq_token', data.access_token);
+      localStorage.setItem('urload_token', data.access_token);
       const u = mapUser(data.user);
       if (role && u.role !== role) {
         setError('This account is not registered as a ' + role);
-        localStorage.removeItem('hauliq_token');
+        localStorage.removeItem('urload_token');
         setLoading(false);
         return false;
       }
@@ -78,7 +78,7 @@ export function AuthProvider({ children }) {
         dot_number: formData.dot      || null,
       };
       const data = await authApi.signup(payload);
-      localStorage.setItem('hauliq_token', data.access_token);
+      localStorage.setItem('urload_token', data.access_token);
       const u = mapUser(data.user);
       setUser(u);
       setLoading(false);
@@ -92,7 +92,7 @@ export function AuthProvider({ children }) {
 
   // ── Logout ────────────────────────────────────────────────────────────────
   const logout = useCallback(() => {
-    localStorage.removeItem('hauliq_token');
+    localStorage.removeItem('urload_token');
     setUser(null);
   }, []);
 

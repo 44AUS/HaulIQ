@@ -84,7 +84,7 @@ export default function AdminWaitlist() {
             <PeopleIcon color="primary" />
             <Typography variant="h5" fontWeight={700}>Waitlist</Typography>
           </Box>
-          <Typography variant="body2" color="text.secondary">People waiting for early access to HaulIQ</Typography>
+          <Typography variant="body2" color="text.secondary">People waiting for early access to Urload</Typography>
         </Box>
         <Button
           variant="outlined"
