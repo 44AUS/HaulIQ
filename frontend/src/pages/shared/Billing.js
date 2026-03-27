@@ -12,7 +12,6 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import { useAuth } from '../../context/AuthContext';
-import { subscriptionsApi } from '../../services/api';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
