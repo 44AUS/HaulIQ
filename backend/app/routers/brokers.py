@@ -42,16 +42,23 @@ def flagged_brokers(
     )
 
 
+def _get_broker_or_404(broker_id: UUID, db: Session) -> Broker:
+    """Look up broker by broker-profile ID or user ID."""
+    broker = db.query(Broker).filter(
+        (Broker.id == broker_id) | (Broker.user_id == broker_id)
+    ).first()
+    if not broker:
+        raise HTTPException(status_code=404, detail="Broker not found")
+    return broker
+
+
 @router.get("/{broker_id}", response_model=BrokerOut, summary="Get broker profile")
 def get_broker(
     broker_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    broker = db.query(Broker).filter(Broker.id == broker_id).first()
-    if not broker:
-        raise HTTPException(status_code=404, detail="Broker not found")
-    return broker
+    return _get_broker_or_404(broker_id, db)
 
 
 @router.get("/{broker_id}/reviews", response_model=list[BrokerReviewOut],
@@ -61,9 +68,10 @@ def get_broker_reviews(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    broker = _get_broker_or_404(broker_id, db)
     return (
         db.query(BrokerReview)
-        .filter(BrokerReview.broker_id == broker_id)
+        .filter(BrokerReview.broker_id == broker.id)
         .order_by(desc(BrokerReview.created_at))
         .limit(50)
         .all()
