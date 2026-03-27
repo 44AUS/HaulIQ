@@ -15,6 +15,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PersonIcon from '@mui/icons-material/Person';
 
 function statusChip(status) {
   const map = {
@@ -192,63 +194,134 @@ export default function BookingRequests() {
             </Paper>
           ) : activeBids.map(bid => {
             const diff = bid.load_rate ? ((bid.amount - bid.load_rate) / bid.load_rate * 100) : null;
-            const isAbove = diff >= 0;
+            const isAbove = diff !== null && diff >= 0;
+            const loadNum = String(bid.load_id).slice(0, 8).toUpperCase();
             return (
-              <Card key={bid.id} variant="outlined">
-                <CardContent>
+              <Card key={bid.id} variant="outlined" sx={{ overflow: 'hidden' }}>
+                {/* Clickable load header */}
+                <Box
+                  component={Link}
+                  to={`/broker/loads/${bid.load_id}`}
+                  state={{ from: 'Booking Requests' }}
+                  sx={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    px: 2, py: 1.25, bgcolor: 'action.hover',
+                    borderBottom: '1px solid', borderColor: 'divider',
+                    textDecoration: 'none',
+                    '&:hover': { bgcolor: 'action.selected' },
+                    transition: 'background-color 0.15s',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Typography sx={{ fontFamily: 'monospace', fontSize: '0.7rem', fontWeight: 700, color: 'text.disabled', letterSpacing: '0.05em' }}>
+                      #{loadNum}
+                    </Typography>
+                    {bid.load_origin && bid.load_dest ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <Typography variant="body2" fontWeight={600} color="text.primary">{bid.load_origin}</Typography>
+                        <ArrowForwardIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                        <Typography variant="body2" fontWeight={600} color="text.primary">{bid.load_dest}</Typography>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" fontWeight={600}>Load #{loadNum}</Typography>
+                    )}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {statusChip(bid.status)}
+                    <OpenInNewIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                  </Box>
+                </Box>
+
+                {/* Bid body */}
+                <CardContent sx={{ pt: 1.5, pb: '12px !important' }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                        <Typography variant="subtitle2" fontWeight={600}>
-                          {bid.load_origin && bid.load_dest ? `${bid.load_origin} → ${bid.load_dest}` : `Load #${String(bid.load_id).slice(0, 8)}`}
-                        </Typography>
-                        {statusChip(bid.status)}
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-                        <Typography variant="h6" fontWeight={700} color="primary.main">
-                          ${bid.amount.toLocaleString()}
-                        </Typography>
-                        {diff !== null && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: isAbove ? 'success.main' : 'warning.main' }}>
-                            {isAbove ? <TrendingUpIcon sx={{ fontSize: 14 }} /> : <TrendingDownIcon sx={{ fontSize: 14 }} />}
-                            <Typography variant="caption">
-                              {isAbove ? '+' : ''}{diff.toFixed(1)}% vs ${bid.load_rate.toLocaleString()} listed
+                      {/* Amount row */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Bid Amount</Typography>
+                          <Typography variant="h6" fontWeight={800} color="primary.main" sx={{ lineHeight: 1.1 }}>
+                            ${bid.amount.toLocaleString()}
+                          </Typography>
+                        </Box>
+                        {bid.load_rate && (
+                          <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>Listed Rate</Typography>
+                            <Typography variant="subtitle2" fontWeight={600} color="text.secondary" sx={{ lineHeight: 1.1 }}>
+                              ${bid.load_rate.toLocaleString()}
                             </Typography>
                           </Box>
                         )}
+                        {diff !== null && (
+                          <Chip
+                            size="small"
+                            icon={isAbove ? <TrendingUpIcon /> : <TrendingDownIcon />}
+                            label={`${isAbove ? '+' : ''}${diff.toFixed(1)}%`}
+                            color={isAbove ? 'success' : 'warning'}
+                            variant="outlined"
+                            sx={{ fontWeight: 700 }}
+                          />
+                        )}
                       </Box>
-                      <Typography variant="caption" color="text.secondary">
-                        {bid.carrier_name || 'Carrier'}{bid.carrier_mc ? ` · MC-${bid.carrier_mc}` : ''}
-                      </Typography>
+
+                      {/* Carrier */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: bid.note || bid.counter_amount ? 0.75 : 0 }}>
+                        <PersonIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                        <Typography
+                          component={bid.carrier_id ? Link : 'span'}
+                          to={bid.carrier_id ? `/c/${bid.carrier_id?.slice(0, 8)}` : undefined}
+                          state={bid.carrier_id ? { carrierId: bid.carrier_id } : undefined}
+                          variant="body2"
+                          fontWeight={600}
+                          sx={bid.carrier_id ? { color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } } : {}}
+                        >
+                          {bid.carrier_name || 'Carrier'}
+                        </Typography>
+                        {bid.carrier_mc && (
+                          <Typography variant="caption" color="text.disabled">MC-{bid.carrier_mc}</Typography>
+                        )}
+                      </Box>
+
                       {bid.note && (
-                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
-                          "{bid.note}"
-                        </Typography>
+                        <Paper variant="outlined" sx={{ px: 1.5, py: 0.75, mt: 0.75, bgcolor: 'action.hover' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                            "{bid.note}"
+                          </Typography>
+                        </Paper>
                       )}
+
                       {bid.counter_amount && (
-                        <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
-                          Your counter: <strong>${bid.counter_amount.toLocaleString()}</strong>
-                          {bid.counter_note && ` — ${bid.counter_note}`}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
+                          <SyncAltIcon sx={{ fontSize: 13, color: 'info.main' }} />
+                          <Typography variant="caption" color="info.main">
+                            Your counter: <strong>${bid.counter_amount.toLocaleString()}</strong>
+                            {bid.counter_note && ` — ${bid.counter_note}`}
+                          </Typography>
+                        </Box>
                       )}
                     </Box>
+
                     {bid.status === 'pending' && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexShrink: 0, minWidth: 100 }}>
                         <Button
-                          size="small"
-                          variant="outlined"
-                          color="info"
+                          fullWidth size="small" variant="contained" color="success"
+                          startIcon={<CheckIcon />}
+                          onClick={() => setBidModal({ bid, mode: 'accept' })}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          fullWidth size="small" variant="outlined" color="info"
                           startIcon={<SyncAltIcon />}
                           onClick={() => { setBidModal({ bid, mode: 'counter' }); setCounterAmount(String(bid.load_rate || '')); }}
                         >
                           Counter
                         </Button>
-                        <Button size="small" variant="outlined" color="success" startIcon={<CheckIcon />}
-                          onClick={() => setBidModal({ bid, mode: 'accept' })}>
-                          Accept
-                        </Button>
-                        <Button size="small" variant="outlined" color="error" startIcon={<CloseIcon />}
-                          onClick={() => setBidModal({ bid, mode: 'reject' })}>
+                        <Button
+                          fullWidth size="small" variant="outlined" color="error"
+                          startIcon={<CloseIcon />}
+                          onClick={() => setBidModal({ bid, mode: 'reject' })}
+                        >
                           Reject
                         </Button>
                       </Box>
