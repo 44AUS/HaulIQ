@@ -220,6 +220,10 @@ def broker_active_loads(
             "carrier_id": carrier_id,
             "carrier_name": carrier_name,
             "carrier_mc": carrier_mc,
+            "pickup_lat": float(load.pickup_lat) if load.pickup_lat is not None else None,
+            "pickup_lng": float(load.pickup_lng) if load.pickup_lng is not None else None,
+            "delivery_lat": float(load.delivery_lat) if load.delivery_lat is not None else None,
+            "delivery_lng": float(load.delivery_lng) if load.delivery_lng is not None else None,
         })
     return result
 

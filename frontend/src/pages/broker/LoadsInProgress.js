@@ -28,16 +28,6 @@ const MAP_OPTIONS = {
   disableDefaultUI: true,
   zoomControl: true,
   scrollwheel: true,
-  styles: [
-    { elementType: 'geometry', stylers: [{ color: '#1a1f2e' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#9ca3af' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1f2e' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2d3748' }] },
-    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#374151' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f172a' }] },
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  ],
 };
 
 const MARKER_COLOR = {
@@ -411,9 +401,9 @@ function LoadsMap({ loads }) {
         </Typography>
       </Box>
 
-      <Box sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ border: '1px solid', borderColor: 'divider' }}>
         <GoogleMap
-          mapContainerStyle={{ width: '100%', height: 520 }}
+          mapContainerStyle={{ width: '100%', height: 640 }}
           zoom={5}
           center={{ lat: 39.5, lng: -98.35 }}
           options={MAP_OPTIONS}
@@ -558,10 +548,10 @@ export default function BrokerLoadsInProgress() {
         </Paper>
       ) : view === 'cards' ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          {loads.map(load => <BrokerLoadCard key={load.id} load={load} />)}
+          {loads.filter(l => l.status !== 'delivered').map(load => <BrokerLoadCard key={load.id} load={load} />)}
         </Box>
       ) : view === 'table' ? (
-        <TableView loads={loads} />
+        <TableView loads={loads.filter(l => l.status !== 'delivered')} />
       ) : (
         <LoadsMap loads={loads} />
       )}
