@@ -186,7 +186,7 @@ export default function BrokerDashboard() {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    {['Route', 'Type', 'Rate', 'Views', 'Status', 'Posted'].map(h => (
+                    {['Route', 'Type', 'Rate', 'Pickup', 'Views', 'Bids', 'Status'].map(h => (
                       <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', color: 'text.secondary', whiteSpace: 'nowrap' }}>
                         {h}
                       </TableCell>
@@ -195,24 +195,35 @@ export default function BrokerDashboard() {
                 </TableHead>
                 <TableBody>
                   {recentLoads.map((load, idx) => (
-                    <TableRow
-                      key={load.id}
-                      component={Link}
-                      to={`/broker/loads/${load.id}`}
-                      state={{ from: 'Dashboard' }}
-                      sx={{
-                        bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        '&:hover': { bgcolor: 'action.selected' },
-                      }}
-                    >
-                      <TableCell sx={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{load.origin} → {load.dest}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary' }}>{load.type}</TableCell>
+                    <TableRow key={load.id} sx={{ bgcolor: idx % 2 === 1 ? 'action.hover' : 'inherit' }}>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                        <Typography
+                          component={Link}
+                          to={`/broker/loads/${load._raw?.id || load.id}`}
+                          state={{ from: 'Dashboard' }}
+                          variant="body2"
+                          fontWeight={600}
+                          sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                        >
+                          {load.origin} → {load.dest}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>{load.type}</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>${(load.rate || 0).toLocaleString()}</TableCell>
-                      <TableCell>{load.viewCount || 0}</TableCell>
+                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.pickup}</TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <VisibilityIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                          <Typography variant="body2">{load.viewCount || 0}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <GroupIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                          <Typography variant="body2">—</Typography>
+                        </Box>
+                      </TableCell>
                       <TableCell>{statusChip(load.status)}</TableCell>
-                      <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{load.posted}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
