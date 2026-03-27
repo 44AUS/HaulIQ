@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, Card, CardContent, CardActionArea } from '@mui/material';
+import { Box, Typography, Card, CardContent, CardActionArea } from '@mui/material';
 import PaletteIcon from '@mui/icons-material/Palette';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -85,13 +85,11 @@ export default function Preferences() {
           Customize your HaulIQ experience and manage app-wide settings.
         </Typography>
       </Box>
-      <Grid container spacing={2}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
         {cards.map(card => (
-          <Grid item xs={12} sm={6} lg={3} key={card.title} sx={{ display: 'flex' }}>
-            <PrefCard {...card} onClick={() => card.path && navigate(card.path)} />
-          </Grid>
+          <PrefCard key={card.title} {...card} onClick={() => card.path && navigate(card.path)} />
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }
