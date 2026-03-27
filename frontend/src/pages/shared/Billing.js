@@ -4,13 +4,14 @@ import {
   Box, Typography, Tabs, Tab, Card, CardContent, Button, Chip,
   CircularProgress, ToggleButtonGroup, ToggleButton, Paper,
   Table, TableHead, TableRow, TableCell, TableBody, Divider,
-  TextField, InputAdornment, IconButton, Alert,
+  TextField, InputAdornment, IconButton, Alert, Tooltip,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
+import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -238,10 +239,23 @@ function PlanCard({ plan, billing, currentKey, onActivate, activating }) {
 }
 
 // ─── Referrals Tab ────────────────────────────────────────────────────────────
-function ReferralsTab({ user }) {
+// Generate last-7-days date labels
+function last7Days() {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  });
+}
+const CHART_DATES = last7Days();
+const EMPTY_CHART = CHART_DATES.map(date => ({ date, trials: 0, pro: 0, enterprise: 0, starter: 0, credit: 0 }));
+
+function ReferralsTab({ user, currentSub }) {
   const [copied, setCopied] = useState(false);
+  const hasActivePlan = currentSub && currentSub.status !== 'cancelled';
   const referralCode = `HAULIQ-${(user?.name || 'USER').split(' ')[0].toUpperCase().slice(0, 6)}`;
   const referralLink = `https://hauliq.app/join?ref=${referralCode}`;
+  const maskedLink = '•'.repeat(36);
 
   const copy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -249,82 +263,129 @@ function ReferralsTab({ user }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const dateRange = `${CHART_DATES[0]} - ${CHART_DATES[6]}`;
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 700, mx: 'auto' }}>
-      {/* Hero */}
-      <Card variant="outlined" sx={{ textAlign: 'center', p: 4 }}>
-        <PersonAddIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1.5 }} />
-        <Typography variant="h5" fontWeight={800} sx={{ mb: 0.5 }}>Earn $25 per referral</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Invite a broker or carrier to HaulIQ. When they activate a paid plan, you both get a $25 account credit.
-        </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      {/* Program description card */}
+      <Card variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5 }}>
+            HaulIQ Referral Program
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
+            Get HaulIQ to credit you! If a broker or carrier uses your referral link to sign up, they'll enjoy{' '}
+            <strong>10% off their first billing cycle</strong> when they subscribe. And you'll get a{' '}
+            <strong>10% credit</strong> towards your next billing cycle!
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+            For example, if someone using your referral link subscribes to the annual Enterprise plan, they will
+            get a 10% discount and HaulIQ will apply a credit towards your subscription automatically.
+          </Typography>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* Referral link field */}
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+              <Typography variant="caption" fontWeight={600} color="text.secondary">Referral Link</Typography>
+              <InfoOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+            </Box>
+
+            {hasActivePlan ? (
+              <>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={referralLink}
+                  InputProps={{
+                    readOnly: true,
+                    sx: { fontFamily: 'monospace', fontSize: '0.82rem' },
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title={copied ? 'Copied!' : 'Copy link'}>
+                          <IconButton onClick={copy} size="small" color={copied ? 'success' : 'default'}>
+                            <ContentCopyIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {copied && (
+                  <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block' }}>
+                    Link copied to clipboard!
+                  </Typography>
+                )}
+              </>
+            ) : (
+              <>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={maskedLink}
+                  InputProps={{
+                    readOnly: true,
+                    sx: { letterSpacing: '0.08em', color: 'text.disabled' },
+                  }}
+                />
+                <Box sx={{
+                  mt: 1, px: 1.5, py: 0.75, borderRadius: 1,
+                  bgcolor: 'error.main', display: 'inline-block',
+                }}>
+                  <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
+                    You must have an active HaulIQ subscription to unlock your referral link
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+        </CardContent>
       </Card>
 
-      {/* Referral link */}
-      <Box>
-        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>Your referral link</Typography>
-        <TextField
-          fullWidth
-          size="small"
-          value={referralLink}
-          InputProps={{
-            readOnly: true,
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={copy} size="small">
-                  <ContentCopyIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        {copied && <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block' }}>Copied!</Typography>}
-      </Box>
+      {/* Analytics section */}
+      <Card variant="outlined" sx={{ borderRadius: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="subtitle2" fontWeight={700} color="text.secondary">Analytics</Typography>
+            <Typography variant="caption" color="text.disabled">Days · {dateRange}</Typography>
+          </Box>
 
-      {/* How it works */}
-      <Box>
-        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>How it works</Typography>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-          {[
-            { step: '1', title: 'Share your link', desc: 'Send your unique link to a broker or carrier.' },
-            { step: '2', title: 'They sign up', desc: 'They create an account using your referral link.' },
-            { step: '3', title: 'Both earn $25', desc: 'When they activate a paid plan, you both get credit.' },
-          ].map(({ step, title, desc }) => (
-            <Paper key={step} variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: 'primary.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1, fontWeight: 800, fontSize: '0.85rem' }}>
-                {step}
-              </Box>
-              <Typography variant="body2" fontWeight={700} sx={{ mb: 0.5 }}>{title}</Typography>
-              <Typography variant="caption" color="text.secondary">{desc}</Typography>
-            </Paper>
-          ))}
-        </Box>
-      </Box>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+            {/* Trials started chart */}
+            <Box>
+              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>Trials Started</Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={EMPTY_CHART} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <ReTooltip />
+                  <Line type="monotone" dataKey="trials" stroke="#9ca3af" strokeWidth={2} dot={false} name="Trials Started" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
 
-      {/* Stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-        {[
-          { label: 'Referrals sent', value: '—' },
-          { label: 'Converted', value: '—' },
-          { label: 'Credits earned', value: '$0' },
-        ].map(({ label, value }) => (
-          <Card key={label}>
-            <CardContent sx={{ textAlign: 'center', py: '16px !important' }}>
-              <Typography variant="caption" color="text.secondary">{label}</Typography>
-              <Typography variant="h5" fontWeight={800}>{value}</Typography>
-            </CardContent>
-          </Card>
-        ))}
-      </Box>
-
-      {/* History */}
-      <Box>
-        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>Referral history</Typography>
-        <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">No referrals yet</Typography>
-          <Typography variant="caption" color="text.disabled">Share your link above to get started</Typography>
-        </Paper>
-      </Box>
+            {/* Revenue / conversions chart */}
+            <Box>
+              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>Conversions by Plan</Typography>
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={EMPTY_CHART} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <ReTooltip />
+                  <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                  <Line type="monotone" dataKey="enterprise" stroke="#f59e0b" strokeWidth={2} dot={false} name="Enterprise" />
+                  <Line type="monotone" dataKey="pro"        stroke="#3b82f6" strokeWidth={2} dot={false} name="Pro" />
+                  <Line type="monotone" dataKey="starter"   stroke="#ec4899" strokeWidth={2} dot={false} name="Starter" />
+                  <Line type="monotone" dataKey="credit"    stroke="#22c55e" strokeWidth={2} dot={false} name="Credit" />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
     </Box>
   );
 }
@@ -527,7 +588,7 @@ export default function Billing() {
       )}
 
       {/* ── Referrals Tab ─────────────────────────────────────────────────── */}
-      {tab === 1 && <ReferralsTab user={user} />}
+      {tab === 1 && <ReferralsTab user={user} currentSub={currentSub} />}
     </Box>
   );
 }
