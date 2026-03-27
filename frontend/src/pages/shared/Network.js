@@ -46,7 +46,7 @@ export default function Network() {
   };
 
   const profilePath = (entry) =>
-    entry.role === 'carrier' ? `/c/${entry.user_id?.slice(0,8)}` : `/broker-profile/${entry.user_id}`;
+    entry.role === 'carrier' ? `/c/${entry.user_id?.slice(0,8)}` : `/b/${entry.user_id?.slice(0,8)}`;
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>

@@ -337,7 +337,7 @@ export default function Messages() {
     if (!convo) return null;
     return String(senderId) === String(convo.carrier_id) ? convo.carrier_avatar_url : convo.broker_avatar_url;
   };
-  const getProfileLink = (party) => party?.role === 'carrier' ? `/c/${party.id?.slice(0,8)}` : `/broker-profile/${party.id}`;
+  const getProfileLink = (party) => party?.role === 'carrier' ? `/c/${party.id?.slice(0,8)}` : `/b/${party.id?.slice(0,8)}`;
   const getConvoLabel = (c) => String(c.carrier_id) === String(user?.id) ? (c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`) : (c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`);
   const getLastMsg = (c) => { const msgs = c.messages || []; return msgs[msgs.length - 1] || null; };
   const hasUnread = (c) => (c.messages || []).some(m => m.sender_id !== user?.id && !m.is_read);
@@ -501,7 +501,7 @@ export default function Messages() {
                   >
                     <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
                       <ListItemAvatar sx={{ minWidth: 42 }}>
-                        <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/broker-profile/${otherId}`} onClick={e => e.stopPropagation()}>
+                        <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
                           <UserAvatar name={label} src={otherAvatar} size={34} />
                         </Box>
                       </ListItemAvatar>

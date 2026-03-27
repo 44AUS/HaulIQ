@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, cast, String as SAString
 from typing import Optional
 from uuid import UUID
 
@@ -42,10 +42,21 @@ def flagged_brokers(
     )
 
 
-def _get_broker_or_404(broker_id: UUID, db: Session) -> Broker:
-    """Look up broker by broker-profile ID or user ID."""
-    broker = db.query(Broker).filter(
-        (Broker.id == broker_id) | (Broker.user_id == broker_id)
+def _get_broker_or_404(broker_id: str, db: Session) -> Broker:
+    """Look up broker by full UUID, 8-char user_id prefix, or broker profile id."""
+    # Try full UUID first
+    try:
+        uid = UUID(broker_id)
+        broker = db.query(Broker).filter(
+            (Broker.id == uid) | (Broker.user_id == uid)
+        ).first()
+        if broker:
+            return broker
+    except ValueError:
+        pass
+    # Fall back to 8-char prefix match on user_id
+    broker = db.query(Broker).join(User, User.id == Broker.user_id).filter(
+        cast(User.id, SAString).like(f"{broker_id}%")
     ).first()
     if not broker:
         raise HTTPException(status_code=404, detail="Broker not found")
@@ -54,7 +65,7 @@ def _get_broker_or_404(broker_id: UUID, db: Session) -> Broker:
 
 @router.get("/{broker_id}", response_model=BrokerOut, summary="Get broker profile")
 def get_broker(
-    broker_id: UUID,
+    broker_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -64,7 +75,7 @@ def get_broker(
 @router.get("/{broker_id}/reviews", response_model=list[BrokerReviewOut],
             summary="Get reviews for a broker")
 def get_broker_reviews(
-    broker_id: UUID,
+    broker_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

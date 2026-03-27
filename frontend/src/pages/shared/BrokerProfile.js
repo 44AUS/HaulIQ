@@ -148,7 +148,15 @@ export default function BrokerProfile() {
 
   useEffect(() => {
     brokersApi.get(brokerId)
-      .then(data => setBroker(adaptBroker(data)))
+      .then(data => {
+        const adapted = adaptBroker(data);
+        setBroker(adapted);
+        if (adapted?.user_id && user?.id !== adapted.user_id) {
+          blocksApi.check(adapted.user_id)
+            .then(d => setIsBlocked(d.is_blocked))
+            .catch(() => {});
+        }
+      })
       .catch(err => setBrokerError(err.message))
       .finally(() => setLoadingBroker(false));
 
@@ -156,22 +164,17 @@ export default function BrokerProfile() {
       .then(data => setReviews(Array.isArray(data) ? data.map(adaptReview) : []))
       .catch(() => setReviews([]))
       .finally(() => setLoadingReviews(false));
-
-    if (!isOwner) {
-      blocksApi.check(brokerId)
-        .then(data => setIsBlocked(data.is_blocked))
-        .catch(() => {});
-    }
   }, [brokerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleBlock = async () => {
     setBlockLoading(true);
     try {
+      const targetId = broker?.user_id || brokerId;
       if (isBlocked) {
-        await blocksApi.unblock(brokerId);
+        await blocksApi.unblock(targetId);
         setIsBlocked(false);
       } else {
-        await blocksApi.block(brokerId);
+        await blocksApi.block(targetId);
         setIsBlocked(true);
       }
     } catch (e) {
@@ -181,7 +184,7 @@ export default function BrokerProfile() {
     }
   };
 
-  const isOwner = user?.id === brokerId;
+  const isOwner = broker ? user?.id === broker.user_id : false;
   const logo = isOwner ? (user?.avatar_url ?? broker?.logo) : broker?.logo;
   const handleLogoUpload = async (dataUrl) => {
     await authApi.update({ avatar_url: dataUrl });

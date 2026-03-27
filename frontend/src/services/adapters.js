@@ -30,6 +30,7 @@ export function adaptBroker(b) {
   if (!b) return null;
   return {
     id:              String(b.id),
+    user_id:         b.user_id ? String(b.user_id) : null,
     name:            b.name,
     rating:          b.avg_rating,
     reviews:         b.reviews_count,

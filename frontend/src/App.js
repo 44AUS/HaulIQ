@@ -161,7 +161,7 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/checkout" element={<Checkout />} />
-      <Route path="/broker-profile/:brokerId" element={
+      <Route path="/b/:brokerId" element={
         <ProtectedRoute>
           <DashboardLayout><BrokerProfile /></DashboardLayout>
         </ProtectedRoute>

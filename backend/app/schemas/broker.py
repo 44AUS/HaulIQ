@@ -7,6 +7,7 @@ from app.models.broker import BrokerBadge, PaySpeed
 
 class BrokerOut(BaseModel):
     id: UUID
+    user_id: Optional[UUID] = None
     name: str
     avg_rating: float
     reviews_count: int
