@@ -44,6 +44,7 @@ import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
 import Preferences from './pages/shared/Preferences';
 import BrandingSettings from './pages/shared/BrandingSettings';
+import Billing from './pages/shared/Billing';
 import MapView from './pages/shared/MapView';
 
 // Pages — Admin
@@ -100,6 +101,7 @@ function CarrierRoutes() {
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
           <Route path="documents" element={<Documents />} />
+          <Route path="billing" element={<Billing />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
@@ -126,6 +128,7 @@ function BrokerRoutes() {
           <Route path="track/:bookingId" element={<TrackLoad />} />
           <Route path="network" element={<Network />} />
           <Route path="documents" element={<Documents />} />
+          <Route path="billing" element={<Billing />} />
           <Route path="subscription" element={<ManageSubscription />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>

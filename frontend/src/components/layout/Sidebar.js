@@ -53,6 +53,7 @@ const CARRIER_LINKS = [
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: NetworkIcon,      label: 'Network',        path: '/carrier/network', badge: 'network' },
   { icon: FolderIcon,       label: 'Documents',      path: '/carrier/documents' },
+  { icon: CreditCardIcon,   label: 'Billing',        path: '/carrier/billing' },
   { icon: PreferencesIcon,  label: 'Preferences',    path: '/preferences' },
 ];
 
@@ -66,6 +67,7 @@ const BROKER_LINKS = [
   { icon: FolderIcon,    label: 'Documents',         path: '/broker/documents' },
   { icon: EventIcon,     label: 'Booking Requests',  path: '/broker/bookings', badge: 'bookings' },
   { icon: ZapIcon,          label: 'Instant Book',   path: '/broker/instant-book' },
+  { icon: CreditCardIcon,   label: 'Billing',        path: '/broker/billing' },
   { icon: PreferencesIcon,  label: 'Preferences',    path: '/preferences' },
 ];
 
