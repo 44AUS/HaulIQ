@@ -68,7 +68,7 @@ function LocationRequestCard({ data, isMe, onShare }) {
         <NavigationIcon sx={{ fontSize: 14, color: 'primary.light' }} />
         <Typography variant="body2" fontWeight={600} color="text.primary">Location Requested</Typography>
       </Box>
-      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
+      <Typography variant="caption" display="block" sx={{ mb: 1.5, color: isMe ? 'rgba(255,255,255,0.75)' : 'text.secondary' }}>
         {isMe ? 'You asked the carrier to share their location.' : 'The broker is asking for your current location.'}
       </Typography>
       {!isMe && (
@@ -122,7 +122,7 @@ function DocUploadCard({ data, isMe, onView }) {
   const label = (data.doc_type || 'other').replace('_', ' ').toUpperCase();
   return (
     <Paper variant="outlined" sx={{
-      p: 1.5, maxWidth: '75%', ml: isMe ? 'auto' : 0,
+      p: 1.5, width: 220, ml: isMe ? 'auto' : 0,
       bgcolor: isMe ? 'primary.dark' : 'background.paper',
       borderColor: isMe ? 'primary.main' : 'divider', borderRadius: 2,
     }}>
