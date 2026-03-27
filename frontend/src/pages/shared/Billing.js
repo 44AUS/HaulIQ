@@ -474,57 +474,63 @@ export default function Billing() {
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
           ) : (
             <>
-              {/* Current plan card */}
-              {currentSub && (
-                <Box sx={{ maxWidth: 400, mx: 'auto', width: '100%' }}>
-                  <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ mb: 1.5 }}>Current Plan</Typography>
-                  <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                    {/* Status badge */}
-                    <Box sx={{ textAlign: 'center', py: 0.75, bgcolor: currentSub.status === 'trialing' ? 'rgba(161,138,0,0.25)' : 'action.selected' }}>
-                      <Typography variant="caption" fontWeight={700} sx={{
-                        color: currentSub.status === 'trialing' ? '#c9a800' : 'text.secondary',
-                        textTransform: 'capitalize', letterSpacing: '0.06em',
-                      }}>
-                        {currentSub.status === 'trialing' ? 'Trialing' : currentSub.status}
+              {/* Current plan card — always shown */}
+              <Box sx={{ maxWidth: 400, mx: 'auto', width: '100%' }}>
+                <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ mb: 1.5 }}>Current Plan</Typography>
+                <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                  {/* Status badge */}
+                  <Box sx={{
+                    textAlign: 'center', py: 0.75,
+                    bgcolor: currentSub?.status === 'trialing' ? 'rgba(161,138,0,0.25)'
+                      : currentSub ? 'rgba(34,197,94,0.12)' : 'action.selected',
+                  }}>
+                    <Typography variant="caption" fontWeight={700} sx={{
+                      color: currentSub?.status === 'trialing' ? '#c9a800'
+                        : currentSub ? 'success.main' : 'text.disabled',
+                      textTransform: 'capitalize', letterSpacing: '0.06em',
+                    }}>
+                      {currentSub?.status === 'trialing' ? 'Trialing'
+                        : currentSub ? currentSub.status : 'No Active Plan'}
+                    </Typography>
+                  </Box>
+
+                  {/* Plan name + days left */}
+                  <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Typography variant="h6" fontWeight={800}>
+                      {currentSub?.plan?.name || 'Starter'}
+                    </Typography>
+                    {daysLeft !== null && currentSub && (
+                      <Typography variant="body2" fontWeight={600} color="text.secondary">{daysLeft} days left</Typography>
+                    )}
+                  </Box>
+
+                  {/* Company row */}
+                  <Box sx={{
+                    mx: 2, mb: 2, px: 1.5, py: 1.25,
+                    display: 'flex', alignItems: 'center', gap: 1.5,
+                    bgcolor: 'action.hover', borderRadius: 1.5,
+                  }}>
+                    <Box sx={{
+                      width: 36, height: 36, borderRadius: '50%',
+                      bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}>
+                      <Typography variant="subtitle2" fontWeight={700}>
+                        {(user?.company || user?.name || '?')[0].toUpperCase()}
                       </Typography>
                     </Box>
-
-                    {/* Plan name + days left */}
-                    <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Typography variant="h6" fontWeight={800}>{currentSub.plan?.name}</Typography>
-                      {daysLeft !== null && (
-                        <Typography variant="body2" fontWeight={600} color="text.secondary">{daysLeft} days left</Typography>
-                      )}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2 }}>
+                        {user?.role === 'broker' ? 'Business' : 'Carrier'}
+                      </Typography>
+                      <Typography variant="body2" fontWeight={600} noWrap>
+                        {user?.company || user?.name}
+                      </Typography>
                     </Box>
-
-                    {/* Company row */}
-                    <Box sx={{
-                      mx: 2, mb: 2, px: 1.5, py: 1.25,
-                      display: 'flex', alignItems: 'center', gap: 1.5,
-                      bgcolor: 'action.hover', borderRadius: 1.5,
-                    }}>
-                      <Box sx={{
-                        width: 36, height: 36, borderRadius: '50%',
-                        bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        <Typography variant="subtitle2" fontWeight={700}>
-                          {(user?.company || user?.name || '?')[0].toUpperCase()}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2 }}>
-                          {user?.role === 'broker' ? 'Business' : 'Carrier'}
-                        </Typography>
-                        <Typography variant="body2" fontWeight={600} noWrap>
-                          {user?.company || user?.name}
-                        </Typography>
-                      </Box>
-                      <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
-                    </Box>
-                  </Paper>
-                </Box>
-              )}
+                    <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
+                  </Box>
+                </Paper>
+              </Box>
 
               {/* Billing toggle */}
               <Box sx={{ textAlign: 'center' }}>
