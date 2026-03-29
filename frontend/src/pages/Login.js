@@ -8,10 +8,6 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
-import CheckIcon from '@mui/icons-material/Check';
 import { useAuth, ROLES } from '../context/AuthContext';
 
 const BRAND      = '#1565C0';
@@ -58,18 +54,6 @@ function WaveBg() {
   );
 }
 
-const ROLE_OPTIONS = [
-  { r: 'carrier', label: 'Driver',  icon: <LocalShippingIcon sx={{ fontSize: 20 }} /> },
-  { r: 'broker',  label: 'Broker',  icon: <BusinessCenterIcon sx={{ fontSize: 20 }} /> },
-  { r: 'admin',   label: 'Admin',   icon: <AdminPanelSettingsIcon sx={{ fontSize: 20 }} /> },
-];
-
-const DEMO_ACCOUNTS = [
-  { role: 'carrier', email: 'carrier@demo.com', pw: 'demo1234', label: 'Carrier Demo' },
-  { role: 'broker',  email: 'broker@demo.com',  pw: 'demo1234', label: 'Broker Demo' },
-  { role: 'admin',   email: 'admin@urload.app', pw: 'admin1234', label: 'Admin Demo' },
-];
-
 const inputSx = {
   color: '#fff',
   bgcolor: 'rgba(255,255,255,0.06)',
@@ -82,7 +66,7 @@ const inputSx = {
 export default function Login() {
   const [params] = useSearchParams();
   const defaultRole = params.get('role') || '';
-  const [role, setRole] = useState(defaultRole);
+  const [role] = useState(defaultRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -137,44 +121,6 @@ export default function Login() {
                 <Typography variant="body2" sx={{ color: '#8a8f9c', lineHeight: 1.65 }}>
                   Sign in to your Urload account
                 </Typography>
-              </Box>
-
-              {/* Role selector */}
-              <Box sx={{ px: { xs: 3, sm: 4 }, pb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  {ROLE_OPTIONS.map(({ r, label, icon }) => {
-                    const sel = role === r;
-                    return (
-                      <Box
-                        key={r}
-                        onClick={() => setRole(r)}
-                        sx={{
-                          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.6,
-                          py: 1.4, borderRadius: '8px', border: '1px solid', cursor: 'pointer',
-                          borderColor: sel ? BRAND_LIGHT : 'rgba(255,255,255,0.09)',
-                          bgcolor: sel ? 'rgba(66,165,245,0.08)' : 'rgba(255,255,255,0.02)',
-                          color: sel ? BRAND_LIGHT : '#6b7280',
-                          transition: 'all 0.15s',
-                          '&:hover': {
-                            borderColor: sel ? BRAND_LIGHT : 'rgba(255,255,255,0.22)',
-                            color: sel ? BRAND_LIGHT : '#9ca3af',
-                            bgcolor: sel ? 'rgba(66,165,245,0.08)' : 'rgba(255,255,255,0.04)',
-                          },
-                        }}
-                      >
-                        {sel
-                          ? <Box sx={{ width: 20, height: 20, borderRadius: '4px', bgcolor: BRAND_LIGHT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <CheckIcon sx={{ fontSize: 13, color: '#fff' }} />
-                            </Box>
-                          : icon
-                        }
-                        <Typography variant="caption" fontWeight={700} sx={{ fontSize: '0.72rem', letterSpacing: '0.04em' }}>
-                          {label}
-                        </Typography>
-                      </Box>
-                    );
-                  })}
-                </Box>
               </Box>
 
               {error && (
@@ -249,39 +195,6 @@ export default function Login() {
                     Sign up free
                   </Typography>
                 </Typography>
-              </Box>
-            </Box>
-
-            {/* Demo accounts */}
-            <Box sx={{
-              mt: 2,
-              bgcolor: 'rgba(17,19,24,0.85)', borderRadius: '10px',
-              border: '1px solid rgba(255,255,255,0.07)',
-              p: 2,
-            }}>
-              <Typography variant="caption" sx={{
-                color: '#4b5563', display: 'block', textAlign: 'center',
-                mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.09em', fontWeight: 700, fontSize: '0.65rem',
-              }}>
-                Quick Demo Access
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                {DEMO_ACCOUNTS.map(acc => (
-                  <Box
-                    key={acc.role}
-                    onClick={() => { setRole(acc.role); setEmail(acc.email); setPassword(acc.pw); }}
-                    sx={{
-                      flex: 1, textAlign: 'center', py: 0.9, borderRadius: '7px', cursor: 'pointer',
-                      bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-                      '&:hover': { bgcolor: 'rgba(255,255,255,0.07)', borderColor: 'rgba(255,255,255,0.18)' },
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ color: '#9ca3af', fontWeight: 600, fontSize: '0.72rem' }}>
-                      {acc.label}
-                    </Typography>
-                  </Box>
-                ))}
               </Box>
             </Box>
 
