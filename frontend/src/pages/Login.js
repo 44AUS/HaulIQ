@@ -1,7 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Truck, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import {
+  Box, Typography, Button, TextField, Paper,
+  InputAdornment, IconButton, Divider,
+} from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useAuth, ROLES } from '../context/AuthContext';
+
+const BRAND = '#1565C0';
+const BRAND_MED = '#1976d2';
+const BRAND_LIGHT = '#42a5f5';
+
+function WaveBackground() {
+  return (
+    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', bgcolor: BRAND_MED }}>
+      <Box sx={{
+        position: 'absolute', width: '160%', height: '55%', bottom: '-5%', left: '-30%',
+        bgcolor: 'rgba(255,255,255,0.07)', borderRadius: '50% 50% 0 0 / 80% 80% 0 0',
+        transform: 'rotate(-4deg)',
+      }} />
+      <Box sx={{
+        position: 'absolute', width: '130%', height: '45%', bottom: '8%', left: '-15%',
+        bgcolor: 'rgba(255,255,255,0.07)', borderRadius: '50% 50% 0 0 / 70% 70% 0 0',
+        transform: 'rotate(-2deg)',
+      }} />
+      <Box sx={{
+        position: 'absolute', width: '110%', height: '35%', bottom: '18%', right: '-10%',
+        bgcolor: 'rgba(255,255,255,0.06)', borderRadius: '50% 50% 0 0 / 60% 60% 0 0',
+        transform: 'rotate(3deg)',
+      }} />
+      <Box sx={{
+        position: 'absolute', width: '90%', height: '28%', top: '-5%', left: '-5%',
+        bgcolor: 'rgba(0,0,0,0.08)', borderRadius: '0 0 50% 50% / 0 0 70% 70%',
+        transform: 'rotate(2deg)',
+      }} />
+    </Box>
+  );
+}
+
+const ROLE_OPTIONS = [
+  { r: 'carrier', label: 'Driver', icon: <LocalShippingIcon sx={{ fontSize: 18 }} /> },
+  { r: 'broker',  label: 'Broker', icon: <BusinessCenterIcon sx={{ fontSize: 18 }} /> },
+  { r: 'admin',   label: 'Admin',  icon: <AdminPanelSettingsIcon sx={{ fontSize: 18 }} /> },
+];
+
+const DEMO_ACCOUNTS = [
+  { role: 'carrier', email: 'carrier@demo.com', pw: 'demo1234', label: 'Carrier Demo' },
+  { role: 'broker',  email: 'broker@demo.com',  pw: 'demo1234', label: 'Broker Demo' },
+  { role: 'admin',   email: 'admin@urload.app', pw: 'admin1234', label: 'Admin Demo' },
+];
 
 export default function Login() {
   const [params] = useSearchParams();
@@ -27,103 +80,152 @@ export default function Login() {
     }
   };
 
-  const DEMO_ACCOUNTS = [
-    { role: 'carrier', email: 'carrier@demo.com', pw: 'demo1234', label: 'Carrier Demo' },
-    { role: 'broker',  email: 'broker@demo.com',  pw: 'demo1234', label: 'Broker Demo' },
-    { role: 'admin',   email: 'admin@urload.app', pw: 'demo1234', label: 'Admin Demo' },
-  ];
-
-  const fillDemo = (acc) => {
-    setRole(acc.role);
-    setEmail(acc.email);
-    setPassword(acc.pw);
+  const fieldSx = {
+    color: '#fff',
+    bgcolor: 'rgba(255,255,255,0.05)',
+    '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' },
+    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
+    '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT },
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex items-center justify-center px-4">
-      {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(34,197,94,0.06)_0%,transparent_60%)]" />
+    <Box sx={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+      <WaveBackground />
+      <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        {/* Nav */}
+        <Box sx={{ px: 4, py: 2 }}>
+          <Typography variant="h5" fontWeight={900} sx={{ color: '#fff', letterSpacing: '-0.5px' }}>
+            ur<span style={{ color: BRAND_LIGHT }}>load</span>
+          </Typography>
+        </Box>
 
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-9 h-9 bg-brand-500 rounded-lg flex items-center justify-center glow-green-sm">
-            <Truck size={20} className="text-white" />
-          </div>
-          <span className="text-white font-bold text-2xl">Ur<span className="gradient-text">load</span></span>
-        </Link>
+        {/* Banner */}
+        <Box sx={{ bgcolor: 'rgba(0,0,0,0.25)', py: 0.75, textAlign: 'center' }}>
+          <Typography variant="caption" sx={{ color: BRAND_LIGHT, fontWeight: 600, letterSpacing: '0.04em' }}>
+            Free to Start &bull; No Payment Method Required &bull; Cancel Anytime
+          </Typography>
+        </Box>
 
-        <div className="glass rounded-2xl border border-dark-400/40 p-8">
-          <h1 className="text-2xl font-bold text-white mb-1">Welcome back</h1>
-          <p className="text-dark-200 text-sm mb-6">Sign in to your Urload account</p>
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: 4 }}>
+          <Box sx={{ width: '100%', maxWidth: 480 }}>
+            <Paper elevation={0} sx={{
+              bgcolor: '#1a1a2e', borderRadius: 2,
+              overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <Box sx={{ p: 3.5 }}>
+                <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', mb: 0.5 }}>Welcome back</Typography>
+                <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 3 }}>Sign in to your Urload account</Typography>
 
-          {/* Role selector */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            {[['carrier', '🚛', 'Driver'], ['broker', '📋', 'Broker'], ['admin', '⚙️', 'Admin']].map(([r, icon, label]) => (
-              <button key={r} onClick={() => setRole(r)}
-                className={`py-2.5 rounded-lg text-xs font-medium transition-all border ${
-                  role === r
-                    ? 'bg-brand-500/10 border-brand-500/40 text-brand-400'
-                    : 'border-dark-400/50 text-dark-300 hover:border-dark-300 hover:text-white'
-                }`}>
-                <span className="block text-lg mb-0.5">{icon}</span>{label}
-              </button>
-            ))}
-          </div>
+                {/* Role selector */}
+                <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+                  {ROLE_OPTIONS.map(({ r, label, icon }) => (
+                    <Box
+                      key={r}
+                      onClick={() => setRole(r)}
+                      sx={{
+                        flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5,
+                        py: 1.25, borderRadius: 1.5, border: '1px solid', cursor: 'pointer',
+                        borderColor: role === r ? BRAND_LIGHT : 'rgba(255,255,255,0.1)',
+                        bgcolor: role === r ? 'rgba(66,165,245,0.1)' : 'transparent',
+                        color: role === r ? BRAND_LIGHT : '#9e9e9e',
+                        transition: 'all 0.15s',
+                        '&:hover': { borderColor: BRAND_LIGHT, color: BRAND_LIGHT },
+                      }}
+                    >
+                      {icon}
+                      <Typography variant="caption" fontWeight={600}>{label}</Typography>
+                    </Box>
+                  ))}
+                </Box>
 
-          {error && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-5">
-              <AlertCircle size={15} className="text-red-400 flex-shrink-0" />
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
+                {error && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(244,67,54,0.1)', border: '1px solid rgba(244,67,54,0.3)', borderRadius: 1, px: 2, py: 1.25, mb: 2 }}>
+                    <ErrorOutlineIcon sx={{ fontSize: 16, color: '#f44336', flexShrink: 0 }} />
+                    <Typography variant="body2" sx={{ color: '#f44336' }}>{error}</Typography>
+                  </Box>
+                )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-                className="input" placeholder="you@example.com" required />
-            </div>
-            <div>
-              <label className="block text-dark-100 text-sm font-medium mb-1.5">Password</label>
-              <div className="relative">
-                <input type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
-                  className="input pr-10" placeholder="••••••••" required />
-                <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-300 hover:text-white">
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-            <button type="submit" disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3 glow-green disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <><span>Sign In</span><ArrowRight size={16} /></>
-              )}
-            </button>
-          </form>
+                <form onSubmit={handleSubmit}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                      label="Email"
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      fullWidth size="small" required
+                      InputLabelProps={{ sx: { color: '#9e9e9e' } }}
+                      InputProps={{ sx: fieldSx }}
+                    />
+                    <TextField
+                      label="Password"
+                      type={showPw ? 'text' : 'password'}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      fullWidth size="small" required
+                      InputLabelProps={{ sx: { color: '#9e9e9e' } }}
+                      InputProps={{
+                        sx: fieldSx,
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: '#9e9e9e' }}>
+                              {showPw ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      disabled={loading || !email || !password}
+                      endIcon={!loading && <ChevronRightIcon />}
+                      sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', py: 1.25 }}
+                    >
+                      {loading ? 'Signing in…' : 'Sign In'}
+                    </Button>
+                  </Box>
+                </form>
 
-          <p className="text-center text-dark-300 text-sm mt-6">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-brand-400 hover:text-brand-300 font-medium">Sign up free</Link>
-          </p>
-        </div>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2.5, pt: 2.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <Button component={Link} to="/login" sx={{ color: BRAND_LIGHT, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem' }}>
+                    Forgot password?
+                  </Button>
+                  <Typography variant="body2" sx={{ color: '#9e9e9e' }}>
+                    No account?{' '}
+                    <Typography component={Link} to="/signup" variant="body2" sx={{ color: BRAND_LIGHT, fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                      Sign up free
+                    </Typography>
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
 
-        {/* Demo accounts */}
-        <div className="mt-6 glass rounded-xl border border-dark-400/30 p-4">
-          <p className="text-dark-300 text-xs text-center mb-3 font-medium uppercase tracking-wider">Quick Demo Access</p>
-          <div className="grid grid-cols-3 gap-2">
-            {DEMO_ACCOUNTS.map(acc => (
-              <button key={acc.role} onClick={() => fillDemo(acc)}
-                className="py-2 px-3 bg-dark-700/60 hover:bg-dark-600 rounded-lg text-xs text-dark-100 hover:text-white transition-colors capitalize border border-dark-400/30">
-                {acc.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+            {/* Demo accounts */}
+            <Paper elevation={0} sx={{ mt: 2, bgcolor: 'rgba(26,26,46,0.85)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 2, p: 2 }}>
+              <Typography variant="caption" sx={{ color: '#616161', display: 'block', textAlign: 'center', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>
+                Quick Demo Access
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {DEMO_ACCOUNTS.map(acc => (
+                  <Box
+                    key={acc.role}
+                    onClick={() => { setRole(acc.role); setEmail(acc.email); setPassword(acc.pw); }}
+                    sx={{
+                      flex: 1, textAlign: 'center', py: 1, borderRadius: 1.5, cursor: 'pointer',
+                      bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                      '&:hover': { bgcolor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.2)' },
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <Typography variant="caption" sx={{ color: '#bdbdbd', fontWeight: 500 }}>{acc.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            </Paper>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }
