@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box, Typography, Button, TextField, Paper, Checkbox, CircularProgress,
+  Box, Typography, Button, TextField, CircularProgress,
   InputAdornment, IconButton,
 } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -16,33 +16,49 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 
-const BRAND = '#1565C0';
-const BRAND_MED = '#1976d2';
+const BRAND      = '#1565C0';
+const BRAND_MED  = '#1976d2';
 const BRAND_LIGHT = '#42a5f5';
 
-function WaveBackground() {
+function WaveBg() {
   return (
-    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden', bgcolor: BRAND_MED }}>
+    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: BRAND_MED, overflow: 'hidden' }}>
+      {/* top-right glow blob */}
       <Box sx={{
-        position: 'absolute', width: '160%', height: '55%', bottom: '-5%', left: '-30%',
-        bgcolor: 'rgba(255,255,255,0.07)', borderRadius: '50% 50% 0 0 / 80% 80% 0 0',
-        transform: 'rotate(-4deg)',
+        position: 'absolute', width: 480, height: 480,
+        borderRadius: '50%', top: -180, right: -120,
+        background: 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%)',
+        pointerEvents: 'none',
       }} />
+      {/* bottom-left glow blob */}
       <Box sx={{
-        position: 'absolute', width: '130%', height: '45%', bottom: '8%', left: '-15%',
-        bgcolor: 'rgba(255,255,255,0.07)', borderRadius: '50% 50% 0 0 / 70% 70% 0 0',
-        transform: 'rotate(-2deg)',
+        position: 'absolute', width: 400, height: 400,
+        borderRadius: '50%', bottom: -140, left: -100,
+        background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
       }} />
-      <Box sx={{
-        position: 'absolute', width: '110%', height: '35%', bottom: '18%', right: '-10%',
-        bgcolor: 'rgba(255,255,255,0.06)', borderRadius: '50% 50% 0 0 / 60% 60% 0 0',
-        transform: 'rotate(3deg)',
-      }} />
-      <Box sx={{
-        position: 'absolute', width: '90%', height: '28%', top: '-5%', left: '-5%',
-        bgcolor: 'rgba(0,0,0,0.08)', borderRadius: '0 0 50% 50% / 0 0 70% 70%',
-        transform: 'rotate(2deg)',
-      }} />
+      {/* SVG wave layers */}
+      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 220" preserveAspectRatio="none"
+          style={{ display: 'block', width: '100%', height: 220 }}>
+          <path fill="rgba(0,0,0,0.18)"
+            d="M0,128L60,117.3C120,107,240,85,360,90.7C480,96,600,128,720,138.7C840,149,960,139,1080,122.7C1200,107,1320,85,1380,74.7L1440,64L1440,220L1380,220C1320,220,1200,220,1080,220C960,220,840,220,720,220C600,220,480,220,360,220C240,220,120,220,60,220L0,220Z"/>
+        </svg>
+      </Box>
+      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 160" preserveAspectRatio="none"
+          style={{ display: 'block', width: '100%', height: 160 }}>
+          <path fill="rgba(0,0,0,0.12)"
+            d="M0,96L80,85.3C160,75,320,53,480,64C640,75,800,117,960,122.7C1120,128,1280,96,1360,80L1440,64L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"/>
+        </svg>
+      </Box>
+      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 100" preserveAspectRatio="none"
+          style={{ display: 'block', width: '100%', height: 100 }}>
+          <path fill="rgba(0,0,0,0.10)"
+            d="M0,64L120,53.3C240,43,480,21,720,32C960,43,1200,85,1320,106.7L1440,128L1440,100L1320,100C1200,100,960,100,720,100C480,100,240,100,120,100L0,100Z"/>
+        </svg>
+      </Box>
     </Box>
   );
 }
@@ -50,17 +66,26 @@ function WaveBackground() {
 const ROLES_OPTIONS = [
   {
     r: 'carrier',
-    icon: <LocalShippingIcon sx={{ fontSize: 28, color: '#888' }} />,
+    icon: <LocalShippingIcon sx={{ fontSize: 26 }} />,
     title: 'Driver / Carrier',
     desc: 'Find profitable loads, track earnings, and grow your trucking business.',
   },
   {
     r: 'broker',
-    icon: <BusinessCenterIcon sx={{ fontSize: 28, color: '#888' }} />,
+    icon: <BusinessCenterIcon sx={{ fontSize: 26 }} />,
     title: 'Freight Broker',
     desc: 'Post loads, reach serious carriers, and manage your freight operations.',
   },
 ];
+
+const inputSx = {
+  color: '#fff',
+  bgcolor: 'rgba(255,255,255,0.06)',
+  borderRadius: 1,
+  '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
+  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
+  '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT + ' !important' },
+};
 
 export default function Signup() {
   const [params] = useSearchParams();
@@ -106,73 +131,106 @@ export default function Signup() {
     if (result) setStep(3);
   };
 
-  const navBar = (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 4, py: 2, position: 'relative', zIndex: 10 }}>
-      <Box component="img" src="/urload-logo.png" alt="Urload" sx={{ height: 32, filter: 'brightness(0) invert(1)' }} />
-    </Box>
-  );
-
-  const banner = (
-    <Box sx={{ bgcolor: 'rgba(0,0,0,0.25)', py: 0.75, textAlign: 'center', position: 'relative', zIndex: 10 }}>
-      <Typography variant="caption" sx={{ color: BRAND_LIGHT, fontWeight: 600, letterSpacing: '0.04em' }}>
-        Free to Start &bull; No Payment Method Required &bull; Cancel Anytime
-      </Typography>
-    </Box>
-  );
-
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-      <WaveBackground />
+      <WaveBg />
+
       <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {navBar}
-        {banner}
+        {/* Nav */}
+        <Box sx={{ px: { xs: 2, sm: 4 }, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box component="img" src="/urload-logo.png" alt="Urload" sx={{ height: 30, filter: 'brightness(0) invert(1)' }} />
+        </Box>
 
-        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: 4 }}>
-          <Paper elevation={0} sx={{
-            width: '100%', maxWidth: 520,
-            bgcolor: '#1a1a2e', borderRadius: 2,
-            overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)',
-          }}>
-            {/* Step content */}
+        {/* Banner */}
+        <Box sx={{ bgcolor: 'rgba(0,0,0,0.22)', py: 0.6, textAlign: 'center' }}>
+          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.7rem' }}>
+            Free to Start &nbsp;&bull;&nbsp; No Payment Method Required &nbsp;&bull;&nbsp; Cancel Anytime
+          </Typography>
+        </Box>
+
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: { xs: 3, sm: 5 } }}>
+          <Box sx={{ width: '100%', maxWidth: 500 }}>
+
+            {/* ── Step 0 — Select Role ─────────────────────────────────────── */}
             {step === 0 && (
-              <Box sx={{ p: 3.5 }}>
-                <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', mb: 0.5 }}>
-                  Step 1 of 3 — Select Your Role
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 3, lineHeight: 1.6 }}>
-                  Select the role that best describes you. This will configure features designed for your account.
-                </Typography>
+              <Box sx={{
+                bgcolor: '#111318', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+                overflow: 'hidden',
+              }}>
+                <Box sx={{ px: { xs: 3, sm: 4 }, pt: 4, pb: 3 }}>
+                  <Typography variant="overline" sx={{ color: BRAND_LIGHT, fontWeight: 700, letterSpacing: '0.1em', fontSize: '0.68rem' }}>
+                    Step 1 of 3
+                  </Typography>
+                  <Typography variant="h5" fontWeight={800} sx={{ color: '#fff', mt: 0.5, mb: 0.75, lineHeight: 1.2 }}>
+                    Select Your Role
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#8a8f9c', lineHeight: 1.65 }}>
+                    Choose the role that best describes you. This will configure features designed specifically for your account.
+                  </Typography>
+                </Box>
 
-                {ROLES_OPTIONS.map(opt => (
-                  <Box
-                    key={opt.r}
-                    onClick={() => setRole(opt.r)}
-                    sx={{
-                      display: 'flex', alignItems: 'center', gap: 2, p: 2, mb: 1.5,
-                      borderRadius: 1.5, border: '1px solid',
-                      borderColor: role === opt.r ? BRAND_LIGHT : 'rgba(255,255,255,0.1)',
-                      bgcolor: role === opt.r ? 'rgba(66,165,245,0.08)' : 'transparent',
-                      cursor: 'pointer', transition: 'all 0.15s',
-                      '&:hover': { borderColor: BRAND_LIGHT, bgcolor: 'rgba(66,165,245,0.05)' },
-                    }}
+                <Box sx={{ px: { xs: 3, sm: 4 }, pb: 1 }}>
+                  {ROLES_OPTIONS.map(opt => {
+                    const selected = role === opt.r;
+                    return (
+                      <Box
+                        key={opt.r}
+                        onClick={() => setRole(opt.r)}
+                        sx={{
+                          display: 'flex', alignItems: 'center', gap: 2,
+                          p: '14px 16px', mb: 1.5, borderRadius: '8px', cursor: 'pointer',
+                          border: '1px solid',
+                          borderColor: selected ? BRAND_LIGHT : 'rgba(255,255,255,0.09)',
+                          bgcolor: selected ? 'rgba(66,165,245,0.08)' : 'rgba(255,255,255,0.02)',
+                          transition: 'border-color 0.15s, background 0.15s',
+                          '&:hover': {
+                            borderColor: selected ? BRAND_LIGHT : 'rgba(255,255,255,0.22)',
+                            bgcolor: selected ? 'rgba(66,165,245,0.08)' : 'rgba(255,255,255,0.04)',
+                          },
+                        }}
+                      >
+                        {/* Custom square checkbox */}
+                        <Box sx={{
+                          width: 20, height: 20, borderRadius: '4px', flexShrink: 0,
+                          border: '2px solid',
+                          borderColor: selected ? BRAND_LIGHT : 'rgba(255,255,255,0.3)',
+                          bgcolor: selected ? BRAND_LIGHT : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.15s',
+                        }}>
+                          {selected && <CheckIcon sx={{ fontSize: 13, color: '#fff' }} />}
+                        </Box>
+
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body1" fontWeight={700} sx={{ color: '#fff', lineHeight: 1.3 }}>
+                            {opt.title}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#8a8f9c', mt: 0.3, lineHeight: 1.5, fontSize: '0.8rem' }}>
+                            {opt.desc}
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ color: selected ? BRAND_LIGHT : '#555', flexShrink: 0 }}>
+                          {opt.icon}
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+
+                <Box sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  px: { xs: 3, sm: 4 }, py: 2.5,
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  mt: 1,
+                }}>
+                  <Button
+                    component={Link} to="/login"
+                    startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />}
+                    sx={{ color: 'rgba(255,255,255,0.55)', textTransform: 'none', fontWeight: 600, fontSize: '0.82rem', '&:hover': { color: '#fff', bgcolor: 'transparent' } }}
                   >
-                    <Checkbox
-                      checked={role === opt.r}
-                      onChange={() => setRole(opt.r)}
-                      onClick={e => e.stopPropagation()}
-                      sx={{ color: 'rgba(255,255,255,0.3)', '&.Mui-checked': { color: BRAND_LIGHT }, p: 0 }}
-                    />
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="body1" fontWeight={700} sx={{ color: '#fff' }}>{opt.title}</Typography>
-                      <Typography variant="body2" sx={{ color: '#9e9e9e', mt: 0.25, lineHeight: 1.5 }}>{opt.desc}</Typography>
-                    </Box>
-                    {opt.icon}
-                  </Box>
-                ))}
-
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3, pt: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <Button component={Link} to="/login" startIcon={<ChevronLeftIcon />}
-                    sx={{ color: BRAND_LIGHT, textTransform: 'none', fontWeight: 600 }}>
                     Login
                   </Button>
                   <Button
@@ -180,7 +238,12 @@ export default function Signup() {
                     endIcon={<ChevronRightIcon />}
                     disabled={!role}
                     onClick={() => setStep(1)}
-                    sx={{ bgcolor: BRAND, '&:hover': { bgcolor: BRAND_MED }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.06em', px: 3 }}
+                    sx={{
+                      bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
+                      textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em',
+                      px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem',
+                      boxShadow: 'none',
+                    }}
                   >
                     Step 2
                   </Button>
@@ -188,23 +251,34 @@ export default function Signup() {
               </Box>
             )}
 
+            {/* ── Step 1 — Business Info ────────────────────────────────────── */}
             {step === 1 && (
-              <Box sx={{ p: 3.5 }}>
-                <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', mb: 0.5 }}>
-                  Step 2 of 3 — Business Info
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 3, lineHeight: 1.6 }}>
-                  Add your business information below. This is used to configure your account and profile.
-                </Typography>
+              <Box sx={{
+                bgcolor: '#111318', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+                overflow: 'hidden',
+              }}>
+                <Box sx={{ px: { xs: 3, sm: 4 }, pt: 4, pb: 3 }}>
+                  <Typography variant="overline" sx={{ color: BRAND_LIGHT, fontWeight: 700, letterSpacing: '0.1em', fontSize: '0.68rem' }}>
+                    Step 2 of 3
+                  </Typography>
+                  <Typography variant="h5" fontWeight={800} sx={{ color: '#fff', mt: 0.5, mb: 0.75, lineHeight: 1.2 }}>
+                    Business Info
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#8a8f9c', lineHeight: 1.65 }}>
+                    Add your business information below. This is used to configure your profile.
+                  </Typography>
+                </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ px: { xs: 3, sm: 4 }, pb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField
                     label={role === 'broker' ? 'Brokerage Name *' : 'Company / DBA Name *'}
                     value={form.company}
                     onChange={e => set('company', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
-                    InputProps={{ sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' } } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    InputProps={{ sx: inputSx }}
                   />
                   {role === 'carrier' && (
                     <TextField
@@ -218,14 +292,17 @@ export default function Signup() {
                         mcState?.valid ? `✓ ${mcState.legal_name}` :
                         mcState?.error || ''
                       }
-                      FormHelperTextProps={{ sx: { color: mcState?.valid ? '#66bb6a' : mcState?.error ? '#f44336' : '#9e9e9e' } }}
-                      InputLabelProps={{ sx: { color: '#9e9e9e' } }}
+                      FormHelperTextProps={{ sx: { color: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : '#6b7280' } }}
+                      InputLabelProps={{ sx: { color: '#6b7280' } }}
                       InputProps={{
-                        sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: mcState?.valid ? '#66bb6a' : mcState?.error ? '#f44336' : 'rgba(255,255,255,0.15)' } },
-                        endAdornment: mcState === 'checking' ? <InputAdornment position="end"><CircularProgress size={14} sx={{ color: '#9e9e9e' }} /></InputAdornment>
-                          : mcState?.valid ? <InputAdornment position="end"><CheckIcon sx={{ fontSize: 16, color: '#66bb6a' }} /></InputAdornment>
-                          : mcState?.error ? <InputAdornment position="end"><ErrorOutlineIcon sx={{ fontSize: 16, color: '#f44336' }} /></InputAdornment>
-                          : null,
+                        sx: { ...inputSx, '& fieldset': { borderColor: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : 'rgba(255,255,255,0.14)' } },
+                        endAdornment: mcState === 'checking'
+                          ? <InputAdornment position="end"><CircularProgress size={14} sx={{ color: '#6b7280' }} /></InputAdornment>
+                          : mcState?.valid
+                            ? <InputAdornment position="end"><CheckIcon sx={{ fontSize: 16, color: '#4ade80' }} /></InputAdornment>
+                            : mcState?.error
+                              ? <InputAdornment position="end"><ErrorOutlineIcon sx={{ fontSize: 16, color: '#f87171' }} /></InputAdornment>
+                              : null,
                       }}
                     />
                   )}
@@ -235,14 +312,22 @@ export default function Signup() {
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
-                    InputProps={{ sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' } } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    InputProps={{ sx: inputSx }}
                   />
                 </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3, pt: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <Button onClick={() => setStep(0)} startIcon={<ChevronLeftIcon />}
-                    sx={{ color: BRAND_LIGHT, textTransform: 'none', fontWeight: 600 }}>
+                <Box sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  px: { xs: 3, sm: 4 }, py: 2.5,
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  mt: 1,
+                }}>
+                  <Button
+                    onClick={() => setStep(0)}
+                    startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />}
+                    sx={{ color: 'rgba(255,255,255,0.55)', textTransform: 'none', fontWeight: 600, fontSize: '0.82rem', '&:hover': { color: '#fff', bgcolor: 'transparent' } }}
+                  >
                     Step 1
                   </Button>
                   <Button
@@ -250,7 +335,12 @@ export default function Signup() {
                     endIcon={<ChevronRightIcon />}
                     disabled={!step2Valid || mcBlocking || mcState === 'checking'}
                     onClick={() => setStep(2)}
-                    sx={{ bgcolor: BRAND, '&:hover': { bgcolor: BRAND_MED }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.06em', px: 3 }}
+                    sx={{
+                      bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
+                      textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em',
+                      px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem',
+                      boxShadow: 'none',
+                    }}
                   >
                     Step 3
                   </Button>
@@ -258,39 +348,50 @@ export default function Signup() {
               </Box>
             )}
 
+            {/* ── Step 2 — Your Info ────────────────────────────────────────── */}
             {step === 2 && (
-              <Box sx={{ p: 3.5 }}>
-                <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', mb: 0.5 }}>
-                  Step 3 of 3 — Your Info
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 3, lineHeight: 1.6 }}>
-                  Add your information below. This is used to generate your profile and login credentials.
-                </Typography>
+              <Box sx={{
+                bgcolor: '#111318', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+                overflow: 'hidden',
+              }}>
+                <Box sx={{ px: { xs: 3, sm: 4 }, pt: 4, pb: 3 }}>
+                  <Typography variant="overline" sx={{ color: BRAND_LIGHT, fontWeight: 700, letterSpacing: '0.1em', fontSize: '0.68rem' }}>
+                    Step 3 of 3
+                  </Typography>
+                  <Typography variant="h5" fontWeight={800} sx={{ color: '#fff', mt: 0.5, mb: 0.75, lineHeight: 1.2 }}>
+                    Your Info
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#8a8f9c', lineHeight: 1.65 }}>
+                    Create your login credentials and personal profile details.
+                  </Typography>
+                </Box>
 
                 {error && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(244,67,54,0.1)', border: '1px solid rgba(244,67,54,0.3)', borderRadius: 1, px: 2, py: 1.25, mb: 2 }}>
-                    <ErrorOutlineIcon sx={{ fontSize: 16, color: '#f44336', flexShrink: 0 }} />
-                    <Typography variant="body2" sx={{ color: '#f44336' }}>{error}</Typography>
+                  <Box sx={{ mx: { xs: 3, sm: 4 }, mb: 1, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: '6px', px: 2, py: 1.25 }}>
+                    <ErrorOutlineIcon sx={{ fontSize: 15, color: '#f87171', flexShrink: 0 }} />
+                    <Typography variant="body2" sx={{ color: '#f87171', fontSize: '0.82rem' }}>{error}</Typography>
                   </Box>
                 )}
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ px: { xs: 3, sm: 4 }, pb: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextField
                     label="Full Name *"
                     value={form.name}
                     onChange={e => set('name', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
-                    InputProps={{ sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' } } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    InputProps={{ sx: inputSx }}
                   />
                   <TextField
-                    label="Email (used to log in) *"
+                    label="Email Address *"
                     type="email"
                     value={form.email}
                     onChange={e => set('email', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
-                    InputProps={{ sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' } } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    InputProps={{ sx: inputSx }}
                   />
                   <TextField
                     label="Password *"
@@ -298,12 +399,12 @@ export default function Signup() {
                     value={form.password}
                     onChange={e => set('password', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
                     InputProps={{
-                      sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: 'rgba(255,255,255,0.15)' } },
+                      sx: inputSx,
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: '#9e9e9e' }}>
+                          <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: '#6b7280' }}>
                             {showPw ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
                           </IconButton>
                         </InputAdornment>
@@ -318,75 +419,110 @@ export default function Signup() {
                     fullWidth size="small"
                     error={!!form.confirmPassword && form.password !== form.confirmPassword}
                     helperText={form.confirmPassword && form.password !== form.confirmPassword ? 'Passwords do not match' : ''}
-                    FormHelperTextProps={{ sx: { color: '#f44336' } }}
-                    InputLabelProps={{ sx: { color: '#9e9e9e' } }}
+                    FormHelperTextProps={{ sx: { color: '#f87171' } }}
+                    InputLabelProps={{ sx: { color: '#6b7280' } }}
                     InputProps={{
-                      sx: { color: '#fff', bgcolor: 'rgba(255,255,255,0.05)', '& fieldset': { borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f44336' : 'rgba(255,255,255,0.15)' } },
+                      sx: {
+                        ...inputSx,
+                        '& fieldset': { borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : 'rgba(255,255,255,0.14)' },
+                      },
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowConfirm(v => !v)} edge="end" size="small" sx={{ color: '#9e9e9e' }}>
+                          <IconButton onClick={() => setShowConfirm(v => !v)} edge="end" size="small" sx={{ color: '#6b7280' }}>
                             {showConfirm ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
                           </IconButton>
                         </InputAdornment>
                       ),
                     }}
                   />
+
+                  <Typography variant="caption" sx={{ color: '#4b5563', lineHeight: 1.6, mt: -0.5 }}>
+                    By clicking "Create Account" you agree to our{' '}
+                    <Typography component="span" variant="caption" sx={{ color: BRAND_LIGHT, cursor: 'pointer' }}>
+                      Terms of Service
+                    </Typography>
+                  </Typography>
+
+                  <Button
+                    fullWidth variant="contained"
+                    disabled={!step3Valid || loading}
+                    onClick={handleSignup}
+                    startIcon={loading ? <CircularProgress size={15} color="inherit" /> : null}
+                    sx={{
+                      bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
+                      textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em',
+                      py: 1.25, borderRadius: '6px', boxShadow: 'none', fontSize: '0.85rem',
+                    }}
+                  >
+                    {loading ? 'Creating Account…' : 'Create Account'}
+                  </Button>
                 </Box>
 
-                <Typography variant="caption" sx={{ color: '#616161', display: 'block', mt: 2, lineHeight: 1.6 }}>
-                  By clicking "Create Account" you are agreeing to our{' '}
-                  <Typography component="span" variant="caption" sx={{ color: BRAND_LIGHT, cursor: 'pointer' }}>Terms of Service</Typography>
-                </Typography>
-
-                <Button
-                  fullWidth
-                  variant="contained"
-                  disabled={!step3Valid || loading}
-                  onClick={handleSignup}
-                  sx={{ mt: 2, bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', py: 1.25 }}
-                  startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
-                >
-                  {loading ? 'Creating…' : 'Create Account'}
-                </Button>
-
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, pt: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                  <Button onClick={() => setStep(1)} startIcon={<ChevronLeftIcon />}
-                    sx={{ color: BRAND_LIGHT, textTransform: 'none', fontWeight: 600 }}>
+                <Box sx={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+                  px: { xs: 3, sm: 4 }, py: 2,
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                }}>
+                  <Button
+                    onClick={() => setStep(1)}
+                    startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />}
+                    sx={{ color: 'rgba(255,255,255,0.55)', textTransform: 'none', fontWeight: 600, fontSize: '0.82rem', '&:hover': { color: '#fff', bgcolor: 'transparent' } }}
+                  >
                     Step 2
                   </Button>
                 </Box>
               </Box>
             )}
 
+            {/* ── Step 3 — Success ──────────────────────────────────────────── */}
             {step === 3 && (
-              <Box sx={{ p: 4, textAlign: 'center' }}>
-                <Box sx={{ width: 64, height: 64, borderRadius: '50%', bgcolor: 'rgba(66,165,245,0.15)', border: `2px solid ${BRAND_LIGHT}`, display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 3 }}>
+              <Box sx={{
+                bgcolor: '#111318', borderRadius: '12px',
+                border: '1px solid rgba(255,255,255,0.07)',
+                boxShadow: '0 24px 60px rgba(0,0,0,0.5)',
+                p: { xs: 4, sm: 5 }, textAlign: 'center',
+              }}>
+                <Box sx={{
+                  width: 64, height: 64, borderRadius: '50%', mx: 'auto', mb: 3,
+                  bgcolor: 'rgba(66,165,245,0.12)', border: `1.5px solid ${BRAND_LIGHT}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
                   <CheckCircleIcon sx={{ fontSize: 32, color: BRAND_LIGHT }} />
                 </Box>
-                <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', mb: 1 }}>Welcome to Urload!</Typography>
-                <Typography variant="body2" sx={{ color: '#9e9e9e', mb: 4 }}>
-                  Your account is ready. Let's get started.
+                <Typography variant="h5" fontWeight={800} sx={{ color: '#fff', mb: 1 }}>
+                  Welcome to Urload!
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#8a8f9c', mb: 4 }}>
+                  Your account is ready. Let's get you started.
                 </Typography>
                 <Button
                   variant="contained"
                   endIcon={<ChevronRightIcon />}
                   onClick={() => navigate(role === 'broker' ? '/broker/dashboard' : '/carrier/dashboard')}
-                  sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', px: 4, py: 1.25 }}
+                  sx={{
+                    bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
+                    textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em',
+                    px: 4, py: 1.25, borderRadius: '6px', boxShadow: 'none',
+                  }}
                 >
                   Go to Dashboard
                 </Button>
               </Box>
             )}
-          </Paper>
 
-          {step === 0 && (
-            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', textAlign: 'center', mt: 2 }}>
-              Already have an account?{' '}
-              <Typography component={Link} to="/login" variant="body2" sx={{ color: '#fff', fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
-                Sign in
+            {step === 0 && (
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.45)', textAlign: 'center', mt: 2.5, fontSize: '0.82rem' }}>
+                Already have an account?{' '}
+                <Typography component={Link} to="/login" variant="body2" sx={{
+                  color: 'rgba(255,255,255,0.75)', fontWeight: 700, textDecoration: 'none', fontSize: '0.82rem',
+                  '&:hover': { color: '#fff' },
+                }}>
+                  Sign in
+                </Typography>
               </Typography>
-            </Typography>
-          )}
+            )}
+
+          </Box>
         </Box>
       </Box>
     </Box>
