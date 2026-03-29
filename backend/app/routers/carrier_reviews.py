@@ -64,6 +64,8 @@ class CarrierReviewOut(BaseModel):
     comment: Optional[str]
     is_anonymous: bool
     created_at: datetime
+    broker_name: Optional[str] = None
+    broker_avatar_url: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
@@ -174,13 +176,21 @@ def get_carrier_reviews(
     current_user: User = Depends(get_current_user),
 ):
     full_id = _resolve_carrier_id(carrier_id, db)
-    return (
-        db.query(CarrierReview)
+    rows = (
+        db.query(CarrierReview, User)
+        .outerjoin(User, User.id == CarrierReview.broker_id)
         .filter(CarrierReview.carrier_id == full_id)
         .order_by(desc(CarrierReview.created_at))
         .limit(50)
         .all()
     )
+    result = []
+    for review, broker in rows:
+        out = CarrierReviewOut.model_validate(review)
+        out.broker_name = broker.name if broker else None
+        out.broker_avatar_url = broker.avatar_url if broker else None
+        result.append(out)
+    return result
 
 
 @router.get("/carrier/{carrier_id}/stats", response_model=CarrierStatsOut)

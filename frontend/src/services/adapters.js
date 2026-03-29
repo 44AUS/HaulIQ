@@ -107,18 +107,19 @@ export function adaptHistory(h) {
 
 export function adaptReview(r) {
   return {
-    id:            String(r.id),
-    brokerId:      r.broker_id ? String(r.broker_id) : null,
-    carrierId:     r.carrier_id ? String(r.carrier_id) : null,
-    carrierName:   r.carrier_name  || (r.is_anonymous ? 'Anonymous Driver' : 'Driver'),
-    brokerName:    r.broker_name   || (r.is_anonymous ? 'Anonymous Broker' : 'Broker'),
-    rating:        r.rating,
-    communication: r.communication || null,
-    accuracy:      r.accuracy      || null,
-    paymentDays:   r.payment_days  || null,
-    wouldWorkAgain: r.would_work_again ?? null,
-    comment:       r.comment       || '',
-    isAnonymous:   r.is_anonymous  || false,
-    createdAt:     r.created_at,
+    id:              String(r.id),
+    brokerId:        r.broker_id ? String(r.broker_id) : null,
+    carrierId:       r.carrier_id ? String(r.carrier_id) : null,
+    brokerName:      r.broker_name || 'Broker',
+    brokerAvatarUrl: r.broker_avatar_url || null,
+    carrierName:     r.carrier_name || 'Driver',
+    rating:          r.rating,
+    communication:   r.communication || null,
+    accuracy:        r.accuracy      || null,
+    paymentDays:     r.payment_days  || null,
+    wouldWorkAgain:  r.would_work_again ?? null,
+    comment:         r.comment       || '',
+    isAnonymous:     false,
+    createdAt:       r.created_at,
   };
 }

@@ -158,7 +158,15 @@ export default function CarrierProfile() {
       comment: form.comment || null,
       is_anonymous: false,
     })
-      .then(() => { setSubmitted(true); setShowForm(false); })
+      .then(() => {
+        setSubmitted(true);
+        setShowForm(false);
+        setCanReview(false);
+        setCanReviewReason('already_reviewed');
+        carrierReviewsApi.get(carrierId)
+          .then(data => setReviews(Array.isArray(data) ? data.map(adaptReview) : []))
+          .catch(() => {});
+      })
       .catch(err => alert(err.message));
   };
 
@@ -383,11 +391,24 @@ export default function CarrierProfile() {
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 1.5 }}>
                     <Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-                        <Avatar sx={{ width: 28, height: 28, bgcolor: 'action.selected', fontSize: 12, fontWeight: 700 }}>
-                          {review.isAnonymous ? '?' : review.brokerName.charAt(0)}
+                        <Avatar
+                          component={review.brokerId ? Link : 'div'}
+                          to={review.brokerId ? `/b/${review.brokerId.slice(0, 8)}` : undefined}
+                          state={review.brokerId ? { brokerId: review.brokerId } : undefined}
+                          src={review.brokerAvatarUrl || undefined}
+                          sx={{ width: 28, height: 28, bgcolor: 'primary.dark', fontSize: 12, fontWeight: 700, textDecoration: 'none', cursor: review.brokerId ? 'pointer' : 'default' }}
+                        >
+                          {review.brokerName.charAt(0)}
                         </Avatar>
-                        <Typography variant="body2" fontWeight={600}>
-                          {review.isAnonymous ? 'Anonymous Broker' : review.brokerName}
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          component={review.brokerId ? Link : 'span'}
+                          to={review.brokerId ? `/b/${review.brokerId.slice(0, 8)}` : undefined}
+                          state={review.brokerId ? { brokerId: review.brokerId } : undefined}
+                          sx={{ textDecoration: 'none', color: 'text.primary', '&:hover': review.brokerId ? { textDecoration: 'underline' } : {} }}
+                        >
+                          {review.brokerName}
                         </Typography>
                         {review.wouldWorkAgain === true && (
                           <Chip label="✓ Would book again" size="small" color="success" variant="outlined" />
