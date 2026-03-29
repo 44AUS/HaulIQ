@@ -106,7 +106,7 @@ export const subscriptionsApi = {
 
 // ─── Carrier reviews ──────────────────────────────────────────────────────────
 export const carrierReviewsApi = {
-  post:      (data)     => request('/api/carrier-reviews', { method: 'POST', body: JSON.stringify(data) }),
+  post:      (data)     => request('/api/carrier-reviews/', { method: 'POST', body: JSON.stringify(data) }),
   get:       (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}`),
   stats:     (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/stats`),
   canReview: (carrierId) => request(`/api/carrier-reviews/carrier/${carrierId}/can-review`),

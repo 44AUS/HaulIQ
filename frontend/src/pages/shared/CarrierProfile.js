@@ -3,7 +3,6 @@ import { useParams, useLocation, Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress,
-  FormControlLabel, Checkbox,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -157,7 +156,7 @@ export default function CarrierProfile() {
       load_care: form.loadCare || null,
       would_work_again: form.wouldWorkAgain,
       comment: form.comment || null,
-      is_anonymous: form.isAnonymous,
+      is_anonymous: false,
     })
       .then(() => { setSubmitted(true); setShowForm(false); })
       .catch(err => alert(err.message));
@@ -351,17 +350,11 @@ export default function CarrierProfile() {
                 value={form.comment}
                 onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
               />
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <FormControlLabel
-                  control={<Checkbox size="small" checked={form.isAnonymous} onChange={e => setForm(f => ({ ...f, isAnonymous: e.target.checked }))} />}
-                  label={<Typography variant="body2">Submit anonymously</Typography>}
-                />
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
-                  <Button variant="contained" size="small" onClick={handleSubmit} disabled={form.rating === 0}>
-                    Submit Review
-                  </Button>
-                </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button variant="contained" size="small" onClick={handleSubmit} disabled={form.rating === 0}>
+                  Submit Review
+                </Button>
               </Box>
             </Box>
           </CardContent>
