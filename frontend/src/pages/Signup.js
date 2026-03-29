@@ -122,8 +122,6 @@ export default function Signup() {
     </Box>
   );
 
-  const stepLabel = step < 3 ? `Step ${step + 1} of 3` : null;
-
   return (
     <Box sx={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
       <WaveBackground />
