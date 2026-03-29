@@ -78,13 +78,18 @@ const ROLES_OPTIONS = [
   },
 ];
 
-const inputSx = {
-  color: '#fff',
-  bgcolor: 'rgba(255,255,255,0.06)',
-  borderRadius: 1,
-  '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
-  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
-  '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT + ' !important' },
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    color: '#fff',
+    bgcolor: 'rgba(255,255,255,0.06)',
+    borderRadius: '6px',
+    '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
+    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
+    '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT },
+  },
+  '& .MuiInputLabel-root': { color: '#6b7280' },
+  '& .MuiInputLabel-root.Mui-focused': { color: BRAND_LIGHT },
+  '& .MuiInputLabel-shrink': { bgcolor: '#111318', px: 0.5, borderRadius: '2px' },
 };
 
 export default function Signup() {
@@ -277,8 +282,7 @@ export default function Signup() {
                     value={form.company}
                     onChange={e => set('company', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{ sx: inputSx }}
+                    sx={fieldSx}
                   />
                   {role === 'carrier' && (
                     <TextField
@@ -293,9 +297,13 @@ export default function Signup() {
                         mcState?.error || ''
                       }
                       FormHelperTextProps={{ sx: { color: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : '#6b7280' } }}
-                      InputLabelProps={{ sx: { color: '#6b7280' } }}
+                      sx={{
+                        ...fieldSx,
+                        '& .MuiOutlinedInput-root fieldset': {
+                          borderColor: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : 'rgba(255,255,255,0.14)',
+                        },
+                      }}
                       InputProps={{
-                        sx: { ...inputSx, '& fieldset': { borderColor: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : 'rgba(255,255,255,0.14)' } },
                         endAdornment: mcState === 'checking'
                           ? <InputAdornment position="end"><CircularProgress size={14} sx={{ color: '#6b7280' }} /></InputAdornment>
                           : mcState?.valid
@@ -312,8 +320,7 @@ export default function Signup() {
                     value={form.phone}
                     onChange={e => set('phone', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{ sx: inputSx }}
+                    sx={fieldSx}
                   />
                 </Box>
 
@@ -381,8 +388,7 @@ export default function Signup() {
                     value={form.name}
                     onChange={e => set('name', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{ sx: inputSx }}
+                    sx={fieldSx}
                   />
                   <TextField
                     label="Email Address *"
@@ -390,8 +396,7 @@ export default function Signup() {
                     value={form.email}
                     onChange={e => set('email', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{ sx: inputSx }}
+                    sx={fieldSx}
                   />
                   <TextField
                     label="Password *"
@@ -399,9 +404,8 @@ export default function Signup() {
                     value={form.password}
                     onChange={e => set('password', e.target.value)}
                     fullWidth size="small"
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    sx={fieldSx}
                     InputProps={{
-                      sx: inputSx,
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: '#6b7280' }}>
@@ -420,12 +424,13 @@ export default function Signup() {
                     error={!!form.confirmPassword && form.password !== form.confirmPassword}
                     helperText={form.confirmPassword && form.password !== form.confirmPassword ? 'Passwords do not match' : ''}
                     FormHelperTextProps={{ sx: { color: '#f87171' } }}
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{
-                      sx: {
-                        ...inputSx,
-                        '& fieldset': { borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : 'rgba(255,255,255,0.14)' },
+                    sx={{
+                      ...fieldSx,
+                      '& .MuiOutlinedInput-root fieldset': {
+                        borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : 'rgba(255,255,255,0.14)',
                       },
+                    }}
+                    InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton onClick={() => setShowConfirm(v => !v)} edge="end" size="small" sx={{ color: '#6b7280' }}>

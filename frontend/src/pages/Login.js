@@ -54,13 +54,18 @@ function WaveBg() {
   );
 }
 
-const inputSx = {
-  color: '#fff',
-  bgcolor: 'rgba(255,255,255,0.06)',
-  borderRadius: 1,
-  '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
-  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
-  '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT + ' !important' },
+const fieldSx = {
+  '& .MuiOutlinedInput-root': {
+    color: '#fff',
+    bgcolor: 'rgba(255,255,255,0.06)',
+    borderRadius: '6px',
+    '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
+    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
+    '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT },
+  },
+  '& .MuiInputLabel-root': { color: '#6b7280' },
+  '& .MuiInputLabel-root.Mui-focused': { color: BRAND_LIGHT },
+  '& .MuiInputLabel-shrink': { bgcolor: '#111318', px: 0.5, borderRadius: '2px' },
 };
 
 export default function Login() {
@@ -138,8 +143,7 @@ export default function Login() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     fullWidth size="small" required
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
-                    InputProps={{ sx: inputSx }}
+                    sx={fieldSx}
                   />
                   <TextField
                     label="Password"
@@ -147,9 +151,8 @@ export default function Login() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     fullWidth size="small" required
-                    InputLabelProps={{ sx: { color: '#6b7280' } }}
+                    sx={fieldSx}
                     InputProps={{
-                      sx: inputSx,
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: '#6b7280' }}>
