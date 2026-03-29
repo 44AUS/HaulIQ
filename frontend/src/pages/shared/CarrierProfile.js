@@ -75,6 +75,7 @@ export default function CarrierProfile() {
   const [submitted, setSubmitted] = useState(false);
   const [networkState, setNetworkState] = useState({ status: 'none', entry_id: null, loading: true });
   const [canReview, setCanReview] = useState(false);
+  const [canReviewReason, setCanReviewReason] = useState(null);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
   const [form, setForm] = useState({
@@ -100,8 +101,8 @@ export default function CarrierProfile() {
         .then(data => setIsBlocked(data.is_blocked))
         .catch(() => {});
       carrierReviewsApi.canReview(carrierId)
-        .then(data => setCanReview(data.can_review))
-        .catch(() => setCanReview(false));
+        .then(data => { setCanReview(data.can_review); setCanReviewReason(data.reason); })
+        .catch(() => { setCanReview(false); setCanReviewReason(null); });
     } else {
       setNetworkState(prev => ({ ...prev, loading: false }));
     }
@@ -229,7 +230,9 @@ export default function CarrierProfile() {
                       </Button>
                     )
                   )}
-                  {canReview && !submitted && (
+                  {submitted || canReviewReason === 'already_reviewed' ? (
+                    <Chip icon={<CheckCircleIcon />} label="Reviewed" color="success" size="small" />
+                  ) : canReview ? (
                     <Button
                       variant="contained"
                       size="small"
@@ -238,7 +241,14 @@ export default function CarrierProfile() {
                     >
                       Review
                     </Button>
-                  )}
+                  ) : canReviewReason === 'no_completed_load' ? (
+                    <Chip
+                      label="Complete a load to review"
+                      size="small"
+                      variant="outlined"
+                      sx={{ color: 'text.disabled', borderColor: 'divider', fontSize: '0.7rem' }}
+                    />
+                  ) : null}
                   <Button
                     variant="outlined"
                     color={isBlocked ? 'error' : 'inherit'}
@@ -252,7 +262,6 @@ export default function CarrierProfile() {
                   </Button>
                 </Box>
               )}
-              {submitted && <Chip icon={<CheckCircleIcon />} label="Submitted" color="success" size="small" sx={{ mt: 1 }} />}
             </Box>
           </Box>
 
