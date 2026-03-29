@@ -23,6 +23,7 @@ function ConnectionRow({ conn, onRemove, profilePath, userRole }) {
         <Avatar
           component={Link}
           to={profilePath(conn)}
+          state={{ carrierId: conn.user_id, brokerId: conn.user_id }}
           src={conn.avatar_url || undefined}
           sx={{ width: 56, height: 56, fontWeight: 700, fontSize: '1.2rem', textDecoration: 'none', flexShrink: 0, bgcolor: 'primary.dark' }}
         >
@@ -34,6 +35,7 @@ function ConnectionRow({ conn, onRemove, profilePath, userRole }) {
           <Typography
             component={Link}
             to={profilePath(conn)}
+            state={{ carrierId: conn.user_id, brokerId: conn.user_id }}
             variant="body1"
             fontWeight={700}
             noWrap
@@ -70,6 +72,7 @@ function ConnectionRow({ conn, onRemove, profilePath, userRole }) {
             <MenuItem
               component={Link}
               to={profilePath(conn)}
+              state={{ carrierId: conn.user_id, brokerId: conn.user_id }}
               onClick={() => setAnchor(null)}
               sx={{ fontSize: '0.875rem' }}
             >
