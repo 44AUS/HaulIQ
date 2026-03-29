@@ -108,9 +108,7 @@ export default function Signup() {
 
   const navBar = (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 4, py: 2, position: 'relative', zIndex: 10 }}>
-      <Typography variant="h5" fontWeight={900} sx={{ color: '#fff', letterSpacing: '-0.5px' }}>
-        ur<span style={{ color: BRAND_LIGHT }}>load</span>
-      </Typography>
+      <Box component="img" src="/urload-logo.png" alt="Urload" sx={{ height: 32, filter: 'brightness(0) invert(1)' }} />
     </Box>
   );
 

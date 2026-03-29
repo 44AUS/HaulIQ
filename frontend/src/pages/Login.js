@@ -94,9 +94,7 @@ export default function Login() {
       <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {/* Nav */}
         <Box sx={{ px: 4, py: 2 }}>
-          <Typography variant="h5" fontWeight={900} sx={{ color: '#fff', letterSpacing: '-0.5px' }}>
-            ur<span style={{ color: BRAND_LIGHT }}>load</span>
-          </Typography>
+          <Box component="img" src="/urload-logo.png" alt="Urload" sx={{ height: 32, filter: 'brightness(0) invert(1)' }} />
         </Box>
 
         {/* Banner */}
