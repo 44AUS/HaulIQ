@@ -59,6 +59,7 @@ export const messagesApi = {
   unreadCount:    ()                          => request('/api/messages/unread-count'),
   typing:         (id)                        => request(`/api/messages/conversations/${id}/typing`, { method: 'POST' }),
   typingStatus:   (id)                        => request(`/api/messages/conversations/${id}/typing`),
+  presence:       ()                          => request('/api/messages/presence', { method: 'POST' }),
 };
 
 // ─── Bids ──────────────────────────────────────────────────────────────────────

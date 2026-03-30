@@ -55,18 +55,24 @@ class ConversationOut(BaseModel):
     messages: list[MessageOut]
     is_blocked_by_me: bool = False
     active_booking_id: Optional[UUID] = None
+    other_last_active_at: Optional[datetime] = None
     model_config = {"from_attributes": True}
 
 
 def _enrich(c: Conversation, db: Session = None, current_user_id=None) -> ConversationOut:
     is_blocked = False
     active_booking_id = None
+    other_last_active_at = None
 
     if db is not None and current_user_id is not None:
         other_id = c.broker_id if str(c.carrier_id) == str(current_user_id) else c.carrier_id
         is_blocked = db.query(UserBlock).filter_by(
             blocker_id=current_user_id, blocked_id=other_id
         ).first() is not None
+
+        other_user = db.query(User).filter(User.id == other_id).first()
+        if other_user:
+            other_last_active_at = other_user.last_active_at
 
         # Check for an in-transit booking between this carrier and broker
         booking = (
@@ -96,6 +102,7 @@ def _enrich(c: Conversation, db: Session = None, current_user_id=None) -> Conver
         messages=[MessageOut.model_validate(m, from_attributes=True) for m in c.messages],
         is_blocked_by_me=is_blocked,
         active_booking_id=active_booking_id,
+        other_last_active_at=other_last_active_at,
     )
 
 
@@ -304,3 +311,13 @@ def unread_count(
             Message.is_read == False,  # noqa: E712
         ).count()
     return {"unread": total}
+
+
+@router.post("/presence", status_code=204)
+def update_presence(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update the current user's last_active_at timestamp."""
+    current_user.last_active_at = datetime.utcnow()
+    db.commit()

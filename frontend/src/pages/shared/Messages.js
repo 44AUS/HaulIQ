@@ -273,6 +273,40 @@ function TypingIndicator() {
   );
 }
 
+function getPresenceInfo(isoString) {
+  if (!isoString) return null;
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHr = Math.floor(diffMs / 3600000);
+  if (diffMin < 5) return { label: 'Active now', color: '#44b700' };
+  if (diffMin < 60) return { label: `Active ${diffMin}m ago`, color: '#44b700' };
+  if (diffHr < 24) return { label: `Active ${diffHr}h ago`, color: '#bdbdbd' };
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays === 1) return { label: 'Active yesterday', color: '#bdbdbd' };
+  return { label: `Active ${diffDays}d ago`, color: '#bdbdbd' };
+}
+
+function PresenceDot({ lastActiveAt, size = 10, withLabel = false }) {
+  const info = getPresenceInfo(lastActiveAt);
+  if (!info) return null;
+  const isActive = info.color === '#44b700';
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{
+        width: size, height: size, borderRadius: '50%',
+        bgcolor: info.color,
+        boxShadow: isActive ? `0 0 0 2px #fff, 0 0 0 3px ${info.color}` : 'none',
+        flexShrink: 0,
+      }} />
+      {withLabel && (
+        <Typography variant="caption" sx={{ fontSize: 11, color: isActive ? 'success.main' : 'text.disabled', fontWeight: isActive ? 600 : 400 }}>
+          {info.label}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
 export default function Messages() {
   const { user } = useAuth();
   const location = useLocation();
@@ -293,6 +327,13 @@ export default function Messages() {
   const typingTimeoutRef = useRef(null);
   const [viewerDoc, setViewerDoc] = useState(null);
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
+
+  // Ping presence every 30s while on this page
+  useEffect(() => {
+    messagesApi.presence().catch(() => {});
+    const interval = setInterval(() => messagesApi.presence().catch(() => {}), 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
@@ -566,8 +607,15 @@ export default function Messages() {
                 >
                   <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
                     <ListItemAvatar sx={{ minWidth: 42 }}>
-                      <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
-                        <UserAvatar name={label} src={otherAvatar} size={34} />
+                      <Box sx={{ position: 'relative', width: 34, height: 34 }}>
+                        <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
+                          <UserAvatar name={label} src={otherAvatar} size={34} />
+                        </Box>
+                        {c.other_last_active_at && (
+                          <Box sx={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid', borderColor: 'background.paper', borderRadius: '50%' }}>
+                            <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
+                          </Box>
+                        )}
                       </Box>
                     </ListItemAvatar>
                     <ListItemText
@@ -584,6 +632,7 @@ export default function Messages() {
                       secondary={
                         <Box>
                           {c.load_id && <Typography variant="caption" color="text.secondary" display="block" noWrap>{label}</Typography>}
+                          {c.other_last_active_at && <PresenceDot lastActiveAt={c.other_last_active_at} size={7} withLabel />}
                           {lastMsg && <Typography variant="caption" color="text.disabled" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
                         </Box>
                       }
@@ -635,8 +684,13 @@ export default function Messages() {
               <ArrowBackIcon fontSize="small" />
             </IconButton>
             {otherParty && (
-              <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0 }}>
-                <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={34} />
+              <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0, position: 'relative' }}>
+                <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
+                {activeConvo.other_last_active_at && (
+                  <Box sx={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid', borderColor: 'background.paper', borderRadius: '50%' }}>
+                    <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={10} />
+                  </Box>
+                )}
               </Box>
             )}
             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -648,7 +702,13 @@ export default function Messages() {
               ) : (
                 <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
               )}
-              {activeConvo.load_id && <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>}
+              {activeConvo.other_last_active_at
+                ? <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={7} withLabel />
+                : activeConvo.load_id && <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
+              }
+              {activeConvo.other_last_active_at && activeConvo.load_id && (
+                <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
+              )}
             </Box>
             {user?.role === 'broker' && activeConvo.active_booking_id && (
               <Button component={Link} to={`/broker/track/${activeConvo.active_booking_id}`}

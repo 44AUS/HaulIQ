@@ -47,6 +47,7 @@ class User(Base):
     vetting_score     = Column(String(20), nullable=True)
     vetting_flags     = Column(String, nullable=True)
     vetting_summary   = Column(String, nullable=True)
+    last_active_at    = Column(DateTime, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
     updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
