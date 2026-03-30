@@ -523,7 +523,7 @@ export default function LoadDetail() {
                         Instant Book · Not on allowlist
                       </Button>
                     )}
-                    {load.bookNow && !load.instantBook && (
+                    {load.bookNow && !canInstantBook && (
                       <Button onClick={handleBookNow} variant="contained" fullWidth startIcon={<EventAvailableIcon />} size="large">
                         Book Now
                       </Button>
