@@ -5,7 +5,7 @@ from app.models.user import User, UserRole, UserPlan
 from app.schemas.user import UserCreate, UserLogin, UserOut, UserUpdate, Token
 from app.utils.password import hash_password, verify_password
 from app.utils.jwt import create_access_token
-from app.utils.fmcsa import _strip_mc
+from app.utils.fmcsa import verify_mc, _strip_mc
 from app.utils.vetting import vet_carrier, vet_broker
 from app.middleware.auth import get_current_user
 from app.config import get_settings
