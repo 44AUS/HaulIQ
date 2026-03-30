@@ -27,6 +27,8 @@ class LoadCreate(BaseModel):
     pickup_lng: Optional[float] = None
     delivery_lat: Optional[float] = None
     delivery_lng: Optional[float] = None
+    instant_book: bool = False
+    book_now: bool = True
 
     @field_validator("rate")
     @classmethod
@@ -62,6 +64,8 @@ class LoadUpdate(BaseModel):
     pickup_lng: Optional[float] = None
     delivery_lat: Optional[float] = None
     delivery_lng: Optional[float] = None
+    instant_book: Optional[bool] = None
+    book_now: Optional[bool] = None
 
 
 class LoadOut(BaseModel):
@@ -89,6 +93,8 @@ class LoadOut(BaseModel):
     status: LoadStatus
     is_hot: bool
     is_saved: bool = False
+    instant_book: bool = False
+    book_now: bool = True
     view_count: int
     notes: Optional[str]
     posted_at: datetime

@@ -6,10 +6,12 @@ import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing
 import {
   Box, Typography, Button, Paper, Grid, TextField, FormControl,
   InputLabel, Select, MenuItem, InputAdornment, CircularProgress, Alert,
+  FormControlLabel, Switch,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import BoltIcon from '@mui/icons-material/Bolt';
 
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 const DIMS = ['48x102', '53x102', '40x96', '28x102'];
@@ -27,6 +29,7 @@ export default function PostLoad() {
     pickup: '', delivery: '',
     equipment: 'Dry Van', weight: '', dims: '48x102',
     commodity: '', rate: '', miles: '', deadhead: '', notes: '',
+    instantBook: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -101,6 +104,7 @@ export default function PostLoad() {
       pickup_lng:       form.pickupLng || null,
       delivery_lat:     form.deliveryLat || null,
       delivery_lng:     form.deliveryLng || null,
+      instant_book:     form.instantBook,
     })
       .then(() => setPosted(true))
       .catch(err => { setError(err.message); setSubmitting(false); });
@@ -121,6 +125,7 @@ export default function PostLoad() {
             pickupLat: null, pickupLng: null, deliveryLat: null, deliveryLng: null,
             pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102',
             commodity: '', rate: '', miles: '', deadhead: '', notes: '',
+            instantBook: false,
           });
         }}>
           Post Another
@@ -256,6 +261,22 @@ export default function PostLoad() {
               }
               FormHelperTextProps={{ sx: { color: parseFloat(form.rate) < 1500 ? 'warning.main' : 'text.secondary' } }}
             />
+          </Box>
+
+          {/* Instant Book */}
+          <Box sx={{ border: '1px solid', borderColor: form.instantBook ? 'success.main' : 'divider', borderRadius: 2, p: 2 }}>
+            <FormControlLabel
+              control={<Switch checked={form.instantBook} onChange={e => set('instantBook', e.target.checked)} color="success" />}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <BoltIcon fontSize="small" sx={{ color: form.instantBook ? 'success.main' : 'text.disabled' }} />
+                  <Typography variant="body2" fontWeight={600}>Enable Instant Book</Typography>
+                </Box>
+              }
+            />
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5, ml: 4.5 }}>
+              Carriers on your Instant Book allowlist can book this load immediately without approval.
+            </Typography>
           </Box>
 
           {/* Notes */}
