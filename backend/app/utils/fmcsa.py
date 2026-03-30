@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 
 FMCSA_BASE = "https://mobile.fmcsa.dot.gov/qc/services/carriers/mc-number"
-TIMEOUT = 8  # seconds
+TIMEOUT = 20  # seconds
 
 
 @dataclass

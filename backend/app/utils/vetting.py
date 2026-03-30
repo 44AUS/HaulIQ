@@ -28,6 +28,17 @@ async def vet_carrier(company: str, mc_number: str, api_key: str) -> dict:
 
     result = await verify_mc(mc_number, api_key)
 
+    # Timeout or API unavailable — allow signup but flag for manual review
+    if result.error and ("timed out" in result.error.lower() or "unavailable" in result.error.lower()):
+        return {
+            "ok": True,
+            "status": "manual_review",
+            "score": "50",
+            "flags": json.dumps(["fmcsa_unavailable"]),
+            "summary": "FMCSA verification unavailable — manual review required.",
+            "fmcsa": result,
+        }
+
     if not result.found:
         return {
             "ok": False,
@@ -112,6 +123,16 @@ async def vet_broker(company: str, mc_number: str, api_key: str) -> dict:
         }
 
     result = await verify_mc(mc_number, api_key)
+
+    if result.error and ("timed out" in result.error.lower() or "unavailable" in result.error.lower()):
+        return {
+            "ok": True,
+            "status": "manual_review",
+            "score": "50",
+            "flags": json.dumps(["fmcsa_unavailable"]),
+            "summary": "FMCSA verification unavailable — manual review required.",
+            "fmcsa": result,
+        }
 
     if not result.found:
         return {

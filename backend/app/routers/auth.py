@@ -60,6 +60,16 @@ async def verify_mc_number(mc_number: str, db: Session = Depends(get_db)):
     # FMCSA verification
     result = await verify_mc(mc_number, settings.fmcsa_api_key)
 
+    # Timeout / API unreachable — return partial success so signup isn't blocked
+    if result.error and ("timed out" in result.error.lower() or "unavailable" in result.error.lower()):
+        return {
+            "valid": True,
+            "legal_name": None,
+            "operating_status": "unverified",
+            "dot_number": None,
+            "mc_number": mc_clean,
+        }
+
     if not result.found:
         raise HTTPException(status_code=404, detail=result.error or "MC number not found in FMCSA database")
 
