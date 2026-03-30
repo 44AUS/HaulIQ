@@ -1,17 +1,21 @@
-import React from 'react';
 import { Box } from '@mui/material';
 
-// Each wave is a progressively lighter tint of the brand blue,
-// matching the layered wave style from the reference screenshot.
+// 7 solid-color wave bands, each filling from its curve edge down to the bottom.
+// Colors step from dark blue → light blue, matching the layered ocean effect in the reference.
 const WAVES = [
-  { color: '#1976d2', d: 'M0,90 C480,25 960,190 1440,105 L1440,900 L0,900 Z' },
-  { color: '#1e88e5', d: 'M0,235 C480,160 960,315 1440,240 L1440,900 L0,900 Z' },
-  { color: '#2196f3', d: 'M0,375 C360,305 720,445 1080,375 C1260,340 1380,410 1440,375 L1440,900 L0,900 Z' },
-  { color: '#42a5f5', d: 'M0,505 C480,435 960,575 1440,505 L1440,900 L0,900 Z' },
-  { color: '#64b5f6', d: 'M0,635 C360,570 720,700 1080,635 C1260,603 1380,668 1440,640 L1440,900 L0,900 Z' },
-  { color: '#90caf9', d: 'M0,755 C480,700 960,810 1440,755 L1440,900 L0,900 Z' },
-  { color: '#bbdefb', d: 'M0,855 C360,830 720,875 1080,850 C1260,838 1380,865 1440,855 L1440,900 L0,900 Z' },
+  { color: '#1769c5', y: 110, a: 68 },
+  { color: '#1e80d8', y: 235, a: 68 },
+  { color: '#2494e6', y: 358, a: 65 },
+  { color: '#2fa8f2', y: 478, a: 62 },
+  { color: '#47baf9', y: 595, a: 58 },
+  { color: '#6ecbfc', y: 708, a: 52 },
+  { color: '#9ddcfe', y: 818, a: 44 },
 ];
+
+// Generates a smooth single-arc S-curve wave path that fills to the bottom of the SVG
+function path(y, a) {
+  return `M0,${y} C480,${y - a} 960,${y + a} 1440,${y} L1440,900 L0,900 Z`;
+}
 
 export default function WaveBg() {
   return (
@@ -19,10 +23,10 @@ export default function WaveBg() {
       <svg
         viewBox="0 0 1440 900"
         preserveAspectRatio="none"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
       >
         {WAVES.map((w, i) => (
-          <path key={i} fill={w.color} d={w.d} />
+          <path key={i} fill={w.color} d={path(w.y, w.a)} />
         ))}
       </svg>
     </Box>

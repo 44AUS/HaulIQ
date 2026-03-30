@@ -126,14 +126,7 @@ export default function Signup() {
       <WaveBg />
 
       <Box sx={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        {/* Banner */}
-        <Box sx={{ bgcolor: 'rgba(0,0,0,0.22)', py: 0.6, textAlign: 'center' }}>
-          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.75)', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.7rem' }}>
-            Free to Start &nbsp;&bull;&nbsp; No Payment Method Required &nbsp;&bull;&nbsp; Cancel Anytime
-          </Typography>
-        </Box>
-
-        <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: { xs: 3, sm: 5 } }}>
+<Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: { xs: 3, sm: 5 } }}>
           <Box sx={{ width: '100%', maxWidth: 500 }}>
 
             <AuthHeader lang={lang} setLang={handleLang} mode={mode} toggleMode={toggleMode} />
@@ -141,6 +134,12 @@ export default function Signup() {
             {/* ── Step 0 — Select Role ─────────────────────────────────────── */}
             {step === 0 && (
               <Box sx={cardSx}>
+                {/* Banner — top strip inside the card */}
+                <Box sx={{ bgcolor: BRAND_MED, py: 0.9, textAlign: 'center', borderBottom: `1px solid ${borderC}` }}>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.88)', fontWeight: 600, letterSpacing: '0.05em', fontSize: '0.7rem' }}>
+                    Free to Start &nbsp;&bull;&nbsp; No Payment Method Required &nbsp;&bull;&nbsp; Cancel Anytime
+                  </Typography>
+                </Box>
                 <Box sx={{ px: { xs: 3, sm: 4 }, pt: 4, pb: 3 }}>
                   <Typography variant="overline" sx={{ color: BRAND_LIGHT, fontWeight: 700, letterSpacing: '0.1em', fontSize: '0.68rem' }}>Step 1 of 3</Typography>
                   <Typography variant="h5" fontWeight={800} sx={{ color: textPri, mt: 0.5, mb: 0.75, lineHeight: 1.2 }}>{t.s1title}</Typography>
