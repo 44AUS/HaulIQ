@@ -16,6 +16,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 import AuthHeader from '../components/AuthHeader';
+import WaveBg from '../components/WaveBg';
 
 const BRAND      = '#1565C0';
 const BRAND_MED  = '#1976d2';
@@ -26,50 +27,6 @@ const LABELS = {
   es: { s1title: 'Selecciona tu Rol', s1sub: 'Elige el rol que mejor te describe. Esto configurará las funciones de tu cuenta.', s2title: 'Información del Negocio', s2sub: 'Agrega tu información empresarial. Se usará para configurar tu perfil.', s3title: 'Tu Información', s3sub: 'Crea tus credenciales de inicio de sesión y los detalles de tu perfil.', carrier: 'Conductor / Transportista', carrierDesc: 'Encuentra cargas rentables, rastrea ganancias y haz crecer tu negocio.', broker: 'Agente de Carga', brokerDesc: 'Publica cargas, llega a transportistas serios y gestiona tus operaciones.', company: 'Empresa / Nombre comercial *', brokerage: 'Nombre de la agencia *', mc: 'Número MC (opcional)', phone: 'Teléfono del negocio *', name: 'Nombre completo *', email: 'Correo electrónico *', password: 'Contraseña *', confirm: 'Confirmar contraseña *', terms: 'Al hacer clic en "Crear cuenta" aceptas nuestros', tos: 'Términos de servicio', create: 'Crear Cuenta', creating: 'Creando cuenta…', login: 'Iniciar sesión', welcome: '¡Bienvenido a Urload!', welcomeSub: 'Tu cuenta está lista. ¡Comencemos!', dashboard: 'Ir al Panel', mismatch: 'Las contraseñas no coinciden' },
   fr: { s1title: 'Choisissez votre Rôle', s1sub: "Choisissez le rôle qui vous correspond le mieux. Cela configurera les fonctionnalités de votre compte.", s2title: 'Infos Professionnelles', s2sub: 'Ajoutez vos informations professionnelles pour configurer votre profil.', s3title: 'Vos Informations', s3sub: 'Créez vos identifiants de connexion et les détails de votre profil.', carrier: 'Conducteur / Transporteur', carrierDesc: 'Trouvez des chargements rentables, suivez vos revenus et développez votre activité.', broker: 'Courtier en fret', brokerDesc: 'Publiez des chargements, atteignez des transporteurs sérieux et gérez vos opérations.', company: 'Entreprise / Nom commercial *', brokerage: "Nom de l'agence *", mc: 'Numéro MC (optionnel)', phone: 'Téléphone professionnel *', name: 'Nom complet *', email: 'Adresse e-mail *', password: 'Mot de passe *', confirm: 'Confirmer le mot de passe *', terms: 'En cliquant sur "Créer un compte" vous acceptez nos', tos: "Conditions d'utilisation", create: 'Créer un compte', creating: 'Création…', login: 'Connexion', welcome: 'Bienvenue sur Urload !', welcomeSub: 'Votre compte est prêt. Commençons !', dashboard: 'Aller au tableau de bord', mismatch: 'Les mots de passe ne correspondent pas' },
 };
-
-function WaveBg() {
-  return (
-    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: BRAND_MED, overflow: 'hidden' }}>
-      {/* top-right glow blob */}
-      <Box sx={{
-        position: 'absolute', width: 480, height: 480,
-        borderRadius: '50%', top: -180, right: -120,
-        background: 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-      {/* bottom-left glow blob */}
-      <Box sx={{
-        position: 'absolute', width: 400, height: 400,
-        borderRadius: '50%', bottom: -140, left: -100,
-        background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
-        pointerEvents: 'none',
-      }} />
-      {/* SVG wave layers */}
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 220" preserveAspectRatio="none"
-          style={{ display: 'block', width: '100%', height: 220 }}>
-          <path fill="rgba(0,0,0,0.18)"
-            d="M0,128L60,117.3C120,107,240,85,360,90.7C480,96,600,128,720,138.7C840,149,960,139,1080,122.7C1200,107,1320,85,1380,74.7L1440,64L1440,220L1380,220C1320,220,1200,220,1080,220C960,220,840,220,720,220C600,220,480,220,360,220C240,220,120,220,60,220L0,220Z"/>
-        </svg>
-      </Box>
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 160" preserveAspectRatio="none"
-          style={{ display: 'block', width: '100%', height: 160 }}>
-          <path fill="rgba(0,0,0,0.12)"
-            d="M0,96L80,85.3C160,75,320,53,480,64C640,75,800,117,960,122.7C1120,128,1280,96,1360,80L1440,64L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"/>
-        </svg>
-      </Box>
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 100" preserveAspectRatio="none"
-          style={{ display: 'block', width: '100%', height: 100 }}>
-          <path fill="rgba(0,0,0,0.10)"
-            d="M0,64L120,53.3C240,43,480,21,720,32C960,43,1200,85,1320,106.7L1440,128L1440,100L1320,100C1200,100,960,100,720,100C480,100,240,100,120,100L0,100Z"/>
-        </svg>
-      </Box>
-    </Box>
-  );
-}
-
 
 export default function Signup() {
   const [params] = useSearchParams();

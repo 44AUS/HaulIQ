@@ -10,6 +10,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
+import WaveBg from '../components/WaveBg';
 
 const BRAND     = '#1565C0';
 const BRAND_MED = '#1976d2';
@@ -20,30 +21,6 @@ const LABELS = {
   es: { title: 'Bienvenido',   sub: 'Inicia sesión en tu cuenta Urload',  email: 'Correo',   password: 'Contraseña',  signin: 'Iniciar sesión', signingIn: 'Iniciando…',    forgot: '¿Olvidaste tu contraseña?', noAccount: '¿Sin cuenta?', signupFree: 'Regístrate gratis' },
   fr: { title: 'Bon retour',   sub: 'Connectez-vous à votre compte Urload', email: 'E-mail', password: 'Mot de passe', signin: 'Se connecter',  signingIn: 'Connexion…',     forgot: 'Mot de passe oublié ?',    noAccount: 'Pas de compte ?', signupFree: 'Inscription gratuite' },
 };
-
-function WaveBg() {
-  return (
-    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: BRAND_MED, overflow: 'hidden' }}>
-      <Box sx={{ position: 'absolute', width: 480, height: 480, borderRadius: '50%', top: -180, right: -120, background: 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <Box sx={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', bottom: -140, left: -100, background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 220" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 220 }}>
-          <path fill="rgba(0,0,0,0.18)" d="M0,128L60,117.3C120,107,240,85,360,90.7C480,96,600,128,720,138.7C840,149,960,139,1080,122.7C1200,107,1320,85,1380,74.7L1440,64L1440,220L1380,220C1320,220,1200,220,1080,220C960,220,840,220,720,220C600,220,480,220,360,220C240,220,120,220,60,220L0,220Z"/>
-        </svg>
-      </Box>
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 160" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 160 }}>
-          <path fill="rgba(0,0,0,0.12)" d="M0,96L80,85.3C160,75,320,53,480,64C640,75,800,117,960,122.7C1120,128,1280,96,1360,80L1440,64L1440,160L1360,160C1280,160,1120,160,960,160C800,160,640,160,480,160C320,160,160,160,80,160L0,160Z"/>
-        </svg>
-      </Box>
-      <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 100 }}>
-          <path fill="rgba(0,0,0,0.10)" d="M0,64L120,53.3C240,43,480,21,720,32C960,43,1200,85,1320,106.7L1440,128L1440,100L1320,100C1200,100,960,100,720,100C480,100,240,100,120,100L0,100Z"/>
-        </svg>
-      </Box>
-    </Box>
-  );
-}
 
 export default function Login() {
   const [params] = useSearchParams();
