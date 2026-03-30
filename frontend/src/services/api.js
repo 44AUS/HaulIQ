@@ -132,7 +132,7 @@ export const networkApi = {
   check:       (userId)          => request(`/api/network/check/${userId}`),
   requests:    ()                => request('/api/network/requests'),
   respond:     (id, accepted)    => request(`/api/network/${id}/respond`, { method: 'PATCH', body: JSON.stringify({ accepted }) }),
-  search:      (q, role)         => request(`/api/network/search?q=${encodeURIComponent(q || '')}${role ? `&role=${role}` : ''}`),
+  search:      (q, state)        => request(`/api/network/search?q=${encodeURIComponent(q || '')}${state ? `&state=${encodeURIComponent(state)}` : ''}`),
   suggestions: ()                => request('/api/network/suggestions'),
 };
 

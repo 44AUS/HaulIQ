@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import {
   Box, Typography, Avatar, Button, IconButton,
   Chip, CircularProgress, Divider, Menu, MenuItem,
-  TextField, InputAdornment, Select, FormControl, InputLabel,
-  Card, CardContent, Paper,
+  TextField, InputAdornment,
+  Card, CardContent, Paper, Autocomplete,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import CheckIcon from '@mui/icons-material/Check';
@@ -17,6 +17,14 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
+
+const US_STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
+  'HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+  'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ',
+  'NM','NY','NC','ND','OH','OK','OR','PA','RI','SC',
+  'SD','TN','TX','UT','VT','VA','WA','WV','WI','WY',
+];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -227,7 +235,7 @@ export default function Network() {
   const [responding, setResponding] = useState(null);
   const [connecting, setConnecting] = useState(null);
   const [query, setQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
+  const [stateFilter, setStateFilter] = useState(null);
   const debounceRef = useRef(null);
 
   useEffect(() => {
@@ -243,14 +251,14 @@ export default function Network() {
   }, []);
 
   // Debounced search
-  const runSearch = useCallback((q, role) => {
-    if (!q && !role) {
+  const runSearch = useCallback((q, state) => {
+    if (!q && !state) {
       setSearchResults([]);
       setSearching(false);
       return;
     }
     setSearching(true);
-    networkApi.search(q, role)
+    networkApi.search(q, state)
       .then(res => setSearchResults(Array.isArray(res) ? res : []))
       .catch(() => setSearchResults([]))
       .finally(() => setSearching(false));
@@ -258,9 +266,9 @@ export default function Network() {
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(query, roleFilter), 350);
+    debounceRef.current = setTimeout(() => runSearch(query, stateFilter), 350);
     return () => clearTimeout(debounceRef.current);
-  }, [query, roleFilter, runSearch]);
+  }, [query, stateFilter, runSearch]);
 
   const handleRespond = (id, accepted) => {
     setResponding(id + (accepted ? '_accept' : '_decline'));
@@ -303,7 +311,7 @@ export default function Network() {
       })
     : connections;
 
-  const isSearchActive = Boolean(query || roleFilter);
+  const isSearchActive = Boolean(query || stateFilter);
   const rightColumnItems = isSearchActive
     ? searchResults.filter(u => u.connection_status !== 'accepted')
     : suggestions;
@@ -349,23 +357,20 @@ export default function Network() {
             }}
             sx={{ flex: 1, minWidth: 220 }}
           />
-          <FormControl size="small" sx={{ minWidth: 130 }}>
-            <InputLabel>Role</InputLabel>
-            <Select
-              value={roleFilter}
-              label="Role"
-              onChange={e => setRoleFilter(e.target.value)}
-            >
-              <MenuItem value="">All</MenuItem>
-              {user?.role === 'broker' && <MenuItem value="carrier">Carriers</MenuItem>}
-              {user?.role === 'carrier' && <MenuItem value="broker">Brokers</MenuItem>}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            options={US_STATES}
+            value={stateFilter}
+            onChange={(_, val) => setStateFilter(val)}
+            size="small"
+            sx={{ minWidth: 120 }}
+            renderInput={params => <TextField {...params} label="State" />}
+            clearOnEscape
+          />
           {isSearchActive && (
             <Button
               variant="text"
               size="small"
-              onClick={() => { setQuery(''); setRoleFilter(''); }}
+              onClick={() => { setQuery(''); setStateFilter(null); }}
               sx={{ textTransform: 'none', color: 'text.secondary' }}
             >
               Clear

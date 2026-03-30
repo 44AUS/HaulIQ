@@ -76,17 +76,17 @@ def _with_status(u: User, current_user: User, db: Session) -> dict:
 @router.get("/search", summary="Search users to connect with")
 def search_users(
     q: str = Query(""),
-    role: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     opposite = UserRole.carrier if current_user.role == UserRole.broker else UserRole.broker
-    # Only allow filtering to the opposite role — same-role connections are not supported
-    target_role = UserRole(role) if role in ("broker", "carrier") and UserRole(role) == opposite else opposite
     query = db.query(User).filter(
         User.id != current_user.id,
-        User.role == target_role,
+        User.role == opposite,
     )
+    if state:
+        query = query.filter(User.business_state.ilike(f"%{state}%"))
     if q:
         query = query.filter(
             User.name.ilike(f"%{q}%") |
