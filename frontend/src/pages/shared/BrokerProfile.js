@@ -25,6 +25,14 @@ import { useAuth } from '../../context/AuthContext';
 import { brokersApi, blocksApi, authApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
 
+function formatPhone(raw) {
+  if (!raw) return '';
+  const d = raw.replace(/\D/g, '');
+  if (d.length === 10) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+  if (d.length === 11 && d[0] === '1') return `+1 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+  return raw;
+}
+
 function StarInput({ value, onChange, size = 24 }) {
   const [hover, setHover] = useState(0);
   return (
@@ -286,7 +294,7 @@ export default function BrokerProfile() {
                   {broker.phone && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <PhoneIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
-                      <Typography variant="caption" color="text.secondary">{broker.phone}</Typography>
+                      <Typography variant="caption" component="a" href={`tel:${broker.phone.replace(/\D/g,'')}`} color="text.secondary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>{formatPhone(broker.phone)}</Typography>
                     </Box>
                   )}
                 </Box>
