@@ -126,12 +126,14 @@ export const instantBookApi = {
 
 // ─── Network ──────────────────────────────────────────────────────────────────
 export const networkApi = {
-  list:     ()                  => request('/api/network/'),
-  add:      (carrierId)         => request('/api/network/', { method: 'POST', body: JSON.stringify({ carrier_id: carrierId }) }),
-  remove:   (id)                => request(`/api/network/${id}`, { method: 'DELETE' }),
-  check:    (carrierId)         => request(`/api/network/check/${carrierId}`),
-  requests: ()                  => request('/api/network/requests'),
-  respond:  (id, accepted)      => request(`/api/network/${id}/respond`, { method: 'PATCH', body: JSON.stringify({ accepted }) }),
+  list:        ()                => request('/api/network/'),
+  add:         (otherUserId)     => request('/api/network/', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId }) }),
+  remove:      (id)              => request(`/api/network/${id}`, { method: 'DELETE' }),
+  check:       (userId)          => request(`/api/network/check/${userId}`),
+  requests:    ()                => request('/api/network/requests'),
+  respond:     (id, accepted)    => request(`/api/network/${id}/respond`, { method: 'PATCH', body: JSON.stringify({ accepted }) }),
+  search:      (q, role)         => request(`/api/network/search?q=${encodeURIComponent(q || '')}${role ? `&role=${role}` : ''}`),
+  suggestions: ()                => request('/api/network/suggestions'),
 };
 
 export const waitlistApi = {
