@@ -181,6 +181,7 @@ export default function Login() {
                       bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
                       textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em',
                       py: 1.25, borderRadius: '6px', boxShadow: 'none', fontSize: '0.85rem',
+                      '&.Mui-disabled': { bgcolor: BRAND_MED, color: '#fff', opacity: 0.45 },
                     }}
                   >
                     {loading ? t.signingIn : t.signin}
