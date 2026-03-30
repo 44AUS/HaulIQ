@@ -1,51 +1,29 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-const BRAND_MED = '#1976d2';
+// Each wave is a progressively lighter tint of the brand blue,
+// matching the layered wave style from the reference screenshot.
+const WAVES = [
+  { color: '#1976d2', d: 'M0,90 C480,25 960,190 1440,105 L1440,900 L0,900 Z' },
+  { color: '#1e88e5', d: 'M0,235 C480,160 960,315 1440,240 L1440,900 L0,900 Z' },
+  { color: '#2196f3', d: 'M0,375 C360,305 720,445 1080,375 C1260,340 1380,410 1440,375 L1440,900 L0,900 Z' },
+  { color: '#42a5f5', d: 'M0,505 C480,435 960,575 1440,505 L1440,900 L0,900 Z' },
+  { color: '#64b5f6', d: 'M0,635 C360,570 720,700 1080,635 C1260,603 1380,668 1440,640 L1440,900 L0,900 Z' },
+  { color: '#90caf9', d: 'M0,755 C480,700 960,810 1440,755 L1440,900 L0,900 Z' },
+  { color: '#bbdefb', d: 'M0,855 C360,830 720,875 1080,850 C1260,838 1380,865 1440,855 L1440,900 L0,900 Z' },
+];
 
 export default function WaveBg() {
   return (
-    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: BRAND_MED, overflow: 'hidden' }}>
+    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: '#1565c0', overflow: 'hidden' }}>
       <svg
         viewBox="0 0 1440 900"
         preserveAspectRatio="none"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
       >
-        {/* Wave 1 — top, darkest */}
-        <path
-          fill="rgba(0,0,0,0.20)"
-          d="M0,85 C240,45 480,125 720,85 C960,45 1200,120 1440,80 L1440,900 L0,900 Z"
-        />
-        {/* Wave 2 */}
-        <path
-          fill="rgba(0,0,0,0.16)"
-          d="M0,205 C300,160 600,250 900,205 C1100,175 1300,235 1440,195 L1440,900 L0,900 Z"
-        />
-        {/* Wave 3 */}
-        <path
-          fill="rgba(0,0,0,0.11)"
-          d="M0,330 C180,290 360,370 540,330 C720,290 900,368 1080,330 C1260,292 1380,355 1440,335 L1440,900 L0,900 Z"
-        />
-        {/* Wave 4 — middle */}
-        <path
-          fill="rgba(0,0,0,0.06)"
-          d="M0,460 C360,415 720,505 1080,460 C1260,438 1380,482 1440,465 L1440,900 L0,900 Z"
-        />
-        {/* Wave 5 */}
-        <path
-          fill="rgba(255,255,255,0.05)"
-          d="M0,590 C240,550 480,630 720,590 C960,550 1200,625 1440,585 L1440,900 L0,900 Z"
-        />
-        {/* Wave 6 */}
-        <path
-          fill="rgba(255,255,255,0.10)"
-          d="M0,715 C300,685 600,748 900,715 C1100,698 1300,735 1440,720 L1440,900 L0,900 Z"
-        />
-        {/* Wave 7 — bottom, lightest */}
-        <path
-          fill="rgba(255,255,255,0.17)"
-          d="M0,825 C360,805 720,848 1080,825 C1260,814 1380,838 1440,830 L1440,900 L0,900 Z"
-        />
+        {WAVES.map((w, i) => (
+          <path key={i} fill={w.color} d={w.d} />
+        ))}
       </svg>
     </Box>
   );
