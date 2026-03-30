@@ -70,34 +70,6 @@ function WaveBg() {
   );
 }
 
-const ROLES_OPTIONS = [
-  {
-    r: 'carrier',
-    icon: <LocalShippingIcon sx={{ fontSize: 26 }} />,
-    title: 'Driver / Carrier',
-    desc: 'Find profitable loads, track earnings, and grow your trucking business.',
-  },
-  {
-    r: 'broker',
-    icon: <BusinessCenterIcon sx={{ fontSize: 26 }} />,
-    title: 'Freight Broker',
-    desc: 'Post loads, reach serious carriers, and manage your freight operations.',
-  },
-];
-
-const fieldSx = {
-  '& .MuiOutlinedInput-root': {
-    color: '#fff',
-    bgcolor: 'rgba(255,255,255,0.06)',
-    borderRadius: '6px',
-    '& fieldset': { borderColor: 'rgba(255,255,255,0.14)' },
-    '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.28)' },
-    '&.Mui-focused fieldset': { borderColor: BRAND_LIGHT },
-  },
-  '& .MuiInputLabel-root': { color: '#6b7280' },
-  '& .MuiInputLabel-root.Mui-focused': { color: BRAND_LIGHT },
-  '& .MuiInputLabel-shrink': { bgcolor: '#111318', px: 0.5, borderRadius: '2px' },
-};
 
 export default function Signup() {
   const [params] = useSearchParams();
