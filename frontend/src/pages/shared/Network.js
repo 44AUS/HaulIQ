@@ -287,7 +287,7 @@ export default function Network() {
         setSuggestions(patch);
         setSearchResults(patch);
       })
-      .catch(() => {})
+      .catch(err => alert(err.message || 'Failed to send connection request'))
       .finally(() => setConnecting(null));
   };
 

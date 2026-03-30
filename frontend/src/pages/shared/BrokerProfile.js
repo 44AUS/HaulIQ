@@ -20,8 +20,10 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PhoneIcon from '@mui/icons-material/Phone';
 import BlockIcon from '@mui/icons-material/Block';
 import GppBadIcon from '@mui/icons-material/GppBad';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CheckIcon from '@mui/icons-material/Check';
 import { useAuth } from '../../context/AuthContext';
-import { brokersApi, blocksApi, authApi } from '../../services/api';
+import { brokersApi, blocksApi, authApi, networkApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
 
 function formatPhone(raw) {
@@ -152,6 +154,8 @@ export default function BrokerProfile() {
   const [brokerError, setBrokerError] = useState(null);
   const [isBlocked, setIsBlocked] = useState(false);
   const [blockLoading, setBlockLoading] = useState(false);
+  const [networkState, setNetworkState] = useState({ status: 'none', entry_id: null, loading: true });
+  const [networkConnecting, setNetworkConnecting] = useState(false);
 
   useEffect(() => {
     brokersApi.get(brokerId)
@@ -162,6 +166,15 @@ export default function BrokerProfile() {
           blocksApi.check(adapted.user_id)
             .then(d => setIsBlocked(d.is_blocked))
             .catch(() => {});
+          if (user?.role === 'carrier') {
+            networkApi.check(adapted.user_id)
+              .then(d => setNetworkState({ status: d.status, entry_id: d.entry_id, loading: false }))
+              .catch(() => setNetworkState({ status: 'none', entry_id: null, loading: false }));
+          } else {
+            setNetworkState(prev => ({ ...prev, loading: false }));
+          }
+        } else {
+          setNetworkState(prev => ({ ...prev, loading: false }));
         }
       })
       .catch(err => setBrokerError(err.message))
@@ -179,6 +192,15 @@ export default function BrokerProfile() {
       .then(data => setCanReview(data))
       .catch(() => setCanReview({ can_review: false, reason: null }));
   }, [broker]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleConnect = () => {
+    if (!broker?.user_id) return;
+    setNetworkConnecting(true);
+    networkApi.add(broker.user_id)
+      .then(res => setNetworkState({ status: res.status, entry_id: res.id, loading: false }))
+      .catch(err => alert(err.message || 'Failed to send connection request'))
+      .finally(() => setNetworkConnecting(false));
+  };
 
   const handleToggleBlock = async () => {
     setBlockLoading(true);
@@ -337,6 +359,24 @@ export default function BrokerProfile() {
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+              {/* Connect button — carriers connecting to this broker */}
+              {user?.role === 'carrier' && !isOwner && !networkState.loading && (
+                networkState.status === 'accepted' ? (
+                  <Chip icon={<CheckIcon />} label="Connected" size="small" color="primary" variant="outlined" />
+                ) : networkState.status === 'pending' ? (
+                  <Chip label="Request Sent" size="small" color="warning" variant="outlined" />
+                ) : (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={networkConnecting ? <CircularProgress size={14} color="inherit" /> : <PersonAddIcon />}
+                    onClick={handleConnect}
+                    disabled={networkConnecting}
+                  >
+                    Connect
+                  </Button>
+                )
+              )}
               {!isOwner && (
                 <Button
                   variant="outlined"

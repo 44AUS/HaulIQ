@@ -133,10 +133,14 @@ export default function CarrierProfile() {
   };
 
   const handleAddToNetwork = () => {
+    const targetId = stats?.carrier_id || carrierId;
     setNetworkState(prev => ({ ...prev, loading: true }));
-    networkApi.add(carrierId)
+    networkApi.add(targetId)
       .then(res => setNetworkState({ status: res.status, entry_id: res.id, loading: false }))
-      .catch(() => setNetworkState(prev => ({ ...prev, loading: false })));
+      .catch(err => {
+        alert(err.message || 'Failed to send connection request');
+        setNetworkState(prev => ({ ...prev, loading: false }));
+      });
   };
 
   const avgOverall = reviews.length
