@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { loadsApi, bookingsApi, analyticsApi } from '../../services/api';
+import { loadsApi, bookingsApi, analyticsApi, brokersApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import {
@@ -28,6 +28,7 @@ export default function BrokerDashboard() {
   const [loads, setLoads] = useState([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [brokerAnalytics, setBrokerAnalytics] = useState(null);
+  const [brokerProfile, setBrokerProfile] = useState(null);
 
   useEffect(() => {
     loadsApi.posted()
@@ -44,7 +45,13 @@ export default function BrokerDashboard() {
     analyticsApi.broker()
       .then(data => setBrokerAnalytics(data))
       .catch(() => setBrokerAnalytics(null));
-  }, []);
+
+    if (user?.id) {
+      brokersApi.get(user.id)
+        .then(data => setBrokerProfile(data))
+        .catch(() => setBrokerProfile(null));
+    }
+  }, [user?.id]);
 
   const recentLoads = loads.slice(0, 4);
 
@@ -148,14 +155,26 @@ export default function BrokerDashboard() {
               Your Broker Rating
             </Typography>
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h3" fontWeight={900}>—</Typography>
+              <Typography variant="h3" fontWeight={900}>
+                {brokerProfile?.avg_rating > 0 ? brokerProfile.avg_rating.toFixed(1) : '—'}
+              </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, my: 1 }}>
-                {[1,2,3,4,5].map(i => <StarBorderIcon key={i} sx={{ fontSize: 18, color: 'text.disabled' }} />)}
+                {[1,2,3,4,5].map(i => (
+                  <StarBorderIcon key={i} sx={{ fontSize: 18, color: brokerProfile?.avg_rating >= i ? 'warning.main' : 'text.disabled' }} />
+                ))}
               </Box>
-              <Typography variant="caption" color="text.secondary">Based on carrier reviews</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {brokerProfile?.reviews_count > 0
+                  ? `Based on ${brokerProfile.reviews_count} carrier review${brokerProfile.reviews_count !== 1 ? 's' : ''}`
+                  : 'No carrier reviews yet'}
+              </Typography>
             </Box>
             <Divider sx={{ my: 1.5 }} />
-            {[['Payment Speed', '—'], ['Response Rate', '—'], ['Load Accuracy', '—']].map(([k, v]) => (
+            {[
+              ['Avg Payment Days', brokerProfile?.avg_payment_days ? `${Math.round(brokerProfile.avg_payment_days)} days` : '—'],
+              ['Pay Speed', brokerProfile?.pay_speed ? brokerProfile.pay_speed.replace('_', ' ') : '—'],
+              ['Total Reviews', brokerProfile?.reviews_count > 0 ? brokerProfile.reviews_count : '—'],
+            ].map(([k, v]) => (
               <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75 }}>
                 <Typography variant="body2" color="text.secondary">{k}</Typography>
                 <Typography variant="body2" fontWeight={600} color="primary.main">{v}</Typography>
