@@ -10,7 +10,7 @@ export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
         component="img"
         src="/urload-logo.png"
         alt="Urload"
-        sx={{ height: 28, filter: 'brightness(0) invert(1)' }}
+        sx={{ height: 38, filter: 'brightness(0) invert(1)' }}
       />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <Select
