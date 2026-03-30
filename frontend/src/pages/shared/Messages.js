@@ -13,6 +13,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import BlockIcon from '@mui/icons-material/Block';
@@ -186,6 +187,68 @@ function DocViewer({ doc, onClose }) {
   );
 }
 
+function LoadDocsModal({ loadId, onClose, onView }) {
+  const [docs, setDocs] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
+
+  useEffect(() => {
+    if (!loadId) return;
+    setLoadingDocs(true);
+    documentsApi.list(loadId)
+      .then(d => setDocs(Array.isArray(d) ? d : []))
+      .catch(() => setDocs([]))
+      .finally(() => setLoadingDocs(false));
+  }, [loadId]);
+
+  return (
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.5 }}>
+        <FolderOpenIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+        <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
+          Load Documents
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
+          Load #{String(loadId).slice(0, 8)}
+        </Typography>
+        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ pb: 2 }}>
+        {loadingDocs ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : docs.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <DescriptionIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+            <Typography variant="body2" color="text.secondary">No documents uploaded for this load yet.</Typography>
+          </Box>
+        ) : (
+          <List disablePadding>
+            {docs.map(doc => {
+              const label = (doc.doc_type || 'other').replace('_', ' ').toUpperCase();
+              return (
+                <Box key={doc.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: 1, borderColor: 'divider' }}>
+                  <DescriptionIcon sx={{ fontSize: 22, color: 'primary.light', flexShrink: 0 }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" fontWeight={600} noWrap>{doc.file_name}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
+                      <Chip label={label} size="small" color={DOC_TYPE_COLOR[doc.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
+                      <Typography variant="caption" color="text.secondary">{doc.uploader_name}</Typography>
+                    </Box>
+                  </Box>
+                  <Button size="small" variant="outlined" onClick={() => onView(doc)} sx={{ flexShrink: 0, fontSize: 11 }}>
+                    View
+                  </Button>
+                </Box>
+              );
+            })}
+          </List>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function TypingIndicator() {
   return (
     <>
@@ -229,6 +292,7 @@ export default function Messages() {
   const [otherIsTyping, setOtherIsTyping] = useState(false);
   const typingTimeoutRef = useRef(null);
   const [viewerDoc, setViewerDoc] = useState(null);
+  const [docsModalLoadId, setDocsModalLoadId] = useState(null);
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
@@ -481,57 +545,84 @@ export default function Messages() {
               <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
               <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>Use New Message to start one</Typography>
             </Box>
-          ) : (
-            <List disablePadding>
-              {conversations.map(c => {
-                const lastMsg = getLastMsg(c);
-                const unread = hasUnread(c);
-                const label = getConvoLabel(c);
-                const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-                const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
-                const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
-                return (
-                  <Box
-                    key={c.id}
-                    sx={{
-                      display: 'flex', alignItems: 'center', borderBottom: 1, borderColor: 'divider',
-                      bgcolor: activeConvoId === c.id ? 'action.selected' : 'transparent',
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
-                      <ListItemAvatar sx={{ minWidth: 42 }}>
-                        <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
-                          <UserAvatar name={label} src={otherAvatar} size={34} />
+          ) : (() => {
+            const loadConvos = conversations.filter(c => c.load_id);
+            const directConvos = conversations.filter(c => !c.load_id);
+            const renderConvo = (c) => {
+              const lastMsg = getLastMsg(c);
+              const unread = hasUnread(c);
+              const label = getConvoLabel(c);
+              const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+              const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+              const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
+              return (
+                <Box
+                  key={c.id}
+                  sx={{
+                    display: 'flex', alignItems: 'center', borderBottom: 1, borderColor: 'divider',
+                    bgcolor: activeConvoId === c.id ? 'action.selected' : 'transparent',
+                    '&:hover': { bgcolor: 'action.hover' },
+                  }}
+                >
+                  <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
+                    <ListItemAvatar sx={{ minWidth: 42 }}>
+                      <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
+                        <UserAvatar name={label} src={otherAvatar} size={34} />
+                      </Box>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
+                          {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
+                          {c.load_id
+                            ? <Typography variant="body2" fontWeight={unread ? 700 : 600} noWrap color="text.primary">Load #{c.load_id.slice(0, 8)}</Typography>
+                            : <Typography variant="body2" fontWeight={unread ? 700 : 500} noWrap color="text.primary">{label}</Typography>
+                          }
                         </Box>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
-                            {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
-                            <Typography variant="body2" fontWeight={unread ? 700 : 500} noWrap color="text.primary">{label}</Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Box>
-                            {c.load_id && <Typography variant="caption" color="text.disabled" display="block" noWrap>Load #{c.load_id.slice(0, 8)}</Typography>}
-                            {lastMsg && <Typography variant="caption" color="text.secondary" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
-                          </Box>
-                        }
-                        secondaryTypographyProps={{ component: 'div' }}
-                      />
-                      {lastMsg && (
-                        <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10 }}>
-                          {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </Typography>
-                      )}
-                    </ListItemButton>
-                  </Box>
-                );
-              })}
-            </List>
-          )}
+                      }
+                      secondary={
+                        <Box>
+                          {c.load_id && <Typography variant="caption" color="text.secondary" display="block" noWrap>{label}</Typography>}
+                          {lastMsg && <Typography variant="caption" color="text.disabled" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
+                        </Box>
+                      }
+                      secondaryTypographyProps={{ component: 'div' }}
+                    />
+                    {lastMsg && (
+                      <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10 }}>
+                        {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
+                    )}
+                  </ListItemButton>
+                </Box>
+              );
+            };
+            return (
+              <List disablePadding>
+                {loadConvos.length > 0 && (
+                  <>
+                    <Box sx={{ px: 2, py: 0.75, bgcolor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        Load Conversations
+                      </Typography>
+                    </Box>
+                    {loadConvos.map(renderConvo)}
+                  </>
+                )}
+                {directConvos.length > 0 && (
+                  <>
+                    <Box sx={{ px: 2, py: 0.75, bgcolor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
+                      <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        Direct Messages
+                      </Typography>
+                    </Box>
+                    {directConvos.map(renderConvo)}
+                  </>
+                )}
+              </List>
+            );
+          })()}
         </Box>
       </Box>
 
@@ -564,6 +655,16 @@ export default function Messages() {
                 variant="outlined" size="small" color="success" startIcon={<NavigationIcon />} sx={{ fontSize: 11, flexShrink: 0 }}>
                 Locate Load
               </Button>
+            )}
+            {activeConvo.load_id && (
+              <IconButton
+                size="small"
+                title="View load documents"
+                sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
+                onClick={() => setDocsModalLoadId(activeConvo.load_id)}
+              >
+                <FolderOpenIcon sx={{ fontSize: 18 }} />
+              </IconButton>
             )}
             <IconButton
               size="small" disabled={deletingId === activeConvoId}
@@ -670,6 +771,13 @@ export default function Messages() {
       )}
     </Paper>
     {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+    {docsModalLoadId && (
+      <LoadDocsModal
+        loadId={docsModalLoadId}
+        onClose={() => setDocsModalLoadId(null)}
+        onView={(doc) => { setDocsModalLoadId(null); setViewerDoc(doc); }}
+      />
+    )}
     </>
   );
 }
