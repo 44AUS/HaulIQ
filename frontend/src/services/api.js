@@ -45,6 +45,7 @@ export const loadsApi = {
 export const brokersApi = {
   list:       ()         => request('/api/brokers'),
   get:        (id)       => request(`/api/brokers/${id}`),
+  canReview:  (id)       => request(`/api/brokers/${id}/can-review`),
   review:     (id, data) => request(`/api/brokers/${id}/reviews`, { method: 'POST', body: JSON.stringify(data) }),
   reviews:    (id)       => request(`/api/brokers/${id}/reviews`),
 };

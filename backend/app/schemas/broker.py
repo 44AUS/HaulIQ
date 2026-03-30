@@ -25,11 +25,9 @@ class BrokerOut(BaseModel):
 
 
 class BrokerReviewCreate(BaseModel):
-    broker_id: UUID
     rating: int
     comment: Optional[str] = None
     payment_days: Optional[int] = None
-    is_anonymous: bool = False
     communication: Optional[int] = None
     accuracy: Optional[int] = None
     would_work_again: Optional[bool] = None
@@ -45,6 +43,8 @@ class BrokerReviewCreate(BaseModel):
 class BrokerReviewOut(BaseModel):
     id: UUID
     broker_id: UUID
+    carrier_id: Optional[UUID] = None
+    carrier_name: Optional[str] = None
     rating: int
     comment: Optional[str]
     payment_days: Optional[int]

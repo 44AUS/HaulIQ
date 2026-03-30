@@ -173,6 +173,13 @@ export default function BrokerProfile() {
       .finally(() => setLoadingReviews(false));
   }, [brokerId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!broker || user?.role !== 'carrier') return;
+    brokersApi.canReview(broker.id)
+      .then(data => setCanReview(data))
+      .catch(() => setCanReview({ can_review: false, reason: null }));
+  }, [broker]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleToggleBlock = async () => {
     setBlockLoading(true);
     try {
@@ -201,6 +208,7 @@ export default function BrokerProfile() {
   const [tab, setTab] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [canReview, setCanReview] = useState(null); // null = loading, {can_review, reason}
   const [form, setForm] = useState({
     rating: 0, communication: 0, accuracy: 0,
     paymentDays: '', wouldWorkAgain: null, comment: '',
@@ -230,14 +238,12 @@ export default function BrokerProfile() {
   const handleSubmitReview = () => {
     if (form.rating === 0) return;
     brokersApi.review(broker.id, {
-      broker_id: broker.id,
       rating: form.rating,
       communication: form.communication || null,
       accuracy: form.accuracy || null,
       payment_days: form.paymentDays ? parseInt(form.paymentDays) : null,
       would_work_again: form.wouldWorkAgain,
       comment: form.comment || null,
-      is_anonymous: false,
     })
       .then(() => { setSubmitted(true); setShowForm(false); })
       .catch(err => alert(err.message));
@@ -343,10 +349,14 @@ export default function BrokerProfile() {
                   {isBlocked ? 'Unblock' : 'Block'}
                 </Button>
               )}
-              {user?.role === 'carrier' && !submitted && (
+              {user?.role === 'carrier' && !submitted && canReview?.can_review && (
                 <Button variant="contained" size="small" startIcon={<StarIcon />} onClick={() => setShowForm(!showForm)}>
                   Write a Review
                 </Button>
+              )}
+              {user?.role === 'carrier' && !submitted && canReview && !canReview.can_review && (
+                <Chip label={canReview.reason || 'Review unavailable'} size="small" variant="outlined" color="default"
+                  title={canReview.reason} />
               )}
               {submitted && (
                 <Chip icon={<CheckCircleIcon />} label="Review submitted" color="success" size="small" />
