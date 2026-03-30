@@ -26,7 +26,7 @@ export default function LoadCard({ load, onSave }) {
 
   return (
     <div
-      onClick={() => navigate(`/carrier/loads/${load.id}`)}
+      onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })}
       className={`glass rounded-xl p-5 border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg ${profitColor} animate-fade-in`}
     >
       {/* Header */}
