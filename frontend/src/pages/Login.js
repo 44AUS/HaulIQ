@@ -116,7 +116,7 @@ export default function Login() {
         </Box>
 
         <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 2, py: { xs: 3, sm: 5 } }}>
-          <Box sx={{ width: '100%', maxWidth: 460 }}>
+          <Box sx={{ width: '100%', maxWidth: 500 }}>
 
             <AuthHeader lang={lang} setLang={handleLang} mode={mode} toggleMode={toggleMode} />
 
