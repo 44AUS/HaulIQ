@@ -80,12 +80,13 @@ def search_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    opposite = UserRole.carrier if current_user.role == UserRole.broker else UserRole.broker
+    # Only allow filtering to the opposite role — same-role connections are not supported
+    target_role = UserRole(role) if role in ("broker", "carrier") and UserRole(role) == opposite else opposite
     query = db.query(User).filter(
         User.id != current_user.id,
-        User.role != UserRole.admin,
+        User.role == target_role,
     )
-    if role in ("broker", "carrier"):
-        query = query.filter(User.role == UserRole(role))
     if q:
         query = query.filter(
             User.name.ilike(f"%{q}%") |

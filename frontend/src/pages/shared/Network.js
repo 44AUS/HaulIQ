@@ -357,8 +357,8 @@ export default function Network() {
               onChange={e => setRoleFilter(e.target.value)}
             >
               <MenuItem value="">All</MenuItem>
-              <MenuItem value="carrier">Carriers</MenuItem>
-              <MenuItem value="broker">Brokers</MenuItem>
+              {user?.role === 'broker' && <MenuItem value="carrier">Carriers</MenuItem>}
+              {user?.role === 'carrier' && <MenuItem value="broker">Brokers</MenuItem>}
             </Select>
           </FormControl>
           {isSearchActive && (
