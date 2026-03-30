@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
-  Tabs, Tab, TextField, Grid, CircularProgress, LinearProgress,
-  FormControlLabel, Checkbox, Paper,
+  Tabs, Tab, TextField, Grid, CircularProgress, LinearProgress, Paper,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -204,7 +203,7 @@ export default function BrokerProfile() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     rating: 0, communication: 0, accuracy: 0,
-    paymentDays: '', wouldWorkAgain: null, comment: '', isAnonymous: false,
+    paymentDays: '', wouldWorkAgain: null, comment: '',
   });
 
   if (loadingBroker) return (
@@ -230,15 +229,15 @@ export default function BrokerProfile() {
 
   const handleSubmitReview = () => {
     if (form.rating === 0) return;
-    brokersApi.review(brokerId, {
-      broker_id: brokerId,
+    brokersApi.review(broker.id, {
+      broker_id: broker.id,
       rating: form.rating,
       communication: form.communication || null,
       accuracy: form.accuracy || null,
       payment_days: form.paymentDays ? parseInt(form.paymentDays) : null,
       would_work_again: form.wouldWorkAgain,
       comment: form.comment || null,
-      is_anonymous: form.isAnonymous,
+      is_anonymous: false,
     })
       .then(() => { setSubmitted(true); setShowForm(false); })
       .catch(err => alert(err.message));
@@ -468,17 +467,11 @@ export default function BrokerProfile() {
                 value={form.comment}
                 onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
               />
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <FormControlLabel
-                  control={<Checkbox size="small" checked={form.isAnonymous} onChange={e => setForm(f => ({ ...f, isAnonymous: e.target.checked }))} />}
-                  label={<Typography variant="body2">Submit anonymously</Typography>}
-                />
-                <Box sx={{ display: 'flex', gap: 1.5 }}>
-                  <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
-                  <Button variant="contained" size="small" onClick={handleSubmitReview} disabled={form.rating === 0}>
-                    Submit Review
-                  </Button>
-                </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button variant="contained" size="small" onClick={handleSubmitReview} disabled={form.rating === 0}>
+                  Submit Review
+                </Button>
               </Box>
             </Box>
           </CardContent>

@@ -31,7 +31,7 @@ export default function BrokerRating({ broker, compact = false }) {
         <BrokerLogoMini logo={broker.logo} name={broker.name} />
         <Star size={12} className="text-yellow-400 fill-yellow-400" />
         <span className="text-white text-xs font-semibold">{broker.rating}</span>
-        <Link to={`/b/${broker.id?.slice(0,8)}`} className="text-dark-300 text-xs hover:text-brand-400 transition-colors">
+        <Link to={`/b/${(broker.user_id || broker.id)?.slice(0,8)}`} className="text-dark-300 text-xs hover:text-brand-400 transition-colors">
           · {broker.name.split(' ')[0]}
         </Link>
         {broker.warns > 0 && <AlertTriangle size={12} className="text-red-400" />}
@@ -45,7 +45,7 @@ export default function BrokerRating({ broker, compact = false }) {
         <div className="flex items-start gap-3">
           <BrokerLogoMini logo={broker.logo} name={broker.name} />
           <div>
-            <Link to={`/b/${broker.id?.slice(0,8)}`} className="text-white font-semibold text-sm hover:text-brand-400 transition-colors">
+            <Link to={`/b/${(broker.user_id || broker.id)?.slice(0,8)}`} className="text-white font-semibold text-sm hover:text-brand-400 transition-colors">
               {broker.name}
             </Link>
             <div className="flex items-center gap-1 mt-1">
