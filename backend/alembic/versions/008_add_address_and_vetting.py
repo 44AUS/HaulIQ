@@ -7,8 +7,8 @@ Create Date: 2026-03-29
 from alembic import op
 import sqlalchemy as sa
 
-revision = '008'
-down_revision = '007'
+revision = '008_add_address_and_vetting'
+down_revision = '007_network_status'
 branch_labels = None
 depends_on = None
 
