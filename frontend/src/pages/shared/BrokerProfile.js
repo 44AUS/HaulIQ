@@ -297,6 +297,16 @@ export default function BrokerProfile() {
                       <Typography variant="caption" component="a" href={`tel:${broker.phone.replace(/\D/g,'')}`} color="text.secondary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>{formatPhone(broker.phone)}</Typography>
                     </Box>
                   )}
+                  {broker.vetting_status && broker.vetting_status !== 'pending' && (
+                    <Box sx={{
+                      display: 'inline-flex', alignItems: 'center', gap: 0.4,
+                      px: 1, py: 0.25, borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700,
+                      bgcolor: broker.vetting_status === 'verified' ? 'success.light' : broker.vetting_status === 'flagged' ? 'error.light' : 'warning.light',
+                      color: broker.vetting_status === 'verified' ? 'success.dark' : broker.vetting_status === 'flagged' ? 'error.dark' : 'warning.dark',
+                    }}>
+                      {broker.vetting_status === 'verified' ? '✓ Verified' : broker.vetting_status === 'flagged' ? '⚠ Flagged' : '⏳ Review'}
+                    </Box>
+                  )}
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                   {[1, 2, 3, 4, 5].map(i => (

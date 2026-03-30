@@ -215,6 +215,18 @@ export default function CarrierProfile() {
                       <Typography variant="caption" component="a" href={`tel:${stats.phone.replace(/\D/g,'')}`} color="text.secondary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>{formatPhone(stats.phone)}</Typography>
                     </Box>
                   )}
+                  {stats?.vetting_status && stats.vetting_status !== 'pending' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{
+                        display: 'inline-flex', alignItems: 'center', gap: 0.4,
+                        px: 1, py: 0.25, borderRadius: '4px', fontSize: '0.68rem', fontWeight: 700,
+                        bgcolor: stats.vetting_status === 'verified' ? 'success.light' : stats.vetting_status === 'flagged' ? 'error.light' : 'warning.light',
+                        color: stats.vetting_status === 'verified' ? 'success.dark' : stats.vetting_status === 'flagged' ? 'error.dark' : 'warning.dark',
+                      }}>
+                        {stats.vetting_status === 'verified' ? '✓ Verified' : stats.vetting_status === 'flagged' ? '⚠ Flagged' : '⏳ Review'}
+                      </Box>
+                    </Box>
+                  )}
                   {stats?.total_reviews != null && (
                     <Typography variant="caption" color="text.secondary">{stats.total_reviews} reviews</Typography>
                   )}

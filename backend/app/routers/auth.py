@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-import re
 from app.database import get_db
 from app.models.user import User, UserRole, UserPlan
 from app.schemas.user import UserCreate, UserLogin, UserOut, UserUpdate, Token
 from app.utils.password import hash_password, verify_password
 from app.utils.jwt import create_access_token
-from app.utils.fmcsa import verify_mc, _strip_mc
+from app.utils.fmcsa import _strip_mc
+from app.utils.vetting import vet_carrier, vet_broker
 from app.middleware.auth import get_current_user
 from app.config import get_settings
 
@@ -77,24 +77,41 @@ async def verify_mc_number(mc_number: str, db: Session = Depends(get_db)):
 
 @router.post("/signup", response_model=Token, status_code=status.HTTP_201_CREATED,
              summary="Register a new user (carrier or broker)")
-def signup(payload: UserCreate, db: Session = Depends(get_db)):
+async def signup(payload: UserCreate, db: Session = Depends(get_db)):
+    settings = get_settings()
+
     # Check email not already registered
     existing = db.query(User).filter(User.email == payload.email.lower()).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="An account with this email already exists.",
-        )
+        raise HTTPException(status_code=400, detail="An account with this email already exists.")
 
     # Check MC number not already in use
     if payload.mc_number:
         mc_clean = _strip_mc(payload.mc_number)
         mc_dupe = db.query(User).filter(User.mc_number.ilike(f"%{mc_clean}%")).first()
         if mc_dupe:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="This MC number is already registered to another account.",
-            )
+            raise HTTPException(status_code=400, detail="This MC number is already registered to another account.")
+
+    # ── FMCSA vetting (synchronous — blocks signup if it fails) ──────────────
+    if payload.role == UserRole.carrier:
+        vet = await vet_carrier(
+            company=payload.company or payload.name,
+            mc_number=payload.mc_number or "",
+            api_key=settings.fmcsa_api_key,
+        )
+    else:
+        vet = await vet_broker(
+            company=payload.company or payload.name,
+            mc_number=payload.mc_number or "",
+            api_key=settings.fmcsa_api_key,
+        )
+
+    if not vet["ok"]:
+        raise HTTPException(status_code=422, detail=vet["summary"])
+
+    # Pull DOT number from FMCSA result if available
+    fmcsa = vet.get("fmcsa")
+    dot_from_fmcsa = fmcsa.dot_number if fmcsa else None
 
     user = User(
         email=payload.email.lower(),
@@ -105,7 +122,16 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
         phone=payload.phone,
         company=payload.company,
         mc_number=payload.mc_number,
-        dot_number=payload.dot_number,
+        dot_number=payload.dot_number or dot_from_fmcsa,
+        business_address=payload.business_address,
+        business_city=payload.business_city,
+        business_state=payload.business_state,
+        business_zip=payload.business_zip,
+        business_country=payload.business_country,
+        vetting_status=vet["status"],
+        vetting_score=vet["score"],
+        vetting_flags=vet["flags"],
+        vetting_summary=vet["summary"],
     )
     db.add(user)
     db.commit()

@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     # Admin bootstrap secret — set this in Railway env vars, then POST to /api/auth/create-admin
     admin_secret: str = ""
 
+    # Google Maps API key (used by frontend — stored here for reference)
+    google_maps_api_key: str = ""
+
     @field_validator("database_url", mode="before")
     @classmethod
     def fix_postgres_url(cls, v: str) -> str:

@@ -14,6 +14,11 @@ class UserCreate(BaseModel):
     company: Optional[str] = None
     mc_number: Optional[str] = None
     dot_number: Optional[str] = None
+    business_address: Optional[str] = None
+    business_city:    Optional[str] = None
+    business_state:   Optional[str] = None
+    business_zip:     Optional[str] = None
+    business_country: Optional[str] = None
 
     @field_validator("password")
     @classmethod
@@ -50,6 +55,15 @@ class UserOut(BaseModel):
     dot_number: Optional[str]
     avatar_url: Optional[str] = None
     is_active: bool
+    business_address:  Optional[str] = None
+    business_city:     Optional[str] = None
+    business_state:    Optional[str] = None
+    business_zip:      Optional[str] = None
+    business_country:  Optional[str] = None
+    vetting_status:    Optional[str] = None
+    vetting_score:     Optional[str] = None
+    vetting_flags:     Optional[str] = None
+    vetting_summary:   Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

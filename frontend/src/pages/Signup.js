@@ -9,14 +9,18 @@ import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckIcon from '@mui/icons-material/Check';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { useLoadScript, Autocomplete } from '@react-google-maps/api';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 import AuthHeader from '../components/AuthHeader';
 import WaveBg from '../components/WaveBg';
+
+const GOOGLE_LIBRARIES = ['places'];
 
 const BRAND      = '#1565C0';
 const BRAND_MED  = '#1976d2';
@@ -33,11 +37,21 @@ export default function Signup() {
   const initRole = params.get('role') || '';
   const [step, setStep] = useState(0);
   const [role, setRole] = useState(initRole);
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', phone: '', company: '', mc: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', confirmPassword: '',
+    phone: '', company: '', mc: '',
+    businessAddress: '', businessCity: '', businessState: '', businessZip: '', businessCountry: '',
+  });
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [mcState, setMcState] = useState(null);
   const mcTimerRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
+  const { isLoaded: mapsLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
+    libraries: GOOGLE_LIBRARIES,
+  });
   const [lang, setLang] = useState(() => localStorage.getItem('urload_lang') || 'en');
   const [mode, setMode] = useState(() => localStorage.getItem('urload_form_theme') || 'dark');
   const { signup, loading, error, setError } = useAuth();
@@ -96,13 +110,42 @@ export default function Signup() {
     }, 700);
   };
 
+  const handlePlaceSelect = () => {
+    const place = autocompleteRef.current?.getPlace();
+    if (!place?.address_components) return;
+    const get = (type) => place.address_components.find(c => c.types.includes(type))?.long_name || '';
+    const getShort = (type) => place.address_components.find(c => c.types.includes(type))?.short_name || '';
+    const streetNum = get('street_number');
+    const route = get('route');
+    setForm(f => ({
+      ...f,
+      businessAddress: [streetNum, route].filter(Boolean).join(' '),
+      businessCity:    get('locality') || get('sublocality') || get('postal_town'),
+      businessState:   get('administrative_area_level_1'),
+      businessZip:     get('postal_code'),
+      businessCountry: getShort('country'),
+    }));
+  };
+
   const mcBlocking = form.mc && mcState && mcState !== 'checking' && !mcState?.valid;
-  const step2Valid = form.company && form.phone;
+  // Carriers must provide MC number (required for FMCSA vetting)
+  const step2Valid = form.company && form.phone && form.businessAddress &&
+    (role !== 'carrier' || (form.mc && mcState?.valid));
   const step3Valid = form.name && form.email && form.password && form.password === form.confirmPassword;
 
   const handleSignup = async () => {
     if (form.password !== form.confirmPassword) return;
-    const result = await signup({ ...form, role, plan: 'basic' });
+    const result = await signup({
+      ...form,
+      mc: form.mc,
+      role,
+      plan: 'basic',
+      business_address: form.businessAddress,
+      business_city:    form.businessCity,
+      business_state:   form.businessState,
+      business_zip:     form.businessZip,
+      business_country: form.businessCountry,
+    });
     if (result) setStep(3);
   };
 
@@ -194,7 +237,7 @@ export default function Signup() {
                   <TextField label={role === 'broker' ? t.brokerage : t.company} value={form.company} onChange={e => set('company', e.target.value)} fullWidth size="small" sx={fieldSx} />
                   {role === 'carrier' && (
                     <TextField
-                      label={t.mc} value={form.mc} onChange={e => handleMcChange(e.target.value)} fullWidth size="small"
+                      label="MC Number * (required)" value={form.mc} onChange={e => handleMcChange(e.target.value)} fullWidth size="small"
                       error={!!mcState?.error}
                       helperText={mcState === 'checking' ? 'Verifying…' : mcState?.valid ? `✓ ${mcState.legal_name}` : mcState?.error || ''}
                       FormHelperTextProps={{ sx: { color: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : textSec } }}
@@ -207,6 +250,36 @@ export default function Signup() {
                     />
                   )}
                   <TextField label={t.phone} type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} fullWidth size="small" sx={fieldSx} />
+
+                  {/* Business Address — Google Places Autocomplete */}
+                  {mapsLoaded ? (
+                    <Autocomplete
+                      onLoad={ref => { autocompleteRef.current = ref; }}
+                      onPlaceChanged={handlePlaceSelect}
+                      options={{ types: ['address'], componentRestrictions: { country: ['us', 'ca', 'mx'] } }}
+                    >
+                      <TextField
+                        label="Business Address *"
+                        placeholder="Start typing your address…"
+                        defaultValue={form.businessAddress ? `${form.businessAddress}, ${form.businessCity}, ${form.businessState} ${form.businessZip}`.trim().replace(/^,\s*/, '') : ''}
+                        fullWidth size="small" sx={fieldSx}
+                        InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
+                      />
+                    </Autocomplete>
+                  ) : (
+                    <TextField
+                      label="Business Address *"
+                      value={form.businessAddress}
+                      onChange={e => set('businessAddress', e.target.value)}
+                      fullWidth size="small" sx={fieldSx}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
+                    />
+                  )}
+                  {form.businessCity && (
+                    <Typography variant="caption" sx={{ color: textSec, mt: -1 }}>
+                      {[form.businessCity, form.businessState, form.businessZip, form.businessCountry].filter(Boolean).join(', ')}
+                    </Typography>
+                  )}
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 3, sm: 4 }, py: 2.5, borderTop: `1px solid ${borderC}`, mt: 1 }}>

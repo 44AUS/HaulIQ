@@ -68,14 +68,19 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       const payload = {
-        email:      formData.email,
-        password:   formData.password,
-        name:       formData.name,
-        role:       formData.role,
-        phone:      formData.phone    || null,
-        company:    formData.company  || null,
-        mc_number:  formData.mc       || null,
-        dot_number: formData.dot      || null,
+        email:            formData.email,
+        password:         formData.password,
+        name:             formData.name,
+        role:             formData.role,
+        phone:            formData.phone             || null,
+        company:          formData.company           || null,
+        mc_number:        formData.mc                || null,
+        dot_number:       formData.dot               || null,
+        business_address: formData.business_address  || null,
+        business_city:    formData.business_city     || null,
+        business_state:   formData.business_state    || null,
+        business_zip:     formData.business_zip      || null,
+        business_country: formData.business_country  || null,
       };
       const data = await authApi.signup(payload);
       localStorage.setItem('urload_token', data.access_token);
