@@ -10,6 +10,7 @@ from app.models.load import Load, LoadStatus
 from app.models.booking import Bid, Booking, BookingStatus
 from app.models.broker import Broker
 from app.models.user import User
+from sqlalchemy import exists
 from app.schemas.analytics import (
     LoadHistoryOut, InsightOut, LaneStatsOut, EarningsSummary, WeeklyEarning
 )
@@ -62,6 +63,52 @@ def get_history(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_carrier),
 ):
+    # Backfill: find completed bookings that have no LoadHistory entry yet
+    completed_bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.carrier_id == current_user.id,
+            Booking.status == BookingStatus.completed,
+            ~exists().where(LoadHistory.load_id == Booking.load_id)
+                     .where(LoadHistory.carrier_id == current_user.id),
+        )
+        .all()
+    )
+    for booking in completed_bookings:
+        load = db.query(Load).filter(Load.id == booking.load_id).first()
+        if not load:
+            continue
+        gross = load.rate or 0.0
+        miles = load.miles or 1
+        rpm = round(gross / miles, 4) if miles else 0.0
+        origin_state = (load.origin or '').split(',')[-1].strip()[:2].upper() or None
+        dest_state = (load.destination or '').split(',')[-1].strip()[:2].upper() or None
+        lane_key = f"{origin_state}_{dest_state}" if origin_state and dest_state else None
+        broker_obj = db.query(Broker).filter(Broker.user_id == load.broker_user_id).first()
+        db.add(LoadHistory(
+            carrier_id=current_user.id,
+            load_id=load.id,
+            origin=load.origin,
+            origin_state=origin_state,
+            destination=load.destination,
+            dest_state=dest_state,
+            lane_key=lane_key,
+            miles=load.miles or 0,
+            deadhead_miles=load.deadhead_miles or 0,
+            load_type=load.load_type,
+            broker_name=broker_obj.name if broker_obj else None,
+            gross_revenue=gross,
+            fuel_cost=None,
+            net_profit=gross,
+            rate_per_mile=rpm,
+            net_per_mile=rpm,
+            pickup_date=load.pickup_date,
+            delivery_date=load.delivery_date,
+            accepted_at=booking.updated_at or datetime.utcnow(),
+        ))
+    if completed_bookings:
+        db.commit()
+
     return (
         db.query(LoadHistory)
         .filter(LoadHistory.carrier_id == current_user.id)

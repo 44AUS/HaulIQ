@@ -12,6 +12,7 @@ from app.models.booking import Booking, BookingStatus
 from app.models.load import Load, LoadStatus
 from app.models.broker import Broker
 from app.models.messaging import Conversation, Message
+from app.models.analytics import LoadHistory
 
 router = APIRouter()
 
@@ -405,6 +406,44 @@ def confirm_delivery(
     route = f"{load.origin} → {load.destination}" if load else "your load"
     _notify_broker(db, booking, load, current_user,
         f"🏁 Delivery confirmed — {carrier_name} has delivered {route}. Load complete.")
+
+    # Auto-create LoadHistory entry so carrier's history is populated
+    if load:
+        already = db.query(LoadHistory).filter_by(
+            carrier_id=current_user.id, load_id=load.id
+        ).first()
+        if not already:
+            gross = load.rate or 0.0
+            miles = load.miles or 1
+            rpm = round(gross / miles, 4) if miles else 0.0
+            origin_state = (load.origin or '').split(',')[-1].strip()[:2].upper() or None
+            dest_state = (load.destination or '').split(',')[-1].strip()[:2].upper() or None
+            lane_key = f"{origin_state}_{dest_state}" if origin_state and dest_state else None
+            broker_obj = db.query(Broker).filter(Broker.user_id == load.broker_user_id).first()
+            broker_name = broker_obj.name if broker_obj else None
+            history_entry = LoadHistory(
+                carrier_id=current_user.id,
+                load_id=load.id,
+                origin=load.origin,
+                origin_state=origin_state,
+                destination=load.destination,
+                dest_state=dest_state,
+                lane_key=lane_key,
+                miles=load.miles or 0,
+                deadhead_miles=load.deadhead_miles or 0,
+                load_type=load.load_type,
+                broker_name=broker_name,
+                gross_revenue=gross,
+                fuel_cost=None,
+                net_profit=gross,
+                rate_per_mile=rpm,
+                net_per_mile=rpm,
+                pickup_date=load.pickup_date,
+                delivery_date=load.delivery_date,
+                accepted_at=datetime.utcnow(),
+            )
+            db.add(history_entry)
+
     db.commit()
     return {"status": booking.status}
 
