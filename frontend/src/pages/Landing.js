@@ -687,7 +687,7 @@ export default function Landing() {
   const open = () => setShowWaitlist(true);
 
   return (
-    <div style={{ background: '#080c10', minHeight: '100vh' }}>
+    <div style={{ background: '#080c10', minHeight: '100vh', fontFamily: 'Mont, "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <Navbar />
       <Hero onWaitlist={open} />
       <WaveTransition />

@@ -119,29 +119,34 @@ const DOC_TYPE_COLOR = {
   rate_confirmation: 'info', other: 'default',
 };
 
-function DocUploadCard({ data, isMe, onView }) {
+function DocUploadCard({ data, isMe, onView, isDeleted }) {
   const label = (data.doc_type || 'other').replace('_', ' ').toUpperCase();
   return (
     <Paper variant="outlined" sx={{
       p: 1.5, width: 220, ml: isMe ? 'auto' : 0,
-      bgcolor: isMe ? 'primary.dark' : 'background.paper',
-      borderColor: isMe ? 'primary.main' : 'divider', borderRadius: 2,
+      bgcolor: isDeleted ? 'action.disabledBackground' : isMe ? 'primary.dark' : 'background.paper',
+      borderColor: isDeleted ? 'error.main' : isMe ? 'primary.main' : 'divider', borderRadius: 2,
+      opacity: isDeleted ? 0.75 : 1,
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-        <DescriptionIcon sx={{ fontSize: 14, color: 'primary.light' }} />
-        <Typography variant="body2" fontWeight={600} color="text.primary">Document Uploaded</Typography>
+        <DescriptionIcon sx={{ fontSize: 14, color: isDeleted ? 'error.main' : 'primary.light' }} />
+        <Typography variant="body2" fontWeight={600} color={isDeleted ? 'error.main' : 'text.primary'}>
+          {isDeleted ? 'Document Deleted' : 'Document Uploaded'}
+        </Typography>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-        <Chip label={label} size="small" color={DOC_TYPE_COLOR[data.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
+        <Chip label={label} size="small" color={isDeleted ? 'error' : DOC_TYPE_COLOR[data.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
         {data.page_count > 1 && <Typography variant="caption" color="text.secondary">{data.page_count} pages</Typography>}
       </Box>
-      <Typography variant="body2" color="text.primary" sx={{ mb: 1, fontWeight: 500 }} noWrap>{data.file_name}</Typography>
+      <Typography variant="body2" color={isDeleted ? 'text.disabled' : 'text.primary'} sx={{ mb: 1, fontWeight: 500, textDecoration: isDeleted ? 'line-through' : 'none' }} noWrap>{data.file_name}</Typography>
       <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
         {data.uploader_name} · {data.uploader_role}
       </Typography>
-      <Button variant="contained" size="small" fullWidth startIcon={<DescriptionIcon />} onClick={onView} sx={{ fontSize: 11 }}>
-        View Document
-      </Button>
+      {!isDeleted && (
+        <Button variant="contained" size="small" fullWidth startIcon={<DescriptionIcon />} onClick={onView} sx={{ fontSize: 11 }}>
+          View Document
+        </Button>
+      )}
     </Paper>
   );
 }
@@ -327,6 +332,7 @@ export default function Messages() {
   const typingTimeoutRef = useRef(null);
   const [viewerDoc, setViewerDoc] = useState(null);
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
+  const [loadDocs, setLoadDocs] = useState(null);
 
   // Ping presence every 30s while on this page
   useEffect(() => {
@@ -405,6 +411,18 @@ export default function Messages() {
   }, [activeConvoId]);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [activeMessages.length]);
+
+  // Fetch docs for the active load so deleted docs can be detected
+  const activeConvoForDocs = conversations.find(c => c.id === activeConvoId);
+  useEffect(() => {
+    const loadId = activeConvoForDocs?.load_id;
+    if (!loadId) { setLoadDocs(null); return; }
+    setLoadDocs(null);
+    documentsApi.list(loadId)
+      .then(docs => setLoadDocs(Array.isArray(docs) ? docs : []))
+      .catch(() => setLoadDocs([]));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeConvoForDocs?.load_id]);
 
   // Poll for other user typing status
   useEffect(() => {
@@ -624,7 +642,7 @@ export default function Messages() {
                           {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
                           {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
                           {c.load_id
-                            ? <Typography variant="body2" fontWeight={unread ? 700 : 600} noWrap color="text.primary">Load #{c.load_id.slice(0, 8)}</Typography>
+                            ? <Typography variant="body2" fontWeight={unread ? 700 : 600} noWrap color="text.primary">LOAD #{c.load_id.slice(0, 8).toUpperCase()}</Typography>
                             : <Typography variant="body2" fontWeight={unread ? 700 : 500} noWrap color="text.primary">{label}</Typography>
                           }
                         </Box>
@@ -704,10 +722,28 @@ export default function Messages() {
               )}
               {activeConvo.other_last_active_at
                 ? <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={7} withLabel />
-                : activeConvo.load_id && <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
+                : activeConvo.load_id && (
+                  <Typography
+                    component={Link}
+                    to={`/${user?.role}/loads/${activeConvo.load_id}`}
+                    variant="caption"
+                    display="block"
+                    sx={{ color: 'primary.main', textDecoration: 'none', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+                  >
+                    LOAD #{activeConvo.load_id.slice(0, 8).toUpperCase()}
+                  </Typography>
+                )
               }
               {activeConvo.other_last_active_at && activeConvo.load_id && (
-                <Typography variant="caption" color="text.secondary" display="block">Load #{activeConvo.load_id.slice(0, 8)}</Typography>
+                <Typography
+                  component={Link}
+                  to={`/${user?.role}/loads/${activeConvo.load_id}`}
+                  variant="caption"
+                  display="block"
+                  sx={{ color: 'primary.main', textDecoration: 'none', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
+                >
+                  LOAD #{activeConvo.load_id.slice(0, 8).toUpperCase()}
+                </Typography>
               )}
             </Box>
             {user?.role === 'broker' && activeConvo.active_booking_id && (
@@ -770,13 +806,16 @@ export default function Messages() {
                 </Box>
               );
 
-              if (special?.__type === 'doc_upload') return (
-                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} />
-                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                </Box>
-              );
+              if (special?.__type === 'doc_upload') {
+                const isDocDeleted = loadDocs !== null && !loadDocs.some(d => String(d.id) === String(special.doc_id));
+                return (
+                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                    <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />
+                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                  </Box>
+                );
+              }
 
               if (special?.__type === 'location_share') return (
                 <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>

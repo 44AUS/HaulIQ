@@ -165,5 +165,19 @@ export const blocksApi = {
   check:   (userId) => request(`/api/blocks/check/${userId}`),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi };
+// ─── Admin ────────────────────────────────────────────────────────────────────
+export const adminApi = {
+  stats:      ()              => request('/api/admin/stats'),
+  users:      (params = {})  => request('/api/admin/users?' + new URLSearchParams(params)),
+  suspend:    (id)            => request(`/api/admin/users/${id}/suspend`, { method: 'PATCH' }),
+  activate:   (id)            => request(`/api/admin/users/${id}/activate`, { method: 'PATCH' }),
+  setPlan:    (id, plan)      => request(`/api/admin/users/${id}/plan?plan=${plan}`, { method: 'PATCH' }),
+  loads:      (params = {})  => request('/api/admin/loads?' + new URLSearchParams(params)),
+  removeLoad: (id)            => request(`/api/admin/loads/${id}`, { method: 'DELETE' }),
+  revenue:    ()              => request('/api/admin/revenue'),
+  plans:      ()              => request('/api/admin/plans'),
+  updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi };
 export default api;
