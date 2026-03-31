@@ -647,34 +647,129 @@ function CTA({ onWaitlist }) {
 }
 
 // ─── FOOTER ─────────────────────────────────────────────────────────────────────
-function Footer() {
+function FacebookIcon() {
   return (
-    <footer style={{ background: '#080c10', borderTop: '1px solid rgba(48,54,61,0.4)', padding: '60px 0 32px' }}>
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid sm:grid-cols-4 gap-10 mb-12">
-          <div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+function InstagramIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+function YoutubeIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" />
+      <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#1a1a2e" />
+    </svg>
+  );
+}
+
+function Footer() {
+  const cols = [
+    {
+      title: 'PRODUCT',
+      links: ['Features', 'Pricing', 'Load Board', 'Profit Calculator'],
+    },
+    {
+      title: 'CARRIERS',
+      links: ['How It Works', 'Earnings Brain', 'Broker Reviews', 'Instant Book'],
+    },
+    {
+      title: 'BROKERS',
+      links: ['Post Loads', 'Carrier Network', 'Analytics', 'Manage Bids'],
+    },
+    {
+      title: 'COMPANY',
+      links: ['About Us', 'Contact Us', 'Careers', 'Blog'],
+    },
+  ];
+
+  return (
+    <footer style={{ background: '#13171f' }}>
+      {/* Main footer grid */}
+      <div className="max-w-6xl mx-auto px-6" style={{ paddingTop: 64, paddingBottom: 48 }}>
+        <div className="grid sm:grid-cols-5 gap-10 mb-14">
+          {/* Logo + tagline */}
+          <div className="sm:col-span-1">
             <div className="flex items-center mb-4">
-              <img src="/urload-logo.png" alt="UrLoad" style={{ height: 28, width: 'auto' }} />
+              <img src="/urload-logo.png" alt="HaulIQ" style={{ height: 32, width: 'auto' }} />
             </div>
-            <p className="text-dark-300 text-sm leading-relaxed">The driver profit optimization platform. Built by truckers, for truckers.</p>
+            <p style={{ color: '#8b949e', fontSize: 13, lineHeight: 1.7 }}>
+              The smarter load board. Built for carriers and brokers who mean business.
+            </p>
           </div>
-          {[
-            { title: 'Product', links: ['Features', 'Pricing', 'Compare', 'Changelog'] },
-            { title: 'Company', links: ['About', 'Blog', 'Careers', 'Press'] },
-            { title: 'Legal', links: ['Privacy', 'Terms', 'Security', 'Contact'] },
-          ].map(({ title, links }) => (
+
+          {/* Link columns */}
+          {cols.map(({ title, links }) => (
             <div key={title}>
-              <h4 className="text-white font-semibold text-sm mb-4">{title}</h4>
-              <ul className="space-y-3">
-                {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                {links.map(l => <li key={l}><a href="#" className="text-dark-300 hover:text-white text-sm transition-colors">{l}</a></li>)}
+              <h4 style={{ color: '#0ea5e9', fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 16 }}>
+                {title}
+              </h4>
+              <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {links.map(l => (
+                  <li key={l}>
+                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                    <a href="#" style={{ color: '#8b949e', fontSize: 14, textDecoration: 'none', transition: 'color 0.2s' }}
+                      onMouseEnter={e => e.target.style.color = '#e6edf3'}
+                      onMouseLeave={e => e.target.style.color = '#8b949e'}
+                    >{l}</a>
+                  </li>
+                ))}
               </ul>
             </div>
           ))}
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-dark-400/40">
-          <p className="text-dark-400 text-sm">© 2026 UrLoad, Inc. All rights reserved.</p>
-          <p className="text-dark-400 text-sm mt-2 sm:mt-0">Built for the road. ⚡</p>
+
+        {/* Social icons */}
+        <div style={{ marginBottom: 32 }}>
+          <p style={{ color: '#0ea5e9', fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', marginBottom: 14 }}>
+            FOLLOW US
+          </p>
+          <div style={{ display: 'flex', gap: 16 }}>
+            {[
+              { icon: <FacebookIcon />, href: '#' },
+              { icon: <InstagramIcon />, href: '#' },
+              { icon: <YoutubeIcon />, href: '#' },
+            ].map(({ icon, href }, i) => (
+              <a
+                key={i}
+                href={href}
+                style={{ color: '#e6edf3', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.1)', transition: 'background 0.2s, color 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(14,165,233,0.15)'; e.currentTarget.style.color = '#0ea5e9'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#e6edf3'; }}
+              >
+                {icon}
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div style={{ borderTop: '1px solid rgba(48,54,61,0.5)', paddingTop: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <img src="/urload-logo.png" alt="" style={{ height: 20, width: 'auto', opacity: 0.5 }} />
+            <span style={{ color: '#484f58', fontSize: 13 }}>© 2026 HaulIQ, Inc. All rights reserved.</span>
+          </div>
+          <div style={{ display: 'flex', gap: 24 }}>
+            {['Sitemap', 'Privacy Policy', 'Terms of Service'].map(l => (
+              // eslint-disable-next-line jsx-a11y/anchor-is-valid
+              <a key={l} href="#"
+                style={{ color: '#484f58', fontSize: 13, textDecoration: 'underline', textUnderlineOffset: 3, transition: 'color 0.2s' }}
+                onMouseEnter={e => e.target.style.color = '#8b949e'}
+                onMouseLeave={e => e.target.style.color = '#484f58'}
+              >{l}</a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
