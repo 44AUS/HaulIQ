@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useJsApiLoader, Autocomplete as GAutocomplete } from '@react-google-maps/api';
 import {
-  Brain, Star, TrendingUp, Zap, ArrowRight,
+  Brain, TrendingUp, Zap, ArrowRight,
   Check, X, BarChart2,
   Mail, User,
 } from 'lucide-react';
@@ -386,24 +386,24 @@ function MockBrokers() {
 function AppBadge({ type }) {
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
+      display: 'flex', alignItems: 'center', gap: 12,
       background: '#000', border: '1.5px solid rgba(255,255,255,0.2)',
-      borderRadius: 10, padding: '8px 18px', cursor: 'pointer',
+      borderRadius: 12, padding: '11px 22px', cursor: 'pointer',
     }}>
       {type === 'google' ? (
         <>
           <svg width="20" height="22" viewBox="0 0 24 24"><path d="M3.18 23.76c.3.17.64.24.99.2l12.6-12.6L13.14 7.7 3.18 23.76z" fill="#EA4335"/><path d="M21.3 10.12l-2.94-1.68-3.6 3.56 3.6 3.56 2.97-1.7c.85-.48.85-1.74-.03-1.74z" fill="#FBBC05"/><path d="M2.17.24A1.56 1.56 0 0 0 2 1v22c0 .27.07.52.18.74l13.41-13.4L2.17.24z" fill="#4285F4"/><path d="M4.17.44L16.77 7 13.14 10.7 3.18.24a1.56 1.56 0 0 1 .99.2z" fill="#34A853"/></svg>
           <div>
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, lineHeight: 1 }}>GET IT ON</div>
-            <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>Google Play</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, lineHeight: 1 }}>GET IT ON</div>
+            <div style={{ color: '#fff', fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>Google Play</div>
           </div>
         </>
       ) : (
         <>
           <svg width="18" height="22" viewBox="0 0 814 1000"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-43.4-150.3-109.2S70 700.1 70 610.6c0-176.6 114.8-269.9 227.1-269.9 59.9 0 109.6 40.8 147.2 40.8 35.8 0 92.1-43.2 162.8-43.2zm-166.9-180.4c28.3-37 48.9-88.6 48.9-140.2 0-7.1-.6-14.3-1.9-20.1-46.3 1.8-101.5 31.7-134.8 72.2-26.1 30.7-50.6 82.4-50.6 134.9 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.4 1.3 13.6 1.3 41.7 0 93.1-28.4 122.9-67.3z" fill="#fff"/></svg>
           <div>
-            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, lineHeight: 1 }}>Download on the</div>
-            <div style={{ color: '#fff', fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>App Store</div>
+            <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, lineHeight: 1 }}>Download on the</div>
+            <div style={{ color: '#fff', fontSize: 16, fontWeight: 600, lineHeight: 1.3 }}>App Store</div>
           </div>
         </>
       )}
@@ -486,7 +486,7 @@ function Hero({ onWaitlist }) {
             {/* Stars */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 18 }}>
               {[1,2,3,4,5].map(i => <span key={i} style={{ color: '#fbbf24', fontSize: 22, lineHeight: 1 }}>★</span>)}
-              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: 500, marginLeft: 6 }}>400+ five star reviews</span>
+              <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: 500, marginLeft: 6 }}>Built for serious carriers</span>
             </div>
             {/* Badges */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -609,48 +609,7 @@ function MoreFeatures() {
   );
 }
 
-// ─── TESTIMONIALS ───────────────────────────────────────────────────────────────
-function Testimonials() {
-  const reviews = [
-    { name: 'Marcus T.', role: 'Owner-Operator · 5 years', avatar: 'MT', text: "UrLoad's Earnings Brain told me to avoid a broker I'd been using for years. Turned out they had 3 delayed payments that week. Saved me $2,400 in headaches.", stars: 5 },
-    { name: 'Jessica R.', role: 'Fleet Owner · 4 trucks', avatar: 'JR', text: 'The profit calculator alone is worth the Pro subscription. I rejected 6 loads last week that looked good on paper but were actually losing money after fuel and deadhead.', stars: 5 },
-    { name: 'Derek L.', role: 'OTR Driver · 3 years', avatar: 'DL', text: "Finally a load board that doesn't just show me loads — it shows me which ones will actually make me money. My weekly net is up 34% since switching.", stars: 5 },
-    { name: 'Priya S.', role: 'Freight Broker', avatar: 'PS', text: 'As a broker, the Elite plan gave me access to serious, high-volume carriers. My load acceptance rate went from 31% to 67% in 6 weeks.', stars: 5 },
-  ];
-
-  return (
-    <section style={{ background: '#0d1117', padding: '100px 0' }}>
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="badge-green text-sm mb-5 inline-block">Reviews</span>
-          <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">Drivers trust UrLoad.</h2>
-          <div className="flex items-center justify-center gap-1.5 mt-3">
-            {[1,2,3,4,5].map(i => <Star key={i} size={20} className="text-yellow-400 fill-yellow-400" />)}
-            <span className="text-white font-bold ml-2">4.9</span>
-            <span className="text-dark-300 text-sm ml-1">from 1,284 reviews</span>
-          </div>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {reviews.map(({ name, role, avatar, text, stars }) => (
-            <div key={name} className="glass rounded-2xl p-6 border border-dark-400/40 hover:border-brand-500/20 transition-all">
-              <div className="flex items-center gap-1 mb-4">
-                {[...Array(stars)].map((_, i) => <Star key={i} size={13} className="text-yellow-400 fill-yellow-400" />)}
-              </div>
-              <p className="text-dark-100 text-sm leading-relaxed mb-5">"{text}"</p>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-brand-500/20 rounded-full flex items-center justify-center text-brand-400 text-xs font-bold">{avatar}</div>
-                <div>
-                  <p className="text-white text-sm font-semibold">{name}</p>
-                  <p className="text-dark-300 text-xs">{role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+function Testimonials() { return null; }
 
 // ─── PRICING ────────────────────────────────────────────────────────────────────
 function Pricing({ onWaitlist }) {
@@ -774,7 +733,7 @@ function CTA({ onWaitlist }) {
             <span className="badge-green text-sm mb-6 inline-block">Start Today</span>
             <h2 className="text-4xl lg:text-5xl font-black text-white mb-5">Ready to earn smarter?</h2>
             <p className="text-dark-200 text-lg mb-10 max-w-xl mx-auto">
-              Join 2,100+ drivers already using UrLoad to maximize their earnings per mile.
+              Join the waitlist and be among the first to access smarter freight technology built for carriers and brokers.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={onWaitlist} className="btn-primary text-base px-10 py-4 flex items-center justify-center gap-2 glow-green">
