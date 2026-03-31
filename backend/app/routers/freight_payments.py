@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import get_db
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, require_admin
 from app.models.user import User, UserRole
 from app.models.booking import Booking, BookingStatus
 from app.models.load import Load
@@ -198,6 +198,68 @@ def release_payment(
     db.commit()
 
     return {"ok": True, "carrier_amount": payment.carrier_amount, "transfer_id": transfer["id"]}
+
+
+# ── List payments for current user ────────────────────────────────────────────
+@router.get("/my", summary="List all payments for current user")
+def list_my_payments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role == UserRole.broker:
+        payments = db.query(LoadPayment).filter(LoadPayment.broker_id == current_user.id).order_by(LoadPayment.created_at.desc()).all()
+    else:
+        payments = db.query(LoadPayment).filter(LoadPayment.carrier_id == current_user.id).order_by(LoadPayment.created_at.desc()).all()
+
+    result = []
+    for p in payments:
+        load = db.query(Load).filter(Load.id == p.load_id).first()
+        result.append({
+            "id": str(p.id),
+            "booking_id": str(p.booking_id),
+            "load_id": str(p.load_id),
+            "amount": p.amount,
+            "fee_amount": p.fee_amount,
+            "carrier_amount": p.carrier_amount,
+            "status": p.status,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "escrowed_at": p.escrowed_at.isoformat() if p.escrowed_at else None,
+            "released_at": p.released_at.isoformat() if p.released_at else None,
+            "load_origin": load.origin if load else None,
+            "load_destination": load.destination if load else None,
+        })
+    return result
+
+
+# ── Admin: list all payments ───────────────────────────────────────────────────
+@router.get("/admin/all", summary="Admin: list all payments across platform")
+def admin_list_payments(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    payments = db.query(LoadPayment).order_by(LoadPayment.created_at.desc()).all()
+    result = []
+    for p in payments:
+        load = db.query(Load).filter(Load.id == p.load_id).first()
+        result.append({
+            "id": str(p.id),
+            "booking_id": str(p.booking_id),
+            "load_id": str(p.load_id),
+            "broker_name": p.broker.name if p.broker else None,
+            "broker_email": p.broker.email if p.broker else None,
+            "carrier_name": p.carrier.name if p.carrier else None,
+            "carrier_email": p.carrier.email if p.carrier else None,
+            "amount": p.amount,
+            "fee_amount": p.fee_amount,
+            "carrier_amount": p.carrier_amount,
+            "status": p.status,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+            "escrowed_at": p.escrowed_at.isoformat() if p.escrowed_at else None,
+            "released_at": p.released_at.isoformat() if p.released_at else None,
+            "load_origin": load.origin if load else None,
+            "load_destination": load.destination if load else None,
+        })
+    return result
 
 
 # ── Get payment status for a booking ──────────────────────────────────────────

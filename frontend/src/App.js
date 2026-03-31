@@ -23,9 +23,11 @@ import CarrierAnalytics from './pages/carrier/Analytics';
 import CarrierLoadsInProgress from './pages/carrier/LoadsInProgress';
 import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
 import PlaceBid from './pages/carrier/PlaceBid';
+import CarrierPayments from './pages/carrier/Payments';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
+import BrokerPayments from './pages/broker/Payments';
 import PostLoad from './pages/broker/PostLoad';
 import ManageLoads from './pages/broker/ManageLoads';
 import BrokerAnalytics from './pages/broker/BrokerAnalytics';
@@ -54,6 +56,7 @@ import AdminSubscriptions from './pages/admin/AdminSubscriptions';
 import AdminRevenue from './pages/admin/AdminRevenue';
 import AdminLoads from './pages/admin/AdminLoads';
 import AdminWaitlist from './pages/admin/AdminWaitlist';
+import AdminPayments from './pages/admin/AdminPayments';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -97,6 +100,7 @@ function CarrierRoutes() {
           <Route path="active" element={<CarrierLoadsInProgress />} />
           <Route path="active/:bookingId" element={<ActiveLoadDetail />} />
           <Route path="loads/:id/bid" element={<PlaceBid />} />
+          <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
@@ -124,6 +128,7 @@ function BrokerRoutes() {
           <Route path="messages" element={<Messages />} />
           <Route path="bookings" element={<BookingRequests />} />
           <Route path="instant-book" element={<InstantBookSettings />} />
+          <Route path="payments" element={<BrokerPayments />} />
           <Route path="active" element={<BrokerLoadsInProgress />} />
           <Route path="track/:bookingId" element={<TrackLoad />} />
           <Route path="network" element={<Network />} />
@@ -149,6 +154,7 @@ function AdminRoutes() {
           <Route path="subscriptions" element={<AdminSubscriptions />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="waitlist" element={<AdminWaitlist />} />
+          <Route path="payments" element={<AdminPayments />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </DashboardLayout>

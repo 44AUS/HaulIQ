@@ -19,6 +19,8 @@ import {
   Group as UsersIcon,
   CreditCard as CreditCardIcon,
   AttachMoney as MoneyIcon,
+  AccountBalanceWallet as WalletIcon,
+  Payment as PaymentIcon,
   Settings as SettingsIcon,
   Logout as LogoutIcon,
   ChevronLeft as ChevronLeftIcon,
@@ -51,6 +53,7 @@ const CARRIER_LINKS = [
   { icon: HistoryIcon,   label: 'Load History',      path: '/carrier/history' },
   { icon: ActivityIcon,  label: 'In Progress',       path: '/carrier/active' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
+  { icon: WalletIcon,       label: 'Payments',       path: '/carrier/payments' },
   { icon: NetworkIcon,      label: 'Network',        path: '/carrier/network', badge: 'network' },
   { icon: FolderIcon,       label: 'Documents',      path: '/carrier/documents' },
   { icon: CreditCardIcon,   label: 'Billing',        path: '/carrier/billing' },
@@ -67,6 +70,7 @@ const BROKER_LINKS = [
   { icon: FolderIcon,    label: 'Documents',         path: '/broker/documents' },
   { icon: EventIcon,     label: 'Booking Requests',  path: '/broker/bookings', badge: 'bookings' },
   { icon: ZapIcon,          label: 'Instant Book',   path: '/broker/instant-book' },
+  { icon: PaymentIcon,      label: 'Payments',       path: '/broker/payments' },
   { icon: CreditCardIcon,   label: 'Billing',        path: '/broker/billing' },
   { icon: PreferencesIcon,  label: 'Preferences',    path: '/preferences' },
 ];
@@ -77,6 +81,7 @@ const ADMIN_LINKS = [
   { icon: PackageIcon,    label: 'Load Moderation',   path: '/admin/loads' },
   { icon: CreditCardIcon, label: 'Subscriptions',     path: '/admin/subscriptions' },
   { icon: MoneyIcon,      label: 'Revenue',           path: '/admin/revenue' },
+  { icon: PaymentIcon,    label: 'Payments',          path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',          path: '/admin/waitlist' },
 ];
 

@@ -173,6 +173,8 @@ export const freightPaymentsApi = {
   charge:        (bookingId)   => request(`/api/freight-payments/charge/${bookingId}`, { method: 'POST' }),
   release:       (bookingId)   => request(`/api/freight-payments/release/${bookingId}`, { method: 'POST' }),
   status:        (bookingId)   => request(`/api/freight-payments/${bookingId}`),
+  list:          ()            => request('/api/freight-payments/my'),
+  adminList:     ()            => request('/api/freight-payments/admin/all'),
 };
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
