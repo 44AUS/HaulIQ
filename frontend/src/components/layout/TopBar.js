@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
-  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton,
+  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -28,10 +28,16 @@ import {
   NetworkCheck as NetworkIcon,
   MoreVert as MoreVertIcon,
   Layers as LayersIcon,
+  LocalShipping as TruckIcon,
+  Person as PersonIcon,
+  Message as MsgIcon,
+  Bookmark as SavedIcon,
+  CheckCircle as DoneIcon,
+  LocalAtm as PayIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
-import { messagesApi, bookingsApi, networkApi, bidsApi } from '../../services/api';
+import { messagesApi, bookingsApi, networkApi, bidsApi, searchApi } from '../../services/api';
 
 const DEFAULT_BAR_COLOR = '#1565C0';
 const BAR_COLOR_HOVER = 'rgba(255,255,255,0.12)';
@@ -247,6 +253,90 @@ function NotificationsPanel({ onClose }) {
   );
 }
 
+// ── Search results panel ──────────────────────────────────────────────────────
+const SEARCH_CATEGORIES = [
+  { key: 'connections',       label: 'Connections',       Icon: PersonIcon },
+  { key: 'messages',          label: 'Messages',           Icon: MsgIcon },
+  { key: 'loads_in_progress', label: 'Loads In Progress', Icon: TruckIcon },
+  { key: 'completed_loads',   label: 'Completed Loads',   Icon: DoneIcon },
+  { key: 'saved_loads',       label: 'Saved Loads',       Icon: SavedIcon },
+  { key: 'payments',          label: 'Payments',           Icon: PayIcon },
+];
+
+function SearchResultsPanel({ results, loading, onNavigate }) {
+  if (loading) {
+    return (
+      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {[1, 2, 3].map(i => (
+          <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+            <Skeleton variant="circular" width={28} height={28} />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="text" width="60%" height={16} />
+              <Skeleton variant="text" width="40%" height={13} sx={{ mt: 0.25 }} />
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    );
+  }
+
+  const hasAny = SEARCH_CATEGORIES.some(c => (results?.[c.key] || []).length > 0);
+  if (!hasAny) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary">No results found</Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ maxHeight: 480, overflowY: 'auto', py: 1 }}>
+      {SEARCH_CATEGORIES.map(({ key, label, Icon }) => {
+        const items = results?.[key] || [];
+        if (!items.length) return null;
+        return (
+          <Box key={key}>
+            <Typography variant="caption" sx={{ px: 2, py: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.68rem' }}>
+              {label}
+            </Typography>
+            {items.map(item => (
+              <Box
+                key={item.id}
+                onClick={() => onNavigate(item)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1.5,
+                  px: 2, py: 1, cursor: 'pointer',
+                  '&:hover': { bgcolor: 'action.hover' },
+                  transition: 'background 0.12s',
+                }}
+              >
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
+                  <Icon sx={{ fontSize: 14, color: '#fff' }} />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" fontWeight={600} noWrap>
+                    {key === 'connections' ? item.name
+                      : key === 'messages' ? `${item.other_name}: ${item.body}`
+                      : key === 'payments' ? `${item.origin} → ${item.destination}`
+                      : `${item.origin} → ${item.destination}`}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>
+                    {key === 'connections' ? (item.company || item.role)
+                      : key === 'messages' ? 'Message'
+                      : key === 'payments' ? `$${item.amount?.toFixed(2)} · ${item.status}`
+                      : `${item.commodity || ''} · $${item.rate?.toLocaleString()}`}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+            <Divider sx={{ my: 0.5 }} />
+          </Box>
+        );
+      })}
+    </Box>
+  );
+}
+
 // ── Main TopBar ───────────────────────────────────────────────────────────────
 export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const { user } = useAuth();
@@ -263,6 +353,9 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const [notifCount, setNotifCount] = useState(0);
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const searchRef = useRef(null);
+  const [searchResults, setSearchResults] = useState(null);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchPanelRef = useRef(null);
 
   // Fetch notification count
   useEffect(() => {
@@ -285,9 +378,35 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  useEffect(() => {
+    if (!searchVal || searchVal.trim().length < 2) {
+      setSearchResults(null);
+      return;
+    }
+    setSearchLoading(true);
+    const timer = setTimeout(() => {
+      searchApi.search(searchVal.trim())
+        .then(data => setSearchResults(data))
+        .catch(() => setSearchResults(null))
+        .finally(() => setSearchLoading(false));
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchVal]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (searchPanelRef.current && !searchPanelRef.current.contains(e.target)) {
+        setSearchResults(null);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const handleCloseSearch = () => {
     setSearchOpen(false);
     setSearchVal('');
+    setSearchResults(null);
   };
 
   if (!user) return null;
@@ -330,7 +449,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
           </Tooltip>
 
           {/* Center area: nav links (desktop) | mobile dropdown trigger | expanding search */}
-          <Box sx={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
+          <Box ref={searchPanelRef} sx={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
 
             {/* Desktop nav links — fades out when search opens */}
             {!isMobile && (
@@ -418,6 +537,36 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
                 <CloseIcon sx={{ fontSize: 15 }} />
               </IconButton>
             </Box>
+
+            {/* Search results panel */}
+            {searchOpen && (searchResults !== null || searchLoading) && (
+              <Paper
+                elevation={8}
+                sx={{
+                  position: 'absolute',
+                  top: 62,
+                  left: 0,
+                  right: 0,
+                  zIndex: 9999,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  minWidth: 320,
+                }}
+              >
+                <SearchResultsPanel
+                  results={searchResults}
+                  loading={searchLoading}
+                  onNavigate={(item) => {
+                    if (item.conv_id) {
+                      navigate(`${item.path}?conv=${item.conv_id}`);
+                    } else {
+                      navigate(item.path);
+                    }
+                    handleCloseSearch();
+                  }}
+                />
+              </Paper>
+            )}
           </Box>
 
           {/* Right: search icon + notifications */}

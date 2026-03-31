@@ -186,6 +186,11 @@ export const freightPaymentsApi = {
   adminList:     ()            => request('/api/freight-payments/admin/all'),
 };
 
+// ─── Search ───────────────────────────────────────────────────────────────────
+export const searchApi = {
+  search: (q) => request(`/api/search?q=${encodeURIComponent(q)}`),
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminApi = {
   stats:      ()              => request('/api/admin/stats'),
@@ -200,5 +205,5 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi };
 export default api;

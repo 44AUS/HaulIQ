@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import { LayoutContext } from '../../components/layout/DashboardLayout';
 import {
   Box, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
@@ -317,6 +317,7 @@ function PresenceDot({ lastActiveAt, size = 10, withLabel = false }) {
 export default function Messages() {
   const { user } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { drawerWidth } = useContext(LayoutContext);
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
@@ -342,6 +343,15 @@ export default function Messages() {
     const interval = setInterval(() => messagesApi.presence().catch(() => {}), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Pre-select conversation from search navigation (?conv=<id>)
+  useEffect(() => {
+    const convId = searchParams.get('conv');
+    if (convId && conversations.length > 0) {
+      const found = conversations.find(c => c.id === convId);
+      if (found) setActiveConvoId(found.id);
+    }
+  }, [searchParams, conversations]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleShareLocation = (bookingId) => {
     if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
