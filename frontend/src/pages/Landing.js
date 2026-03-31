@@ -6,7 +6,7 @@ import {
   Mail, User,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import { waitlistApi } from '../services/api';
+import { waitlistApi, plansApi } from '../services/api';
 
 const GMAPS_LIBS = ['places'];
 
@@ -618,11 +618,8 @@ function Pricing({ onWaitlist }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch((process.env.REACT_APP_API_URL || 'http://localhost:8000') + '/api/subscriptions/plans')
-      .then(r => r.json())
-      .then(data => {
-        if (Array.isArray(data)) setAllPlans(data);
-      })
+    plansApi.list()
+      .then(data => { if (Array.isArray(data)) setAllPlans(data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
