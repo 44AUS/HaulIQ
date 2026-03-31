@@ -51,6 +51,7 @@ class User(Base):
     created_at        = Column(DateTime, default=datetime.utcnow)
     updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     stripe_connect_account_id = Column(String(255), nullable=True)
+    brand_color               = Column(String(20), nullable=True)
 
     # Relationships
     subscription   = relationship("Subscription", back_populates="user", uselist=False)

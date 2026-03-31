@@ -8,6 +8,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PaletteIcon from '@mui/icons-material/Palette';
 import { useThemeMode } from '../../context/ThemeContext';
+import { authApi } from '../../services/api';
 
 const PRESET_COLORS = [
   '#0D1B2A', '#1565C0', '#1B5E20', '#4A148C',
@@ -23,7 +24,12 @@ export default function BrandingSettings() {
   const { brandColor, setBrandColor } = useThemeMode();
   const currentColor = brandColor || DEFAULT_COLOR;
 
-  const handleReset = () => setBrandColor(null);
+  const persistColor = (color) => {
+    setBrandColor(color || null);
+    authApi.update({ brand_color: color || null }).catch(() => {});
+  };
+
+  const handleReset = () => persistColor(null);
 
   return (
     <Box sx={{ maxWidth: 640 }}>
@@ -66,7 +72,7 @@ export default function BrandingSettings() {
             <input
               type="color"
               value={currentColor}
-              onChange={e => setBrandColor(e.target.value)}
+              onChange={e => persistColor(e.target.value)}
               style={{ position: 'absolute', inset: 0, width: '200%', height: '200%', opacity: 0, cursor: 'pointer', border: 'none' }}
             />
           </Box>
@@ -98,7 +104,7 @@ export default function BrandingSettings() {
               <input
                 type="color"
                 value={currentColor}
-                onChange={e => setBrandColor(e.target.value)}
+                onChange={e => persistColor(e.target.value)}
                 style={{ position: 'absolute', inset: '-10px', width: 'calc(100% + 20px)', height: 'calc(100% + 20px)', opacity: 0, cursor: 'pointer', border: 'none' }}
               />
             </Box>
@@ -121,7 +127,7 @@ export default function BrandingSettings() {
             {PRESET_COLORS.map(color => (
               <Tooltip key={color} title={color} placement="top">
                 <Box
-                  onClick={() => setBrandColor(color)}
+                  onClick={() => persistColor(color)}
                   sx={{
                     width: 32, height: 32, borderRadius: 1.5, bgcolor: color, cursor: 'pointer',
                     border: '2px solid',

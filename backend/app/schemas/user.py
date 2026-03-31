@@ -41,6 +41,7 @@ class UserUpdate(BaseModel):
     dot_number: Optional[str] = None
     password: Optional[str] = None
     avatar_url: Optional[str] = None
+    brand_color: Optional[str] = None
 
 
 class UserOut(BaseModel):
@@ -64,6 +65,7 @@ class UserOut(BaseModel):
     vetting_score:     Optional[str] = None
     vetting_flags:     Optional[str] = None
     vetting_summary:   Optional[str] = None
+    brand_color:       Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

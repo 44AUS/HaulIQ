@@ -1,8 +1,24 @@
+import { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
-import { AppThemeProvider } from './context/ThemeContext';
+import { AppThemeProvider, useThemeMode } from './context/ThemeContext';
 import { Box, CircularProgress } from '@mui/material';
+
+// Syncs brand color from server profile when user logs in / switches accounts
+function BrandColorSync() {
+  const { user } = useAuth();
+  const { setBrandColor } = useThemeMode();
+  const prevIdRef = useRef(null);
+  useEffect(() => {
+    if (user?.id && user.id !== prevIdRef.current) {
+      prevIdRef.current = user.id;
+      if (user.brand_color) setBrandColor(user.brand_color);
+    }
+    if (!user) prevIdRef.current = null;
+  }, [user?.id, user?.brand_color, setBrandColor]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
 
 // Pages — Public
 import Landing from './pages/Landing';
@@ -211,6 +227,7 @@ export default function App() {
       <AuthProvider>
         <MessagingProvider>
           <BrowserRouter>
+            <BrandColorSync />
             <AppRoutes />
           </BrowserRouter>
         </MessagingProvider>

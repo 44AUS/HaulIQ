@@ -109,13 +109,19 @@ def get_broker_reviews(
     return result
 
 
-def _has_completed_load_with_broker(carrier_id, broker_user_id, db: Session) -> bool:
+def _has_completed_load_with_broker(carrier_id, broker_id, broker_user_id, db: Session) -> bool:
     """Check if this carrier has at least one completed booking on a load posted by this broker."""
-    return db.query(Booking).join(Load, Booking.load_id == Load.id).filter(
+    q = db.query(Booking).join(Load, Booking.load_id == Load.id).filter(
         Booking.carrier_id == carrier_id,
-        Load.broker_user_id == broker_user_id,
         Booking.status == BookingStatus.completed,
-    ).first() is not None
+    )
+    if broker_user_id:
+        q = q.filter(
+            (Load.broker_user_id == broker_user_id) | (Load.broker_id == broker_id)
+        )
+    else:
+        q = q.filter(Load.broker_id == broker_id)
+    return q.first() is not None
 
 
 @router.get("/{broker_id}/can-review", summary="Check if the current carrier can review this broker")
@@ -134,7 +140,7 @@ def can_review(
     if already_reviewed:
         return {"can_review": False, "reason": "You have already reviewed this broker."}
 
-    if not _has_completed_load_with_broker(current_user.id, broker.user_id, db):
+    if not _has_completed_load_with_broker(current_user.id, broker.id, broker.user_id, db):
         return {"can_review": False, "reason": "You can only review brokers after completing a load for them."}
 
     return {"can_review": True, "reason": None}
@@ -159,7 +165,7 @@ def submit_review(
         raise HTTPException(status_code=400, detail="You have already reviewed this broker.")
 
     # Must have completed a load with this broker
-    if not _has_completed_load_with_broker(current_user.id, broker.user_id, db):
+    if not _has_completed_load_with_broker(current_user.id, broker.id, broker.user_id, db):
         raise HTTPException(status_code=403, detail="You can only review brokers after completing a load for them.")
 
     review = BrokerReview(

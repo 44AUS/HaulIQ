@@ -14,6 +14,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import Tooltip from '@mui/material/Tooltip';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import BlockIcon from '@mui/icons-material/Block';
@@ -714,29 +716,9 @@ export default function Messages() {
               ) : (
                 <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
               )}
-              {activeConvo.other_last_active_at
-                ? <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={7} withLabel />
-                : activeConvo.load_id && (
-                  <Typography
-                    component={Link}
-                    to={`/${user?.role}/loads/${activeConvo.load_id}`}
-                    variant="caption"
-                    display="block"
-                    sx={{ color: 'primary.main', textDecoration: 'none', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
-                  >
-                    LOAD #{activeConvo.load_id.slice(0, 8).toUpperCase()}
-                  </Typography>
-                )
-              }
-              {activeConvo.other_last_active_at && activeConvo.load_id && (
-                <Typography
-                  component={Link}
-                  to={`/${user?.role}/loads/${activeConvo.load_id}`}
-                  variant="caption"
-                  display="block"
-                  sx={{ color: 'primary.main', textDecoration: 'none', fontWeight: 600, '&:hover': { textDecoration: 'underline' } }}
-                >
-                  LOAD #{activeConvo.load_id.slice(0, 8).toUpperCase()}
+              {activeConvo.other_last_active_at && (
+                <Typography variant="caption" color="text.secondary" display="block">
+                  {getPresenceInfo(activeConvo.other_last_active_at)?.label}
                 </Typography>
               )}
             </Box>
@@ -747,14 +729,28 @@ export default function Messages() {
               </Button>
             )}
             {activeConvo.load_id && (
-              <IconButton
-                size="small"
-                title="View load documents"
-                sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
-                onClick={() => setDocsModalLoadId(activeConvo.load_id)}
-              >
-                <FolderOpenIcon sx={{ fontSize: 18 }} />
-              </IconButton>
+              <Tooltip title="View load" placement="bottom">
+                <IconButton
+                  component={Link}
+                  to={`/${user?.role}/loads/${activeConvo.load_id}`}
+                  size="small"
+                  sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <LocalShippingIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            )}
+            {activeConvo.load_id && (
+              <Tooltip title="View load documents" placement="bottom">
+                <IconButton
+                  size="small"
+                  sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
+                  onClick={() => setDocsModalLoadId(activeConvo.load_id)}
+                >
+                  <FolderOpenIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
             )}
             <IconButton
               size="small" disabled={deletingId === activeConvoId}
