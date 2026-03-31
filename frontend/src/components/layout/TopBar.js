@@ -27,9 +27,10 @@ import {
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, bookingsApi, networkApi, bidsApi } from '../../services/api';
 
-const BAR_COLOR = '#00796B';
+const DEFAULT_BAR_COLOR = '#1565C0';
 const BAR_COLOR_HOVER = 'rgba(255,255,255,0.12)';
 const NOTIF_DRAWER_WIDTH = 360;
 
@@ -76,8 +77,8 @@ function NavLink({ item, active, onClick }) {
         cursor: 'pointer',
         position: 'relative',
         userSelect: 'none',
-        color: active ? '#fff' : 'rgba(255,255,255,0.72)',
-        bgcolor: active ? 'rgba(255,255,255,0.10)' : 'transparent',
+        color: active ? '#fff' : 'rgba(255,255,255,0.75)',
+        bgcolor: active ? 'rgba(255,255,255,0.12)' : 'transparent',
         '&:hover': { bgcolor: BAR_COLOR_HOVER, color: '#fff' },
         transition: 'all 0.15s',
         minWidth: 0,
@@ -239,8 +240,10 @@ function NotificationsPanel({ onClose }) {
 }
 
 // ── Main TopBar ───────────────────────────────────────────────────────────────
-export default function TopBar({ totalNotifCount = 0 }) {
+export default function TopBar() {
   const { user } = useAuth();
+  const { brandColor } = useThemeMode();
+  const barColor = brandColor || DEFAULT_BAR_COLOR;
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -289,7 +292,7 @@ export default function TopBar({ totalNotifCount = 0 }) {
         position="static"
         elevation={0}
         sx={{
-          bgcolor: BAR_COLOR,
+          bgcolor: barColor,
           color: '#fff',
           height: 52,
           flexShrink: 0,
