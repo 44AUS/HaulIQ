@@ -433,7 +433,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
                   pointerEvents: searchOpen ? 'none' : 'auto',
                 }}
               >
-                <SearchIcon fontSize="small" />
+                <SearchIcon sx={{ fontSize: 22 }} />
               </IconButton>
             </Tooltip>
 
@@ -445,7 +445,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
                 sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
               >
                 <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                  <BellIcon fontSize="small" />
+                  <BellIcon sx={{ fontSize: 22 }} />
                 </Badge>
               </IconButton>
             </Tooltip>

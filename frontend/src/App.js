@@ -8,7 +8,6 @@ import { Box, CircularProgress } from '@mui/material';
 // Pages — Public
 import Landing from './pages/Landing';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
 import Checkout from './pages/Checkout';
 import ManageSubscription from './pages/shared/ManageSubscription';
 
