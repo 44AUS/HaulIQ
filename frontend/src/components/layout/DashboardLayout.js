@@ -1,6 +1,7 @@
 import { useState, createContext } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import Sidebar, { DRAWER_WIDTH, DRAWER_COLLAPSED_WIDTH } from './Sidebar';
+import TopBar from './TopBar';
 
 export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
 
@@ -33,6 +34,7 @@ export default function DashboardLayout({ children }) {
           overflow: 'hidden',
         }}
       >
+        <TopBar />
         {/* Scroll container — pages scroll here, not the viewport */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
           {children}
