@@ -5,21 +5,6 @@ import { MessagingProvider } from './context/MessagingContext';
 import { AppThemeProvider, useThemeMode } from './context/ThemeContext';
 import { Box, CircularProgress } from '@mui/material';
 
-// Syncs brand color from server profile when user logs in / switches accounts
-function BrandColorSync() {
-  const { user } = useAuth();
-  const { setBrandColor } = useThemeMode();
-  const prevIdRef = useRef(null);
-  useEffect(() => {
-    if (user?.id && user.id !== prevIdRef.current) {
-      prevIdRef.current = user.id;
-      if (user.brand_color) setBrandColor(user.brand_color);
-    }
-    if (!user) prevIdRef.current = null;
-  }, [user?.id, user?.brand_color, setBrandColor]); // eslint-disable-line react-hooks/exhaustive-deps
-  return null;
-}
-
 // Pages — Public
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -76,6 +61,21 @@ import AdminPayments from './pages/admin/AdminPayments';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
+
+// ─── Brand color sync ─────────────────────────────────────────────────────────
+function BrandColorSync() {
+  const { user } = useAuth();
+  const { setBrandColor } = useThemeMode();
+  const prevIdRef = useRef(null);
+  useEffect(() => {
+    if (user?.id && user.id !== prevIdRef.current) {
+      prevIdRef.current = user.id;
+      if (user.brand_color) setBrandColor(user.brand_color);
+    }
+    if (!user) prevIdRef.current = null;
+  }, [user?.id, user?.brand_color, setBrandColor]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
 
 // ─── Route guards ─────────────────────────────────────────────────────────────
 function ProtectedRoute({ children, requiredRole }) {
