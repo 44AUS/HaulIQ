@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { useJsApiLoader, Autocomplete as GAutocomplete } from '@react-google-maps/api';
-
-const GMAPS_LIBS = ['places'];
 import { Link } from 'react-router-dom';
 import {
   Brain, Star, TrendingUp, Zap, ArrowRight,
@@ -10,6 +8,8 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { waitlistApi } from '../services/api';
+
+const GMAPS_LIBS = ['places'];
 
 // ─── WAITLIST MODAL ─────────────────────────────────────────────────────────────
 function CopyButton({ text }) {
