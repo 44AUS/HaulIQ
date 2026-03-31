@@ -106,6 +106,15 @@ export const subscriptionsApi = {
   cancel: () => request('/api/subscriptions/me', { method: 'DELETE' }),
 };
 
+// ─── Plans ────────────────────────────────────────────────────────────────────
+export const plansApi = {
+  list:        (role) => request(`/api/subscriptions/plans${role ? `?role=${role}` : ''}`),
+  adminList:   () => request('/api/subscriptions/admin/plans'),
+  adminCreate: (data) => request('/api/subscriptions/admin/plans', { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdate: (id, data) => request(`/api/subscriptions/admin/plans/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  adminDelete: (id) => request(`/api/subscriptions/admin/plans/${id}`, { method: 'DELETE' }),
+};
+
 // ─── Carrier reviews ──────────────────────────────────────────────────────────
 export const carrierReviewsApi = {
   post:      (data)     => request('/api/carrier-reviews/', { method: 'POST', body: JSON.stringify(data) }),
@@ -191,5 +200,5 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi };
 export default api;

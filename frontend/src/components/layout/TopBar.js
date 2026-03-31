@@ -27,6 +27,7 @@ import {
   PendingActions as PendingIcon,
   NetworkCheck as NetworkIcon,
   MoreVert as MoreVertIcon,
+  Layers as LayersIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -61,6 +62,7 @@ const ADMIN_NAV = [
   { icon: MoneyIcon,      label: 'Revenue',   path: '/admin/revenue' },
   { icon: PaymentIcon,    label: 'Payments',  path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',  path: '/admin/waitlist' },
+  { icon: LayersIcon,     label: 'Plans',     path: '/admin/plans' },
 ];
 
 // ── Single top nav link ───────────────────────────────────────────────────────

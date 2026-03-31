@@ -655,37 +655,28 @@ function Testimonials() {
 // ─── PRICING ────────────────────────────────────────────────────────────────────
 function Pricing({ onWaitlist }) {
   const [tab, setTab] = useState('carrier');
+  const [allPlans, setAllPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const plans = {
-    carrier: [
-      { name: 'Basic', price: 0, period: 'forever', desc: 'Just getting started', color: 'default',
-        features: ['20 load views/day', 'Basic profit calculator', 'Standard filters', 'Email support'],
-        missing: ['Broker ratings', 'Earnings Brain', 'Hot load alerts', 'Analytics'] },
-      { name: 'Pro', price: 49, period: 'month', desc: 'Most popular for owner-operators', color: 'brand', popular: true,
-        features: ['Unlimited load views', 'Full profit calculator', 'Broker ratings & reviews', 'Basic Earnings Brain', 'Hot load notifications', '90-day load history', 'Priority support'],
-        missing: ['Advanced AI insights', 'Early load access', 'Full analytics'] },
-      { name: 'Elite', price: 99, period: 'month', desc: 'Maximum earning power', color: 'purple',
-        features: ['Everything in Pro', 'Full Driver Earnings Brain', 'Priority load access', 'Early hot load alerts', 'Advanced analytics', 'Weekly profit reports', 'Dedicated account rep'],
-        missing: [] },
-    ],
-    broker: [
-      { name: 'Basic', price: 0, period: 'forever', desc: 'Post and be discovered', color: 'default',
-        features: ['10 active postings', 'Standard visibility', 'Basic dashboard'],
-        missing: ['Enhanced visibility', 'Carrier analytics', 'Priority placement', 'API access'] },
-      { name: 'Pro', price: 79, period: 'month', desc: 'More reach, better conversions', color: 'brand', popular: true,
-        features: ['50 active postings', 'Enhanced visibility', 'Carrier engagement data', 'Performance dashboard', 'Priority support'],
-        missing: ['Priority placement', 'API access', 'Unlimited postings'] },
-      { name: 'Elite', price: 149, period: 'month', desc: 'Dominate the board', color: 'purple',
-        features: ['Unlimited postings', 'Priority placement', 'Full conversion analytics', 'Premium carrier exposure', 'Dedicated account rep', 'API access'],
-        missing: [] },
-    ],
-  };
+  useEffect(() => {
+    fetch((process.env.REACT_APP_API_URL || 'http://localhost:8000') + '/api/subscriptions/plans')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setAllPlans(data);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const colorMap = {
-    default: { border: 'border-dark-400/40', btn: 'btn-secondary', badge: '' },
-    brand:   { border: 'border-brand-500/40', btn: 'btn-primary glow-green', badge: 'badge-green' },
-    purple:  { border: 'border-purple-500/40', btn: 'bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-all', badge: 'badge-blue' },
+    default: { border: 'border-dark-400/40', btn: 'btn-secondary' },
+    brand:   { border: 'border-brand-500/40', btn: 'btn-primary glow-green' },
+    purple:  { border: 'border-purple-500/40', btn: 'bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-all' },
   };
+
+  const plans = allPlans
+    .filter(p => p.role === tab && p.is_active)
+    .sort((a, b) => ((a.limits?.sort_order ?? 99) - (b.limits?.sort_order ?? 99)) || a.price - b.price);
 
   return (
     <section id="pricing" style={{ background: '#080c10', padding: '100px 0' }}>
@@ -696,7 +687,7 @@ function Pricing({ onWaitlist }) {
           <h2 className="text-4xl lg:text-5xl font-black text-white mb-4">
             Simple, transparent pricing.<br /><span className="gradient-text">No hidden fees.</span>
           </h2>
-          <p className="text-dark-200 text-lg">Start free. Upgrade when you're ready to maximize earnings.</p>
+          <p className="text-dark-200 text-lg">Choose the plan that fits your business.</p>
           <div className="inline-flex glass rounded-xl p-1 mt-8">
             {['carrier', 'broker'].map(t => (
               <button key={t} onClick={() => setTab(t)}
@@ -707,53 +698,66 @@ function Pricing({ onWaitlist }) {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {plans[tab].map((plan) => {
-            const c = colorMap[plan.color];
-            return (
-              <div key={plan.name} className={`glass rounded-2xl p-7 border ${c.border} relative flex flex-col ${plan.popular ? 'scale-105 shadow-2xl shadow-brand-500/10' : ''}`}>
-                {plan.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="badge-green text-xs px-3 py-1">Most Popular</span>
+        {loading ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="glass rounded-2xl p-7 border border-dark-400/40 animate-pulse">
+                <div className="h-6 bg-white/5 rounded mb-3 w-2/3" />
+                <div className="h-4 bg-white/5 rounded mb-6 w-1/2" />
+                <div className="h-10 bg-white/5 rounded mb-6 w-1/3" />
+                {[1,2,3,4].map(j => <div key={j} className="h-3 bg-white/5 rounded mb-2" />)}
+              </div>
+            ))}
+          </div>
+        ) : plans.length === 0 ? (
+          <p className="text-center text-dark-300">No plans available yet.</p>
+        ) : (
+          <div className={`grid gap-6 ${plans.length === 1 ? 'max-w-sm mx-auto' : plans.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'}`}>
+            {plans.map((plan) => {
+              const color = plan.limits?.color || 'default';
+              const c = colorMap[color] || colorMap.default;
+              const popular = plan.limits?.popular || false;
+              const missing = plan.limits?.missing || [];
+              return (
+                <div key={plan.id} className={`glass rounded-2xl p-7 border ${c.border} relative flex flex-col ${popular ? 'scale-105 shadow-2xl shadow-brand-500/10' : ''}`}>
+                  {popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <span className="badge-green text-xs px-3 py-1">Most Popular</span>
+                    </div>
+                  )}
+                  <div className="mb-6">
+                    <h3 className="text-white font-bold text-xl mb-1">{plan.name}</h3>
+                    <p className="text-dark-300 text-sm">{plan.description}</p>
                   </div>
-                )}
-                <div className="mb-6">
-                  <h3 className="text-white font-bold text-xl mb-1">{plan.name}</h3>
-                  <p className="text-dark-300 text-sm">{plan.desc}</p>
-                </div>
-                <div className="mb-6">
-                  {plan.price === 0 ? (
-                    <p className="text-4xl font-black text-white">Free</p>
-                  ) : (
+                  <div className="mb-6">
                     <div className="flex items-end gap-1">
                       <span className="text-dark-300 text-lg">$</span>
                       <span className="text-4xl font-black text-white">{plan.price}</span>
-                      <span className="text-dark-300 text-sm mb-1">/{plan.period}</span>
+                      <span className="text-dark-300 text-sm mb-1">/month</span>
                     </div>
-                  )}
+                  </div>
+                  <ul className="space-y-2.5 mb-6 flex-1">
+                    {(plan.features || []).map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check size={14} className="text-brand-400 flex-shrink-0 mt-0.5" />
+                        <span className="text-dark-100">{f}</span>
+                      </li>
+                    ))}
+                    {missing.map(f => (
+                      <li key={f} className="flex items-start gap-2 text-sm opacity-35">
+                        <X size={14} className="text-dark-400 flex-shrink-0 mt-0.5" />
+                        <span className="text-dark-300 line-through">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button onClick={onWaitlist} className={`block text-center w-full py-3 rounded-lg font-semibold transition-all text-sm ${c.btn}`}>
+                    Join Waitlist
+                  </button>
                 </div>
-                <ul className="space-y-2.5 mb-6 flex-1">
-                  {plan.features.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check size={14} className="text-brand-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-dark-100">{f}</span>
-                    </li>
-                  ))}
-                  {plan.missing.map(f => (
-                    <li key={f} className="flex items-start gap-2 text-sm opacity-35">
-                      <X size={14} className="text-dark-400 flex-shrink-0 mt-0.5" />
-                      <span className="text-dark-300 line-through">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button onClick={onWaitlist} className={`block text-center w-full py-3 rounded-lg font-semibold transition-all text-sm ${c.btn}`}>
-                  Join Waitlist
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        <p className="text-center text-dark-300 text-sm mt-10">All plans include 14-day free trial on paid tiers. No credit card required.</p>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
