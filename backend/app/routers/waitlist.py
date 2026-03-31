@@ -32,8 +32,13 @@ class JoinRequest(BaseModel):
     email: EmailStr
     name: str
     role: str        # 'carrier' | 'broker'
+    phone: Optional[str] = None
     company: Optional[str] = None
     mc_number: Optional[str] = None
+    business_address: Optional[str] = None
+    business_city: Optional[str] = None
+    business_state: Optional[str] = None
+    business_zip: Optional[str] = None
 
 
 class WaitlistOut(BaseModel):
@@ -76,8 +81,13 @@ def join_waitlist(payload: JoinRequest, db: Session = Depends(get_db)):
         name=payload.name,
         role=UserRole(payload.role),
         plan=UserPlan.basic,
+        phone=payload.phone,
         company=payload.company,
         mc_number=payload.mc_number,
+        business_address=payload.business_address,
+        business_city=payload.business_city,
+        business_state=payload.business_state,
+        business_zip=payload.business_zip,
         is_active=False,
     )
     db.add(user)

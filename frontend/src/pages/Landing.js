@@ -24,14 +24,21 @@ function CopyButton({ text }) {
   );
 }
 
+const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
+
 function WaitlistModal({ onClose }) {
   const [role, setRole] = useState('carrier');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
   const [mcNumber, setMcNumber] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null); // { temp_email, temp_password, already }
+  const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
   const handleSubmit = (e) => {
@@ -39,7 +46,18 @@ function WaitlistModal({ onClose }) {
     if (!name.trim()) { setError('Please enter your name.'); return; }
     setSubmitting(true);
     setError(null);
-    waitlistApi.join({ email, name: name.trim(), role, company: company.trim() || undefined, mc_number: mcNumber.trim() || undefined })
+    waitlistApi.join({
+      email,
+      name: name.trim(),
+      role,
+      phone: phone.trim() || undefined,
+      company: company.trim() || undefined,
+      mc_number: mcNumber.trim() || undefined,
+      business_address: address.trim() || undefined,
+      business_city: city.trim() || undefined,
+      business_state: state || undefined,
+      business_zip: zip.trim() || undefined,
+    })
       .then(res => setResult(res))
       .catch(err => { setError(err.message); setSubmitting(false); });
   };
@@ -122,6 +140,10 @@ function WaitlistModal({ onClose }) {
                 </div>
               </div>
               <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Phone Number</label>
+                <input className="input" type="tel" placeholder="(555) 000-0000" value={phone} onChange={e => setPhone(e.target.value)} />
+              </div>
+              <div>
                 <label className="block text-dark-100 text-sm font-medium mb-1.5">Company Name</label>
                 <input className="input" placeholder={role === 'carrier' ? 'Your trucking company' : 'Your brokerage name'} value={company} onChange={e => setCompany(e.target.value)} />
               </div>
@@ -131,6 +153,28 @@ function WaitlistModal({ onClose }) {
                   <input className="input" placeholder="MC-123456" value={mcNumber} onChange={e => setMcNumber(e.target.value)} />
                 </div>
               )}
+              <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Business Address</label>
+                <input className="input" placeholder="123 Main St" value={address} onChange={e => setAddress(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-dark-100 text-sm font-medium mb-1.5">City</label>
+                  <input className="input" placeholder="Dallas" value={city} onChange={e => setCity(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-dark-100 text-sm font-medium mb-1.5">ZIP</label>
+                  <input className="input" placeholder="75201" value={zip} onChange={e => setZip(e.target.value)} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">State</label>
+                <select className="input" value={state} onChange={e => setState(e.target.value)}
+                  style={{ appearance: 'auto', background: 'transparent' }}>
+                  <option value="">Select state…</option>
+                  {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" disabled={submitting}
                 className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
