@@ -137,9 +137,10 @@ export const networkApi = {
 };
 
 export const waitlistApi = {
-  join:   (data) => request('/api/waitlist/', { method: 'POST', body: JSON.stringify(data) }),
-  list:   ()     => request('/api/waitlist/'),
-  remove: (id)   => request(`/api/waitlist/${id}`, { method: 'DELETE' }),
+  join:     (data) => request('/api/waitlist/', { method: 'POST', body: JSON.stringify(data) }),
+  list:     ()     => request('/api/waitlist/'),
+  activate: (id)   => request(`/api/waitlist/${id}/activate`, { method: 'POST' }),
+  remove:   (id)   => request(`/api/waitlist/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Locations ────────────────────────────────────────────────────────────────

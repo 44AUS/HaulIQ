@@ -4,7 +4,15 @@
       "Bash(npm install:*)",
       "Bash(npx tailwindcss:*)",
       "Bash(npm run:*)",
-      "Bash(CI=true npm run build)"
+      "Bash(CI=true npm run build)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(cp \"c:/Users/austi/Desktop/HaulIQ/frontend/src/pages/shared/ProfileSettings.js\" /dev/null)",
+      "Bash(mv \"c:/Users/austi/Desktop/HaulIQ/frontend/src/pages/shared/ProfileSettings.js\" /dev/null)",
+      "Bash(npx react-scripts:*)",
+      "Bash(find c:/Users/austi/Desktop/HaulIQ/frontend -name logo* -o -name urload* -o -name UrLoad*)",
+      "WebFetch(domain:app.urable.com)"
     ]
   }
 }

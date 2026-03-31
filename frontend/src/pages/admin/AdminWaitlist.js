@@ -9,6 +9,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import WorkIcon from '@mui/icons-material/Work';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { waitlistApi } from '../../services/api';
 
 function RoleBadge({ role }) {
@@ -42,6 +43,7 @@ export default function AdminWaitlist() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [deleting, setDeleting] = useState(null);
+  const [activating, setActivating] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -68,6 +70,19 @@ export default function AdminWaitlist() {
       alert('Failed to delete: ' + e.message);
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleActivate = async (entry) => {
+    if (!window.confirm(`Activate account for ${entry.email}? They will be able to log in immediately.`)) return;
+    setActivating(entry.id);
+    try {
+      await waitlistApi.activate(entry.id);
+      setEntries(prev => prev.map(e => e.id === entry.id ? { ...e, activated: true } : e));
+    } catch (e) {
+      alert('Failed to activate: ' + e.message);
+    } finally {
+      setActivating(null);
     }
   };
 
@@ -151,7 +166,7 @@ export default function AdminWaitlist() {
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['Name', 'Email', 'Role', 'Joined', ''].map((h, i) => (
+                  {['Name', 'Email', 'Role', 'Company', 'MC #', 'Joined', 'Status', ''].map((h, i) => (
                     <TableCell
                       key={i}
                       sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main' }}
@@ -177,23 +192,57 @@ export default function AdminWaitlist() {
                       <RoleBadge role={entry.role} />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {entry.company || '—'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary" noWrap>
+                        {entry.mc_number || '—'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption" color="text.secondary" noWrap>
                         {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </Typography>
                     </TableCell>
-                    <TableCell align="right">
-                      <IconButton
+                    <TableCell>
+                      <Chip
+                        label={entry.activated ? 'Activated' : 'Pending'}
                         size="small"
-                        onClick={() => handleDelete(entry.id)}
-                        disabled={deleting === entry.id}
-                        title="Remove from waitlist"
-                        sx={{ '&:hover': { color: 'error.main' } }}
-                      >
-                        {deleting === entry.id
-                          ? <CircularProgress size={14} color="inherit" />
-                          : <DeleteOutlineIcon sx={{ fontSize: 16 }} />
-                        }
-                      </IconButton>
+                        color={entry.activated ? 'success' : 'warning'}
+                        sx={{ fontSize: 11 }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+                        {!entry.activated && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleActivate(entry)}
+                            disabled={activating === entry.id}
+                            title="Activate account"
+                            sx={{ '&:hover': { color: 'success.main' } }}
+                          >
+                            {activating === entry.id
+                              ? <CircularProgress size={14} color="inherit" />
+                              : <HowToRegIcon sx={{ fontSize: 16 }} />
+                            }
+                          </IconButton>
+                        )}
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(entry.id)}
+                          disabled={deleting === entry.id}
+                          title="Remove from waitlist"
+                          sx={{ '&:hover': { color: 'error.main' } }}
+                        >
+                          {deleting === entry.id
+                            ? <CircularProgress size={14} color="inherit" />
+                            : <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                          }
+                        </IconButton>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}

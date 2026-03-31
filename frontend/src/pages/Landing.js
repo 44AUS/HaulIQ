@@ -9,46 +9,96 @@ import Navbar from '../components/layout/Navbar';
 import { waitlistApi } from '../services/api';
 
 // ─── WAITLIST MODAL ─────────────────────────────────────────────────────────────
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+  return (
+    <button type="button" onClick={copy} style={{
+      background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px',
+      color: copied ? '#38bdf8' : '#6e7681', fontSize: 11, fontWeight: 600, letterSpacing: '0.03em',
+    }}>
+      {copied ? 'Copied!' : 'Copy'}
+    </button>
+  );
+}
+
 function WaitlistModal({ onClose }) {
   const [role, setRole] = useState('carrier');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
+  const [mcNumber, setMcNumber] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
+  const [result, setResult] = useState(null); // { temp_email, temp_password, already }
   const [error, setError] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!name.trim()) { setError('Please enter your name.'); return; }
     setSubmitting(true);
     setError(null);
-    waitlistApi.join({ email, name, role })
-      .then(() => setDone(true))
+    waitlistApi.join({ email, name: name.trim(), role, company: company.trim() || undefined, mc_number: mcNumber.trim() || undefined })
+      .then(res => setResult(res))
       .catch(err => { setError(err.message); setSubmitting(false); });
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative glass rounded-2xl border border-dark-400/40 w-full max-w-md p-8 animate-fade-in">
+      <div className="relative glass rounded-2xl border border-dark-400/40 w-full max-w-md p-8 animate-fade-in" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
         <button onClick={onClose} className="absolute top-4 right-4 text-dark-400 hover:text-white transition-colors">
           <X size={18} />
         </button>
-        {done ? (
-          <div className="text-center py-4">
-            <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5 glow-green">
+
+        {result ? (
+          <div className="py-2">
+            <div className="w-16 h-16 bg-brand-500/10 border border-brand-500/30 rounded-full flex items-center justify-center mx-auto mb-5">
               <Check size={28} className="text-brand-400" />
             </div>
-            <h3 className="text-white font-bold text-xl mb-2">You're on the list!</h3>
-            <p className="text-dark-300 text-sm">We'll reach out as soon as your spot opens up.</p>
-            <button onClick={onClose} className="mt-6 btn-primary px-8 py-2.5 text-sm">Done</button>
+            <h3 className="text-white font-bold text-xl mb-1 text-center">
+              {result.already ? "You're already on the list!" : "You're on the list!"}
+            </h3>
+            {!result.already && (
+              <>
+                <p className="text-dark-300 text-sm text-center mb-5">
+                  We've created your account. Save these credentials — you'll use them to log in when we launch.
+                </p>
+                <div style={{ background: 'rgba(14,165,233,0.07)', border: '1px solid rgba(14,165,233,0.25)', borderRadius: 12, padding: '16px 20px', marginBottom: 20 }}>
+                  <p style={{ color: '#8b949e', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', marginBottom: 12 }}>YOUR LOGIN CREDENTIALS</p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <div>
+                      <p style={{ color: '#8b949e', fontSize: 11, marginBottom: 2 }}>Email</p>
+                      <p style={{ color: '#e6edf3', fontSize: 14, fontWeight: 600 }}>{result.temp_email}</p>
+                    </div>
+                    <CopyButton text={result.temp_email} />
+                  </div>
+                  <div style={{ borderTop: '1px solid rgba(48,54,61,0.5)', paddingTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ color: '#8b949e', fontSize: 11, marginBottom: 2 }}>Temporary Password</p>
+                      <p style={{ color: '#e6edf3', fontSize: 14, fontWeight: 600, fontFamily: 'monospace', letterSpacing: '0.08em' }}>{result.temp_password}</p>
+                    </div>
+                    <CopyButton text={result.temp_password} />
+                  </div>
+                </div>
+                <div style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)', borderRadius: 8, padding: '10px 14px', marginBottom: 20 }}>
+                  <p style={{ color: '#fbbf24', fontSize: 12 }}>⚠️ Screenshot or copy your password now — it won't be shown again.</p>
+                </div>
+              </>
+            )}
+            {result.already && (
+              <p className="text-dark-300 text-sm text-center mb-6">You're already registered. We'll notify you when your account is activated.</p>
+            )}
+            <button onClick={onClose} className="btn-primary w-full py-2.5 text-sm">Got it!</button>
           </div>
         ) : (
           <>
             <div className="mb-6">
               <h3 className="text-white font-bold text-xl mb-1">Join the Waitlist</h3>
-              <p className="text-dark-300 text-sm">Get early access to UrLoad and be first in line when we launch.</p>
+              <p className="text-dark-300 text-sm">We'll pre-build your account so you're ready to go on launch day.</p>
             </div>
-            <div className="flex gap-2 p-1 bg-dark-800 rounded-xl border border-dark-400/40 mb-6">
+            <div className="flex gap-2 p-1 bg-dark-800 rounded-xl border border-dark-400/40 mb-5">
               {[{ key: 'carrier', label: "🚛 I'm a Carrier" }, { key: 'broker', label: "📋 I'm a Broker" }].map(opt => (
                 <button key={opt.key} type="button" onClick={() => setRole(opt.key)}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${role === opt.key ? 'bg-brand-500 text-white' : 'text-dark-300 hover:text-white'}`}>
@@ -58,10 +108,10 @@ function WaitlistModal({ onClose }) {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-dark-100 text-sm font-medium mb-1.5">Name</label>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Full Name <span className="text-red-400">*</span></label>
                 <div className="relative">
                   <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400" />
-                  <input className="input pl-9" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} />
+                  <input className="input pl-9" placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} required />
                 </div>
               </div>
               <div>
@@ -71,11 +121,22 @@ function WaitlistModal({ onClose }) {
                   <input className="input pl-9" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
               </div>
+              <div>
+                <label className="block text-dark-100 text-sm font-medium mb-1.5">Company Name</label>
+                <input className="input" placeholder={role === 'carrier' ? 'Your trucking company' : 'Your brokerage name'} value={company} onChange={e => setCompany(e.target.value)} />
+              </div>
+              {role === 'carrier' && (
+                <div>
+                  <label className="block text-dark-100 text-sm font-medium mb-1.5">MC Number <span className="text-dark-400 font-normal">(optional)</span></label>
+                  <input className="input" placeholder="MC-123456" value={mcNumber} onChange={e => setMcNumber(e.target.value)} />
+                </div>
+              )}
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button type="submit" disabled={submitting}
                 className="btn-primary w-full py-3 flex items-center justify-center gap-2 glow-green disabled:opacity-60">
-                {submitting ? 'Joining…' : <><span>Join Waitlist</span><ArrowRight size={16} /></>}
+                {submitting ? 'Creating your account…' : <><span>Join Waitlist</span><ArrowRight size={16} /></>}
               </button>
+              <p className="text-dark-400 text-xs text-center">A temporary password will be generated for you on the next screen.</p>
             </form>
           </>
         )}
