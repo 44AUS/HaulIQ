@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useJsApiLoader, Autocomplete as GAutocomplete } from '@react-google-maps/api';
-import { Link } from 'react-router-dom';
 import {
   Brain, Star, TrendingUp, Zap, ArrowRight,
-  Check, X, ChevronRight, BarChart2,
+  Check, X, BarChart2,
   Mail, User,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
@@ -463,12 +462,14 @@ function Hero({ onWaitlist }) {
               Smart Load Board<br />Built for <span style={{ color: '#0ea5e9' }}>Driver Profit.</span>
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 17, lineHeight: 1.8, marginBottom: 14, maxWidth: 500 }}>
-              UrLoad is the AI-powered platform that tells you exactly which loads to take,
-              which brokers to trust, and how to maximize profit on every mile.
+              Urload is an all-in-one platform built specifically for the trucking industry, connecting carriers and brokers in one seamless system.
             </p>
-            <a href="#features" style={{ color: '#0ea5e9', fontWeight: 600, fontSize: 15, textDecoration: 'none', display: 'inline-block', marginBottom: 36 }}>
+            <p style={{ color: 'rgba(255,255,255,0.62)', fontSize: 17, lineHeight: 1.8, marginBottom: 14, maxWidth: 500 }}>
+              Designed to streamline operations, Urload makes it easy to find loads, manage shipments, pay carriers, communicate in real time, and keep your business moving efficiently.
+            </p>
+            {/* <a href="#features" style={{ color: '#0ea5e9', fontWeight: 600, fontSize: 15, textDecoration: 'none', display: 'inline-block', marginBottom: 36 }}>
               Show more »
-            </a>
+            </a> */}
             <div style={{ marginBottom: 28 }}>
               <button
                 onClick={onWaitlist}
@@ -518,7 +519,6 @@ function FeatureRow({ flip = false, light = false, label, title, desc, bullets, 
   const headC  = light ? '#111827' : '#ffffff';
   const bodyC  = light ? '#6b7280' : '#8b949e';
   const bulletC = light ? '#374151' : '#8b949e';
-  const learnC = light ? '#111827' : '#e6edf3';
 
   return (
     <section style={{ background: bg, padding: '100px 0' }}>
@@ -549,9 +549,6 @@ function FeatureRow({ flip = false, light = false, label, title, desc, bullets, 
               <button onClick={onWaitlist} className="btn-primary flex items-center gap-2">
                 Get Started <ArrowRight size={16} />
               </button>
-              <Link to="/login" style={{ color: learnC, fontWeight: 600, fontSize: 15, display: 'inline-flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
-                See how it works <ChevronRight size={16} />
-              </Link>
             </div>
           </div>
 
@@ -779,9 +776,6 @@ function CTA({ onWaitlist }) {
               <button onClick={onWaitlist} className="btn-primary text-base px-10 py-4 flex items-center justify-center gap-2 glow-green">
                 Join the Waitlist <ArrowRight size={18} />
               </button>
-              <Link to="/login" className="btn-secondary text-base px-10 py-4 flex items-center justify-center gap-2">
-                View Live Demo
-              </Link>
             </div>
           </div>
         </div>

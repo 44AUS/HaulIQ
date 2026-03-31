@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown, LogOut, Settings, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -95,22 +95,7 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="hidden sm:block px-4 py-2 text-sm font-semibold text-white hover:text-white/70 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="px-5 py-2 text-sm font-bold text-black bg-white hover:bg-white/90 rounded-lg transition-all"
-                >
-                  Get Started
-                </Link>
-              </>
-            )}
+            ) : null}
             <button className="md:hidden text-white/70 hover:text-white ml-1" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -126,16 +111,6 @@ export default function Navbar() {
                 {label}
               </a>
             ))}
-            <div className="flex gap-2 mt-3 px-2">
-              <Link to="/login" onClick={() => setMobileOpen(false)}
-                className="flex-1 text-center py-2.5 text-sm font-medium text-white/80 border border-white/20 rounded-lg hover:bg-white/[0.06] transition-all">
-                Login
-              </Link>
-              <Link to="/signup" onClick={() => setMobileOpen(false)}
-                className="flex-1 text-center py-2.5 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-600 rounded-lg transition-all">
-                Get Started
-              </Link>
-            </div>
           </div>
         )}
       </div>

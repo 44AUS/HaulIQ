@@ -184,7 +184,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/b/:brokerId" element={
         <ProtectedRoute>
