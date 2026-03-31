@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { bookingsApi, loadsApi, bidsApi } from '../../services/api';
+import { bookingsApi, loadsApi, bidsApi, freightPaymentsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import {
   Box, Typography, Button, Card, CardContent, Chip, CircularProgress, Alert,
   Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  Tabs, Tab, InputAdornment,
+  Tabs, Tab, InputAdornment, Divider,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,6 +17,189 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
+import SendIcon from '@mui/icons-material/Send';
+
+// Lazy-load Stripe — will fail gracefully if @stripe/react-stripe-js not installed
+let loadStripe, Elements, PaymentElement, useStripe, useElements;
+try {
+  ({ loadStripe } = require('@stripe/stripe-js'));
+  ({ Elements, PaymentElement, useStripe, useElements } = require('@stripe/react-stripe-js'));
+} catch (_) {
+  loadStripe = null;
+}
+
+const stripePromise = loadStripe && process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
+  : null;
+
+// ── Payment breakdown row helper ──────────────────────────────────────────────
+function AmountRow({ label, value, bold, color }) {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', py: 0.75 }}>
+      <Typography variant="body2" color="text.secondary">{label}</Typography>
+      <Typography variant="body2" fontWeight={bold ? 700 : 500} sx={color ? { color } : {}}>
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+// ── Inner form that uses Stripe hooks ─────────────────────────────────────────
+function StripePaymentForm({ chargeData, onPaid, onClose }) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const stripe = useStripe?.() ?? null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const elements = useElements?.() ?? null;
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setPaying(true);
+    setPayError(null);
+    try {
+      const result = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.href },
+        redirect: 'if_required',
+      });
+      if (result.error) {
+        setPayError(result.error.message);
+      } else {
+        onPaid();
+      }
+    } catch (err) {
+      setPayError(err.message);
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit}>
+      <Box sx={{ mb: 2 }}>
+        <AmountRow label="Load Rate" value={`$${chargeData.amount?.toLocaleString()}`} />
+        <AmountRow label="Platform Fee (1.5%)" value={`-$${chargeData.fee_amount?.toLocaleString()}`} color="error.main" />
+        <Divider sx={{ my: 0.5 }} />
+        <AmountRow label="Carrier Receives" value={`$${chargeData.carrier_amount?.toLocaleString()}`} bold color="success.main" />
+      </Box>
+
+      {Elements && PaymentElement ? (
+        <Box sx={{ mb: 2 }}>
+          <PaymentElement />
+        </Box>
+      ) : (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Stripe UI components not installed. Run: <code>npm install @stripe/stripe-js @stripe/react-stripe-js</code>
+        </Alert>
+      )}
+
+      {payError && <Alert severity="error" sx={{ mb: 1.5 }}>{payError}</Alert>}
+
+      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+        <Button variant="outlined" onClick={onClose} disabled={paying}>Cancel</Button>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          disabled={paying || !stripe}
+          startIcon={paying ? <CircularProgress size={14} color="inherit" /> : <SendIcon />}
+        >
+          {paying ? 'Processing…' : `Pay $${chargeData.amount?.toLocaleString()}`}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Payment Dialog ─────────────────────────────────────────────────────────────
+function PaymentDialog({ bookingId, onClose, onPaid }) {
+  const [chargeData, setChargeData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    freightPaymentsApi.charge(bookingId)
+      .then(data => setChargeData(data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [bookingId]);
+
+  const handlePaid = () => {
+    onPaid();
+    onClose();
+  };
+
+  return (
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <LockIcon fontSize="small" color="primary" />
+        Pay Load into Escrow
+      </DialogTitle>
+      <DialogContent>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box>
+            <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+            <Button variant="outlined" onClick={onClose}>Close</Button>
+          </Box>
+        ) : chargeData ? (
+          <>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Funds will be held in escrow until you release payment after delivery confirmation.
+            </Typography>
+            {stripePromise && chargeData.client_secret && Elements ? (
+              <Elements stripe={stripePromise} options={{ clientSecret: chargeData.client_secret }}>
+                <StripePaymentForm chargeData={chargeData} onPaid={handlePaid} onClose={onClose} />
+              </Elements>
+            ) : (
+              <Box>
+                <AmountRow label="Load Rate" value={`$${chargeData.amount?.toLocaleString()}`} />
+                <AmountRow label="Platform Fee (1.5%)" value={`-$${chargeData.fee_amount?.toLocaleString()}`} color="error.main" />
+                <Divider sx={{ my: 0.5 }} />
+                <AmountRow label="Carrier Receives" value={`$${chargeData.carrier_amount?.toLocaleString()}`} bold color="success.main" />
+                <Alert severity="warning" sx={{ mt: 2 }}>
+                  Stripe frontend library not configured. Set <code>REACT_APP_STRIPE_PUBLISHABLE_KEY</code> and run{' '}
+                  <code>npm install @stripe/stripe-js @stripe/react-stripe-js</code>.
+                </Alert>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                  <Button variant="outlined" onClick={onClose}>Close</Button>
+                </Box>
+              </Box>
+            )}
+          </>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Payment status chip helper ─────────────────────────────────────────────────
+function paymentChip(payStatus) {
+  if (!payStatus || payStatus === 'unpaid') return null;
+  const map = {
+    pending:  { label: 'Pay Pending', color: 'default' },
+    escrowed: { label: 'In Escrow',   color: 'info' },
+    released: { label: 'Paid',        color: 'success' },
+    failed:   { label: 'Pay Failed',  color: 'error' },
+    refunded: { label: 'Refunded',    color: 'warning' },
+  };
+  const cfg = map[payStatus] || { label: payStatus, color: 'default' };
+  return (
+    <Chip
+      icon={<AttachMoneyIcon sx={{ fontSize: '14px !important' }} />}
+      label={cfg.label}
+      color={cfg.color}
+      size="small"
+      variant="outlined"
+    />
+  );
+}
 
 function statusChip(status) {
   const map = {
@@ -49,6 +232,11 @@ export default function BookingRequests() {
   const [counterNote, setCounterNote] = useState('');
   const [bidActing, setBidActing] = useState(false);
 
+  // Payment state
+  const [paymentStatuses, setPaymentStatuses] = useState({}); // bookingId -> payment status object
+  const [paymentDialog, setPaymentDialog] = useState(null);   // bookingId or null
+  const [releasing, setReleasing] = useState({});             // bookingId -> bool
+
   const fetchBookings = useCallback(() => {
     setLoading(true);
     bookingsApi.pending()
@@ -76,14 +264,36 @@ export default function BookingRequests() {
       .finally(() => setBidsLoading(false));
   }, []);
 
-  useEffect(() => { fetchBookings(); fetchBids(); }, [fetchBookings, fetchBids]);
+  // Fetch active loads (broker-active) to get approved/in_transit/completed bookings
+  const [activeBookings, setActiveBookings] = useState([]);
+  const fetchActiveBookings = useCallback(() => {
+    bookingsApi.brokerActive()
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        setActiveBookings(list);
+        // Fetch payment status for each booking that has a booking_id
+        const bookingIds = list.map(b => b.booking_id).filter(Boolean);
+        bookingIds.forEach(bid => {
+          freightPaymentsApi.status(bid)
+            .then(ps => setPaymentStatuses(prev => ({ ...prev, [bid]: ps })))
+            .catch(() => {});
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+    fetchBids();
+    fetchActiveBookings();
+  }, [fetchBookings, fetchBids, fetchActiveBookings]);
 
   const pendingBookings = bookings.filter(b => b.status === 'pending');
   const activeBids = bids.filter(b => b.status !== 'withdrawn');
 
   const handleReviewBooking = (approved) => {
     bookingsApi.review(reviewModal.item.id, { approved, broker_note: brokerNote })
-      .then(() => { fetchBookings(); setReviewModal(null); setBrokerNote(''); })
+      .then(() => { fetchBookings(); fetchActiveBookings(); setReviewModal(null); setBrokerNote(''); })
       .catch(err => alert(err.message));
   };
 
@@ -102,7 +312,33 @@ export default function BookingRequests() {
       .finally(() => setBidActing(false));
   };
 
+  const handleRelease = async (bookingId) => {
+    setReleasing(r => ({ ...r, [bookingId]: true }));
+    try {
+      await freightPaymentsApi.release(bookingId);
+      setPaymentStatuses(prev => ({
+        ...prev,
+        [bookingId]: { ...prev[bookingId], status: 'released' },
+      }));
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setReleasing(r => ({ ...r, [bookingId]: false }));
+    }
+  };
+
+  const handlePaymentSuccess = (bookingId) => {
+    // Re-fetch status after payment
+    freightPaymentsApi.status(bookingId)
+      .then(ps => setPaymentStatuses(prev => ({ ...prev, [bookingId]: ps })))
+      .catch(() => {});
+    fetchActiveBookings();
+  };
+
   const getLoad = (loadId) => loadCache[loadId] || null;
+
+  // Active loads tab: approved / in_transit / completed loads
+  const bookedLoads = activeBookings.filter(b => ['booked', 'in_transit', 'delivered'].includes(b.status));
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -116,6 +352,7 @@ export default function BookingRequests() {
       <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tab label={`Book Now (${pendingBookings.length})`} />
         <Tab label={`Bids / Offers (${activeBids.filter(b => b.status === 'pending').length})`} />
+        <Tab label={`Active Loads (${bookedLoads.length})`} />
       </Tabs>
 
       {/* Bookings Tab */}
@@ -334,6 +571,87 @@ export default function BookingRequests() {
         </Box>
       )}
 
+      {/* Active Loads Tab — payment actions */}
+      {activeTab === 2 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {bookedLoads.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
+              <AttachMoneyIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">No active or completed loads</Typography>
+            </Paper>
+          ) : bookedLoads.map(load => {
+            const bookingId = load.booking_id;
+            const ps = paymentStatuses[bookingId];
+            const payStatus = ps?.status || 'unpaid';
+            const isEscrowed = payStatus === 'escrowed';
+            const isUnpaidOrPending = payStatus === 'unpaid' || payStatus === 'pending' || payStatus === 'failed';
+
+            return (
+              <Card key={load.id} variant="outlined">
+                <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
+                      <Typography variant="subtitle2" fontWeight={600}>
+                        {load.origin} → {load.destination}
+                      </Typography>
+                      <Chip
+                        label={load.status === 'in_transit' ? 'In Transit' : load.status === 'delivered' ? 'Delivered' : 'Booked'}
+                        size="small"
+                        color={load.status === 'delivered' ? 'success' : load.status === 'in_transit' ? 'info' : 'warning'}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {load.load_type} · ${load.rate?.toLocaleString()} · {load.miles} mi
+                      {load.carrier_name ? ` · ${load.carrier_name}` : ''}
+                    </Typography>
+                    {ps && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.75, flexWrap: 'wrap' }}>
+                        {paymentChip(payStatus)}
+                        {ps.carrier_amount && payStatus !== 'unpaid' && (
+                          <Typography variant="caption" color="text.disabled">
+                            Carrier receives: ${ps.carrier_amount?.toLocaleString()}
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                    {/* Pay Escrow button */}
+                    {bookingId && isUnpaidOrPending && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                        startIcon={<LockIcon />}
+                        onClick={() => setPaymentDialog(bookingId)}
+                      >
+                        Pay Escrow
+                      </Button>
+                    )}
+                    {/* Release Payment button — shown when escrowed */}
+                    {bookingId && isEscrowed && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        color="success"
+                        disabled={releasing[bookingId]}
+                        startIcon={releasing[bookingId] ? <CircularProgress size={14} color="inherit" /> : <CheckIcon />}
+                        onClick={() => handleRelease(bookingId)}
+                      >
+                        {releasing[bookingId] ? 'Releasing…' : 'Release Payment'}
+                      </Button>
+                    )}
+                    {payStatus === 'released' && (
+                      <Chip label="Paid Out" color="success" size="small" icon={<CheckIcon />} />
+                    )}
+                  </Box>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Box>
+      )}
+
       {/* Booking review modal */}
       {reviewModal && reviewModal.type === 'booking' && (
         <Dialog open onClose={() => setReviewModal(null)} maxWidth="sm" fullWidth>
@@ -443,6 +761,15 @@ export default function BookingRequests() {
             </>
           )}
         </Dialog>
+      )}
+
+      {/* Payment dialog */}
+      {paymentDialog && (
+        <PaymentDialog
+          bookingId={paymentDialog}
+          onClose={() => setPaymentDialog(null)}
+          onPaid={() => handlePaymentSuccess(paymentDialog)}
+        />
       )}
     </Box>
   );

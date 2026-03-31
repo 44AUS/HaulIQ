@@ -50,6 +50,7 @@ class User(Base):
     last_active_at    = Column(DateTime, nullable=True)
     created_at        = Column(DateTime, default=datetime.utcnow)
     updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    stripe_connect_account_id = Column(String(255), nullable=True)
 
     # Relationships
     subscription   = relationship("Subscription", back_populates="user", uselist=False)

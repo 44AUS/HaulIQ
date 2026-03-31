@@ -19,7 +19,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { bookingsApi, bidsApi } from '../../services/api';
+import { bookingsApi, bidsApi, freightPaymentsApi } from '../../services/api';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
@@ -75,6 +75,21 @@ function StatusTimeline({ status }) {
   );
 }
 
+function paymentStatusChip(status) {
+  if (!status || status === 'unpaid') {
+    return <Chip label="Unpaid" size="small" sx={{ bgcolor: 'action.disabledBackground', color: 'text.secondary' }} />;
+  }
+  const map = {
+    pending:  { label: 'Payment Pending', color: 'default' },
+    escrowed: { label: 'In Escrow',       color: 'info' },
+    released: { label: 'Paid',            color: 'success' },
+    failed:   { label: 'Payment Failed',  color: 'error' },
+    refunded: { label: 'Refunded',        color: 'warning' },
+  };
+  const cfg = map[status] || { label: status, color: 'default' };
+  return <Chip label={cfg.label} color={cfg.color} size="small" variant="outlined" />;
+}
+
 export default function ActiveLoadDetail() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
@@ -84,6 +99,7 @@ export default function ActiveLoadDetail() {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [myBid, setMyBid] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
   const load = booking?.load;
 
@@ -105,6 +121,11 @@ export default function ActiveLoadDetail() {
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+
+    // Fetch payment status for this booking
+    freightPaymentsApi.status(bookingId)
+      .then(ps => setPaymentStatus(ps))
+      .catch(() => {});
   }, [bookingId]);
 
   const handlePickup = async () => {
@@ -380,6 +401,49 @@ export default function ActiveLoadDetail() {
                     </Box>
                   ))}
                 </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Payment status */}
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="subtitle2" fontWeight={600} gutterBottom>Payment Status</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: paymentStatus?.carrier_amount ? 1.5 : 0 }}>
+                  {paymentStatusChip(paymentStatus?.status)}
+                  {(!paymentStatus || paymentStatus.status === 'unpaid') && (
+                    <Typography variant="caption" color="text.secondary">
+                      Awaiting broker payment
+                    </Typography>
+                  )}
+                  {paymentStatus?.status === 'escrowed' && (
+                    <Typography variant="caption" color="info.main">
+                      Funds held in escrow
+                    </Typography>
+                  )}
+                  {paymentStatus?.status === 'released' && (
+                    <Typography variant="caption" color="success.main">
+                      Payment released to you
+                    </Typography>
+                  )}
+                </Box>
+                {paymentStatus?.carrier_amount && (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="caption" color="text.secondary">You receive</Typography>
+                    <Typography variant="caption" fontWeight={700} color="success.main">
+                      ${paymentStatus.carrier_amount?.toLocaleString()}
+                    </Typography>
+                  </Box>
+                )}
+                {paymentStatus?.released_at && (
+                  <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
+                    Released {new Date(paymentStatus.released_at).toLocaleDateString()}
+                  </Typography>
+                )}
+                {paymentStatus?.escrowed_at && paymentStatus?.status === 'escrowed' && (
+                  <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
+                    Escrowed {new Date(paymentStatus.escrowed_at).toLocaleDateString()}
+                  </Typography>
+                )}
               </CardContent>
             </Card>
 

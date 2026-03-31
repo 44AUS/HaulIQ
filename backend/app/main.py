@@ -6,13 +6,14 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
 from app.models import network as _network_model  # noqa: ensure table is registered
 from app.models import waitlist as _waitlist_model  # noqa: ensure table is registered
 from app.models import location as _location_model  # noqa: ensure table is registered
 from app.models import block as _block_model  # noqa: ensure table is registered
 from app.models import document as _document_model  # noqa: ensure table is registered
+from app.models import load_payment as _load_payment_model  # noqa: ensure table is registered
 
 settings = get_settings()
 
@@ -107,6 +108,7 @@ app.include_router(locations.router,       prefix="/api/locations",       tags=[
 app.include_router(blocks.router,          prefix="/api/blocks",          tags=["Blocks"])
 app.include_router(documents.router,       prefix="/api/loads",            tags=["Documents"])
 app.include_router(my_documents.router,    prefix="/api/documents",         tags=["Documents"])
+app.include_router(freight_payments.router, prefix="/api/freight-payments", tags=["Freight Payments"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, TextField, Button, Alert,
-  Grid, Divider, Avatar, CircularProgress,
+  Grid, Divider, Avatar, CircularProgress, Snackbar,
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -10,8 +11,11 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PhoneIcon from '@mui/icons-material/Phone';
 import SaveIcon from '@mui/icons-material/Save';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../services/api';
+import { authApi, freightPaymentsApi } from '../../services/api';
 
 function resizeToDataUrl(file, size = 256) {
   return new Promise((resolve) => {
@@ -37,7 +41,49 @@ function resizeToDataUrl(file, size = 256) {
 export default function Settings() {
   const { user, updateUser } = useAuth();
   const fileRef = useRef();
+  const location = useLocation();
   const [avatarUploading, setAvatarUploading] = useState(false);
+
+  // Payout account state (carrier only)
+  const [payoutStatus, setPayoutStatus] = useState(null);
+  const [payoutLoading, setPayoutLoading] = useState(false);
+  const [payoutConnecting, setPayoutConnecting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' });
+
+  // Check for payout redirect param
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const payoutParam = params.get('payout');
+    if (payoutParam === 'success') {
+      setSnackbar({ open: true, msg: 'Payout account connected successfully!', severity: 'success' });
+    } else if (payoutParam === 'refresh') {
+      setSnackbar({ open: true, msg: 'Please complete your payout account setup.', severity: 'warning' });
+    }
+  }, [location.search]);
+
+  // Load payout status for carriers
+  useEffect(() => {
+    if (user?.role === 'carrier') {
+      setPayoutLoading(true);
+      freightPaymentsApi.onboardStatus()
+        .then(data => setPayoutStatus(data))
+        .catch(() => setPayoutStatus(null))
+        .finally(() => setPayoutLoading(false));
+    }
+  }, [user?.role]);
+
+  const handleConnectPayout = async () => {
+    setPayoutConnecting(true);
+    try {
+      const data = await freightPaymentsApi.onboard();
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      setSnackbar({ open: true, msg: err.message || 'Failed to start payout setup.', severity: 'error' });
+      setPayoutConnecting(false);
+    }
+  };
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -311,6 +357,89 @@ export default function Settings() {
         </CardContent>
       </Card>
 
+      {/* Payout Account (carrier only) */}
+      {user?.role === 'carrier' && (
+        <Card variant="outlined">
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <AccountBalanceIcon color="primary" />
+              <Typography variant="subtitle1" fontWeight={700}>Payout Account</Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Connect a bank account via Stripe to receive load payments from brokers. HaulIQ retains a 1.5% platform fee — you receive the remainder when a broker releases payment after delivery.
+            </Typography>
+
+            {payoutLoading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <CircularProgress size={18} />
+                <Typography variant="body2" color="text.secondary">Checking account status…</Typography>
+              </Box>
+            ) : payoutStatus?.connected && payoutStatus?.payouts_enabled ? (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <CheckCircleIcon sx={{ color: 'success.main', fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight={600} color="success.main">
+                    Payout account connected
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  Your Stripe Express account is active. Payments will be sent automatically when brokers release funds.
+                  To update banking details, visit your Stripe Express dashboard.
+                </Typography>
+                <Box sx={{ mt: 1.5 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleConnectPayout}
+                    disabled={payoutConnecting}
+                    startIcon={payoutConnecting ? <CircularProgress size={14} color="inherit" /> : <AccountBalanceIcon />}
+                  >
+                    {payoutConnecting ? 'Opening…' : 'Manage Account'}
+                  </Button>
+                </Box>
+              </Box>
+            ) : payoutStatus?.connected && !payoutStatus?.payouts_enabled ? (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <WarningAmberIcon sx={{ color: 'warning.main', fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight={600} color="warning.main">
+                    Account setup incomplete
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Your payout account has been created but you need to finish the setup to receive payments.
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  onClick={handleConnectPayout}
+                  disabled={payoutConnecting}
+                  startIcon={payoutConnecting ? <CircularProgress size={14} color="inherit" /> : <WarningAmberIcon />}
+                >
+                  {payoutConnecting ? 'Opening…' : 'Finish Setup'}
+                </Button>
+              </Box>
+            ) : (
+              <Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  You have not connected a payout account yet. Without one, brokers cannot pay you through HaulIQ.
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleConnectPayout}
+                  disabled={payoutConnecting}
+                  startIcon={payoutConnecting ? <CircularProgress size={14} color="inherit" /> : <AccountBalanceIcon />}
+                >
+                  {payoutConnecting ? 'Opening Stripe…' : 'Connect Bank Account'}
+                </Button>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Account info */}
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
@@ -332,6 +461,23 @@ export default function Settings() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Snackbar for payout redirect feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.msg}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

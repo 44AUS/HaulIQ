@@ -42,6 +42,11 @@ class Settings(BaseSettings):
     # Google Maps API key (used by frontend — stored here for reference)
     google_maps_api_key: str = ""
 
+    # Stripe Connect (freight payments)
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_platform_fee_pct: float = 1.5   # percentage taken by HaulIQ per load payment
+
     @field_validator("database_url", mode="before")
     @classmethod
     def fix_postgres_url(cls, v: str) -> str:

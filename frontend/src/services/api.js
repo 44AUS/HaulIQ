@@ -166,6 +166,15 @@ export const blocksApi = {
   check:   (userId) => request(`/api/blocks/check/${userId}`),
 };
 
+// ─── Freight Payments ──────────────────────────────────────────────────────────
+export const freightPaymentsApi = {
+  onboard:       ()            => request('/api/freight-payments/onboard', { method: 'POST' }),
+  onboardStatus: ()            => request('/api/freight-payments/onboard/status'),
+  charge:        (bookingId)   => request(`/api/freight-payments/charge/${bookingId}`, { method: 'POST' }),
+  release:       (bookingId)   => request(`/api/freight-payments/release/${bookingId}`, { method: 'POST' }),
+  status:        (bookingId)   => request(`/api/freight-payments/${bookingId}`),
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminApi = {
   stats:      ()              => request('/api/admin/stats'),
@@ -180,5 +189,5 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi };
 export default api;
