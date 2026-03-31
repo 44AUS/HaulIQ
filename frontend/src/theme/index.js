@@ -130,7 +130,7 @@ export function buildDarkTheme(brandColor) {
     success:   { main: '#66BB6A' },
     warning:   { main: '#FFA726' },
     error:     { main: '#EF5350' },
-    background: { default: '#1C1C1C', paper: '#252525' },
+    background: { default: '#1E1E1E', paper: '#252525' },
     text:      { primary: '#F0F4F8', secondary: '#9E9E9E' },
     divider:   'rgba(255,255,255,0.08)',
   },

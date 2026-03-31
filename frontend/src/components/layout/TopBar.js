@@ -6,6 +6,7 @@ import {
   Chip, useTheme,
 } from '@mui/material';
 import {
+  Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Search as SearchIcon,
   Close as CloseIcon,
@@ -69,10 +70,10 @@ function NavLink({ item, active, onClick }) {
       onClick={onClick}
       sx={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        px: 1.5,
+        gap: 0.9,
+        px: 1.75,
         height: '100%',
         cursor: 'pointer',
         position: 'relative',
@@ -95,8 +96,8 @@ function NavLink({ item, active, onClick }) {
         } : {},
       }}
     >
-      <Icon sx={{ fontSize: 16, mb: 0.25 }} />
-      <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
+      <Icon sx={{ fontSize: 18, flexShrink: 0 }} />
+      <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
         {item.label}
       </Typography>
     </Box>
@@ -240,7 +241,7 @@ function NotificationsPanel({ onClose }) {
 }
 
 // ── Main TopBar ───────────────────────────────────────────────────────────────
-export default function TopBar() {
+export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const { user } = useAuth();
   const { brandColor } = useThemeMode();
   const barColor = brandColor || DEFAULT_BAR_COLOR;
@@ -294,21 +295,32 @@ export default function TopBar() {
         sx={{
           bgcolor: barColor,
           color: '#fff',
-          height: 52,
+          height: 60,
           flexShrink: 0,
           zIndex: theme.zIndex.appBar,
           borderRadius: 0,
           boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
         }}
       >
-        <Toolbar disableGutters sx={{ height: 52, minHeight: '52px !important', px: 0 }}>
+        <Toolbar disableGutters sx={{ height: 60, minHeight: '60px !important', px: 0 }}>
+
+          {/* Menu toggle — far left */}
+          <Tooltip title={sidebarOpen ? 'Close menu' : 'Open menu'} placement="bottom">
+            <IconButton
+              onClick={onToggleSidebar}
+              size="small"
+              sx={{ ml: 1.5, mr: 0.5, color: 'rgba(255,255,255,0.85)', flexShrink: 0, '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
 
           {/* Nav links — scrollable */}
           <Box
             sx={{
               display: 'flex',
               alignItems: 'stretch',
-              height: 52,
+              height: 60,
               flexGrow: 1,
               overflowX: 'auto',
               '&::-webkit-scrollbar': { display: 'none' },

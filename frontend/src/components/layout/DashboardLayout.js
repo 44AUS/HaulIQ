@@ -1,6 +1,6 @@
 import { useState, createContext } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import Sidebar, { DRAWER_WIDTH, DRAWER_COLLAPSED_WIDTH } from './Sidebar';
+import Sidebar, { DRAWER_WIDTH } from './Sidebar';
 import TopBar from './TopBar';
 
 export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
@@ -9,9 +9,9 @@ export default function DashboardLayout({ children }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const drawerWidth = isMobile ? 0 : (collapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH);
+  const drawerWidth = isMobile ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 
   return (
     <LayoutContext.Provider value={{ drawerWidth }}>
@@ -19,8 +19,8 @@ export default function DashboardLayout({ children }) {
       <Sidebar
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(c => !c)}
+        sidebarOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         onMobileOpen={() => setMobileOpen(true)}
       />
       <Box
@@ -34,8 +34,11 @@ export default function DashboardLayout({ children }) {
           overflow: 'hidden',
         }}
       >
-        <TopBar />
-        {/* Scroll container — pages scroll here, not the viewport */}
+        <TopBar
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(o => !o)}
+        />
+        {/* Scroll container */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
           {children}
         </Box>
