@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, CardContent, Button, Grid, Chip,
   List, ListItem, ListItemIcon, ListItemText, Tabs, Tab,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, IconButton, CircularProgress,
+  TextField, IconButton, Skeleton,
 } from '@mui/material';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import EditIcon from '@mui/icons-material/Edit';
@@ -177,9 +177,19 @@ export default function AdminSubscriptions() {
 
       {/* Plans */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-          <CircularProgress />
-        </Box>
+        <Grid container spacing={2}>
+          {[...Array(6)].map((_, i) => (
+            <Grid item xs={12} sm={4} key={i}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                  <Skeleton variant="text" width="50%" height={18} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       ) : (
         <Box>
           <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>

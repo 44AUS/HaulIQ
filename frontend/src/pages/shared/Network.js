@@ -4,7 +4,7 @@ import {
   Box, Typography, Avatar, Button, IconButton,
   Chip, CircularProgress, Divider, Menu, MenuItem,
   TextField, InputAdornment,
-  Card, CardContent, Paper, Autocomplete,
+  Card, CardContent, Paper, Autocomplete, Skeleton,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import CheckIcon from '@mui/icons-material/Check';
@@ -317,8 +317,10 @@ export default function Network() {
     : suggestions;
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
+      ))}
     </Box>
   );
 

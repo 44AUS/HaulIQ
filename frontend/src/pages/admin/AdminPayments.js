@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
   Alert, Table, TableHead, TableBody, TableRow, TableCell, Button,
-  TextField, MenuItem,
+  TextField, MenuItem, Skeleton,
 } from '@mui/material';
 import PaymentIcon from '@mui/icons-material/Payment';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -121,8 +121,25 @@ export default function AdminPayments() {
       {/* Table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {[...Array(8)].map((_, i) => (
+                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[140, 100, 100, 80, 80, 80, 80, 80].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Box>
         ) : error ? (
           <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>

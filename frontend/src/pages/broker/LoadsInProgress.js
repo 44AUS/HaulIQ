@@ -5,7 +5,7 @@ import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-map
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, Paper,
   Button, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow,
-  TableCell, TableBody,
+  TableCell, TableBody, Skeleton,
 } from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ListIcon from '@mui/icons-material/List';
@@ -597,7 +597,19 @@ export default function BrokerLoadsInProgress() {
 
       {/* Content */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+        <Grid container spacing={3}>
+          {[...Array(6)].map((_, i) => (
+            <Grid item xs={12} sm={6} key={i}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                  <Skeleton variant="text" width="50%" height={18} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       ) : loads.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 6, textAlign: 'center' }}>
           <ActivityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />

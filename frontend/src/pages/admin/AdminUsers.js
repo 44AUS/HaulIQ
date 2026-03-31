@@ -3,7 +3,7 @@ import {
   Box, Typography, Card, TextField, InputAdornment, Button, Avatar,
   Chip, Table, TableHead, TableBody, TableRow, TableCell,
   IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-  Divider, CircularProgress, Select, MenuItem, FormControl, InputLabel,
+  Divider, CircularProgress, Select, MenuItem, FormControl, InputLabel, Skeleton,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import SearchIcon from '@mui/icons-material/Search';
@@ -254,8 +254,25 @@ export default function AdminUsers() {
       {/* Table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-            <CircularProgress />
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {[...Array(7)].map((_, i) => (
+                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[160, 80, 80, 80, 100, 80, 80].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Box>
         ) : users.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 6 }}>

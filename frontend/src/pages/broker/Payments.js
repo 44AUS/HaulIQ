@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
-  Alert, Table, TableHead, TableBody, TableRow, TableCell, Button,
+  Alert, Table, TableHead, TableBody, TableRow, TableCell, Button, Skeleton,
 } from '@mui/material';
 import PaymentIcon from '@mui/icons-material/Payment';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -86,8 +86,25 @@ export default function BrokerPayments() {
       {/* Table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {[...Array(7)].map((_, i) => (
+                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[140, 80, 80, 100, 80, 80, 40].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Box>
         ) : error ? (
           <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>

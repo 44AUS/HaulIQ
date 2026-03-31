@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Grid, CircularProgress, Card, CardContent, Alert
+  Box, Typography, Grid, Card, CardContent, Alert, Skeleton
 } from '@mui/material';
 import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import { loadsApi } from '../../services/api';
@@ -33,9 +33,19 @@ export default function SavedLoads() {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <Grid container spacing={3}>
+          {[...Array(6)].map((_, i) => (
+            <Grid item xs={12} sm={6} key={i}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                  <Skeleton variant="text" width="50%" height={18} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : loads.length === 0 ? (

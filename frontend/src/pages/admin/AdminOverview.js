@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, LinearProgress,
+  Box, Typography, Card, CardContent, Grid, Chip, Skeleton, LinearProgress,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';
@@ -26,8 +26,41 @@ export default function AdminOverview() {
   }, []);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-      <CircularProgress />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Box>
+        <Skeleton variant="text" width={220} height={36} />
+        <Skeleton variant="text" width={300} height={20} />
+      </Box>
+      <Grid container spacing={2}>
+        {[...Array(8)].map((_, i) => (
+          <Grid item xs={6} sm={4} lg={3} key={i}>
+            <Card variant="outlined">
+              <CardContent sx={{ py: 2 }}>
+                <Skeleton variant="rounded" width={34} height={34} sx={{ mb: 1.5, borderRadius: 1.5 }} />
+                <Skeleton variant="text" width="65%" height={16} />
+                <Skeleton variant="text" width="50%" height={40} />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={3}>
+        {[1, 2].map(i => (
+          <Grid item xs={12} md={6} key={i}>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 3 }}>
+                <Skeleton variant="text" width={220} height={24} sx={{ mb: 2.5 }} />
+                {[1, 2, 3].map(j => (
+                  <Box key={j} sx={{ mb: 2 }}>
+                    <Skeleton variant="text" width="60%" height={16} sx={{ mb: 0.75 }} />
+                    <Skeleton variant="rounded" height={8} sx={{ borderRadius: 4 }} />
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 

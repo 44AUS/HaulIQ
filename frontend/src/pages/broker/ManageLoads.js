@@ -8,7 +8,7 @@ import {
   Box, Typography, Button, Card, Table, TableHead, TableRow, TableCell, TableBody,
   Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, FormControl, InputLabel, Select, MenuItem, Grid, Alert,
-  CircularProgress, ToggleButtonGroup, ToggleButton, InputAdornment,
+  Skeleton, CircularProgress, ToggleButtonGroup, ToggleButton, InputAdornment,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
@@ -283,9 +283,28 @@ export default function ManageLoads() {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <Card>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {['Load #', 'Route', 'Type', 'Rate', 'Pickup', 'Views', 'Bids', 'Status', 'Actions'].map(h => (
+                    <TableCell key={h}><Skeleton variant="text" width={60} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[80, 160, 70, 70, 90, 40, 40, 70, 90].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </Card>
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : (

@@ -4,7 +4,7 @@ import {
   Box, Typography, Tabs, Tab, Card, CardContent, Button, Chip,
   CircularProgress, ToggleButtonGroup, ToggleButton, Paper,
   Table, TableHead, TableRow, TableCell, TableBody, Divider,
-  TextField, InputAdornment, IconButton, Alert, Tooltip,
+  TextField, InputAdornment, IconButton, Alert, Tooltip, Skeleton, Grid,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -471,7 +471,19 @@ export default function Billing() {
       {tab === 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+            <Grid container spacing={3}>
+              {[...Array(6)].map((_, i) => (
+                <Grid item xs={12} sm={6} key={i}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                      <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                      <Skeleton variant="text" width="50%" height={18} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
           ) : (
             <>
               {/* Current plan card — always shown */}

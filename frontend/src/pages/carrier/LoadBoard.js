@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel,
-  InputAdornment, IconButton, Chip, CircularProgress, Button, Grid
+  InputAdornment, IconButton, Chip, Skeleton, Button, Grid, Card, CardContent,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -131,9 +131,27 @@ export default function LoadBoard() {
 
       {/* Results */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <Grid container spacing={3}>
+          {[...Array(6)].map((_, i) => (
+            <Grid item xs={12} sm={6} xl={4} key={i}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, alignItems: 'flex-start' }}>
+                    <Skeleton variant="text" width="55%" height={24} />
+                    <Skeleton variant="rounded" width={58} height={22} sx={{ borderRadius: 4 }} />
+                  </Box>
+                  <Skeleton variant="text" width="75%" height={18} sx={{ mb: 0.75 }} />
+                  <Skeleton variant="text" width="60%" height={18} sx={{ mb: 1.25 }} />
+                  <Skeleton variant="text" width="40%" height={32} sx={{ mb: 1.25 }} />
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Skeleton variant="rounded" width={72} height={26} sx={{ borderRadius: 4 }} />
+                    <Skeleton variant="rounded" width={72} height={26} sx={{ borderRadius: 4 }} />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       ) : apiError ? (
         <Box sx={{ border: '1px solid', borderColor: 'error.main', borderRadius: 2, p: 4, textAlign: 'center' }}>
           <Typography color="error">{apiError}</Typography>

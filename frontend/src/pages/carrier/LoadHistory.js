@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, CircularProgress, Alert,
+  Box, Typography, Card, CardContent, Grid, Alert, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
@@ -45,9 +45,28 @@ export default function LoadHistory() {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <Card>
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {[...Array(5)].map((_, i) => (
+                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[120, 100, 80, 80, 80].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </Card>
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : (

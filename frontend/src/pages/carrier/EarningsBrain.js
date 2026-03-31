@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Button, Chip,
-  CircularProgress, Alert
+  Alert, Skeleton
 } from '@mui/material';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -188,9 +188,19 @@ export default function EarningsBrain() {
       <Box>
         <Typography variant="subtitle1" fontWeight={600} gutterBottom>This Week's Insights</Typography>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-            <CircularProgress />
-          </Box>
+          <Grid container spacing={3}>
+            {[...Array(6)].map((_, i) => (
+              <Grid item xs={12} sm={6} key={i}>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                    <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                    <Skeleton variant="text" width="50%" height={18} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : insights.length === 0 ? (

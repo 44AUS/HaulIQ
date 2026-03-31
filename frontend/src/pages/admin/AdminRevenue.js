@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid,
   Table, TableHead, TableBody, TableRow, TableCell,
-  LinearProgress, CircularProgress,
+  LinearProgress, Skeleton,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { adminApi } from '../../services/api';
@@ -19,8 +19,10 @@ export default function AdminRevenue() {
   }, []);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-      <CircularProgress />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
+      ))}
     </Box>
   );
 

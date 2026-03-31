@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Card, TextField, InputAdornment,
   Chip, Table, TableHead, TableBody, TableRow, TableCell,
-  IconButton, Button, CircularProgress,
+  IconButton, Button, CircularProgress, Skeleton,
 } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import SearchIcon from '@mui/icons-material/Search';
@@ -106,8 +106,25 @@ export default function AdminLoads() {
       {/* Table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-            <CircularProgress />
+          <Box sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {[...Array(8)].map((_, i) => (
+                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {[...Array(8)].map((_, i) => (
+                  <TableRow key={i}>
+                    {[140, 100, 80, 80, 80, 80, 80, 40].map((w, j) => (
+                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </Box>
         ) : filtered.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 6 }}>

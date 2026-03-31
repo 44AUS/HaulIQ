@@ -5,7 +5,7 @@ import { adaptLoad } from '../../services/adapters';
 import {
   Box, Typography, Button, Card, CardContent, Chip, CircularProgress, Alert,
   Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  Tabs, Tab, InputAdornment, Divider,
+  Tabs, Tab, InputAdornment, Divider, Skeleton, Grid,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -359,7 +359,19 @@ export default function BookingRequests() {
       {activeTab === 0 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+            <Grid container spacing={3}>
+              {[...Array(6)].map((_, i) => (
+                <Grid item xs={12} sm={6} key={i}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                      <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                      <Skeleton variant="text" width="50%" height={18} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
           ) : error ? (
             <Alert severity="error">{error}</Alert>
           ) : pendingBookings.length === 0 ? (
@@ -423,7 +435,19 @@ export default function BookingRequests() {
       {activeTab === 1 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {bidsLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+            <Grid container spacing={3}>
+              {[...Array(6)].map((_, i) => (
+                <Grid item xs={12} sm={6} key={i}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
+                      <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
+                      <Skeleton variant="text" width="50%" height={18} />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
           ) : activeBids.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
               <AttachMoneyIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />

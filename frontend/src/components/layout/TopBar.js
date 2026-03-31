@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
-  Chip, useTheme,
+  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,6 +26,7 @@ import {
   CheckCircleOutline as CheckIcon,
   PendingActions as PendingIcon,
   NetworkCheck as NetworkIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -123,7 +124,6 @@ function NotificationsPanel({ onClose }) {
           primary: `${d.unread} unread message${d.unread !== 1 ? 's' : ''}`,
           secondary: 'Open Message Center',
           path: `/${user.role}/messages`,
-          color: 'primary',
         }] : [])
         .catch(() => [])
     );
@@ -139,7 +139,6 @@ function NotificationsPanel({ onClose }) {
               primary: `${pending.length} pending booking request${pending.length !== 1 ? 's' : ''}`,
               secondary: 'Review booking requests',
               path: '/broker/bookings',
-              color: 'warning',
             }] : [];
           })
           .catch(() => [])
@@ -157,7 +156,6 @@ function NotificationsPanel({ onClose }) {
               primary: `${reqs.length} network request${reqs.length !== 1 ? 's' : ''}`,
               secondary: 'View connection requests',
               path: '/carrier/network',
-              color: 'info',
             }] : [];
           })
           .catch(() => [])
@@ -173,7 +171,6 @@ function NotificationsPanel({ onClose }) {
               primary: `${countered.length} counter-offer${countered.length !== 1 ? 's' : ''} received`,
               secondary: 'Review your bids',
               path: '/carrier/active',
-              color: 'success',
             }] : [];
           })
           .catch(() => [])
@@ -206,8 +203,16 @@ function NotificationsPanel({ onClose }) {
       {/* Items */}
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
         {loading ? (
-          <Box sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">Loading…</Typography>
+          <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {[1, 2, 3].map(i => (
+              <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
+                <Skeleton variant="circular" width={32} height={32} />
+                <Box sx={{ flex: 1 }}>
+                  <Skeleton variant="text" width="75%" height={18} />
+                  <Skeleton variant="text" width="50%" height={14} sx={{ mt: 0.5 }} />
+                </Box>
+              </Box>
+            ))}
           </Box>
         ) : items.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
@@ -248,11 +253,13 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
   const searchRef = useRef(null);
 
   // Fetch notification count
@@ -275,6 +282,11 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   useEffect(() => {
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
+
+  const handleCloseSearch = () => {
+    setSearchOpen(false);
+    setSearchVal('');
+  };
 
   if (!user) return null;
 
@@ -315,66 +327,115 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
             </IconButton>
           </Tooltip>
 
-          {/* Nav links — scrollable */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'stretch',
-              height: 60,
-              flexGrow: 1,
-              overflowX: 'auto',
-              '&::-webkit-scrollbar': { display: 'none' },
-              scrollbarWidth: 'none',
-            }}
-          >
-            {nav.map(item => (
-              <NavLink
-                key={item.path}
-                item={item}
-                active={isActive(item.path)}
-                onClick={() => navigate(item.path)}
-              />
-            ))}
-          </Box>
+          {/* Center area: nav links (desktop) | mobile dropdown trigger | expanding search */}
+          <Box sx={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
 
-          {/* Right side: search + notifications */}
-          <Box sx={{ display: 'flex', alignItems: 'center', pr: 1, gap: 0.5, flexShrink: 0 }}>
-            {/* Inline search */}
-            {searchOpen ? (
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: 'rgba(255,255,255,0.15)',
-                borderRadius: 1,
-                px: 1.5,
-                height: 32,
-                mr: 0.5,
-              }}>
-                <SearchIcon sx={{ fontSize: 16, mr: 0.75, opacity: 0.8 }} />
-                <InputBase
-                  inputRef={searchRef}
-                  value={searchVal}
-                  onChange={e => setSearchVal(e.target.value)}
-                  onKeyDown={e => e.key === 'Escape' && setSearchOpen(false)}
-                  placeholder="Search…"
-                  sx={{
-                    color: '#fff',
-                    fontSize: '0.8rem',
-                    width: 160,
-                    '& input::placeholder': { color: 'rgba(255,255,255,0.65)', opacity: 1 },
-                  }}
-                />
-                <IconButton size="small" onClick={() => { setSearchOpen(false); setSearchVal(''); }} sx={{ color: 'rgba(255,255,255,0.7)', p: 0.25 }}>
-                  <CloseIcon sx={{ fontSize: 14 }} />
-                </IconButton>
+            {/* Desktop nav links — fades out when search opens */}
+            {!isMobile && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'stretch',
+                  height: 60,
+                  width: '100%',
+                  overflowX: 'auto',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                  scrollbarWidth: 'none',
+                  opacity: searchOpen ? 0 : 1,
+                  transition: 'opacity 0.18s',
+                  pointerEvents: searchOpen ? 'none' : 'auto',
+                }}
+              >
+                {nav.map(item => (
+                  <NavLink
+                    key={item.path}
+                    item={item}
+                    active={isActive(item.path)}
+                    onClick={() => navigate(item.path)}
+                  />
+                ))}
               </Box>
-            ) : (
-              <Tooltip title="Search" placement="bottom">
-                <IconButton onClick={() => setSearchOpen(true)} size="small" sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}>
-                  <SearchIcon fontSize="small" />
+            )}
+
+            {/* Mobile: MoreVert dropdown button */}
+            {isMobile && !searchOpen && (
+              <Tooltip title="Navigation" placement="bottom">
+                <IconButton
+                  onClick={e => setMobileMenuAnchor(e.currentTarget)}
+                  size="small"
+                  sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
+                >
+                  <MoreVertIcon />
                 </IconButton>
               </Tooltip>
             )}
+
+            {/* Expanding search bar — overlays center area when open */}
+            <Box
+              sx={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: '50%',
+                transform: searchOpen
+                  ? 'translateY(-50%) scaleX(1)'
+                  : 'translateY(-50%) scaleX(0.88)',
+                transformOrigin: 'right center',
+                opacity: searchOpen ? 1 : 0,
+                transition: 'opacity 0.2s, transform 0.2s',
+                pointerEvents: searchOpen ? 'auto' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                bgcolor: 'rgba(255,255,255,0.16)',
+                borderRadius: 1.5,
+                px: 1.5,
+                height: 38,
+                mx: 0.5,
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 17, mr: 1, opacity: 0.8, flexShrink: 0 }} />
+              <InputBase
+                inputRef={searchRef}
+                value={searchVal}
+                onChange={e => setSearchVal(e.target.value)}
+                onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
+                placeholder="Search…"
+                sx={{
+                  flex: 1,
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  '& input::placeholder': { color: 'rgba(255,255,255,0.65)', opacity: 1 },
+                }}
+              />
+              <IconButton
+                size="small"
+                onClick={handleCloseSearch}
+                sx={{ color: 'rgba(255,255,255,0.75)', p: 0.25, '&:hover': { color: '#fff' } }}
+              >
+                <CloseIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Right: search icon + notifications */}
+          <Box sx={{ display: 'flex', alignItems: 'center', pr: 1, gap: 0.5, flexShrink: 0 }}>
+            {/* Search icon — hidden when search is open */}
+            <Tooltip title="Search" placement="bottom">
+              <IconButton
+                onClick={() => setSearchOpen(true)}
+                size="small"
+                sx={{
+                  color: 'rgba(255,255,255,0.8)',
+                  '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER },
+                  opacity: searchOpen ? 0 : 1,
+                  transition: 'opacity 0.18s',
+                  pointerEvents: searchOpen ? 'none' : 'auto',
+                }}
+              >
+                <SearchIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
             {/* Notifications bell */}
             <Tooltip title="Notifications" placement="bottom">
@@ -391,6 +452,44 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile nav dropdown */}
+      <Menu
+        anchorEl={mobileMenuAnchor}
+        open={Boolean(mobileMenuAnchor)}
+        onClose={() => setMobileMenuAnchor(null)}
+        PaperProps={{
+          sx: {
+            mt: 0.5,
+            minWidth: 200,
+            borderRadius: 2,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          },
+        }}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+      >
+        {nav.map(item => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          return (
+            <MenuItem
+              key={item.path}
+              onClick={() => { navigate(item.path); setMobileMenuAnchor(null); }}
+              selected={active}
+              sx={{
+                gap: 1.5,
+                py: 1.25,
+                fontWeight: active ? 700 : 500,
+                fontSize: '0.875rem',
+              }}
+            >
+              <Icon sx={{ fontSize: 18, color: active ? 'primary.main' : 'text.secondary' }} />
+              {item.label}
+            </MenuItem>
+          );
+        })}
+      </Menu>
 
       {/* Notifications slide-in drawer */}
       <Drawer

@@ -5,7 +5,7 @@ import {
   Avatar, IconButton, Dialog, DialogContent, DialogTitle, DialogActions,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
   TextField, InputAdornment, MenuItem, Select, FormControl, InputLabel,
-  Tooltip, Button,
+  Tooltip, Button, Skeleton,
 } from '@mui/material';
 import FolderIcon from '@mui/icons-material/Folder';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -163,8 +163,10 @@ export default function Documents() {
   const groups = Object.values(byLoad);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
+      ))}
     </Box>
   );
 
