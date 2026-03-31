@@ -517,7 +517,7 @@ export default function Messages() {
       variant="outlined"
       sx={{
         position: 'fixed',
-        top: { xs: '48px', lg: 0 },
+        top: '60px',
         left: drawerWidth,
         right: 0,
         bottom: 0,
@@ -650,17 +650,11 @@ export default function Messages() {
                       secondary={
                         <Box>
                           {c.load_id && <Typography variant="caption" color="text.secondary" display="block" noWrap>{label}</Typography>}
-                          {c.other_last_active_at && <PresenceDot lastActiveAt={c.other_last_active_at} size={7} withLabel />}
                           {lastMsg && <Typography variant="caption" color="text.disabled" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
                         </Box>
                       }
                       secondaryTypographyProps={{ component: 'div' }}
                     />
-                    {lastMsg && (
-                      <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, ml: 0.5, fontSize: 10 }}>
-                        {new Date(lastMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Typography>
-                    )}
                   </ListItemButton>
                 </Box>
               );

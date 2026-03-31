@@ -513,7 +513,7 @@ export default function LoadDetail() {
 
                 {!bookingStatus && !activeBookingStatus && (
                   <>
-                    {load.instantBook && canInstantBook && (
+                    {canInstantBook && (
                       <Button onClick={handleInstantBook} variant="contained" color="success" fullWidth startIcon={<BoltIcon />} size="large">
                         Instant Book
                       </Button>

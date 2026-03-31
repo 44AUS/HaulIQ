@@ -28,7 +28,6 @@ export default function DashboardLayout({ children }) {
         sx={{
           flexGrow: 1,
           minWidth: 0,
-          pt: isMobile ? 6 : 0,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -36,7 +35,7 @@ export default function DashboardLayout({ children }) {
       >
         <TopBar
           sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen(o => !o)}
+          onToggleSidebar={() => isMobile ? setMobileOpen(o => !o) : setSidebarOpen(o => !o)}
         />
         {/* Scroll container */}
         <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>

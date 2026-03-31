@@ -185,9 +185,6 @@ def check_instant_book_eligibility(
     if not load:
         raise HTTPException(status_code=404, detail="Load not found")
 
-    if not load.instant_book:
-        return {"eligible": False, "reason": "Load does not support instant booking"}
-
     on_list = db.query(InstantBookAllowlist).filter(
         InstantBookAllowlist.broker_id == load.broker_user_id,
         InstantBookAllowlist.carrier_id == current_user.id,
