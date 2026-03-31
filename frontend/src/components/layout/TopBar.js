@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
-  Chip, useMediaQuery, useTheme, alpha,
+  Chip, useTheme,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -22,7 +22,6 @@ import {
   AccountBalanceWallet as WalletIcon,
   Payment as PaymentIcon,
   ChatBubbleOutline as ChatIcon,
-  HowToReg as HowToRegIcon,
   CheckCircleOutline as CheckIcon,
   PendingActions as PendingIcon,
   NetworkCheck as NetworkIcon,
@@ -245,7 +244,6 @@ export default function TopBar({ totalNotifCount = 0 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
