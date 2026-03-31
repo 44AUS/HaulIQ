@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
   Typography, Avatar, Divider, IconButton, Badge, Tooltip, useMediaQuery, useTheme,
-  Button,
+  Button, alpha,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -86,6 +86,15 @@ const ADMIN_LINKS = [
 ];
 
 function NavItem({ item, collapsed, badgeCount, active, onClick }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const c = {
+    text:        isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.60)',
+    textActive:  isDark ? '#fff' : theme.palette.primary.main,
+    hover:       isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+    activeBg:    isDark ? 'rgba(255,255,255,0.12)' : alpha(theme.palette.primary.main, 0.08),
+    activeHover: isDark ? 'rgba(255,255,255,0.16)' : alpha(theme.palette.primary.main, 0.13),
+  };
   const btn = (
     <ListItemButton
       selected={active}
@@ -96,12 +105,12 @@ function NavItem({ item, collapsed, badgeCount, active, onClick }) {
         py: 1.25,
         justifyContent: collapsed ? 'center' : 'flex-start',
         minHeight: 48,
-        color: 'rgba(255,255,255,0.65)',
-        '&:hover': { bgcolor: 'rgba(255,255,255,0.07)', color: '#fff' },
+        color: c.text,
+        '&:hover': { bgcolor: c.hover, color: isDark ? '#fff' : 'text.primary' },
         '&.Mui-selected': {
-          bgcolor: 'rgba(255,255,255,0.12)',
-          color: '#fff',
-          '&:hover': { bgcolor: 'rgba(255,255,255,0.16)' },
+          bgcolor: c.activeBg,
+          color: c.textActive,
+          '&:hover': { bgcolor: c.activeHover },
         },
       }}
     >
@@ -134,6 +143,26 @@ function NavItem({ item, collapsed, badgeCount, active, onClick }) {
 function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
+  const isDark = mode === 'dark';
+  // Mode-aware color tokens
+  const sc = {
+    divider:     isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    dividerFaint: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    icon:        isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)',
+    iconHover:   isDark ? '#fff' : '#0D1B2A',
+    nameColor:   isDark ? '#fff' : '#0D1B2A',
+    subtitleColor: isDark ? 'rgba(255,255,255,0.45)' : '#78909C',
+    planColor:   isDark ? 'primary.light' : 'primary.main',
+    msgBorder:   isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)',
+    msgText:     isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)',
+    msgHoverBorder: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+    msgHoverBg:  isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    msgIconActive: isDark ? 'primary.light' : 'primary.main',
+    msgIconIdle: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)',
+    logoutColor: isDark ? '#ef9a9a' : '#C62828',
+    logoutHoverBg: 'rgba(239,83,80,0.12)',
+    logoutHoverColor: '#ef5350',
+  };
   const location = useLocation();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
@@ -204,21 +233,21 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           {!collapsed && (
             <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'} placement="bottom">
-              <IconButton size="small" onClick={toggleTheme} sx={{ color: 'rgba(255,255,255,0.55)', '&:hover': { color: '#fff' } }}>
+              <IconButton size="small" onClick={toggleTheme} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
                 {mode === 'dark' ? <LightIcon fontSize="small" /> : <DarkIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
           )}
           {onToggleCollapse && (
             <Tooltip title={collapsed ? 'Expand' : 'Collapse'} placement="right">
-              <IconButton onClick={onToggleCollapse} size="small" sx={{ color: 'rgba(255,255,255,0.55)', '&:hover': { color: '#fff' } }}>
+              <IconButton onClick={onToggleCollapse} size="small" sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
                 {collapsed ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
           )}
           {collapsed && (
             <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'} placement="right">
-              <IconButton size="small" onClick={toggleTheme} sx={{ color: 'rgba(255,255,255,0.55)', '&:hover': { color: '#fff' } }}>
+              <IconButton size="small" onClick={toggleTheme} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
                 {mode === 'dark' ? <LightIcon fontSize="small" /> : <DarkIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
@@ -226,7 +255,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
         </Box>
       </Box>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+      <Divider sx={{ borderColor: sc.divider }} />
 
       {/* User info */}
       <Box sx={{ px: collapsed ? 1 : 2, py: 1.5, flexShrink: 0 }}>
@@ -242,11 +271,11 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
               {!user.avatar_url && (user.avatar || user.name?.charAt(0))}
             </Avatar>
             <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-              <Typography variant="body2" fontWeight={700} noWrap sx={{ color: '#fff', lineHeight: 1.3 }}>
+              <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
                 {user.name}
               </Typography>
-              <Typography variant="caption" noWrap sx={{ color: 'rgba(255,255,255,0.45)', textTransform: 'capitalize' }}>
-                {user.role} · <Box component="span" sx={{ color: 'primary.light' }}>{user.plan}</Box>
+              <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, textTransform: 'capitalize' }}>
+                {user.role} · <Box component="span" sx={{ color: sc.planColor }}>{user.plan}</Box>
               </Typography>
             </Box>
           </Box>
@@ -263,10 +292,10 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                   onClick={() => handleNav(messagesPath)}
                   size="small"
                   sx={{
-                    color: unread > 0 ? 'primary.light' : 'rgba(255,255,255,0.55)',
+                    color: unread > 0 ? sc.msgIconActive : sc.msgIconIdle,
                     mx: 'auto',
                     display: 'flex',
-                    '&:hover': { color: '#fff' },
+                    '&:hover': { color: sc.iconHover },
                   }}
                 >
                   <Badge badgeContent={unread > 0 ? (unread > 9 ? '9+' : unread) : null} color="error">
@@ -283,15 +312,15 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                 onClick={() => handleNav(messagesPath)}
                 sx={{
                   borderRadius: 1.5,
-                  borderColor: 'rgba(255,255,255,0.18)',
-                  color: 'rgba(255,255,255,0.8)',
+                  borderColor: sc.msgBorder,
+                  color: sc.msgText,
                   textTransform: 'none',
                   fontWeight: 600,
                   fontSize: '0.8rem',
                   py: 0.75,
                   '&:hover': {
-                    borderColor: 'rgba(255,255,255,0.4)',
-                    bgcolor: 'rgba(255,255,255,0.06)',
+                    borderColor: sc.msgHoverBorder,
+                    bgcolor: sc.msgHoverBg,
                   },
                 }}
               >
@@ -306,7 +335,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
               </Button>
             )}
           </Box>
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+          <Divider sx={{ borderColor: sc.divider }} />
         </>
       )}
 
@@ -314,7 +343,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
       <List dense disablePadding sx={{ flexGrow: 1, overflowY: 'auto' }}>
         {links.map((item, idx) => (
           <Box key={item.path}>
-            {idx > 0 && <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)' }} />}
+            {idx > 0 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
             <NavItem
               item={item}
               collapsed={collapsed}
@@ -327,9 +356,9 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
       </List>
 
       {/* Bottom */}
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
+      <Divider sx={{ borderColor: sc.divider }} />
       <List dense disablePadding>
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)' }} />
+        <Divider sx={{ borderColor: sc.dividerFaint }} />
         <NavItem
           item={{ icon: SettingsIcon, label: 'Settings', path: '/settings' }}
           collapsed={collapsed}
@@ -337,7 +366,7 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
           active={location.pathname === '/settings'}
           onClick={() => handleNav('/settings')}
         />
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)' }} />
+        <Divider sx={{ borderColor: sc.dividerFaint }} />
         <ListItem disablePadding>
           {collapsed ? (
             <Tooltip title="Sign out" placement="right">
@@ -347,8 +376,8 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                   borderRadius: '0 !important',
                   justifyContent: 'center',
                   py: 1.25,
-                  color: '#ef9a9a',
-                  '&:hover': { bgcolor: 'rgba(239,83,80,0.15)', color: '#ef5350' },
+                  color: sc.logoutColor,
+                  '&:hover': { bgcolor: sc.logoutHoverBg, color: sc.logoutHoverColor },
                 }}
               >
                 <ListItemIcon sx={{ justifyContent: 'center', minWidth: 0, color: 'inherit' }}>
@@ -363,8 +392,8 @@ function SidebarContent({ collapsed, onNavigate, onToggleCollapse }) {
                 borderRadius: '0 !important',
                 px: 2.5,
                 py: 1.25,
-                color: '#ef9a9a',
-                '&:hover': { bgcolor: 'rgba(239,83,80,0.15)', color: '#ef5350' },
+                color: sc.logoutColor,
+                '&:hover': { bgcolor: sc.logoutHoverBg, color: sc.logoutHoverColor },
               }}
             >
               <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>

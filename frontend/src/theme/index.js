@@ -43,7 +43,6 @@ const baseTokens = {
 };
 
 export function buildLightTheme(brandColor) {
-  const drawerBg = brandColor || '#0D1B2A';
   return createTheme({
   ...baseTokens,
   palette: {
@@ -71,9 +70,9 @@ export function buildLightTheme(brandColor) {
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: drawerBg,
-          color: '#FFFFFF',
-          borderRight: 'none',
+          background: '#FFFFFF',
+          color: '#0D1B2A',
+          borderRight: '1px solid rgba(0,0,0,0.08)',
           borderRadius: 0,
         },
       },
@@ -122,7 +121,6 @@ export function buildLightTheme(brandColor) {
 export const lightTheme = buildLightTheme(null);
 
 export function buildDarkTheme(brandColor) {
-  const drawerBg = brandColor || '#0D1120';
   return createTheme({
   ...baseTokens,
   palette: {
@@ -132,8 +130,8 @@ export function buildDarkTheme(brandColor) {
     success:   { main: '#66BB6A' },
     warning:   { main: '#FFA726' },
     error:     { main: '#EF5350' },
-    background: { default: '#0A0E1A', paper: '#141824' },
-    text:      { primary: '#F0F4F8', secondary: '#90A4AE' },
+    background: { default: '#1C1C1C', paper: '#252525' },
+    text:      { primary: '#F0F4F8', secondary: '#9E9E9E' },
     divider:   'rgba(255,255,255,0.08)',
   },
   components: {
@@ -141,7 +139,7 @@ export function buildDarkTheme(brandColor) {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: '#141824',
+          background: '#252525',
           color: '#F0F4F8',
           boxShadow: '0 1px 0 rgba(255,255,255,0.06)',
         },
@@ -150,7 +148,7 @@ export function buildDarkTheme(brandColor) {
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          background: drawerBg,
+          background: '#1E1E1E',
           color: '#FFFFFF',
           borderRight: 'none',
           borderRadius: 0,
@@ -163,7 +161,7 @@ export function buildDarkTheme(brandColor) {
           borderRadius: 12,
           border: '1px solid rgba(255,255,255,0.07)',
           boxShadow: 'none',
-          background: '#141824',
+          background: '#252525',
         },
       },
     },
@@ -171,7 +169,7 @@ export function buildDarkTheme(brandColor) {
       styleOverrides: {
         root: {
           '& .MuiTableCell-root': {
-            background: '#0A0E1A',
+            background: '#1C1C1C',
             fontWeight: 700,
             color: '#90A4AE',
             textTransform: 'uppercase',
