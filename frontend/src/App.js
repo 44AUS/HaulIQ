@@ -49,6 +49,7 @@ import Preferences from './pages/shared/Preferences';
 import BrandingSettings from './pages/shared/BrandingSettings';
 import Billing from './pages/shared/Billing';
 import MapView from './pages/shared/MapView';
+import CalendarPage from './pages/shared/CalendarPage';
 
 // Pages — Admin
 import AdminOverview from './pages/admin/AdminOverview';
@@ -119,6 +120,7 @@ function CarrierRoutes() {
           <Route path="loads/:id/bid" element={<PlaceBid />} />
           <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
           <Route path="documents" element={<Documents />} />
@@ -147,6 +149,7 @@ function BrokerRoutes() {
           <Route path="instant-book" element={<InstantBookSettings />} />
           <Route path="payments" element={<BrokerPayments />} />
           <Route path="active" element={<BrokerLoadsInProgress />} />
+          <Route path="calendar" element={<CalendarPage />} />
           <Route path="track/:bookingId" element={<TrackLoad />} />
           <Route path="network" element={<Network />} />
           <Route path="documents" element={<Documents />} />

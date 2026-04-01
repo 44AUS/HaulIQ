@@ -191,6 +191,11 @@ export const searchApi = {
   search: (q) => request(`/api/search?q=${encodeURIComponent(q)}`),
 };
 
+// ─── Calendar ─────────────────────────────────────────────────────────────────
+export const calendarApi = {
+  events: () => request('/api/calendar/events'),
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminApi = {
   stats:      ()              => request('/api/admin/stats'),
@@ -205,5 +210,5 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi };
 export default api;

@@ -34,6 +34,7 @@ import {
   Bookmark as SavedIcon,
   CheckCircle as DoneIcon,
   LocalAtm as PayIcon,
+  EventNote as CalendarIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -45,6 +46,7 @@ const NOTIF_DRAWER_WIDTH = 360;
 
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
+  { icon: CalendarIcon,  label: 'Calendar',    path: '/carrier/calendar' },
   { icon: DashboardIcon, label: 'Dashboard',   path: '/carrier/dashboard' },
   { icon: SearchIcon,    label: 'Load Board',  path: '/carrier/loads' },
   { icon: ActivityIcon,  label: 'In Progress', path: '/carrier/active' },
@@ -53,6 +55,7 @@ const CARRIER_NAV = [
 ];
 
 const BROKER_NAV = [
+  { icon: CalendarIcon,  label: 'Calendar',    path: '/broker/calendar' },
   { icon: DashboardIcon, label: 'Dashboard',   path: '/broker/dashboard' },
   { icon: AddIcon,       label: 'Post Load',   path: '/broker/post' },
   { icon: PackageIcon,   label: 'Loads',       path: '/broker/loads' },
