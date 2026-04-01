@@ -15,7 +15,6 @@ function TypeDialog({ open, type, onClose, onSaved }) {
   const [name, setName] = useState('');
   const [abbreviation, setAbbreviation] = useState('');
   const [classId, setClassId] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [classes, setClasses] = useState([]);
@@ -31,7 +30,6 @@ function TypeDialog({ open, type, onClose, onSaved }) {
       setName(type?.name || '');
       setAbbreviation(type?.abbreviation || '');
       setClassId(type?.class_id || '');
-      setSortOrder(type?.sort_order ?? 0);
       setError(null);
     }
   }, [open, type]);
@@ -41,7 +39,7 @@ function TypeDialog({ open, type, onClose, onSaved }) {
     setSaving(true);
     setError(null);
     try {
-      const payload = { name: name.trim(), abbreviation: abbreviation.trim() || null, class_id: classId || null, sort_order: Number(sortOrder) || 0 };
+      const payload = { name: name.trim(), abbreviation: abbreviation.trim() || null, class_id: classId || null };
       if (editing) {
         await equipmentTypesApi.adminUpdate(type.id, payload);
       } else {
@@ -90,15 +88,6 @@ function TypeDialog({ open, type, onClose, onSaved }) {
               ))}
             </Select>
           </FormControl>
-          <TextField
-            label="Sort Order"
-            type="number"
-            value={sortOrder}
-            onChange={e => setSortOrder(e.target.value)}
-            size="small"
-            helperText="Lower = listed first"
-            inputProps={{ min: 0 }}
-          />
         </Box>
       </DialogContent>
       <DialogActions>
@@ -184,7 +173,6 @@ export default function AdminEquipmentTypes() {
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Name</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 60, textTransform: 'uppercase', letterSpacing: 0.5 }}>Abbr.</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 120, textTransform: 'uppercase', letterSpacing: 0.5 }}>Class</Typography>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Order</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Status</Typography>
               <Box sx={{ width: 80 }} />
             </Box>
@@ -208,7 +196,6 @@ export default function AdminEquipmentTypes() {
                     ? <Chip label={type.class_name} size="small" color="primary" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
                     : <Typography variant="caption" color="text.disabled">—</Typography>}
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ width: 80 }}>{type.sort_order}</Typography>
                 <Box sx={{ width: 80 }}>
                   <Chip
                     label={type.is_active ? 'Active' : 'Hidden'}

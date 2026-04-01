@@ -50,7 +50,7 @@ def list_equipment_classes(
     classes = (
         _query_with_types(db)
         .filter(EquipmentClass.is_active == True)
-        .order_by(EquipmentClass.sort_order, EquipmentClass.name)
+        .order_by(EquipmentClass.name)
         .all()
     )
     return [_serialize(c) for c in classes]
@@ -64,7 +64,7 @@ def admin_list_equipment_classes(
 ):
     classes = (
         _query_with_types(db)
-        .order_by(EquipmentClass.sort_order, EquipmentClass.name)
+        .order_by(EquipmentClass.name)
         .all()
     )
     return [_serialize(c) for c in classes]

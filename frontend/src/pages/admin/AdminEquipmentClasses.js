@@ -13,14 +13,12 @@ import { equipmentClassesApi } from '../../services/api';
 function ClassDialog({ open, cls, onClose, onSaved }) {
   const editing = Boolean(cls?.id);
   const [name, setName] = useState('');
-  const [sortOrder, setSortOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (open) {
       setName(cls?.name || '');
-      setSortOrder(cls?.sort_order ?? 0);
       setError(null);
     }
   }, [open, cls]);
@@ -30,7 +28,7 @@ function ClassDialog({ open, cls, onClose, onSaved }) {
     setSaving(true);
     setError(null);
     try {
-      const payload = { name: name.trim(), sort_order: Number(sortOrder) || 0 };
+      const payload = { name: name.trim() };
       if (editing) {
         await equipmentClassesApi.adminUpdate(cls.id, payload);
       } else {
@@ -58,15 +56,6 @@ function ClassDialog({ open, cls, onClose, onSaved }) {
             fullWidth size="small" required
             placeholder="e.g. Flatbed, Dry Van, Refrigerated"
             helperText="Groups related equipment types so users can search by class"
-          />
-          <TextField
-            label="Sort Order"
-            type="number"
-            value={sortOrder}
-            onChange={e => setSortOrder(e.target.value)}
-            size="small"
-            helperText="Lower = listed first"
-            inputProps={{ min: 0 }}
           />
         </Box>
       </DialogContent>
@@ -152,7 +141,6 @@ export default function AdminEquipmentClasses() {
             <Box sx={{ display: 'flex', alignItems: 'center', px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Class Name</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 140, textTransform: 'uppercase', letterSpacing: 0.5 }}>Types</Typography>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Order</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Status</Typography>
               <Box sx={{ width: 96 }} />
             </Box>
@@ -191,8 +179,6 @@ export default function AdminEquipmentClasses() {
                     <Typography variant="caption" color="text.secondary">+{cls.equipment_types.length - 3} more</Typography>
                   )}
                 </Box>
-
-                <Typography variant="body2" color="text.secondary" sx={{ width: 80 }}>{cls.sort_order}</Typography>
 
                 <Box sx={{ width: 80 }}>
                   <Chip
