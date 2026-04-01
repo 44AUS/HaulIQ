@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
 
 revision = '015_add_equipment_classes'
-down_revision = '014_add_equipment_type_abbreviation'
+down_revision = '014_equip_abbreviation'
 branch_labels = None
 depends_on = None
 
