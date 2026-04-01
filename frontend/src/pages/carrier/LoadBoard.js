@@ -19,6 +19,9 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import RemoveIcon from '@mui/icons-material/Remove';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
+import SquareIcon from '@mui/icons-material/Square';
+import StarIcon from '@mui/icons-material/Star';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
@@ -121,7 +124,14 @@ function MapView({ loads }) {
 }
 
 // ─── Table view ───────────────────────────────────────────────────────────────
-function TableView({ loads }) {
+const TH = ({ children }) => (
+  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.63rem',
+    letterSpacing: '0.06em', whiteSpace: 'nowrap', color: 'text.secondary', py: 1.25 }}>
+    {children}
+  </TableCell>
+);
+
+function TableView({ loads, equipmentTypes }) {
   const navigate = useNavigate();
   const [savedIds, setSavedIds] = useState(() => new Set(loads.filter(l => l.saved).map(l => l.id)));
 
@@ -133,65 +143,136 @@ function TableView({ loads }) {
     );
   };
 
+  // Build abbreviation lookup from equipment types API data
+  const abbrMap = {};
+  equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
+
   if (!loads.length) return null;
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-      <Table size="small">
+    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: 'auto' }}>
+      <Table size="small" sx={{ minWidth: 900 }}>
         <TableHead>
           <TableRow sx={{ bgcolor: 'action.hover' }}>
-            {['Route', 'Equipment', 'Size', 'Rate', '$/mi', 'Net Profit', 'Miles', 'Pickup', 'Length', 'Broker', ''].map(h => (
-              <TableCell key={h} sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.65rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</TableCell>
-            ))}
+            <TH>Age</TH>
+            <TH>Broker</TH>
+            <TH>Pickup</TH>
+            <TH>Rate</TH>
+            <TH>Trip</TH>
+            <TH>Lane</TH>
+            <TH>DH-O</TH>
+            <TH>Delivery</TH>
+            <TH>Equipment</TH>
+            <TH></TH>
           </TableRow>
         </TableHead>
         <TableBody>
           {loads.map(load => {
-            const ProfitIcon = SCORE_ICONS[load.profitScore] || RemoveIcon;
             const isSaved = savedIds.has(load.id);
+            const originCity = load.origin?.split(',')[0] || load.origin;
+            const destCity   = load.dest?.split(',')[0]   || load.dest;
+            const abbr = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
+            const equipParts = [
+              abbr,
+              load.weight || null,
+              load.trailerLength ? `${load.trailerLength} ft` : null,
+              load.loadSize === 'partial' ? 'LTL' : 'FTL',
+            ].filter(Boolean);
+
             return (
               <TableRow key={load.id} hover
                 onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })}
-                sx={{ cursor: 'pointer' }}>
+                sx={{ cursor: 'pointer', '& td': { py: 1.25 } }}>
+
+                {/* Age */}
                 <TableCell>
-                  <Typography variant="body2" fontWeight={700} noWrap sx={{ maxWidth: 140 }}>{load.origin}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 140, display: 'block' }}>→ {load.dest}</Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap>{load.posted}</Typography>
                 </TableCell>
-                <TableCell>
-                  <Chip label={load.type} size="small" variant="outlined"
-                    icon={<LocalShippingIcon sx={{ fontSize: '11px !important' }} />}
-                    sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
-                </TableCell>
-                <TableCell>
-                  <Chip label={load.loadSize === 'partial' ? 'Partial' : 'Full'} size="small"
-                    color={load.loadSize === 'partial' ? 'warning' : 'default'} variant="outlined"
-                    sx={{ fontWeight: 600, fontSize: '0.65rem', height: 20 }} />
-                </TableCell>
-                <TableCell><Typography variant="body2" fontWeight={600}>${load.rate?.toLocaleString()}</Typography></TableCell>
-                <TableCell><Typography variant="body2">${load.ratePerMile}</Typography></TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <ProfitIcon sx={{ fontSize: 13, color: `${SCORE_COLOR[load.profitScore]}.main` }} />
-                    <Typography variant="body2" fontWeight={700} color={`${SCORE_COLOR[load.profitScore]}.main`}>
-                      ${load.netProfit?.toLocaleString()}
-                    </Typography>
-                  </Box>
-                </TableCell>
-                <TableCell><Typography variant="body2" noWrap>{load.miles} mi</Typography></TableCell>
-                <TableCell><Typography variant="body2" noWrap>{load.pickup}</Typography></TableCell>
-                <TableCell>
-                  <Typography variant="body2" noWrap>{load.trailerLength ? `${load.trailerLength} ft` : '—'}</Typography>
-                </TableCell>
+
+                {/* Broker */}
                 <TableCell>
                   {load.broker ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                      <Avatar sx={{ width: 20, height: 20, fontSize: '0.55rem', bgcolor: 'primary.main' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 100 }}>
+                      <Avatar sx={{ width: 24, height: 24, fontSize: '0.58rem', fontWeight: 700, bgcolor: 'primary.main', flexShrink: 0 }}>
                         {load.broker.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
                       </Avatar>
-                      <Typography variant="caption" fontWeight={600} noWrap sx={{ maxWidth: 90 }}>{load.broker.name}</Typography>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.3 }}>
+                          {load.broker.name}
+                        </Typography>
+                        {load.broker.rating > 0 && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                            <StarIcon sx={{ fontSize: 9, color: 'warning.main' }} />
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
+                              {load.broker.rating?.toFixed(1)}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
                     </Box>
-                  ) : '—'}
+                  ) : <Typography variant="caption" color="text.disabled">—</Typography>}
                 </TableCell>
+
+                {/* Pickup */}
                 <TableCell>
+                  <Typography variant="caption" fontWeight={600} noWrap>{load.pickup}</Typography>
+                </TableCell>
+
+                {/* Rate */}
+                <TableCell>
+                  <Typography variant="body2" fontWeight={700} noWrap>${load.rate?.toLocaleString()}</Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap display="block">
+                    ${load.ratePerMile}/mi
+                  </Typography>
+                </TableCell>
+
+                {/* Trip (miles) */}
+                <TableCell>
+                  <Typography variant="body2" fontWeight={600} noWrap>{load.miles} mi</Typography>
+                </TableCell>
+
+                {/* Lane */}
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1 }}>
+                    {/* Icon track */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.25, pb: 0.25 }}>
+                      <FiberManualRecordIcon sx={{ fontSize: 8, color: 'primary.main', flexShrink: 0 }} />
+                      <Box sx={{ width: '1.5px', flex: 1, bgcolor: 'divider', my: '2px' }} />
+                      <SquareIcon sx={{ fontSize: 8, color: 'text.secondary', flexShrink: 0 }} />
+                    </Box>
+                    {/* Cities */}
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.6 }}>
+                        {originCity}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ lineHeight: 1.6 }}>
+                        {destCity}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TableCell>
+
+                {/* DH-O */}
+                <TableCell>
+                  <Typography variant="caption" fontWeight={600} noWrap>
+                    {load.deadhead > 0 ? `${load.deadhead} mi` : '—'}
+                  </Typography>
+                </TableCell>
+
+                {/* Delivery */}
+                <TableCell>
+                  <Typography variant="caption" fontWeight={600} noWrap>{load.delivery}</Typography>
+                </TableCell>
+
+                {/* Equipment */}
+                <TableCell>
+                  <Typography variant="caption" fontWeight={700} noWrap display="block">{abbr}</Typography>
+                  <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: '0.6rem' }}>
+                    {equipParts.slice(1).join(' · ')}
+                  </Typography>
+                </TableCell>
+
+                {/* Bookmark */}
+                <TableCell sx={{ pr: 1 }}>
                   <IconButton size="small" onClick={e => handleSave(e, load)}
                     sx={{ color: isSaved ? 'primary.main' : 'text.disabled' }}>
                     {isSaved ? <BookmarkIcon sx={{ fontSize: 15 }} /> : <BookmarkBorderIcon sx={{ fontSize: 15 }} />}
@@ -316,8 +397,8 @@ export default function LoadBoard() {
         </Box>
 
         {/* Row 1: Origin + Destination (with deadhead) */}
-        <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
-          <Grid item xs={12} sm={6} md={3.5}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} sm={7} md={4}>
             <TextField fullWidth size="small" label="Origin City / State"
               placeholder="e.g. Chicago, IL"
               value={pf.origin}
@@ -333,16 +414,16 @@ export default function LoadBoard() {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={1.5}>
+          <Grid item xs={12} sm={5} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Deadhead</InputLabel>
-              <Select value={pf.originDeadhead} label="Deadhead"
+              <InputLabel>Deadhead to pickup</InputLabel>
+              <Select value={pf.originDeadhead} label="Deadhead to pickup"
                 onChange={e => setPF('originDeadhead', e.target.value)}>
                 {DEADHEAD_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3.5}>
+          <Grid item xs={12} sm={7} md={4}>
             <TextField fullWidth size="small" label="Destination City / State"
               placeholder="e.g. Atlanta, GA"
               value={pf.dest}
@@ -358,10 +439,10 @@ export default function LoadBoard() {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={1.5}>
+          <Grid item xs={12} sm={5} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>Deadhead</InputLabel>
-              <Select value={pf.destDeadhead} label="Deadhead"
+              <InputLabel>Deadhead from delivery</InputLabel>
+              <Select value={pf.destDeadhead} label="Deadhead from delivery"
                 onChange={e => setPF('destDeadhead', e.target.value)}>
                 {DEADHEAD_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
               </Select>
@@ -370,7 +451,7 @@ export default function LoadBoard() {
         </Grid>
 
         {/* Row 2: Equipment, Load Size, Length (min/max), Weight */}
-        <Grid container spacing={1.5} sx={{ mb: 1.5 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Equipment Types</InputLabel>
@@ -380,7 +461,7 @@ export default function LoadBoard() {
                 renderValue={sel =>
                   sel.length === 0 ? 'All Types'
                   : sel.length === 1 ? sel[0]
-                  : `${sel.length} types`
+                  : `${sel.length} types selected`
                 }>
                 {equipmentTypes.map(t => (
                   <MenuItem key={t.id} value={t.name}>
@@ -391,18 +472,18 @@ export default function LoadBoard() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Load Size</InputLabel>
               <Select value={pf.loadSize} label="Load Size"
                 onChange={e => setPF('loadSize', e.target.value)}>
                 <MenuItem value="">Full &amp; Partial</MenuItem>
-                <MenuItem value="full">Full (FTL)</MenuItem>
-                <MenuItem value="partial">Partial (LTL)</MenuItem>
+                <MenuItem value="full">Full Truckload (FTL)</MenuItem>
+                <MenuItem value="partial">Partial Truckload (LTL)</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6} sm={3} md={1.5}>
+          <Grid item xs={6} sm={3} md={2}>
             <TextField fullWidth size="small" label="Min Length"
               type="number" placeholder="40"
               value={pf.minLength}
@@ -411,7 +492,7 @@ export default function LoadBoard() {
               inputProps={{ min: 0 }}
             />
           </Grid>
-          <Grid item xs={6} sm={3} md={1.5}>
+          <Grid item xs={6} sm={3} md={2}>
             <TextField fullWidth size="small" label="Max Length"
               type="number" placeholder="53"
               value={pf.maxLength}
@@ -432,20 +513,20 @@ export default function LoadBoard() {
         </Grid>
 
         {/* Row 3: Date range + Sort + Search button */}
-        <Grid container spacing={1.5} alignItems="center">
-          <Grid item xs={12} sm={6} md={2}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6} md={3}>
             <TextField fullWidth size="small" label="Pickup From"
               type="date" value={pf.dateFrom}
               onChange={e => setPF('dateFrom', e.target.value)}
               InputLabelProps={{ shrink: true }} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} md={3}>
             <TextField fullWidth size="small" label="Pickup To"
               type="date" value={pf.dateTo}
               onChange={e => setPF('dateTo', e.target.value)}
               InputLabelProps={{ shrink: true }} />
           </Grid>
-          <Grid item xs={12} sm={6} md={2.5}>
+          <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Sort By</InputLabel>
               <Select value={pf.sort} label="Sort By" onChange={e => {
@@ -461,7 +542,7 @@ export default function LoadBoard() {
             <Button variant="contained" startIcon={<SearchIcon />}
               onClick={handleSearch} disabled={loading}
               sx={{ textTransform: 'none', fontWeight: 700, px: 3, height: 40, whiteSpace: 'nowrap' }}>
-              Search
+              Search Loads
             </Button>
           </Grid>
         </Grid>
@@ -546,7 +627,7 @@ export default function LoadBoard() {
           ))}
         </Grid>
       ) : view === 'table' ? (
-        <TableView loads={loads} />
+        <TableView loads={loads} equipmentTypes={equipmentTypes} />
       ) : (
         <MapView loads={loads} />
       )}
