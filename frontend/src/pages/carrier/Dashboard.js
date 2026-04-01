@@ -196,41 +196,43 @@ export default function CarrierDashboard() {
       </Grid>
 
       {/* Hot Loads */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BoltIcon sx={{ color: 'error.main' }} />
-            <Typography variant="subtitle1" fontWeight={600}>Hot Loads Right Now</Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BoltIcon sx={{ color: 'error.main' }} />
+              <Typography variant="subtitle1" fontWeight={600}>Hot Loads Right Now</Typography>
+            </Box>
+            <Button
+              component={Link}
+              to="/carrier/loads"
+              variant="text"
+              size="small"
+              endIcon={<ArrowForwardIcon />}
+              sx={{ fontSize: '0.75rem' }}
+            >
+              View all
+            </Button>
           </Box>
-          <Button
-            component={Link}
-            to="/carrier/loads"
-            variant="text"
-            size="small"
-            endIcon={<ArrowForwardIcon />}
-            sx={{ fontSize: '0.75rem' }}
-          >
-            View all
-          </Button>
-        </Box>
+        </Grid>
         {hotLoads.length === 0 ? (
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <Typography variant="body2" color="text.secondary">
-                No hot loads right now — check back soon
-              </Typography>
-            </CardContent>
-          </Card>
-        ) : (
-          <Grid container spacing={3}>
-            {hotLoads.map(load => (
-              <Grid item xs={12} sm={6} md={4} key={load.id}>
-                <LoadCard load={load} />
-              </Grid>
-            ))}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent sx={{ textAlign: 'center', py: 6 }}>
+                <Typography variant="body2" color="text.secondary">
+                  No hot loads right now — check back soon
+                </Typography>
+              </CardContent>
+            </Card>
           </Grid>
+        ) : (
+          hotLoads.map(load => (
+            <Grid item xs={12} sm={6} md={4} key={load.id}>
+              <LoadCard load={load} />
+            </Grid>
+          ))
         )}
-      </Box>
+      </Grid>
     </Box>
   );
 }
