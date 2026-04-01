@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Alert, Skeleton,
+  Box, Typography, Card, CardContent, Alert, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
@@ -72,14 +72,14 @@ export default function LoadHistory() {
       ) : (
         <>
           {/* Summary */}
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
             {[
               { label: 'Total Gross', value: `$${totalGross.toLocaleString()}`, highlight: false },
               { label: 'Total Net', value: `$${totalNet.toLocaleString()}`, highlight: true },
               { label: 'Loads Completed', value: history.length, highlight: false },
             ].map(({ label, value, highlight }) => (
-              <Grid item xs={12} sm={4} key={label}>
-                <Card>
+              <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
+                <Card sx={{ height: '100%' }}>
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Typography variant="body2" color="text.secondary" gutterBottom>{label}</Typography>
                     <Typography variant="h4" fontWeight={800} sx={{ color: highlight ? 'primary.main' : 'text.primary' }}>
@@ -87,9 +87,9 @@ export default function LoadHistory() {
                     </Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
 
           {history.length === 0 ? (
             <Card>
