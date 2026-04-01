@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
 import { AppThemeProvider, useThemeMode } from './context/ThemeContext';
 import { Box, CircularProgress } from '@mui/material';
+import UpdateNotifier from './components/UpdateNotifier';
 
 // Pages — Public
 import Landing from './pages/Landing';
@@ -228,6 +229,7 @@ export default function App() {
       <AuthProvider>
         <MessagingProvider>
           <BrowserRouter>
+            <UpdateNotifier />
             <BrandColorSync />
             <AppRoutes />
           </BrowserRouter>
