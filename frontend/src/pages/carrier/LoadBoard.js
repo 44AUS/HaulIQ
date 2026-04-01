@@ -31,7 +31,6 @@ const SORT_OPTIONS = [
 ];
 
 const SCORE_COLOR = { green: 'success', yellow: 'warning', red: 'error' };
-const SCORE_LABEL = { green: 'High Profit', yellow: 'Marginal', red: 'Loss Risk' };
 const SCORE_ICONS = { green: TrendingUpIcon, yellow: RemoveIcon, red: TrendingDownIcon };
 
 const MAPS_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
