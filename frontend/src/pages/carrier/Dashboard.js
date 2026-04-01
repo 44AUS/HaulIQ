@@ -122,78 +122,73 @@ export default function CarrierDashboard() {
       </Grid>
 
       {/* Earnings chart + Brain insight */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="subtitle1" fontWeight={600}>Earnings Trend</Typography>
-                <Button
-                  component={Link}
-                  to="/carrier/analytics"
-                  variant="text"
-                  size="small"
-                  endIcon={<ArrowForwardIcon />}
-                  sx={{ fontSize: '0.75rem' }}
-                >
-                  Full analytics
-                </Button>
-              </Box>
-              {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={180}>
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#1565C0" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#1565C0" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="week" tick={{ fill: '#9e9e9e', fontSize: 10 }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 8, fontSize: 12 }}
-                      formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Net']}
-                    />
-                    <Area type="monotone" dataKey="net" stroke="#1565C0" strokeWidth={2} fill="url(#netGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Complete loads to see your earnings trend
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Brain insight card */}
-        <Grid item xs={12} md={6}>
-          <Card sx={{ height: '100%', border: '1px solid', borderColor: 'primary.dark', display: 'flex', flexDirection: 'column' }}>
-            <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <PsychologyIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                <Typography variant="subtitle2" fontWeight={600}>Earnings Brain</Typography>
-              </Box>
-              <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography variant="body2" color="text.secondary" textAlign="center">
-                  Insights load on the Brain page
-                </Typography>
-              </Box>
+      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexDirection: { xs: 'column', md: 'row' } }}>
+        <Card sx={{ flex: 1, minWidth: 0 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600}>Earnings Trend</Typography>
               <Button
                 component={Link}
-                to="/carrier/brain"
-                variant="contained"
+                to="/carrier/analytics"
+                variant="text"
+                size="small"
                 endIcon={<ArrowForwardIcon />}
-                fullWidth
-                sx={{ mt: 2 }}
+                sx={{ fontSize: '0.75rem' }}
               >
-                See all insights
+                Full analytics
               </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+            </Box>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#1565C0" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="#1565C0" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="week" tick={{ fill: '#9e9e9e', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 8, fontSize: 12 }}
+                    formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Net']}
+                  />
+                  <Area type="monotone" dataKey="net" stroke="#1565C0" strokeWidth={2} fill="url(#netGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180 }}>
+                <Typography variant="body2" color="text.secondary">
+                  Complete loads to see your earnings trend
+                </Typography>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card sx={{ flex: 1, minWidth: 0, border: '1px solid', borderColor: 'primary.dark', display: 'flex', flexDirection: 'column' }}>
+          <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+              <PsychologyIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+              <Typography variant="subtitle2" fontWeight={600}>Earnings Brain</Typography>
+            </Box>
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Typography variant="body2" color="text.secondary" textAlign="center">
+                Insights load on the Brain page
+              </Typography>
+            </Box>
+            <Button
+              component={Link}
+              to="/carrier/brain"
+              variant="contained"
+              endIcon={<ArrowForwardIcon />}
+              fullWidth
+              sx={{ mt: 2 }}
+            >
+              See all insights
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
 
       {/* Hot Loads */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
