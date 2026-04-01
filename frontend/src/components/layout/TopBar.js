@@ -85,7 +85,7 @@ function NavLink({ item, active, onClick }) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 0.9,
-        px: 1.75,
+        px: 2.5,
         height: '100%',
         cursor: 'pointer',
         position: 'relative',
@@ -109,7 +109,7 @@ function NavLink({ item, active, onClick }) {
       }}
     >
       <Icon sx={{ fontSize: 18, flexShrink: 0 }} />
-      <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
+      <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
         {item.label}
       </Typography>
     </Box>
