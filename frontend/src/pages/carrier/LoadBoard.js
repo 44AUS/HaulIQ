@@ -14,9 +14,6 @@ import TableRowsIcon from '@mui/icons-material/TableRows';
 import MapIcon from '@mui/icons-material/Map';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import RemoveIcon from '@mui/icons-material/Remove';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
@@ -42,8 +39,6 @@ const DEADHEAD_OPTIONS = [
   { value: '200', label: '200 mi' },
   { value: '300', label: '300 mi' },
 ];
-const SCORE_COLOR = { green: 'success', yellow: 'warning', red: 'error' };
-const SCORE_ICONS = { green: TrendingUpIcon, yellow: RemoveIcon, red: TrendingDownIcon };
 const MAPS_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 const MAPS_LIBS = ['places'];
 const INIT = {
