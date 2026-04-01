@@ -424,7 +424,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const isActive = (path) =>
     path === '/admin'
       ? location.pathname === '/admin'
-      : location.pathname.startsWith(path);
+      : location.pathname === path || location.pathname.startsWith(path + '/');
 
   return (
     <>
