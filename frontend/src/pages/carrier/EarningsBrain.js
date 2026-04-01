@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Box, Typography, Card, CardContent, Grid, Button, Chip,
+  Box, Typography, Card, CardContent, Button, Chip,
   Alert, Skeleton
 } from '@mui/material';
 import PsychologyIcon from '@mui/icons-material/Psychology';
@@ -163,15 +163,15 @@ export default function EarningsBrain() {
       </Box>
 
       {/* Summary stats */}
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {[
           { label: 'Insights Generated', value: insights.length || '—', sub: 'Available now' },
           { label: 'Estimated Savings', value: '$—', sub: 'From avoided bad loads' },
           { label: 'Brokers Flagged', value: '—', sub: 'Based on your history' },
           { label: 'Best Lane Found', value: '—', sub: 'Run more loads to unlock' },
         ].map(({ label, value, sub }) => (
-          <Grid item xs={6} md={3} key={label}>
-            <Card>
+          <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Card sx={{ height: '100%' }}>
               <CardContent sx={{ textAlign: 'center' }}>
                 <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
                   {label}
@@ -180,17 +180,17 @@ export default function EarningsBrain() {
                 <Typography variant="caption" color="text.disabled">{sub}</Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Insights grid */}
       <Box>
         <Typography variant="subtitle1" fontWeight={600} gutterBottom>This Week's Insights</Typography>
         {loading ? (
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {[...Array(6)].map((_, i) => (
-              <Grid item xs={12} sm={6} key={i}>
+              <Box key={i} sx={{ flex: '1 1 320px', minWidth: 0 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
@@ -198,9 +198,9 @@ export default function EarningsBrain() {
                     <Skeleton variant="text" width="50%" height={18} />
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         ) : error ? (
           <Alert severity="error">{error}</Alert>
         ) : insights.length === 0 ? (
@@ -213,18 +213,18 @@ export default function EarningsBrain() {
             </CardContent>
           </Card>
         ) : (
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {visibleInsights.map(i => (
-              <Grid item xs={12} md={6} key={i.id}>
+              <Box key={i.id} sx={{ flex: '1 1 320px', minWidth: 0 }}>
                 <InsightCard insight={i} locked={false} onRead={handleMarkRead} />
-              </Grid>
+              </Box>
             ))}
             {lockedInsights.map(i => (
-              <Grid item xs={12} md={6} key={i.id}>
+              <Box key={i.id} sx={{ flex: '1 1 320px', minWidth: 0 }}>
                 <InsightCard insight={i} locked={true} onRead={null} />
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
       </Box>
 
