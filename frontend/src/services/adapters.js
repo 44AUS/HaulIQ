@@ -20,7 +20,7 @@ const PAY_SPEED_LABEL = {
 function timeAgo(iso) {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso)) / 1000;
-  if (diff < 60)   return `${Math.floor(diff)} sec ago`;
+  if (diff < 60)   return '< 1 min ago';
   if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
   return `${Math.floor(diff / 86400)} days ago`;
