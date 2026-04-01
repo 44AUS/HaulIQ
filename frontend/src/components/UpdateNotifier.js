@@ -4,25 +4,31 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-function extractHash(html) {
-  const m = html.match(/src="\/static\/js\/main\.([a-f0-9]+)\.js"/);
-  return m ? m[1] : null;
+async function fetchVersion() {
+  // asset-manifest.json is generated fresh on every CRA build and contains
+  // content-hashed filenames — much more reliable than parsing index.html.
+  const r = await fetch('/asset-manifest.json', {
+    cache: 'no-store',
+    headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
+  });
+  if (!r.ok) return null;
+  const json = await r.json();
+  // "main.js" entry contains the full hashed path, e.g. "/static/js/main.abc123.js"
+  return json?.files?.['main.js'] ?? json?.['main.js'] ?? null;
 }
 
 export default function UpdateNotifier() {
   const [visible, setVisible] = useState(false);
-  const hashRef = useRef(null);
+  const versionRef = useRef(null);
 
   useEffect(() => {
     const check = async () => {
       try {
-        const r = await fetch('/?t=' + Date.now(), { cache: 'no-store' });
-        const html = await r.text();
-        const hash = extractHash(html);
-        if (!hash) return;
-        if (hashRef.current === null) {
-          hashRef.current = hash;
-        } else if (hash !== hashRef.current) {
+        const version = await fetchVersion();
+        if (!version) return;
+        if (versionRef.current === null) {
+          versionRef.current = version;
+        } else if (version !== versionRef.current) {
           setVisible(true);
         }
       } catch {}
