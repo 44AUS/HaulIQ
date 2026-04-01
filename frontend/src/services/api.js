@@ -6,7 +6,12 @@ async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, { ...options, headers });
+  } catch (networkErr) {
+    throw new Error(`Network error — could not reach ${BASE}${path}. Check your connection or API URL.`);
+  }
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

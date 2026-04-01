@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 from typing import Optional
 from uuid import UUID
@@ -39,6 +39,10 @@ def _serialize(et: EquipmentType) -> dict:
     }
 
 
+def _query_with_class(db: Session):
+    return db.query(EquipmentType).options(joinedload(EquipmentType.equipment_class))
+
+
 # ── Public: list active equipment types ───────────────────────────────────────
 @router.get("/")
 def list_equipment_types(
@@ -46,7 +50,7 @@ def list_equipment_types(
     current_user=Depends(get_current_user),
 ):
     types = (
-        db.query(EquipmentType)
+        _query_with_class(db)
         .filter(EquipmentType.is_active == True)
         .order_by(EquipmentType.sort_order, EquipmentType.name)
         .all()
@@ -61,7 +65,7 @@ def admin_list_equipment_types(
     current_user=Depends(require_admin),
 ):
     types = (
-        db.query(EquipmentType)
+        _query_with_class(db)
         .order_by(EquipmentType.sort_order, EquipmentType.name)
         .all()
     )
@@ -75,13 +79,19 @@ def create_equipment_type(
     db: Session = Depends(get_db),
     current_user=Depends(require_admin),
 ):
-    existing = db.query(EquipmentType).filter(EquipmentType.name == body.name).first()
-    if existing:
+    if db.query(EquipmentType).filter(EquipmentType.name == body.name).first():
         raise HTTPException(status_code=400, detail="Equipment type with this name already exists")
-    et = EquipmentType(name=body.name, abbreviation=body.abbreviation, class_id=body.class_id or None, sort_order=body.sort_order, is_active=body.is_active)
+    et = EquipmentType(
+        name=body.name,
+        abbreviation=body.abbreviation,
+        class_id=body.class_id or None,
+        sort_order=body.sort_order,
+        is_active=body.is_active,
+    )
     db.add(et)
     db.commit()
-    db.refresh(et)
+    # Re-fetch with relationship eagerly loaded so _serialize works safely
+    et = _query_with_class(db).filter(EquipmentType.id == et.id).first()
     return _serialize(et)
 
 
@@ -93,7 +103,7 @@ def update_equipment_type(
     db: Session = Depends(get_db),
     current_user=Depends(require_admin),
 ):
-    et = db.query(EquipmentType).filter(EquipmentType.id == str(type_id)).first()
+    et = _query_with_class(db).filter(EquipmentType.id == str(type_id)).first()
     if not et:
         raise HTTPException(status_code=404, detail="Not found")
     if body.name is not None:
@@ -107,7 +117,7 @@ def update_equipment_type(
     if body.is_active is not None:
         et.is_active = body.is_active
     db.commit()
-    db.refresh(et)
+    et = _query_with_class(db).filter(EquipmentType.id == str(type_id)).first()
     return _serialize(et)
 
 

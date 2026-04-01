@@ -6,7 +6,6 @@ from uuid import UUID
 
 from app.database import get_db
 from app.models.equipment_class import EquipmentClass
-from app.models.equipment_type import EquipmentType
 from app.middleware.auth import get_current_user, require_admin
 
 router = APIRouter()
@@ -24,20 +23,22 @@ class EquipmentClassUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
-def _serialize_type(et: EquipmentType) -> dict:
-    return {"id": str(et.id), "name": et.name, "abbreviation": et.abbreviation}
+def _serialize_type(t) -> dict:
+    return {"id": str(t.id), "name": t.name, "abbreviation": t.abbreviation}
 
 
-def _serialize(ec: EquipmentClass, include_types: bool = True) -> dict:
-    data = {
+def _serialize(ec: EquipmentClass) -> dict:
+    return {
         "id": str(ec.id),
         "name": ec.name,
         "sort_order": ec.sort_order,
         "is_active": ec.is_active,
+        "equipment_types": [_serialize_type(t) for t in ec.equipment_types],
     }
-    if include_types:
-        data["equipment_types"] = [_serialize_type(t) for t in ec.equipment_types]
-    return data
+
+
+def _query_with_types(db: Session):
+    return db.query(EquipmentClass).options(joinedload(EquipmentClass.equipment_types))
 
 
 # ── Public: list active classes with their types ───────────────────────────────
@@ -47,8 +48,7 @@ def list_equipment_classes(
     current_user=Depends(get_current_user),
 ):
     classes = (
-        db.query(EquipmentClass)
-        .options(joinedload(EquipmentClass.equipment_types))
+        _query_with_types(db)
         .filter(EquipmentClass.is_active == True)
         .order_by(EquipmentClass.sort_order, EquipmentClass.name)
         .all()
@@ -63,8 +63,7 @@ def admin_list_equipment_classes(
     current_user=Depends(require_admin),
 ):
     classes = (
-        db.query(EquipmentClass)
-        .options(joinedload(EquipmentClass.equipment_types))
+        _query_with_types(db)
         .order_by(EquipmentClass.sort_order, EquipmentClass.name)
         .all()
     )
@@ -83,7 +82,7 @@ def create_equipment_class(
     ec = EquipmentClass(name=body.name, sort_order=body.sort_order, is_active=body.is_active)
     db.add(ec)
     db.commit()
-    db.refresh(ec)
+    ec = _query_with_types(db).filter(EquipmentClass.id == ec.id).first()
     return _serialize(ec)
 
 
@@ -95,7 +94,7 @@ def update_equipment_class(
     db: Session = Depends(get_db),
     current_user=Depends(require_admin),
 ):
-    ec = db.query(EquipmentClass).filter(EquipmentClass.id == str(class_id)).first()
+    ec = _query_with_types(db).filter(EquipmentClass.id == str(class_id)).first()
     if not ec:
         raise HTTPException(status_code=404, detail="Not found")
     if body.name is not None:
@@ -105,7 +104,7 @@ def update_equipment_class(
     if body.is_active is not None:
         ec.is_active = body.is_active
     db.commit()
-    db.refresh(ec)
+    ec = _query_with_types(db).filter(EquipmentClass.id == str(class_id)).first()
     return _serialize(ec)
 
 
