@@ -72,6 +72,7 @@ const ADMIN_NAV = [
   { icon: PaymentIcon,    label: 'Payments',  path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',  path: '/admin/waitlist' },
   { icon: LayersIcon,     label: 'Plans',     path: '/admin/plans' },
+  { icon: TruckIcon,     label: 'Equipment', path: '/admin/equipment' },
 ];
 
 // ── Single top nav link ───────────────────────────────────────────────────────

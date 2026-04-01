@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadsApi } from '../../services/api';
+import { loadsApi, equipmentTypesApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
@@ -13,11 +13,18 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BoltIcon from '@mui/icons-material/Bolt';
 
-const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
 const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 
 export default function PostLoad() {
   const navigate = useNavigate();
+  const [equipmentTypes, setEquipmentTypes] = useState([]);
+
+  useEffect(() => {
+    equipmentTypesApi.list()
+      .then(data => setEquipmentTypes(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
+
   const [form, setForm] = useState({
     // City/state display values (for origin/destination fields)
     originCity: '', destCity: '',
@@ -221,7 +228,7 @@ export default function PostLoad() {
               <FormControl fullWidth size="small">
                 <InputLabel>Equipment Type</InputLabel>
                 <Select value={form.equipment} label="Equipment Type" onChange={e => set('equipment', e.target.value)}>
-                  {EQUIPMENT.map(eq => <MenuItem key={eq} value={eq}>{eq}</MenuItem>)}
+                  {equipmentTypes.map(t => <MenuItem key={t.id} value={t.name}>{t.name}</MenuItem>)}
                 </Select>
               </FormControl>
             </Grid>

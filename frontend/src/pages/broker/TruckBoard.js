@@ -10,25 +10,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SearchIcon from '@mui/icons-material/Search';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import { truckPostsApi } from '../../services/api';
-
-const EQUIPMENT_OPTIONS = [
-  { value: '',           label: 'All Types' },
-  { value: 'dry_van',    label: 'Dry Van',    color: 'default' },
-  { value: 'flatbed',    label: 'Flatbed',    color: 'warning' },
-  { value: 'reefer',     label: 'Reefer',     color: 'info' },
-  { value: 'step_deck',  label: 'Step Deck',  color: 'secondary' },
-  { value: 'lowboy',     label: 'Lowboy',     color: 'error' },
-  { value: 'power_only', label: 'Power Only', color: 'success' },
-];
-
-function equipmentLabel(value) {
-  return EQUIPMENT_OPTIONS.find(o => o.value === value)?.label || value;
-}
-
-function equipmentColor(value) {
-  return EQUIPMENT_OPTIONS.find(o => o.value === value)?.color || 'default';
-}
+import { truckPostsApi, equipmentTypesApi } from '../../services/api';
 
 function TruckCardSkeleton() {
   return (
@@ -51,9 +33,16 @@ export default function TruckBoard() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [equipmentFilter, setEquipmentFilter] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
   const debounceRef = useRef(null);
+
+  useEffect(() => {
+    equipmentTypesApi.list()
+      .then(data => setEquipmentTypes(Array.isArray(data) ? data : []))
+      .catch(() => {});
+  }, []);
 
   const fetchPosts = useCallback((eqType, loc) => {
     setLoading(true);
@@ -93,13 +82,20 @@ export default function TruckBoard() {
       <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2, mb: 3 }}>
         {/* Equipment type filter buttons */}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {EQUIPMENT_OPTIONS.map(opt => (
+          <Chip
+            label="All Types"
+            color={equipmentFilter === '' ? 'primary' : 'default'}
+            variant={equipmentFilter === '' ? 'filled' : 'outlined'}
+            onClick={() => setEquipmentFilter('')}
+            sx={{ fontWeight: 600, cursor: 'pointer', fontSize: '0.8rem' }}
+          />
+          {equipmentTypes.map(t => (
             <Chip
-              key={opt.value}
-              label={opt.label}
-              color={equipmentFilter === opt.value ? (opt.color || 'primary') : 'default'}
-              variant={equipmentFilter === opt.value ? 'filled' : 'outlined'}
-              onClick={() => setEquipmentFilter(opt.value)}
+              key={t.id}
+              label={t.name}
+              color={equipmentFilter === t.name ? 'primary' : 'default'}
+              variant={equipmentFilter === t.name ? 'filled' : 'outlined'}
+              onClick={() => setEquipmentFilter(t.name)}
               sx={{ fontWeight: 600, cursor: 'pointer', fontSize: '0.8rem' }}
             />
           ))}
@@ -153,8 +149,8 @@ export default function TruckBoard() {
                 {/* Top row: equipment chip + carrier name */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, gap: 1, flexWrap: 'wrap' }}>
                   <Chip
-                    label={equipmentLabel(post.equipment_type)}
-                    color={equipmentColor(post.equipment_type)}
+                    label={post.equipment_type}
+                    color="primary"
                     size="small"
                     sx={{ fontWeight: 700, fontSize: '0.75rem' }}
                   />

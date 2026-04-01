@@ -219,5 +219,14 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi };
+// ─── Equipment Types ──────────────────────────────────────────────────────────
+export const equipmentTypesApi = {
+  list:         ()           => request('/api/equipment-types'),
+  adminList:    ()           => request('/api/equipment-types/admin'),
+  adminCreate:  (data)       => request('/api/equipment-types', { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdate:  (id, data)   => request(`/api/equipment-types/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  adminDelete:  (id)         => request(`/api/equipment-types/${id}`, { method: 'DELETE' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi };
 export default api;

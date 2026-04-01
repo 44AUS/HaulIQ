@@ -2,28 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Card, CardContent, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, MenuItem, Select, FormControl,
-  InputLabel, Chip, IconButton, Tooltip,
+  InputLabel, Chip, IconButton, Tooltip, Skeleton, Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ReplayIcon from '@mui/icons-material/Replay';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { truckPostsApi } from '../../services/api';
+import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
+import { truckPostsApi, equipmentTypesApi } from '../../services/api';
 
-const EQUIPMENT_OPTIONS = [
-  { value: 'dry_van',    label: 'Dry Van',    color: 'default' },
-  { value: 'flatbed',    label: 'Flatbed',    color: 'warning' },
-  { value: 'reefer',     label: 'Reefer',     color: 'info' },
-  { value: 'step_deck',  label: 'Step Deck',  color: 'secondary' },
-  { value: 'lowboy',     label: 'Lowboy',     color: 'error' },
-  { value: 'power_only', label: 'Power Only', color: 'success' },
-];
-
-const EMPTY_FORM = {
-  equipment_type: 'dry_van',
+const emptyForm = (equipmentTypes) => ({
+  equipment_type: equipmentTypes[0]?.name || '',
   trailer_length: '',
   weight_capacity: '',
   current_location: '',
@@ -33,22 +26,16 @@ const EMPTY_FORM = {
   available_to: '',
   rate_expectation: '',
   notes: '',
-};
-
-function equipmentLabel(value) {
-  return EQUIPMENT_OPTIONS.find(o => o.value === value)?.label || value;
-}
-
-function equipmentColor(value) {
-  return EQUIPMENT_OPTIONS.find(o => o.value === value)?.color || 'default';
-}
+});
 
 export default function Equipment() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editPost, setEditPost] = useState(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [isRepost, setIsRepost] = useState(false);
+  const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [error, setError] = useState('');
@@ -61,19 +48,24 @@ export default function Equipment() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+  useEffect(() => {
+    equipmentTypesApi.list().then(data => setEquipmentTypes(Array.isArray(data) ? data : [])).catch(() => {});
+    fetchPosts();
+  }, [fetchPosts]);
 
   const openCreate = () => {
     setEditPost(null);
-    setForm(EMPTY_FORM);
+    setIsRepost(false);
+    setForm(emptyForm(equipmentTypes));
     setError('');
     setDialogOpen(true);
   };
 
   const openEdit = (post) => {
     setEditPost(post);
+    setIsRepost(false);
     setForm({
-      equipment_type: post.equipment_type || 'dry_van',
+      equipment_type: post.equipment_type || equipmentTypes[0]?.name || '',
       trailer_length: post.trailer_length ?? '',
       weight_capacity: post.weight_capacity ?? '',
       current_location: post.current_location || '',
@@ -81,6 +73,26 @@ export default function Equipment() {
       preferred_destination: post.preferred_destination || '',
       available_from: post.available_from || '',
       available_to: post.available_to || '',
+      rate_expectation: post.rate_expectation ?? '',
+      notes: post.notes || '',
+    });
+    setError('');
+    setDialogOpen(true);
+  };
+
+  // Repost: same equipment/location/specs, just clear dates so carrier sets new availability
+  const openRepost = (post) => {
+    setEditPost(null);
+    setIsRepost(true);
+    setForm({
+      equipment_type: post.equipment_type || equipmentTypes[0]?.name || '',
+      trailer_length: post.trailer_length ?? '',
+      weight_capacity: post.weight_capacity ?? '',
+      current_location: post.current_location || '',
+      preferred_origin: post.preferred_origin || '',
+      preferred_destination: post.preferred_destination || '',
+      available_from: '',
+      available_to: '',
       rate_expectation: post.rate_expectation ?? '',
       notes: post.notes || '',
     });
@@ -150,19 +162,20 @@ export default function Equipment() {
             Post your available trucks so brokers can find and contact you directly.
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={openCreate}
-          sx={{ fontWeight: 700, borderRadius: 2, textTransform: 'none' }}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
           Post Truck
         </Button>
       </Box>
 
       {/* Cards */}
       {loading ? (
-        <Typography color="text.secondary">Loading your equipment...</Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          {[1, 2, 3].map(i => (
+            <Box key={i} sx={{ flex: '1 1 340px', minWidth: 0 }}>
+              <Skeleton variant="rectangular" height={220} sx={{ borderRadius: 2 }} />
+            </Box>
+          ))}
+        </Box>
       ) : posts.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <LocalShippingIcon sx={{ fontSize: 56, color: 'text.disabled', mb: 2 }} />
@@ -170,7 +183,7 @@ export default function Equipment() {
           <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5, mb: 3 }}>
             Post your available capacity so brokers can reach out.
           </Typography>
-          <Button variant="outlined" startIcon={<AddIcon />} onClick={openCreate} sx={{ textTransform: 'none', borderRadius: 2 }}>
+          <Button variant="outlined" startIcon={<AddIcon />} onClick={openCreate}>
             Post Your First Truck
           </Button>
         </Box>
@@ -180,24 +193,12 @@ export default function Equipment() {
             <Card
               key={post.id}
               variant="outlined"
-              sx={{
-                flex: '1 1 340px',
-                minWidth: 0,
-                borderRadius: 2,
-                opacity: post.is_active ? 1 : 0.6,
-                transition: 'box-shadow 0.15s',
-                '&:hover': { boxShadow: 3 },
-              }}
+              sx={{ flex: '1 1 340px', minWidth: 0, borderRadius: 2, opacity: post.is_active ? 1 : 0.6, '&:hover': { boxShadow: 3 } }}
             >
               <CardContent sx={{ p: 2.5 }}>
-                {/* Top row: chip + actions */}
+                {/* Top row */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, gap: 1 }}>
-                  <Chip
-                    label={equipmentLabel(post.equipment_type)}
-                    color={equipmentColor(post.equipment_type)}
-                    size="small"
-                    sx={{ fontWeight: 700, fontSize: '0.75rem' }}
-                  />
+                  <Chip label={post.equipment_type} size="small" color="primary" sx={{ fontWeight: 700 }} />
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Chip
                       label={post.is_active ? 'Active' : 'Inactive'}
@@ -207,6 +208,11 @@ export default function Equipment() {
                       onClick={() => handleToggleActive(post)}
                       sx={{ cursor: 'pointer', fontWeight: 600, fontSize: '0.7rem' }}
                     />
+                    <Tooltip title="Repost with new dates">
+                      <IconButton size="small" onClick={() => openRepost(post)} color="primary">
+                        <ReplayIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title="Edit">
                       <IconButton size="small" onClick={() => openEdit(post)}>
                         <EditIcon fontSize="small" />
@@ -220,13 +226,11 @@ export default function Equipment() {
                   </Box>
                 </Box>
 
-                {/* Location */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
                   <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                   <Typography variant="body2" fontWeight={600}>{post.current_location}</Typography>
                 </Box>
 
-                {/* Dates */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
                   <CalendarTodayIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
                   <Typography variant="body2" color="text.secondary">
@@ -234,7 +238,6 @@ export default function Equipment() {
                   </Typography>
                 </Box>
 
-                {/* Rate */}
                 {post.rate_expectation != null && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
                     <AttachMoneyIcon sx={{ fontSize: 16, color: 'success.main' }} />
@@ -244,7 +247,6 @@ export default function Equipment() {
                   </Box>
                 )}
 
-                {/* Preferred lanes */}
                 {(post.preferred_origin || post.preferred_destination) && (
                   <Box sx={{ mt: 1 }}>
                     <Typography variant="caption" color="text.disabled" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -256,19 +258,13 @@ export default function Equipment() {
                   </Box>
                 )}
 
-                {/* Specs */}
                 {(post.trailer_length || post.weight_capacity) && (
                   <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                    {post.trailer_length && (
-                      <Typography variant="caption" color="text.secondary">{post.trailer_length} ft</Typography>
-                    )}
-                    {post.weight_capacity && (
-                      <Typography variant="caption" color="text.secondary">{post.weight_capacity.toLocaleString()} lbs</Typography>
-                    )}
+                    {post.trailer_length && <Typography variant="caption" color="text.secondary">{post.trailer_length} ft</Typography>}
+                    {post.weight_capacity && <Typography variant="caption" color="text.secondary">{post.weight_capacity.toLocaleString()} lbs</Typography>}
                   </Box>
                 )}
 
-                {/* Notes */}
                 {post.notes && (
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', fontStyle: 'italic' }}>
                     {post.notes.length > 80 ? post.notes.slice(0, 80) + '…' : post.notes}
@@ -280,150 +276,75 @@ export default function Equipment() {
         </Box>
       )}
 
-      {/* Create / Edit Dialog */}
+      {/* Create / Edit / Repost Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>{editPost ? 'Edit Truck Posting' : 'Post a Truck'}</DialogTitle>
-        <DialogContent sx={{ pt: 1 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-            {error && (
-              <Typography variant="body2" color="error">{error}</Typography>
+        <DialogTitle fontWeight={700}>
+          {isRepost ? 'Repost Truck — Update Dates' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}
+        </DialogTitle>
+        <DialogContent dividers>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            {error && <Alert severity="error">{error}</Alert>}
+            {isRepost && (
+              <Alert severity="info">
+                Same equipment and specs pre-filled — just update your availability dates.
+              </Alert>
             )}
 
             <FormControl fullWidth size="small">
-              <InputLabel>Equipment Type</InputLabel>
-              <Select
-                value={form.equipment_type}
-                label="Equipment Type"
-                onChange={setField('equipment_type')}
-              >
-                {EQUIPMENT_OPTIONS.map(o => (
-                  <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+              <InputLabel>Equipment Type *</InputLabel>
+              <Select value={form.equipment_type || ''} label="Equipment Type *" onChange={setField('equipment_type')}>
+                {equipmentTypes.map(t => (
+                  <MenuItem key={t.id} value={t.name}>{t.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label="Trailer Length (ft)"
-                type="number"
-                size="small"
-                fullWidth
-                value={form.trailer_length}
-                onChange={setField('trailer_length')}
-                inputProps={{ min: 0 }}
-              />
-              <TextField
-                label="Weight Capacity (lbs)"
-                type="number"
-                size="small"
-                fullWidth
-                value={form.weight_capacity}
-                onChange={setField('weight_capacity')}
-                inputProps={{ min: 0 }}
-              />
+              <TextField label="Trailer Length (ft)" type="number" size="small" fullWidth value={form.trailer_length} onChange={setField('trailer_length')} inputProps={{ min: 0 }} />
+              <TextField label="Weight Capacity (lbs)" type="number" size="small" fullWidth value={form.weight_capacity} onChange={setField('weight_capacity')} inputProps={{ min: 0 }} />
             </Box>
 
-            <TextField
-              label="Current Location"
+            <AddressAutocomplete
+              label="Current Location *"
               placeholder="e.g. Dallas, TX"
-              size="small"
-              fullWidth
-              required
               value={form.current_location}
-              onChange={setField('current_location')}
+              onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
             />
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label="Preferred Origin (optional)"
-                placeholder="e.g. TX"
-                size="small"
-                fullWidth
-                value={form.preferred_origin}
-                onChange={setField('preferred_origin')}
-              />
-              <TextField
-                label="Preferred Destination (optional)"
-                placeholder="e.g. CA"
-                size="small"
-                fullWidth
-                value={form.preferred_destination}
-                onChange={setField('preferred_destination')}
-              />
+              <TextField label="Preferred Origin (optional)" placeholder="e.g. Texas" size="small" fullWidth value={form.preferred_origin} onChange={setField('preferred_origin')} />
+              <TextField label="Preferred Destination (optional)" placeholder="e.g. California" size="small" fullWidth value={form.preferred_destination} onChange={setField('preferred_destination')} />
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label="Available From"
-                type="date"
-                size="small"
-                fullWidth
-                required
-                value={form.available_from}
-                onChange={setField('available_from')}
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                label="Available To"
-                type="date"
-                size="small"
-                fullWidth
-                required
-                value={form.available_to}
-                onChange={setField('available_to')}
-                InputLabelProps={{ shrink: true }}
-              />
+              <TextField label="Available From *" type="date" size="small" fullWidth required value={form.available_from} onChange={setField('available_from')} InputLabelProps={{ shrink: true }} />
+              <TextField label="Available To *" type="date" size="small" fullWidth required value={form.available_to} onChange={setField('available_to')} InputLabelProps={{ shrink: true }} />
             </Box>
 
-            <TextField
-              label="Rate Expectation ($/mile)"
-              type="number"
-              size="small"
-              fullWidth
-              value={form.rate_expectation}
-              onChange={setField('rate_expectation')}
-              inputProps={{ min: 0, step: 0.01 }}
-              placeholder="Optional"
-            />
+            <TextField label="Rate Expectation ($/mile)" type="number" size="small" fullWidth value={form.rate_expectation} onChange={setField('rate_expectation')} inputProps={{ min: 0, step: 0.01 }} placeholder="Optional" />
 
-            <TextField
-              label="Notes"
-              multiline
-              minRows={3}
-              size="small"
-              fullWidth
-              value={form.notes}
-              onChange={setField('notes')}
-              placeholder="Any additional details about your truck or preferences..."
-            />
+            <TextField label="Notes" multiline minRows={3} size="small" fullWidth value={form.notes} onChange={setField('notes')} placeholder="Any additional details about your truck or preferences..." />
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button onClick={() => setDialogOpen(false)} sx={{ textTransform: 'none' }}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={saving}
-            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: 2 }}
-          >
-            {saving ? 'Saving…' : editPost ? 'Save Changes' : 'Post Truck'}
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirm Dialog */}
+      {/* Delete Confirm */}
       <Dialog open={Boolean(deleteId)} onClose={() => setDeleteId(null)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Delete Truck Posting?</DialogTitle>
+        <DialogTitle fontWeight={700}>Delete Truck Posting?</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
             This will permanently remove this truck posting. Brokers will no longer be able to find it.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button onClick={() => setDeleteId(null)} sx={{ textTransform: 'none' }}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleDelete} sx={{ textTransform: 'none', fontWeight: 700 }}>
-            Delete
-          </Button>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
     </Box>
