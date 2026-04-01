@@ -94,11 +94,11 @@ export default function CarrierDashboard() {
       </Box>
 
       {/* Stats */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={6} sm={6} md={3}>
+      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard icon={AttachMoneyIcon} label="Total Net" value={fmt(summary?.total_net)} sub="All time" color="primary" />
-        </Grid>
-        <Grid item xs={6} sm={6} md={3}>
+        </Box>
+        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard
             icon={TrendingUpIcon}
             label="Avg Rate/Mile"
@@ -106,11 +106,11 @@ export default function CarrierDashboard() {
             sub="All time"
             color="blue"
           />
-        </Grid>
-        <Grid item xs={6} sm={6} md={3}>
+        </Box>
+        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard icon={LocalShippingIcon} label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" color="warning" />
-        </Grid>
-        <Grid item xs={6} sm={6} md={3}>
+        </Box>
+        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard
             icon={LocationOnIcon}
             label="Avg Deadhead"
@@ -118,8 +118,8 @@ export default function CarrierDashboard() {
             sub="Per load"
             color="primary"
           />
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
       {/* Earnings chart + Brain insight */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexDirection: { xs: 'column', md: 'row' } }}>
