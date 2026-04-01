@@ -231,13 +231,15 @@ export default function ManageLoads() {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all');
   const [editingLoad, setEditingLoad] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchLoads = useCallback(() => {
     setLoading(true);
     loadsApi.posted()
       .then(res => {
         const adapted = adaptLoadList(res);
-        setLoads(adapted.map(l => ({ ...l, status: l.status === 'removed' ? 'expired' : l.status })));
+        setLoads(adapted.filter(l => l.status !== 'removed'));
         setError(null);
       })
       .catch(err => setError(err.message))
@@ -246,10 +248,16 @@ export default function ManageLoads() {
 
   useEffect(() => { fetchLoads(); }, [fetchLoads]);
 
-  const handleDelete = (load) => {
-    loadsApi.delete(load._raw.id)
-      .then(() => fetchLoads())
-      .catch(err => alert(err.message));
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    loadsApi.delete(deleteTarget._raw.id)
+      .then(() => {
+        setLoads(prev => prev.filter(l => l._raw.id !== deleteTarget._raw.id));
+        setDeleteTarget(null);
+      })
+      .catch(err => alert(err.message))
+      .finally(() => setDeleting(false));
   };
 
   const filtered = filter === 'all' ? loads : loads.filter(l => l.status === filter);
@@ -367,7 +375,7 @@ export default function ManageLoads() {
                             <EditIcon sx={{ fontSize: 16 }} />
                           </IconButton>
                         )}
-                        <IconButton size="small" onClick={() => handleDelete(load)} color="error">
+                        <IconButton size="small" onClick={() => setDeleteTarget(load)} color="error">
                           <DeleteIcon sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
@@ -387,6 +395,21 @@ export default function ManageLoads() {
           onSaved={fetchLoads}
         />
       )}
+
+      <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
+        <DialogTitle fontWeight={700}>Delete Load?</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary">
+            This will remove the load from the board. Carriers will no longer see it.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={handleDelete} disabled={deleting}>
+            {deleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
