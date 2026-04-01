@@ -44,12 +44,13 @@ export default function UpdateNotifier() {
     <Box
       sx={{
         position: 'fixed',
-        top: 0,
+        top: 16,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 9999,
-        width: { xs: '100%', sm: 480 },
+        width: { xs: 'calc(100% - 32px)', sm: 640 },
         borderTop: '3px solid #f97316',
+        borderRadius: 2,
         bgcolor: 'background.paper',
         boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
         display: 'flex',
