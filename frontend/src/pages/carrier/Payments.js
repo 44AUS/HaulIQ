@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
+  Box, Typography, Card, CardContent, Chip, CircularProgress,
   Alert, Table, TableHead, TableBody, TableRow, TableCell, Button, Skeleton,
 } from '@mui/material';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -74,22 +74,22 @@ export default function CarrierPayments() {
       </Box>
 
       {/* Stats */}
-      <Grid container spacing={2}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         {[
           { label: 'Awaiting Payment', value: fmt(pending),   color: 'warning.main' },
           { label: 'In Escrow',        value: fmt(inEscrow),  color: 'info.main' },
           { label: 'Paid Out',         value: fmt(totalPaid), color: 'success.main' },
         ].map(({ label, value, color }) => (
-          <Grid item xs={12} sm={4} key={label}>
-            <Card variant="outlined">
+          <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Card variant="outlined" sx={{ height: '100%' }}>
               <CardContent sx={{ textAlign: 'center', py: 2 }}>
                 <Typography variant="h5" fontWeight={800} color={color}>{value}</Typography>
                 <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {/* Table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>

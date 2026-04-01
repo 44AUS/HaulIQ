@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Alert, Skeleton,
+  Box, Typography, Card, CardContent, Alert, Skeleton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
 } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -61,7 +61,7 @@ export default function CarrierAnalytics() {
       ) : (
         <>
           {/* KPI cards */}
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
             {[
               { icon: AttachMoneyIcon, label: 'Total Gross', value: fmt(summary?.total_gross) },
               { icon: TrendingUpIcon,  label: 'Total Net',   value: fmt(summary?.total_net) },
@@ -72,8 +72,8 @@ export default function CarrierAnalytics() {
                 value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—',
               },
             ].map(({ icon: Icon, label, value }) => (
-              <Grid item xs={6} md={3} key={label}>
-                <Card>
+              <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
+                <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Box sx={{
                       width: 40, height: 40, borderRadius: 2,
@@ -87,9 +87,9 @@ export default function CarrierAnalytics() {
                     <Typography variant="h4" fontWeight={800}>{value}</Typography>
                   </CardContent>
                 </Card>
-              </Grid>
+              </Box>
             ))}
-          </Grid>
+          </Box>
 
           {/* Net earnings chart */}
           {weeklyData.length > 0 && (

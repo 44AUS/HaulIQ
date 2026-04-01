@@ -212,22 +212,22 @@ export default function CarrierLoadsInProgress() {
       </Box>
 
       {/* Summary stats */}
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {[
           { label: 'In Transit', value: inTransitCount, color: 'success.main' },
           { label: 'Booked', value: bookedCount, color: 'info.main' },
           { label: 'Pending Response', value: quotedCount, color: 'warning.main' },
         ].map(({ label, value, color }) => (
-          <Grid item xs={4} key={label}>
-            <Card>
+          <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
+            <Card sx={{ height: '100%' }}>
               <CardContent sx={{ textAlign: 'center', py: 2, '&:last-child': { pb: 2 } }}>
                 <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
                 <Typography variant="h4" fontWeight={800} sx={{ color }}>{value}</Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       {loading ? (
         <Grid container spacing={3}>
