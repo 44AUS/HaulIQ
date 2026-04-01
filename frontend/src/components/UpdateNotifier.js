@@ -5,16 +5,15 @@ import CloseIcon from '@mui/icons-material/Close';
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 async function fetchVersion() {
-  // asset-manifest.json is generated fresh on every CRA build and contains
-  // content-hashed filenames — much more reliable than parsing index.html.
-  const r = await fetch('/asset-manifest.json', {
+  // HEAD request to index.html — Vercel sets a unique ETag per deployment
+  // and explicitly does NOT CDN-cache index.html, so this is always fresh.
+  const r = await fetch('/', {
+    method: 'HEAD',
     cache: 'no-store',
     headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
   });
   if (!r.ok) return null;
-  const json = await r.json();
-  // "main.js" entry contains the full hashed path, e.g. "/static/js/main.abc123.js"
-  return json?.files?.['main.js'] ?? json?.['main.js'] ?? null;
+  return r.headers.get('etag') || r.headers.get('last-modified') || null;
 }
 
 export default function UpdateNotifier() {
