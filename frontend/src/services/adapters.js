@@ -17,6 +17,12 @@ const PAY_SPEED_LABEL = {
   net_60:    'Net-60',
 };
 
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + (d.includes('T') ? '' : 'T00:00:00'));
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 function timeAgo(iso) {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso)) / 1000;
@@ -65,8 +71,8 @@ export function adaptLoad(l) {
     profitScore:  l.profit_score   || 'yellow',
     commodity:    l.commodity      || '',
     dims:         l.dimensions     || '48x102',
-    pickup:       l.pickup_date    || l.pickup,
-    delivery:     l.delivery_date  || l.delivery,
+    pickup:       fmtDate(l.pickup_date  || l.pickup),
+    delivery:     fmtDate(l.delivery_date || l.delivery),
     hot:          l.is_hot         || false,
     saved:        l.is_saved       || false,
     posted:       timeAgo(l.posted_at),
