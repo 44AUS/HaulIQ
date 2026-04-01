@@ -16,14 +16,18 @@ depends_on = None
 
 
 def upgrade():
-    op.create_table(
-        'equipment_types',
-        sa.Column('id', UUID(as_uuid=True), primary_key=True, server_default=sa.text('gen_random_uuid()')),
-        sa.Column('name', sa.String(100), nullable=False, unique=True),
-        sa.Column('sort_order', sa.Integer(), nullable=False, server_default='0'),
-        sa.Column('is_active', sa.Boolean(), nullable=False, server_default='true'),
-        sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()')),
-    )
+    conn = op.get_bind()
+    conn.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS equipment_types (
+            id UUID DEFAULT gen_random_uuid() NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            is_active BOOLEAN NOT NULL DEFAULT true,
+            created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT now(),
+            PRIMARY KEY (id),
+            UNIQUE (name)
+        )
+    """))
 
 
 def downgrade():
