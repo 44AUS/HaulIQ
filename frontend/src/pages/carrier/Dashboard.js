@@ -123,7 +123,7 @@ export default function CarrierDashboard() {
 
       {/* Earnings chart + Brain insight */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -168,7 +168,7 @@ export default function CarrierDashboard() {
         </Grid>
 
         {/* Brain insight card */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <Card sx={{ height: '100%', border: '1px solid', borderColor: 'primary.dark', display: 'flex', flexDirection: 'column' }}>
             <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
