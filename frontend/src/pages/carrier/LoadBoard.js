@@ -5,6 +5,7 @@ import {
   InputAdornment, IconButton, Chip, Skeleton, Button, Grid, Paper,
   ToggleButtonGroup, ToggleButton, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Avatar, OutlinedInput, Checkbox, ListItemText,
+  useMediaQuery, useTheme,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -164,8 +165,8 @@ function TableView({ loads, equipmentTypes }) {
         <TableBody>
           {loads.map(load => {
             const isSaved = savedIds.has(load.id);
-            const originCity = load.origin?.split(',')[0] || load.origin;
-            const destCity   = load.dest?.split(',')[0]   || load.dest;
+            const originCity = load.origin || '—';
+            const destCity   = load.dest   || '—';
             const abbr = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
             const equipParts = [
               abbr,
@@ -299,7 +300,9 @@ function TableView({ loads, equipmentTypes }) {
 export default function LoadBoard() {
   const [pf, setPF_state] = useState(INIT);          // pending (what user is editing)
   const [appliedFilters, setAppliedFilters] = useState(INIT); // last fetched
-  const [view, setView]     = useState('cards');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [view, setView]     = useState(() => isMobile ? 'cards' : 'table');
   const [loads, setLoads]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -406,7 +409,7 @@ export default function LoadBoard() {
 
         {/* Row 1: Origin + Destination (with deadhead) */}
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={7} md={4}>
+          <Grid item xs={12} sm={7} md={3}>
             <TextField fullWidth size="small" label="Origin City / State"
               placeholder="e.g. Chicago, IL"
               value={pf.origin}
@@ -422,7 +425,7 @@ export default function LoadBoard() {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={5} md={2}>
+          <Grid item xs={12} sm={5} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Deadhead to pickup</InputLabel>
               <Select value={pf.originDeadhead} label="Deadhead to pickup"
@@ -431,7 +434,7 @@ export default function LoadBoard() {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={7} md={4}>
+          <Grid item xs={12} sm={7} md={3}>
             <TextField fullWidth size="small" label="Destination City / State"
               placeholder="e.g. Atlanta, GA"
               value={pf.dest}
@@ -447,7 +450,7 @@ export default function LoadBoard() {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={5} md={2}>
+          <Grid item xs={12} sm={5} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>Deadhead from delivery</InputLabel>
               <Select value={pf.destDeadhead} label="Deadhead from delivery"
