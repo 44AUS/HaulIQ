@@ -14,6 +14,7 @@ router = APIRouter()
 class EquipmentTypeCreate(BaseModel):
     name: str
     abbreviation: Optional[str] = None
+    class_id: Optional[str] = None
     sort_order: int = 0
     is_active: bool = True
 
@@ -21,6 +22,7 @@ class EquipmentTypeCreate(BaseModel):
 class EquipmentTypeUpdate(BaseModel):
     name: Optional[str] = None
     abbreviation: Optional[str] = None
+    class_id: Optional[str] = None
     sort_order: Optional[int] = None
     is_active: Optional[bool] = None
 
@@ -30,6 +32,8 @@ def _serialize(et: EquipmentType) -> dict:
         "id": str(et.id),
         "name": et.name,
         "abbreviation": et.abbreviation,
+        "class_id": str(et.class_id) if et.class_id else None,
+        "class_name": et.equipment_class.name if et.equipment_class else None,
         "sort_order": et.sort_order,
         "is_active": et.is_active,
     }
@@ -74,7 +78,7 @@ def create_equipment_type(
     existing = db.query(EquipmentType).filter(EquipmentType.name == body.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Equipment type with this name already exists")
-    et = EquipmentType(name=body.name, abbreviation=body.abbreviation, sort_order=body.sort_order, is_active=body.is_active)
+    et = EquipmentType(name=body.name, abbreviation=body.abbreviation, class_id=body.class_id or None, sort_order=body.sort_order, is_active=body.is_active)
     db.add(et)
     db.commit()
     db.refresh(et)
@@ -96,6 +100,8 @@ def update_equipment_type(
         et.name = body.name
     if body.abbreviation is not None:
         et.abbreviation = body.abbreviation
+    if body.class_id is not None:
+        et.class_id = body.class_id or None
     if body.sort_order is not None:
         et.sort_order = body.sort_order
     if body.is_active is not None:

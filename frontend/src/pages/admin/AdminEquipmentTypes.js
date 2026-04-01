@@ -2,25 +2,35 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Button, IconButton, Switch, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, Alert, Skeleton, Paper, Tooltip, Chip,
+  FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { equipmentTypesApi } from '../../services/api';
+import { equipmentTypesApi, equipmentClassesApi } from '../../services/api';
 
 function TypeDialog({ open, type, onClose, onSaved }) {
   const editing = Boolean(type?.id);
   const [name, setName] = useState('');
   const [abbreviation, setAbbreviation] = useState('');
+  const [classId, setClassId] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [classes, setClasses] = useState([]);
+
+  useEffect(() => {
+    equipmentClassesApi.adminList()
+      .then(setClasses)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (open) {
       setName(type?.name || '');
       setAbbreviation(type?.abbreviation || '');
+      setClassId(type?.class_id || '');
       setSortOrder(type?.sort_order ?? 0);
       setError(null);
     }
@@ -31,7 +41,7 @@ function TypeDialog({ open, type, onClose, onSaved }) {
     setSaving(true);
     setError(null);
     try {
-      const payload = { name: name.trim(), abbreviation: abbreviation.trim() || null, sort_order: Number(sortOrder) || 0 };
+      const payload = { name: name.trim(), abbreviation: abbreviation.trim() || null, class_id: classId || null, sort_order: Number(sortOrder) || 0 };
       if (editing) {
         await equipmentTypesApi.adminUpdate(type.id, payload);
       } else {
@@ -67,6 +77,19 @@ function TypeDialog({ open, type, onClose, onSaved }) {
             placeholder="e.g. DV"
             inputProps={{ maxLength: 20 }}
           />
+          <FormControl fullWidth size="small">
+            <InputLabel>Equipment Class (optional)</InputLabel>
+            <Select
+              value={classId}
+              label="Equipment Class (optional)"
+              onChange={e => setClassId(e.target.value)}
+            >
+              <MenuItem value=""><em>No class</em></MenuItem>
+              {classes.map(c => (
+                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Sort Order"
             type="number"
@@ -160,6 +183,7 @@ export default function AdminEquipmentTypes() {
             <Box sx={{ display: 'flex', alignItems: 'center', px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Name</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 60, textTransform: 'uppercase', letterSpacing: 0.5 }}>Abbr.</Typography>
+              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 120, textTransform: 'uppercase', letterSpacing: 0.5 }}>Class</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Order</Typography>
               <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Status</Typography>
               <Box sx={{ width: 80 }} />
@@ -179,6 +203,11 @@ export default function AdminEquipmentTypes() {
                   <Typography variant="body2" fontWeight={600}>{type.name}</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ width: 60 }}>{type.abbreviation || '—'}</Typography>
+                <Box sx={{ width: 120 }}>
+                  {type.class_name
+                    ? <Chip label={type.class_name} size="small" color="primary" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
+                    : <Typography variant="caption" color="text.disabled">—</Typography>}
+                </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ width: 80 }}>{type.sort_order}</Typography>
                 <Box sx={{ width: 80 }}>
                   <Chip

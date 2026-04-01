@@ -29,6 +29,7 @@ import {
   MoreVert as MoreVertIcon,
   Layers as LayersIcon,
   LocalShipping as TruckIcon,
+  Category as CategoryIcon,
   Person as PersonIcon,
   Message as MsgIcon,
   Bookmark as SavedIcon,
@@ -72,7 +73,8 @@ const ADMIN_NAV = [
   { icon: PaymentIcon,    label: 'Payments',  path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',  path: '/admin/waitlist' },
   { icon: LayersIcon,     label: 'Plans',     path: '/admin/plans' },
-  { icon: TruckIcon,     label: 'Equipment', path: '/admin/equipment' },
+  { icon: TruckIcon,    label: 'Equipment', path: '/admin/equipment' },
+  { icon: CategoryIcon, label: 'Classes',   path: '/admin/equipment-classes' },
 ];
 
 // ── Single top nav link ───────────────────────────────────────────────────────
