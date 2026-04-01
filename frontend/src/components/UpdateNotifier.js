@@ -50,7 +50,7 @@ export default function UpdateNotifier() {
         zIndex: 9999,
         width: { xs: '100%', sm: 480 },
         borderTop: '3px solid #f97316',
-        bgcolor: '#fff',
+        bgcolor: 'background.paper',
         boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
         display: 'flex',
         alignItems: 'center',
