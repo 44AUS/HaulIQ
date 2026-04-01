@@ -47,7 +47,6 @@ const NOTIF_DRAWER_WIDTH = 360;
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
   { icon: CalendarIcon,  label: 'Calendar',    path: '/carrier/calendar' },
-  { icon: DashboardIcon, label: 'Dashboard',   path: '/carrier/dashboard' },
   { icon: SearchIcon,    label: 'Load Board',  path: '/carrier/loads' },
   { icon: ActivityIcon,  label: 'In Progress', path: '/carrier/active' },
   { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
@@ -56,7 +55,6 @@ const CARRIER_NAV = [
 
 const BROKER_NAV = [
   { icon: CalendarIcon,  label: 'Calendar',    path: '/broker/calendar' },
-  { icon: DashboardIcon, label: 'Dashboard',   path: '/broker/dashboard' },
   { icon: AddIcon,       label: 'Post Load',   path: '/broker/post' },
   { icon: PackageIcon,   label: 'Loads',       path: '/broker/loads' },
   { icon: EventIcon,     label: 'Bookings',    path: '/broker/bookings' },
