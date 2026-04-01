@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, asc
 from typing import Optional
 from uuid import UUID
+from datetime import date
 
 from app.database import get_db
 from app.models.load import Load, SavedLoad, LoadView, LoadStatus, ProfitScore
@@ -86,6 +87,16 @@ def list_loads(
     max_deadhead:  Optional[int]        = Query(None),
     origin_state:  Optional[str]        = Query(None),
     dest_state:    Optional[str]        = Query(None),
+    origin:             Optional[str]        = Query(None),
+    dest:               Optional[str]        = Query(None),
+    max_origin_deadhead: Optional[int]       = Query(None),
+    load_types:         Optional[str]        = Query(None),
+    load_size:          Optional[str]        = Query(None),
+    min_weight:         Optional[int]        = Query(None),
+    max_weight:         Optional[int]        = Query(None),
+    max_length:         Optional[int]        = Query(None),
+    pickup_date_from:   Optional[date]       = Query(None),
+    pickup_date_to:     Optional[date]       = Query(None),
     sort_by:       str                  = Query("profit"),
     page:          int                  = Query(1, ge=1),
     per_page:      int                  = Query(20, ge=1, le=100),
@@ -111,6 +122,19 @@ def list_loads(
     if max_deadhead: q = q.filter(Load.deadhead_miles <= max_deadhead)
     if origin_state: q = q.filter(Load.origin_state == origin_state.upper())
     if dest_state:   q = q.filter(Load.dest_state   == dest_state.upper())
+
+    if origin:              q = q.filter(Load.origin.ilike(f'%{origin}%'))
+    if dest:                q = q.filter(Load.destination.ilike(f'%{dest}%'))
+    if max_origin_deadhead is not None: q = q.filter(Load.deadhead_miles <= max_origin_deadhead)
+    if load_types:
+        type_list = [t.strip() for t in load_types.split(',') if t.strip()]
+        if type_list: q = q.filter(Load.load_type.in_(type_list))
+    if load_size:           q = q.filter(Load.load_size == load_size)
+    if min_weight:          q = q.filter(Load.weight_lbs >= min_weight)
+    if max_weight:          q = q.filter(Load.weight_lbs <= max_weight)
+    if max_length:          q = q.filter(Load.trailer_length_ft <= max_length)
+    if pickup_date_from:    q = q.filter(Load.pickup_date >= pickup_date_from)
+    if pickup_date_to:      q = q.filter(Load.pickup_date <= pickup_date_to)
 
     total = q.count()
 

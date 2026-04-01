@@ -2,7 +2,7 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from uuid import UUID
 from datetime import date, datetime
-from app.models.load import LoadType, ProfitScore, LoadStatus
+from app.models.load import LoadType, LoadSize, ProfitScore, LoadStatus
 from app.schemas.broker import BrokerOut
 
 
@@ -14,6 +14,8 @@ class LoadCreate(BaseModel):
     miles: int
     deadhead_miles: int = 0
     load_type: LoadType = LoadType.dry_van
+    load_size: LoadSize = LoadSize.full
+    trailer_length_ft: Optional[int] = None
     weight_lbs: Optional[int] = None
     commodity: Optional[str] = None
     dimensions: Optional[str] = "48x102"
@@ -51,6 +53,8 @@ class LoadUpdate(BaseModel):
     miles: Optional[int] = None
     deadhead_miles: Optional[int] = None
     load_type: Optional[LoadType] = None
+    load_size: Optional[LoadSize] = None
+    trailer_length_ft: Optional[int] = None
     weight_lbs: Optional[int] = None
     commodity: Optional[str] = None
     dimensions: Optional[str] = None
@@ -77,6 +81,8 @@ class LoadOut(BaseModel):
     miles: int
     deadhead_miles: int
     load_type: LoadType
+    load_size: Optional[LoadSize] = None
+    trailer_length_ft: Optional[int] = None
     weight_lbs: Optional[int]
     commodity: Optional[str]
     dimensions: Optional[str]

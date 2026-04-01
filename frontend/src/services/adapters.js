@@ -72,6 +72,8 @@ export function adaptLoad(l) {
     posted:       timeAgo(l.posted_at),
     status:       l.status         || 'available',
     instantBook:  l.instant_book   || false,
+    loadSize:     l.load_size     || 'full',
+    trailerLength: l.trailer_length_ft || null,
     bookNow:      l.book_now !== false,
     notes:        l.notes          || '',
     viewCount:    l.view_count     || 0,

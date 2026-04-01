@@ -17,6 +17,11 @@ class LoadType(str, enum.Enum):
     box_truck = "Box Truck"
 
 
+class LoadSize(str, enum.Enum):
+    full    = "full"
+    partial = "partial"
+
+
 class ProfitScore(str, enum.Enum):
     green  = "green"
     yellow = "yellow"
@@ -28,6 +33,11 @@ class LoadStatus(str, enum.Enum):
     filled  = "filled"
     expired = "expired"
     removed = "removed"
+
+
+class LoadSize(str, enum.Enum):
+    full    = "full"
+    partial = "partial"
 
 
 class Load(Base):
@@ -55,6 +65,8 @@ class Load(Base):
 
     # Load details
     load_type        = Column(SAEnum(LoadType), nullable=False, default=LoadType.dry_van)
+    load_size        = Column(SAEnum(LoadSize), nullable=True, default=LoadSize.full)
+    trailer_length_ft = Column(Integer, nullable=True)
     weight_lbs       = Column(Integer, nullable=True)
     commodity        = Column(String(255), nullable=True)
     dimensions       = Column(String(50), nullable=True)      # e.g. "48x102"

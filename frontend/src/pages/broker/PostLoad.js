@@ -35,6 +35,7 @@ export default function PostLoad() {
     // Rest of form
     pickup: '', delivery: '',
     equipment: 'Dry Van', weight: '', dims: '48x102',
+    loadSize: 'full', trailerLength: '',
     commodity: '', rate: '', miles: '', deadhead: '', notes: '',
     instantBook: false,
   });
@@ -111,7 +112,9 @@ export default function PostLoad() {
       pickup_lng:       form.pickupLng || null,
       delivery_lat:     form.deliveryLat || null,
       delivery_lng:     form.deliveryLng || null,
-      instant_book:     form.instantBook,
+      instant_book:      form.instantBook,
+      load_size:         form.loadSize,
+      trailer_length_ft: form.trailerLength ? parseInt(form.trailerLength) : null,
     })
       .then(() => setPosted(true))
       .catch(err => { setError(err.message); setSubmitting(false); });
@@ -131,6 +134,7 @@ export default function PostLoad() {
             originCity: '', destCity: '', pickupAddress: '', deliveryAddress: '',
             pickupLat: null, pickupLng: null, deliveryLat: null, deliveryLng: null,
             pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102',
+            loadSize: 'full', trailerLength: '',
             commodity: '', rate: '', miles: '', deadhead: '', notes: '',
             instantBook: false,
           });
@@ -235,6 +239,26 @@ export default function PostLoad() {
             <Grid item xs={12} sm={6}>
               <TextField fullWidth size="small" label="Weight (lbs)" type="number"
                 value={form.weight} onChange={e => set('weight', e.target.value)} placeholder="42000" />
+            </Grid>
+          </Grid>
+
+          {/* Load Size + Trailer Length */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Load Size</InputLabel>
+                <Select value={form.loadSize} label="Load Size" onChange={e => set('loadSize', e.target.value)}>
+                  <MenuItem value="full">Full Truckload (FTL)</MenuItem>
+                  <MenuItem value="partial">Partial Truckload (LTL)</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField fullWidth size="small" label="Trailer Length (ft)" type="number"
+                value={form.trailerLength} onChange={e => set('trailerLength', e.target.value)}
+                placeholder="53"
+                InputProps={{ endAdornment: <InputAdornment position="end">ft</InputAdornment> }}
+              />
             </Grid>
           </Grid>
 
