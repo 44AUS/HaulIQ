@@ -25,6 +25,7 @@ import CarrierLoadsInProgress from './pages/carrier/LoadsInProgress';
 import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
 import PlaceBid from './pages/carrier/PlaceBid';
 import CarrierPayments from './pages/carrier/Payments';
+import Equipment from './pages/carrier/Equipment';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
@@ -35,6 +36,7 @@ import BrokerAnalytics from './pages/broker/BrokerAnalytics';
 import BookingRequests from './pages/broker/BookingRequests';
 import InstantBookSettings from './pages/broker/InstantBookSettings';
 import BrokerLoadsInProgress from './pages/broker/LoadsInProgress';
+import TruckBoard from './pages/broker/TruckBoard';
 import TrackLoad from './pages/broker/TrackLoad';
 import BrokerLoadDetail from './pages/broker/LoadDetail';
 
@@ -120,6 +122,7 @@ function CarrierRoutes() {
           <Route path="loads/:id/bid" element={<PlaceBid />} />
           <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
+          <Route path="equipment" element={<Equipment />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
@@ -149,6 +152,7 @@ function BrokerRoutes() {
           <Route path="instant-book" element={<InstantBookSettings />} />
           <Route path="payments" element={<BrokerPayments />} />
           <Route path="active" element={<BrokerLoadsInProgress />} />
+          <Route path="trucks" element={<TruckBoard />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="track/:bookingId" element={<TrackLoad />} />
           <Route path="network" element={<Network />} />

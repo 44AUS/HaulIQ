@@ -16,7 +16,7 @@ import { useAuth } from '../../context/AuthContext';
 const CARRIER_CARDS = [
   { icon: PaletteIcon,           title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',        path: '/preferences/branding' },
   { icon: NotificationsIcon,     title: 'Notifications',  desc: 'Control which email and push alerts you receive.',               path: null },
-  { icon: LocalShippingIcon,     title: 'Equipment',      desc: 'Add and manage your trucks, trailers, and load capacity.',       path: null },
+  { icon: LocalShippingIcon,     title: 'Equipment',      desc: 'Add and manage your trucks, trailers, and load capacity.',       path: '/carrier/equipment' },
   { icon: DescriptionIcon,       title: 'Documents',      desc: 'Upload your CDL, MC authority, insurance, and more.',            path: null },
   { icon: CreditCardIcon,        title: 'Billing',        desc: 'Manage your subscription plan and payment method.',              path: null },
   { icon: PrivacyTipIcon,        title: 'Privacy',        desc: 'Control your data sharing and profile visibility.',             path: null },

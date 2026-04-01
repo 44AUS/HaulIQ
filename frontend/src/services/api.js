@@ -196,6 +196,15 @@ export const calendarApi = {
   events: () => request('/api/calendar/events'),
 };
 
+// ─── Truck Posts ───────────────────────────────────────────────────────────────
+export const truckPostsApi = {
+  list:   (params = {}) => request('/api/truck-posts?' + new URLSearchParams(params)),
+  mine:   ()            => request('/api/truck-posts/mine'),
+  create: (data)        => request('/api/truck-posts', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data)    => request(`/api/truck-posts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id)          => request(`/api/truck-posts/${id}`, { method: 'DELETE' }),
+};
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export const adminApi = {
   stats:      ()              => request('/api/admin/stats'),
@@ -210,5 +219,5 @@ export const adminApi = {
   updatePlan: (id, params)    => request(`/api/admin/plans/${id}?${new URLSearchParams(params)}`, { method: 'PATCH' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi };
 export default api;

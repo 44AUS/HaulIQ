@@ -6,8 +6,9 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
+from app.models import truck_post as _truck_post_model  # noqa: ensure table is registered
 from app.models import network as _network_model  # noqa: ensure table is registered
 from app.models import waitlist as _waitlist_model  # noqa: ensure table is registered
 from app.models import location as _location_model  # noqa: ensure table is registered
@@ -111,6 +112,7 @@ app.include_router(my_documents.router,    prefix="/api/documents",         tags
 app.include_router(freight_payments.router, prefix="/api/freight-payments", tags=["Freight Payments"])
 app.include_router(search.router,           prefix="/api/search",           tags=["Search"])
 app.include_router(calendar.router,         prefix="/api/calendar",         tags=["Calendar"])
+app.include_router(truck_posts.router,      prefix="/api/truck-posts",      tags=["Truck Posts"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

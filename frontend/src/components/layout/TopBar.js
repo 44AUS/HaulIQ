@@ -51,6 +51,7 @@ const CARRIER_NAV = [
   { icon: ActivityIcon,  label: 'In Progress', path: '/carrier/active' },
   { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
   { icon: TrendingUpIcon,label: 'Analytics',   path: '/carrier/analytics' },
+  { icon: TruckIcon,     label: 'My Trucks',   path: '/carrier/equipment' },
 ];
 
 const BROKER_NAV = [
@@ -60,6 +61,7 @@ const BROKER_NAV = [
   { icon: EventIcon,     label: 'Bookings',    path: '/broker/bookings' },
   { icon: PaymentIcon,   label: 'Payments',    path: '/broker/payments' },
   { icon: BarChartIcon,  label: 'Analytics',   path: '/broker/analytics' },
+  { icon: TruckIcon,     label: 'Trucks',      path: '/broker/trucks' },
 ];
 
 const ADMIN_NAV = [
