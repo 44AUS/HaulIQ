@@ -157,6 +157,7 @@ function TableView({ loads, equipmentTypes }) {
             <TH>DH-O</TH>
             <TH>Delivery</TH>
             <TH>Equipment</TH>
+            <TH>Net Profit</TH>
             <TH></TH>
           </TableRow>
         </TableHead>
@@ -263,6 +264,18 @@ function TableView({ loads, equipmentTypes }) {
                   <Typography variant="caption" fontWeight={700} noWrap display="block">{abbr}</Typography>
                   <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: '0.6rem' }}>
                     {equipParts.slice(1).join(' · ')}
+                  </Typography>
+                </TableCell>
+
+                {/* Net Profit */}
+                <TableCell>
+                  <Typography variant="body2" fontWeight={700} noWrap
+                    color={
+                      load.profitScore === 'green' ? 'success.main'
+                      : load.profitScore === 'red' ? 'error.main'
+                      : 'warning.main'
+                    }>
+                    ${load.netProfit?.toLocaleString()}
                   </Typography>
                 </TableCell>
 
