@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid,
+  Box, Typography, Card, CardContent,
   Table, TableHead, TableBody, TableRow, TableCell,
   LinearProgress, Skeleton,
 } from '@mui/material';
@@ -47,23 +47,25 @@ export default function AdminRevenue() {
       </Box>
 
       {/* KPIs */}
-      <Grid container spacing={2}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+        gap: 2,
+      }}>
         {[
-          { label: 'Monthly MRR',   value: `$${(total_mrr / 1000).toFixed(1)}K` },
-          { label: 'ARR (projected)', value: `$${(arr / 1000).toFixed(1)}K` },
+          { label: 'Monthly MRR',        value: `$${(total_mrr / 1000).toFixed(1)}K` },
+          { label: 'ARR (projected)',     value: `$${(arr / 1000).toFixed(1)}K` },
           { label: 'Active Subscribers', value: totalSubs.toLocaleString() },
-          { label: 'Avg Rev / Sub', value: totalSubs > 0 ? `$${(total_mrr / totalSubs).toFixed(2)}` : '—' },
+          { label: 'Avg Rev / Sub',      value: totalSubs > 0 ? `$${(total_mrr / totalSubs).toFixed(2)}` : '—' },
         ].map(({ label, value }) => (
-          <Grid item xs={6} sm={3} key={label}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="body2" color="text.secondary" mb={0.5}>{label}</Typography>
-                <Typography variant="h4" fontWeight={800}>{value}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={label}>
+            <CardContent>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>{label}</Typography>
+              <Typography variant="h4" fontWeight={800}>{value}</Typography>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
       {/* Revenue by plan table */}
       <Card variant="outlined" sx={{ overflow: 'hidden' }}>

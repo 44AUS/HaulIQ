@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, Skeleton, LinearProgress,
+  Box, Typography, Card, CardContent, Chip, Skeleton, LinearProgress,
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';
@@ -46,23 +46,21 @@ export default function AdminOverview() {
           </Card>
         ))}
       </Box>
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
         {[1, 2].map(i => (
-          <Grid item xs={12} md={6} key={i}>
-            <Card variant="outlined">
-              <CardContent sx={{ p: 3 }}>
-                <Skeleton variant="text" width={220} height={24} sx={{ mb: 2.5 }} />
-                {[1, 2, 3].map(j => (
-                  <Box key={j} sx={{ mb: 2 }}>
-                    <Skeleton variant="text" width="60%" height={16} sx={{ mb: 0.75 }} />
-                    <Skeleton variant="rounded" height={8} sx={{ borderRadius: 4 }} />
-                  </Box>
-                ))}
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={i}>
+            <CardContent sx={{ p: 3 }}>
+              <Skeleton variant="text" width={220} height={24} sx={{ mb: 2.5 }} />
+              {[1, 2, 3].map(j => (
+                <Box key={j} sx={{ mb: 2 }}>
+                  <Skeleton variant="text" width="60%" height={16} sx={{ mb: 0.75 }} />
+                  <Skeleton variant="rounded" height={8} sx={{ borderRadius: 4 }} />
+                </Box>
+              ))}
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 
@@ -121,43 +119,41 @@ export default function AdminOverview() {
       </Box>
 
       {/* Plan distributions */}
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
         {[
           { title: 'Carrier Plan Distribution', data: stats.carrier_plan_distribution },
           { title: 'Broker Plan Distribution',  data: stats.broker_plan_distribution  },
         ].map(({ title, data }) => (
-          <Grid item xs={12} md={6} key={title}>
-            <Card variant="outlined">
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="subtitle1" fontWeight={700} mb={2.5}>{title}</Typography>
-                {(!data || data.length === 0) ? (
-                  <Typography variant="body2" color="text.disabled">No data yet</Typography>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {data.map(d => (
-                      <Box key={d.plan}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
-                          <Typography variant="body2" sx={{ textTransform: 'capitalize', fontWeight: 600 }}>{d.plan}</Typography>
-                          <Typography variant="body2" color="text.secondary">{d.count} users · {d.pct}%</Typography>
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={d.pct}
-                          sx={{
-                            height: 8, borderRadius: 4,
-                            bgcolor: 'action.hover',
-                            '& .MuiLinearProgress-bar': { bgcolor: PLAN_COLORS[d.plan] || 'primary.main', borderRadius: 4 },
-                          }}
-                        />
+          <Card variant="outlined" key={title}>
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="subtitle1" fontWeight={700} mb={2.5}>{title}</Typography>
+              {(!data || data.length === 0) ? (
+                <Typography variant="body2" color="text.disabled">No data yet</Typography>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {data.map(d => (
+                    <Box key={d.plan}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
+                        <Typography variant="body2" sx={{ textTransform: 'capitalize', fontWeight: 600 }}>{d.plan}</Typography>
+                        <Typography variant="body2" color="text.secondary">{d.count} users · {d.pct}%</Typography>
                       </Box>
-                    ))}
-                  </Box>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+                      <LinearProgress
+                        variant="determinate"
+                        value={d.pct}
+                        sx={{
+                          height: 8, borderRadius: 4,
+                          bgcolor: 'action.hover',
+                          '& .MuiLinearProgress-bar': { bgcolor: PLAN_COLORS[d.plan] || 'primary.main', borderRadius: 4 },
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 }
