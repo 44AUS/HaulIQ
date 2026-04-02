@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, Button,
+  Box, Typography, Card, CardContent, Chip, Button,
   Table, TableHead, TableBody, TableRow, TableCell,
   IconButton, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
@@ -112,22 +112,24 @@ export default function AdminWaitlist() {
       </Box>
 
       {/* Stats */}
-      <Grid container spacing={2}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 2,
+      }}>
         {[
-          { label: 'Total',    value: entries.length,  color: 'text.primary' },
-          { label: 'Carriers', value: carrierCount,    color: 'primary.main' },
-          { label: 'Brokers',  value: brokerCount,     color: 'info.main' },
+          { label: 'Total',    value: entries.length, color: 'text.primary' },
+          { label: 'Carriers', value: carrierCount,   color: 'primary.main' },
+          { label: 'Brokers',  value: brokerCount,    color: 'info.main' },
         ].map(({ label, value, color }) => (
-          <Grid item xs={4} key={label}>
-            <Card variant="outlined">
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h4" fontWeight={800} color={color}>{value}</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={label}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Typography variant="h4" fontWeight={800} color={color}>{value}</Typography>
+              <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
       {/* Filter buttons */}
       <Box sx={{ display: 'flex', gap: 1 }}>

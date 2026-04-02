@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  Box, Typography, Card, CardContent, Grid, Chip, CircularProgress,
+  Box, Typography, Card, CardContent, Chip, CircularProgress,
   Alert, Table, TableHead, TableBody, TableRow, TableCell, Button,
   TextField, MenuItem, Skeleton,
 } from '@mui/material';
@@ -78,23 +78,25 @@ export default function AdminPayments() {
       </Box>
 
       {/* Stats */}
-      <Grid container spacing={2}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+        gap: 2,
+      }}>
         {[
-          { label: 'Total Volume',    value: fmt(totalVolume),   color: 'text.primary' },
-          { label: 'In Escrow',       value: fmt(inEscrow),      color: 'info.main' },
-          { label: 'Released',        value: fmt(totalReleased), color: 'success.main' },
-          { label: 'Platform Revenue',value: fmt(totalFees),     color: 'primary.main' },
+          { label: 'Total Volume',     value: fmt(totalVolume),   color: 'text.primary' },
+          { label: 'In Escrow',        value: fmt(inEscrow),      color: 'info.main' },
+          { label: 'Released',         value: fmt(totalReleased), color: 'success.main' },
+          { label: 'Platform Revenue', value: fmt(totalFees),     color: 'primary.main' },
         ].map(({ label, value, color }) => (
-          <Grid item xs={6} sm={3} key={label}>
-            <Card variant="outlined">
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h6" fontWeight={800} color={color}>{value}</Typography>
-                <Typography variant="caption" color="text.secondary">{label}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={label}>
+            <CardContent sx={{ textAlign: 'center', py: 2 }}>
+              <Typography variant="h6" fontWeight={800} color={color}>{value}</Typography>
+              <Typography variant="caption" color="text.secondary">{label}</Typography>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
       {/* Filter */}
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
