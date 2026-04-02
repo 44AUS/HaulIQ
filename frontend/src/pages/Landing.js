@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useJsApiLoader, Autocomplete as GAutocomplete } from '@react-google-maps/api';
 import {
   Brain, TrendingUp, Zap, ArrowRight,
@@ -859,13 +860,15 @@ function Footer() {
             <span style={{ color: '#484f58', fontSize: 13 }}>© 2026 HaulIQ, Inc. All rights reserved.</span>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
-            {['Sitemap', 'Privacy Policy', 'Terms of Service'].map(l => (
-              // eslint-disable-next-line jsx-a11y/anchor-is-valid
-              <a key={l} href="#"
+            {[
+              { label: 'Privacy Policy',   to: '/privacy' },
+              { label: 'Terms of Service', to: '/terms'   },
+            ].map(({ label, to }) => (
+              <Link key={label} to={to}
                 style={{ color: '#484f58', fontSize: 13, textDecoration: 'underline', textUnderlineOffset: 3, transition: 'color 0.2s' }}
                 onMouseEnter={e => e.target.style.color = '#8b949e'}
                 onMouseLeave={e => e.target.style.color = '#484f58'}
-              >{l}</a>
+              >{label}</Link>
             ))}
           </div>
         </div>

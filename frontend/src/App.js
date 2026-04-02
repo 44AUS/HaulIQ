@@ -10,6 +10,8 @@ import UpdateNotifier from './components/UpdateNotifier';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Checkout from './pages/Checkout';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import ManageSubscription from './pages/shared/ManageSubscription';
 
 // Pages — Carrier
@@ -196,6 +198,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route path="/checkout" element={<Checkout />} />
