@@ -80,6 +80,7 @@ const ADMIN_LINKS = [
   { icon: MoneyIcon,      label: 'Revenue',           path: '/admin/revenue' },
   { icon: PaymentIcon,    label: 'Payments',          path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',          path: '/admin/waitlist' },
+  { icon: ChatIcon,       label: 'Contact Messages',  path: '/admin/contacts' },
 ];
 
 function NavItem({ item, badgeCount, active, onClick }) {

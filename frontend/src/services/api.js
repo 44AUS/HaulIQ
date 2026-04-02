@@ -150,6 +150,13 @@ export const networkApi = {
   suggestions: ()                => request('/api/network/suggestions'),
 };
 
+export const contactApi = {
+  submit:   (data) => request('/api/contact/', { method: 'POST', body: JSON.stringify(data) }),
+  list:     ()     => request('/api/contact/'),
+  markRead: (id)   => request(`/api/contact/${id}/read`, { method: 'PATCH' }),
+  remove:   (id)   => request(`/api/contact/${id}`, { method: 'DELETE' }),
+};
+
 export const waitlistApi = {
   join:     (data) => request('/api/waitlist/', { method: 'POST', body: JSON.stringify(data) }),
   list:     ()     => request('/api/waitlist/'),

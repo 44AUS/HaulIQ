@@ -787,7 +787,12 @@ function Footer() {
     },
     {
       title: 'COMPANY',
-      links: ['About Us', 'Contact Us', 'Careers', 'Blog'],
+      links: [
+        { label: 'Contact Us', to: '/contact' },
+        { label: 'Careers',    to: '/careers' },
+        { label: 'Privacy Policy',   to: '/privacy' },
+        { label: 'Terms of Service', to: '/terms' },
+      ],
     },
   ];
 
@@ -813,15 +818,26 @@ function Footer() {
                 {title}
               </h4>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {links.map(l => (
-                  <li key={l}>
-                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                    <a href="#" style={{ color: '#8b949e', fontSize: 14, textDecoration: 'none', transition: 'color 0.2s' }}
-                      onMouseEnter={e => e.target.style.color = '#e6edf3'}
-                      onMouseLeave={e => e.target.style.color = '#8b949e'}
-                    >{l}</a>
-                  </li>
-                ))}
+                {links.map(l => {
+                  const label = typeof l === 'string' ? l : l.label;
+                  const to    = typeof l === 'object' ? l.to : null;
+                  return (
+                    <li key={label}>
+                      {to ? (
+                        <Link to={to} style={{ color: '#8b949e', fontSize: 14, textDecoration: 'none', transition: 'color 0.2s' }}
+                          onMouseEnter={e => e.currentTarget.style.color = '#e6edf3'}
+                          onMouseLeave={e => e.currentTarget.style.color = '#8b949e'}
+                        >{label}</Link>
+                      ) : (
+                        // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                        <a href="#" style={{ color: '#8b949e', fontSize: 14, textDecoration: 'none', transition: 'color 0.2s' }}
+                          onMouseEnter={e => e.target.style.color = '#e6edf3'}
+                          onMouseLeave={e => e.target.style.color = '#8b949e'}
+                        >{label}</a>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

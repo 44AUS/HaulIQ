@@ -12,6 +12,8 @@ import Login from './pages/Login';
 import Checkout from './pages/Checkout';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Contact from './pages/Contact';
+import Careers from './pages/Careers';
 import ManageSubscription from './pages/shared/ManageSubscription';
 
 // Pages — Carrier
@@ -64,6 +66,7 @@ import AdminLoads from './pages/admin/AdminLoads';
 import AdminWaitlist from './pages/admin/AdminWaitlist';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminPlans from './pages/admin/AdminPlans';
+import AdminContacts from './pages/admin/AdminContacts';
 import AdminEquipmentTypes from './pages/admin/AdminEquipmentTypes';
 import AdminEquipmentClasses from './pages/admin/AdminEquipmentClasses';
 
@@ -186,6 +189,7 @@ function AdminRoutes() {
           <Route path="plans" element={<AdminPlans />} />
           <Route path="equipment" element={<AdminEquipmentTypes />} />
           <Route path="equipment-classes" element={<AdminEquipmentClasses />} />
+          <Route path="contacts" element={<AdminContacts />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </DashboardLayout>
@@ -200,6 +204,8 @@ function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/careers" element={<Careers />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<Navigate to="/" replace />} />
       <Route path="/checkout" element={<Checkout />} />
