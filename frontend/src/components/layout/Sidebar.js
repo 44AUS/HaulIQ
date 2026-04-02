@@ -77,7 +77,6 @@ const ADMIN_LINKS = [
   { icon: DashboardIcon,  label: 'Overview',          path: '/admin' },
   { icon: UsersIcon,      label: 'Users',             path: '/admin/users' },
   { icon: PackageIcon,    label: 'Load Moderation',   path: '/admin/loads' },
-  { icon: CreditCardIcon, label: 'Subscriptions',     path: '/admin/subscriptions' },
   { icon: MoneyIcon,      label: 'Revenue',           path: '/admin/revenue' },
   { icon: PaymentIcon,    label: 'Payments',          path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',          path: '/admin/waitlist' },
