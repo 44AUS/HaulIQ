@@ -31,19 +31,21 @@ export default function AdminOverview() {
         <Skeleton variant="text" width={220} height={36} />
         <Skeleton variant="text" width={300} height={20} />
       </Box>
-      <Grid container spacing={2}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gap: 2,
+      }}>
         {[...Array(8)].map((_, i) => (
-          <Grid item xs={6} sm={4} lg={3} key={i}>
-            <Card variant="outlined">
-              <CardContent sx={{ py: 2 }}>
-                <Skeleton variant="rounded" width={34} height={34} sx={{ mb: 1.5, borderRadius: 1.5 }} />
-                <Skeleton variant="text" width="65%" height={16} />
-                <Skeleton variant="text" width="50%" height={40} />
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={i}>
+            <CardContent sx={{ py: 2 }}>
+              <Skeleton variant="rounded" width={34} height={34} sx={{ mb: 1.5, borderRadius: 1.5 }} />
+              <Skeleton variant="text" width="65%" height={16} />
+              <Skeleton variant="text" width="50%" height={40} />
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
       <Grid container spacing={3}>
         {[1, 2].map(i => (
           <Grid item xs={12} md={6} key={i}>
@@ -95,26 +97,28 @@ export default function AdminOverview() {
         <Chip label="All systems operational" color="success" size="small" />
       </Box>
 
-      {/* KPI grid */}
-      <Grid container spacing={2}>
+      {/* KPI grid — 4 columns */}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gap: 2,
+      }}>
         {kpis.map(({ Icon, label, value, color }) => (
-          <Grid item xs={6} sm={4} lg={3} key={label}>
-            <Card variant="outlined">
-              <CardContent sx={{ py: 2 }}>
-                <Box sx={{
-                  width: 34, height: 34, borderRadius: 1.5, mb: 1.5,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  bgcolor: `${color}.main`,
-                }}>
-                  <Icon sx={{ fontSize: 18, color: '#fff' }} />
-                </Box>
-                <Typography variant="body2" color="text.secondary" mb={0.25}>{label}</Typography>
-                <Typography variant="h4" fontWeight={800}>{value}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card variant="outlined" key={label}>
+            <CardContent sx={{ py: 2 }}>
+              <Box sx={{
+                width: 34, height: 34, borderRadius: 1.5, mb: 1.5,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                bgcolor: `${color}.main`,
+              }}>
+                <Icon sx={{ fontSize: 18, color: '#fff' }} />
+              </Box>
+              <Typography variant="body2" color="text.secondary" mb={0.25}>{label}</Typography>
+              <Typography variant="h4" fontWeight={800}>{value}</Typography>
+            </CardContent>
+          </Card>
         ))}
-      </Grid>
+      </Box>
 
       {/* Plan distributions */}
       <Grid container spacing={3}>

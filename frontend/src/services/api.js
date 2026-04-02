@@ -217,6 +217,7 @@ export const adminApi = {
   suspend:    (id)            => request(`/api/admin/users/${id}/suspend`, { method: 'PATCH' }),
   activate:   (id)            => request(`/api/admin/users/${id}/activate`, { method: 'PATCH' }),
   setPlan:    (id, plan)      => request(`/api/admin/users/${id}/plan?plan=${plan}`, { method: 'PATCH' }),
+  deleteUser: (id)            => request(`/api/admin/users/${id}`, { method: 'DELETE' }),
   loads:      (params = {})  => request('/api/admin/loads?' + new URLSearchParams(params)),
   removeLoad: (id)            => request(`/api/admin/loads/${id}`, { method: 'DELETE' }),
   revenue:    ()              => request('/api/admin/revenue'),

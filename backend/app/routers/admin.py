@@ -133,6 +133,23 @@ def activate_user(
     return {"ok": True}
 
 
+@router.delete("/users/{user_id}", status_code=204, summary="Permanently delete a user account")
+def delete_user(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(require_admin),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.role == UserRole.admin:
+        raise HTTPException(status_code=400, detail="Cannot delete an admin account")
+    if str(user.id) == str(current_admin.id):
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    db.delete(user)
+    db.commit()
+
+
 @router.patch("/users/{user_id}/plan", summary="Override a user's subscription plan")
 def override_plan(
     user_id: UUID,

@@ -11,6 +11,7 @@ import PersonOffIcon from '@mui/icons-material/PersonOff';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { adminApi } from '../../services/api';
 
 const PLANS = ['basic', 'pro', 'elite', 'admin'];
@@ -58,9 +59,11 @@ function PlanDialog({ user, onClose, onSaved }) {
   );
 }
 
-function UserDetailDialog({ user, onClose, onUpdate }) {
+function UserDetailDialog({ user, onClose, onUpdate, onDeleted }) {
   const [planOpen, setPlanOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [actioning, setActioning] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function toggleSuspend() {
     setActioning(true);
@@ -76,6 +79,18 @@ function UserDetailDialog({ user, onClose, onUpdate }) {
       alert(e.message);
     } finally {
       setActioning(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await adminApi.deleteUser(user.id);
+      onDeleted(user.id);
+      onClose();
+    } catch (e) {
+      alert(e.message);
+      setDeleting(false);
     }
   }
 
@@ -116,7 +131,7 @@ function UserDetailDialog({ user, onClose, onUpdate }) {
             ))}
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1, flexWrap: 'wrap' }}>
           <Button variant="outlined" fullWidth onClick={() => setPlanOpen(true)}>Change Plan</Button>
           <Button
             variant="contained"
@@ -127,8 +142,36 @@ function UserDetailDialog({ user, onClose, onUpdate }) {
           >
             {actioning ? '…' : user.is_active ? 'Suspend' : 'Reactivate'}
           </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            startIcon={<DeleteOutlineIcon />}
+            onClick={() => setConfirmDelete(true)}
+          >
+            Delete User
+          </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Delete confirmation */}
+      {confirmDelete && (
+        <Dialog open onClose={() => setConfirmDelete(false)} maxWidth="xs" fullWidth>
+          <DialogTitle>Delete User?</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2">
+              Permanently delete <strong>{user.name}</strong> ({user.email})? This cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+            <Button variant="outlined" fullWidth onClick={() => setConfirmDelete(false)}>Cancel</Button>
+            <Button variant="contained" color="error" fullWidth onClick={handleDelete} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
       {planOpen && (
         <PlanDialog
           user={user}
@@ -173,6 +216,11 @@ export default function AdminUsers() {
   function updateUser(updated) {
     setUsers(prev => prev.map(u => u.id === updated.id ? updated : u));
     if (selectedUser?.id === updated.id) setSelectedUser(updated);
+  }
+
+  function removeUser(id) {
+    setUsers(prev => prev.filter(u => u.id !== id));
+    setTotal(t => t - 1);
   }
 
   async function quickSuspend(u) {
@@ -379,6 +427,7 @@ export default function AdminUsers() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onUpdate={updated => { updateUser(updated); }}
+          onDeleted={removeUser}
         />
       )}
     </Box>
