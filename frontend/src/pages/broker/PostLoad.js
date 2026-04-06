@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadsApi, equipmentTypesApi } from '../../services/api';
+import { loadsApi, equipmentTypesApi, equipmentClassesApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
@@ -17,11 +17,15 @@ const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 
 export default function PostLoad() {
   const navigate = useNavigate();
+  const [equipmentClasses, setEquipmentClasses] = useState([]);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
 
   useEffect(() => {
-    equipmentTypesApi.list()
-      .then(data => setEquipmentTypes(Array.isArray(data) ? data : []))
+    Promise.all([equipmentClassesApi.list(), equipmentTypesApi.list()])
+      .then(([classes, types]) => {
+        setEquipmentClasses(Array.isArray(classes) ? classes : []);
+        setEquipmentTypes(Array.isArray(types) ? types : []);
+      })
       .catch(() => {});
   }, []);
 
@@ -34,7 +38,7 @@ export default function PostLoad() {
     deliveryLat: null, deliveryLng: null,
     // Rest of form
     pickup: '', delivery: '',
-    equipment: 'Dry Van', weight: '', dims: '48x102',
+    equipmentClass: '', equipment: '', weight: '', dims: '48x102',
     loadSize: 'full', trailerLength: '',
     commodity: '', rate: '', miles: '', deadhead: '', notes: '',
     instantBook: false,
@@ -133,7 +137,7 @@ export default function PostLoad() {
           setForm({
             originCity: '', destCity: '', pickupAddress: '', deliveryAddress: '',
             pickupLat: null, pickupLng: null, deliveryLat: null, deliveryLng: null,
-            pickup: '', delivery: '', equipment: 'Dry Van', weight: '', dims: '48x102',
+            pickup: '', delivery: '', equipmentClass: '', equipment: '', weight: '', dims: '48x102',
             loadSize: 'full', trailerLength: '',
             commodity: '', rate: '', miles: '', deadhead: '', notes: '',
             instantBook: false,
@@ -226,16 +230,43 @@ export default function PostLoad() {
             </Grid>
           </Grid>
 
-          {/* Equipment */}
+          {/* Equipment Class → Type */}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Equipment Type</InputLabel>
-                <Select value={form.equipment} label="Equipment Type" onChange={e => set('equipment', e.target.value)}>
-                  {equipmentTypes.map(t => <MenuItem key={t.id} value={t.name}>{t.name}</MenuItem>)}
+              <FormControl fullWidth size="small" required>
+                <InputLabel>Equipment Class</InputLabel>
+                <Select
+                  value={form.equipmentClass}
+                  label="Equipment Class"
+                  onChange={e => setForm(f => ({ ...f, equipmentClass: e.target.value, equipment: '' }))}
+                >
+                  {equipmentClasses.map(c => (
+                    <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth size="small" required disabled={!form.equipmentClass}>
+                <InputLabel>Equipment Type</InputLabel>
+                <Select
+                  value={form.equipment}
+                  label="Equipment Type"
+                  onChange={e => set('equipment', e.target.value)}
+                >
+                  {equipmentTypes
+                    .filter(t => t.class_id === form.equipmentClass)
+                    .map(t => (
+                      <MenuItem key={t.id} value={t.name}>{t.name}</MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+
+          {/* Weight */}
+          <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth size="small" label="Weight (lbs)" type="number"
                 value={form.weight} onChange={e => set('weight', e.target.value)} placeholder="42000" />
