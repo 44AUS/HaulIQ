@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip,
   CircularProgress, Stack, Alert, TextField, Divider, Avatar,
-  Stepper, Step, StepLabel, StepButton
+  Stepper, Step, StepLabel
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -16,9 +16,6 @@ import { bookingsApi, rateConfirmationApi } from '../../services/api';
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
-
-// Only brokers can mark POD; everything else is driven by the carrier
-const BROKER_SETTABLE = ['pod_received'];
 
 export default function DispatchDetail() {
   const { bookingId } = useParams();

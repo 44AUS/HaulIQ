@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { bookingsApi, rateConfirmationApi } from '../../services/api';
+import { bookingsApi } from '../../services/api';
 import DispatcherTable from '../../components/broker/DispatcherTable';
 import DispatchModal from '../../components/broker/DispatchModal';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
