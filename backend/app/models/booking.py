@@ -48,20 +48,6 @@ class Bid(Base):
 
     carrier     = relationship("User", foreign_keys=[carrier_id])
 
-    # TMS dispatch fields
-    driver_name           = Column(String(255), nullable=True)
-    driver_phone          = Column(String(20),  nullable=True)
-    dispatch_notes        = Column(Text, nullable=True)
-    carrier_visible_notes = Column(Text, nullable=True)
-    dispatched_at         = Column(DateTime, nullable=True)
-    picked_up_at          = Column(DateTime, nullable=True)
-    in_transit_at         = Column(DateTime, nullable=True)
-    delivered_at          = Column(DateTime, nullable=True)
-    pod_received_at       = Column(DateTime, nullable=True)
-    tms_status            = Column(SAEnum(TMSStatus), nullable=True)
-
-    check_calls = relationship("CheckCallLog", back_populates="booking", order_by="CheckCallLog.created_at")
-
 
 class CheckCallLog(Base):
     __tablename__ = "check_call_logs"
@@ -90,3 +76,17 @@ class Booking(Base):
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     carrier     = relationship("User", foreign_keys=[carrier_id])
+
+    # TMS dispatch fields
+    driver_name           = Column(String(255), nullable=True)
+    driver_phone          = Column(String(20),  nullable=True)
+    dispatch_notes        = Column(Text, nullable=True)
+    carrier_visible_notes = Column(Text, nullable=True)
+    dispatched_at         = Column(DateTime, nullable=True)
+    picked_up_at          = Column(DateTime, nullable=True)
+    in_transit_at         = Column(DateTime, nullable=True)
+    delivered_at          = Column(DateTime, nullable=True)
+    pod_received_at       = Column(DateTime, nullable=True)
+    tms_status            = Column(SAEnum(TMSStatus, create_type=False), nullable=True)
+
+    check_calls = relationship("CheckCallLog", back_populates="booking", order_by="CheckCallLog.created_at")
