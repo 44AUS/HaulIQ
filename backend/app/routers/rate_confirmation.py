@@ -92,11 +92,12 @@ def _build_pdf(booking: Booking, load: Load, carrier: User, broker_profile: Brok
     story.append(Spacer(1, 12))
 
     # ── Broker & Carrier side by side ──────────────────────────────────────────
-    broker_name  = broker_profile.name if broker_profile else (load.broker_user.company or load.broker_user.name if load.broker_user else "—")
+    broker_user  = load.broker_user
+    broker_name  = broker_profile.name if broker_profile else ((broker_user.company or broker_user.name) if broker_user else "—")
     broker_mc    = broker_profile.mc_number if broker_profile else "—"
     broker_pay   = broker_profile.pay_speed.value if broker_profile and broker_profile.pay_speed else "Net-30"
-    broker_email = load.broker_user.email if load.broker_user else "—"
-    broker_phone = load.broker_user.phone or "—" if load.broker_user else "—"
+    broker_email = broker_user.email if broker_user else "—"
+    broker_phone = (broker_user.phone or "—") if broker_user else "—"
 
     carrier_name  = carrier.company or carrier.name
     carrier_mc    = carrier.mc_number or "—"
@@ -184,7 +185,7 @@ def _build_pdf(booking: Booking, load: Load, carrier: User, broker_profile: Brok
     fin_data = Table([
         [
             Paragraph("All-In Rate", label_style),
-            Paragraph(f"<b><font size=14>${load.rate:,.2f}</font></b>", style("rate_val", fontName="Helvetica-Bold", textColor=NAVY)),
+            Paragraph(f"<b><font size=14>${(load.rate or 0):,.2f}</font></b>", style("rate_val", fontName="Helvetica-Bold", textColor=NAVY)),
             Paragraph("Rate Per Mile", label_style),
             Paragraph(rpm_str, value_style),
             Paragraph("Payment Terms", label_style),
