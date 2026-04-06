@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { bookingsApi } from '../../services/api';
+import { bookingsApi, rateConfirmationApi } from '../../services/api';
+import DispatcherTable from '../../components/broker/DispatcherTable';
+import DispatchModal from '../../components/broker/DispatchModal';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, Paper,
@@ -10,6 +12,7 @@ import {
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ListIcon from '@mui/icons-material/List';
 import MapIcon from '@mui/icons-material/Map';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import PlaceIcon from '@mui/icons-material/Place';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
@@ -529,6 +532,9 @@ export default function BrokerLoadsInProgress() {
   const [loads, setLoads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('cards');
+  const [dispatcherRows, setDispatcherRows] = useState([]);
+  const [dispatcherLoading, setDispatcherLoading] = useState(false);
+  const [dispatchTarget, setDispatchTarget] = useState(null);
 
   useEffect(() => {
     bookingsApi.brokerActive()
@@ -536,6 +542,29 @@ export default function BrokerLoadsInProgress() {
       .catch(() => setLoads([]))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (view !== 'dispatcher') return;
+    setDispatcherLoading(true);
+    bookingsApi.dispatcher()
+      .then(data => setDispatcherRows(Array.isArray(data) ? data : []))
+      .catch(() => setDispatcherRows([]))
+      .finally(() => setDispatcherLoading(false));
+  }, [view]);
+
+  const handleDispatched = async () => {
+    const data = await bookingsApi.dispatcher().catch(() => []);
+    setDispatcherRows(Array.isArray(data) ? data : []);
+  };
+
+  const handleMarkPOD = async (row) => {
+    try {
+      await bookingsApi.tmsStatus(row.booking_id, 'pod_received');
+      handleDispatched();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
 
   const inTransitCount = loads.filter(l => l.status === 'in_transit').length;
   const bookedCount    = loads.filter(l => l.status === 'booked').length;
@@ -571,6 +600,9 @@ export default function BrokerLoadsInProgress() {
           </ToggleButton>
           <ToggleButton value="map" title="Map view">
             <MapIcon sx={{ fontSize: 18 }} />
+          </ToggleButton>
+          <ToggleButton value="dispatcher" title="Dispatcher board">
+            <AssignmentIcon sx={{ fontSize: 18 }} />
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -622,9 +654,23 @@ export default function BrokerLoadsInProgress() {
         </Box>
       ) : view === 'table' ? (
         <TableView loads={loads.filter(l => l.status !== 'delivered')} />
-      ) : (
+      ) : view === 'map' ? (
         <LoadsMap loads={loads} stats={mapStats} />
+      ) : (
+        <DispatcherTable
+          rows={dispatcherRows}
+          loading={dispatcherLoading}
+          onDispatch={row => setDispatchTarget(row)}
+          onMarkPOD={handleMarkPOD}
+        />
       )}
+
+      <DispatchModal
+        open={Boolean(dispatchTarget)}
+        onClose={() => setDispatchTarget(null)}
+        booking={dispatchTarget}
+        onDispatched={handleDispatched}
+      />
     </Box>
   );
 }

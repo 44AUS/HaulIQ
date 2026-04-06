@@ -42,6 +42,7 @@ import InstantBookSettings from './pages/broker/InstantBookSettings';
 import BrokerLoadsInProgress from './pages/broker/LoadsInProgress';
 import TruckBoard from './pages/broker/TruckBoard';
 import TrackLoad from './pages/broker/TrackLoad';
+import DispatchDetail from './pages/broker/DispatchDetail';
 import BrokerLoadDetail from './pages/broker/LoadDetail';
 
 // Pages — Shared
@@ -162,6 +163,7 @@ function BrokerRoutes() {
           <Route path="trucks" element={<TruckBoard />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="track/:bookingId" element={<TrackLoad />} />
+          <Route path="dispatch/:bookingId" element={<DispatchDetail />} />
           <Route path="network" element={<Network />} />
           <Route path="documents" element={<Documents />} />
           <Route path="billing" element={<Billing />} />

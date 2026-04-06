@@ -92,6 +92,35 @@ export const bookingsApi = {
   inProgress:    ()         => request('/api/bookings/in-progress'),
   brokerActive:  ()         => request('/api/bookings/broker-active'),
   forLoad:       (loadId)   => request(`/api/bookings/load/${loadId}`),
+  // TMS
+  dispatch:     (id, data)  => request(`/api/bookings/${id}/dispatch`,   { method: 'PATCH', body: JSON.stringify(data) }),
+  tmsStatus:    (id, status) => request(`/api/bookings/${id}/tms-status`, { method: 'PATCH', body: JSON.stringify({ tms_status: status }) }),
+  checkCalls:   (id)        => request(`/api/bookings/${id}/check-calls`),
+  addCheckCall: (id, note)  => request(`/api/bookings/${id}/check-calls`, { method: 'POST', body: JSON.stringify({ note }) }),
+  dispatcher:   ()          => request('/api/bookings/dispatcher'),
+};
+
+// ─── Rate Confirmation ────────────────────────────────────────────────────────
+export const rateConfirmationApi = {
+  download: async (bookingId) => {
+    const token = localStorage.getItem('urload_token');
+    const res = await fetch(`${BASE}/api/rate-confirmation/${bookingId}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.detail || `Failed to generate PDF (${res.status})`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rate_confirmation_${bookingId.slice(0, 8).toUpperCase()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 };
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
@@ -250,5 +279,5 @@ export const equipmentTypesApi = {
   adminDelete:  (id)         => request(`/api/equipment-types/${id}`, { method: 'DELETE' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi };
 export default api;

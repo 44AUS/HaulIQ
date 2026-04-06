@@ -8,7 +8,7 @@ from datetime import datetime
 from app.database import get_db
 from app.middleware.auth import get_current_user, require_carrier, require_broker
 from app.models.user import User
-from app.models.booking import Booking, BookingStatus
+from app.models.booking import Booking, BookingStatus, TMSStatus, CheckCallLog
 from app.models.load import Load, LoadStatus
 from app.models.broker import Broker
 from app.models.messaging import Conversation, Message
@@ -26,6 +26,17 @@ class BookNowRequest(BaseModel):
 class ReviewBookingRequest(BaseModel):
     approved: bool
     broker_note: Optional[str] = None
+
+
+class DispatchRequest(BaseModel):
+    driver_name:           Optional[str] = None
+    driver_phone:          Optional[str] = None
+    dispatch_notes:        Optional[str] = None
+    carrier_visible_notes: Optional[str] = None
+
+
+class TMSStatusRequest(BaseModel):
+    tms_status: TMSStatus
 
 
 class BookingOut(BaseModel):
@@ -278,6 +289,59 @@ def booking_for_load(
     }
 
 
+@router.get("/dispatcher", summary="Broker: dispatcher board — all active shipments with TMS info")
+def dispatcher_board(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    broker_load_ids = [
+        l.id for l in db.query(Load).filter(Load.broker_user_id == current_user.id).all()
+    ]
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.load_id.in_(broker_load_ids),
+            Booking.status.in_([BookingStatus.approved, BookingStatus.in_transit, BookingStatus.completed]),
+        )
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
+    result = []
+    for bk in bookings:
+        load = db.query(Load).filter(Load.id == bk.load_id).first()
+        if not load:
+            continue
+        carrier = db.query(User).filter(User.id == bk.carrier_id).first()
+        last_call = (
+            db.query(CheckCallLog)
+            .filter(CheckCallLog.booking_id == bk.id)
+            .order_by(CheckCallLog.created_at.desc())
+            .first()
+        )
+        result.append({
+            "booking_id":   str(bk.id),
+            "load_id":      str(load.id),
+            "origin":       load.origin,
+            "destination":  load.destination,
+            "rate":         load.rate,
+            "pickup_date":  str(load.pickup_date) if load.pickup_date else None,
+            "booking_status": bk.status.value,
+            "tms_status":   bk.tms_status.value if bk.tms_status else None,
+            "driver_name":  bk.driver_name,
+            "driver_phone": bk.driver_phone,
+            "carrier_name": (carrier.company or carrier.name) if carrier else None,
+            "carrier_mc":   carrier.mc_number if carrier else None,
+            "dispatched_at":     bk.dispatched_at,
+            "picked_up_at":      bk.picked_up_at,
+            "in_transit_at":     bk.in_transit_at,
+            "delivered_at":      bk.delivered_at,
+            "pod_received_at":   bk.pod_received_at,
+            "last_check_call":   last_call.note if last_call else None,
+            "last_call_at":      last_call.created_at if last_call else None,
+        })
+    return result
+
+
 @router.get("/{booking_id}", summary="Get single booking with load details")
 def get_booking(
     booking_id: UUID,
@@ -311,6 +375,15 @@ def get_booking(
         "note": booking.note,
         "broker_note": booking.broker_note,
         "created_at": booking.created_at,
+        # TMS fields
+        "tms_status":            booking.tms_status.value if booking.tms_status else None,
+        "driver_name":           booking.driver_name,
+        "driver_phone":          booking.driver_phone,
+        "carrier_visible_notes": booking.carrier_visible_notes,
+        "dispatched_at":         booking.dispatched_at,
+        "picked_up_at":          booking.picked_up_at,
+        "delivered_at":          booking.delivered_at,
+        "pod_received_at":       booking.pod_received_at,
         "load": {
             "id": str(load.id),
             "origin": load.origin,
@@ -470,3 +543,192 @@ def review_booking(
     db.commit()
     db.refresh(booking)
     return booking
+
+
+# ── TMS Endpoints ─────────────────────────────────────────────────────────────
+
+@router.patch("/{booking_id}/dispatch", summary="Broker: assign driver and dispatch a booking")
+def dispatch_booking(
+    booking_id: UUID,
+    payload: DispatchRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_broker),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    if not load or str(load.broker_user_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    if payload.driver_name is not None:
+        booking.driver_name = payload.driver_name
+    if payload.driver_phone is not None:
+        booking.driver_phone = payload.driver_phone
+    if payload.dispatch_notes is not None:
+        booking.dispatch_notes = payload.dispatch_notes
+    if payload.carrier_visible_notes is not None:
+        booking.carrier_visible_notes = payload.carrier_visible_notes
+
+    if not booking.tms_status:
+        booking.tms_status = TMSStatus.dispatched
+        booking.dispatched_at = datetime.utcnow()
+
+    db.commit()
+    return {
+        "ok": True,
+        "tms_status":   booking.tms_status.value,
+        "driver_name":  booking.driver_name,
+        "driver_phone": booking.driver_phone,
+        "dispatched_at": booking.dispatched_at,
+    }
+
+
+@router.patch("/{booking_id}/tms-status", summary="Advance TMS milestone status")
+def update_tms_status(
+    booking_id: UUID,
+    payload: TMSStatusRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    is_carrier = str(booking.carrier_id) == str(current_user.id)
+    is_broker  = load and str(load.broker_user_id) == str(current_user.id)
+
+    if not (is_carrier or is_broker):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    carrier_allowed = {TMSStatus.picked_up, TMSStatus.in_transit, TMSStatus.delivered}
+    broker_allowed  = {TMSStatus.pod_received}
+
+    if is_carrier and payload.tms_status not in carrier_allowed:
+        raise HTTPException(status_code=403, detail="Carriers can only set picked_up, in_transit, or delivered")
+    if is_broker and not is_carrier and payload.tms_status not in broker_allowed:
+        raise HTTPException(status_code=403, detail="Brokers can only set pod_received")
+
+    booking.tms_status = payload.tms_status
+    now = datetime.utcnow()
+
+    if payload.tms_status == TMSStatus.picked_up:
+        booking.picked_up_at = now
+        if booking.status == BookingStatus.approved:
+            booking.status = BookingStatus.in_transit
+            booking.in_transit_at = now
+
+    elif payload.tms_status == TMSStatus.in_transit:
+        booking.in_transit_at = now
+        if booking.status == BookingStatus.approved:
+            booking.status = BookingStatus.in_transit
+
+    elif payload.tms_status == TMSStatus.delivered:
+        booking.delivered_at = now
+        booking.status = BookingStatus.completed
+        if load:
+            already = db.query(LoadHistory).filter_by(
+                carrier_id=booking.carrier_id, load_id=load.id
+            ).first()
+            if not already:
+                gross = load.rate or 0.0
+                miles = load.miles or 1
+                rpm   = round(gross / miles, 4) if miles else 0.0
+                origin_state = (load.origin or '').split(',')[-1].strip()[:2].upper() or None
+                dest_state   = (load.destination or '').split(',')[-1].strip()[:2].upper() or None
+                lane_key     = f"{origin_state}_{dest_state}" if origin_state and dest_state else None
+                broker_obj   = db.query(Broker).filter(Broker.user_id == load.broker_user_id).first()
+                db.add(LoadHistory(
+                    carrier_id=booking.carrier_id,
+                    load_id=load.id,
+                    origin=load.origin,
+                    origin_state=origin_state,
+                    destination=load.destination,
+                    dest_state=dest_state,
+                    lane_key=lane_key,
+                    miles=load.miles or 0,
+                    deadhead_miles=load.deadhead_miles or 0,
+                    load_type=load.load_type,
+                    broker_name=broker_obj.name if broker_obj else None,
+                    gross_revenue=gross,
+                    fuel_cost=None,
+                    net_profit=gross,
+                    rate_per_mile=rpm,
+                    net_per_mile=rpm,
+                    pickup_date=load.pickup_date,
+                    delivery_date=load.delivery_date,
+                    accepted_at=datetime.utcnow(),
+                ))
+
+    elif payload.tms_status == TMSStatus.pod_received:
+        booking.pod_received_at = now
+
+    db.commit()
+    return {"ok": True, "tms_status": booking.tms_status.value, "booking_status": booking.status.value}
+
+
+@router.get("/{booking_id}/check-calls", summary="Get check call log for a booking")
+def get_check_calls(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    is_carrier = str(booking.carrier_id) == str(current_user.id)
+    is_broker  = load and str(load.broker_user_id) == str(current_user.id)
+    if not (is_carrier or is_broker):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    calls = (
+        db.query(CheckCallLog)
+        .filter(CheckCallLog.booking_id == booking_id)
+        .order_by(CheckCallLog.created_at.asc())
+        .all()
+    )
+    result = []
+    for c in calls:
+        author = db.query(User).filter(User.id == c.author_id).first()
+        result.append({
+            "id":          str(c.id),
+            "note":        c.note,
+            "author_name": (author.company or author.name) if author else "—",
+            "author_role": author.role.value if author else None,
+            "created_at":  c.created_at,
+        })
+    return result
+
+
+class CheckCallRequest(BaseModel):
+    note: str
+
+
+@router.post("/{booking_id}/check-calls", summary="Add a check call note to a booking")
+def add_check_call(
+    booking_id: UUID,
+    payload: CheckCallRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    is_carrier = str(booking.carrier_id) == str(current_user.id)
+    is_broker  = load and str(load.broker_user_id) == str(current_user.id)
+    if not (is_carrier or is_broker):
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    entry = CheckCallLog(
+        booking_id=booking_id,
+        author_id=current_user.id,
+        note=payload.note.strip(),
+    )
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+    return {"ok": True, "id": str(entry.id), "created_at": entry.created_at}
+

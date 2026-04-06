@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact, rate_confirmation
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
 from app.models import truck_post as _truck_post_model  # noqa: ensure table is registered
 from app.models import network as _network_model  # noqa: ensure table is registered
@@ -30,6 +30,13 @@ async def lifespan(app: FastAPI):
     with engine.connect() as conn:
         try:
             conn.execute(text("ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'in_transit'"))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+    # Ensure TMSStatus enum type exists
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("CREATE TYPE tmsstatus AS ENUM ('dispatched','picked_up','in_transit','delivered','pod_received')"))
             conn.commit()
         except Exception:
             conn.rollback()
@@ -119,6 +126,7 @@ app.include_router(truck_posts.router,      prefix="/api/truck-posts",      tags
 app.include_router(equipment_types.router,   prefix="/api/equipment-types",   tags=["Equipment Types"])
 app.include_router(equipment_classes.router, prefix="/api/equipment-classes", tags=["Equipment Classes"])
 app.include_router(contact.router,           prefix="/api/contact",           tags=["Contact"])
+app.include_router(rate_confirmation.router, prefix="/api/rate-confirmation",  tags=["Rate Confirmation"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

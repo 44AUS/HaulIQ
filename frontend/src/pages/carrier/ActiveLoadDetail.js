@@ -1,8 +1,9 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip,
-  CircularProgress, Stack, Alert
+  CircularProgress, Stack, Alert, TextField, Divider, Avatar,
+  Stepper, Step, StepLabel
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -19,12 +20,18 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { bookingsApi, bidsApi, freightPaymentsApi } from '../../services/api';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import PersonIcon from '@mui/icons-material/Person';
+import AddCommentIcon from '@mui/icons-material/AddComment';
+import { bookingsApi, bidsApi, freightPaymentsApi, rateConfirmationApi } from '../../services/api';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
 const STEP_MAP = { quoted: 0, booked: 1, in_transit: 2, delivered: 3 };
 const STEPS = ['Quoted', 'Booked', 'In Transit', 'Delivered'];
+
+const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
+const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
 
 function StatusTimeline({ status }) {
   const current = STEP_MAP[status] ?? 1;
@@ -51,8 +58,7 @@ function StatusTimeline({ status }) {
               <Typography
                 variant="caption"
                 sx={{
-                  mt: 0.75,
-                  whiteSpace: 'nowrap',
+                  mt: 0.75, whiteSpace: 'nowrap',
                   fontWeight: active ? 700 : 400,
                   color: active ? 'primary.main' : done ? 'primary.light' : 'text.disabled',
                 }}
@@ -94,12 +100,17 @@ export default function ActiveLoadDetail() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
 
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [booking, setBooking]           = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [myBid, setMyBid] = useState(null);
+  const [myBid, setMyBid]               = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
+  const [checkCalls, setCheckCalls]     = useState([]);
+  const [callNote, setCallNote]         = useState('');
+  const [addingCall, setAddingCall]     = useState(false);
+  const [pdfLoading, setPdfLoading]     = useState(false);
+  const callsEndRef = useRef(null);
 
   const load = booking?.load;
 
@@ -108,6 +119,8 @@ export default function ActiveLoadDetail() {
     booking?.status === 'in_transit' ? 'in_transit' :
     booking?.status === 'completed'  ? 'delivered'  :
     'booked';
+
+  const tmsStep = booking?.tms_status ? TMS_VALUES.indexOf(booking.tms_status) : -1;
 
   useEffect(() => {
     bookingsApi.get(bookingId)
@@ -122,11 +135,18 @@ export default function ActiveLoadDetail() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
 
-    // Fetch payment status for this booking
     freightPaymentsApi.status(bookingId)
       .then(ps => setPaymentStatus(ps))
       .catch(() => {});
+
+    bookingsApi.checkCalls(bookingId)
+      .then(calls => setCheckCalls(calls))
+      .catch(() => {});
   }, [bookingId]);
+
+  useEffect(() => {
+    callsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [checkCalls]);
 
   const handlePickup = async () => {
     setActionLoading(true);
@@ -152,6 +172,32 @@ export default function ActiveLoadDetail() {
     }
   };
 
+  const handleAddCall = async () => {
+    if (!callNote.trim()) return;
+    setAddingCall(true);
+    try {
+      await bookingsApi.addCheckCall(bookingId, callNote.trim());
+      const calls = await bookingsApi.checkCalls(bookingId);
+      setCheckCalls(calls);
+      setCallNote('');
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setAddingCall(false);
+    }
+  };
+
+  const handleRateCon = async () => {
+    setPdfLoading(true);
+    try {
+      await rateConfirmationApi.download(bookingId);
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
       <CircularProgress />
@@ -169,6 +215,8 @@ export default function ActiveLoadDetail() {
   const netProfit = load
     ? (load.rate || 0) - (load.fuel_cost_est || 0) - Math.round((load.deadhead_miles || 0) * 0.62) - 120
     : 0;
+
+  const canDownloadRateCon = ['approved', 'in_transit', 'completed'].includes(booking.status);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -192,6 +240,14 @@ export default function ActiveLoadDetail() {
                 <Typography variant="caption" color="text.secondary">
                   Booking #{bookingId.slice(0, 8)}
                 </Typography>
+                {booking.tms_status && (
+                  <Chip
+                    label={TMS_STEPS[tmsStep] || booking.tms_status}
+                    size="small"
+                    color={booking.tms_status === 'pod_received' ? 'success' : booking.tms_status === 'delivered' ? 'success' : 'info'}
+                    variant="filled"
+                  />
+                )}
               </Box>
               <Typography variant="h5" fontWeight={700}>
                 {load?.origin} → {load?.destination}
@@ -202,19 +258,63 @@ export default function ActiveLoadDetail() {
                 {load?.miles ? ` · ${load.miles} loaded miles` : ''}
               </Typography>
             </Box>
-            {load?.broker_user_id && (
-              <Button
-                component={Link}
-                to={`/carrier/messages?userId=${load.broker_user_id}`}
-                variant="outlined"
-                startIcon={<MessageIcon />}
-              >
-                Message Broker
-              </Button>
-            )}
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              {canDownloadRateCon && (
+                <Button
+                  variant="outlined"
+                  startIcon={pdfLoading ? <CircularProgress size={14} /> : <PictureAsPdfIcon />}
+                  onClick={handleRateCon}
+                  disabled={pdfLoading}
+                  size="small"
+                >
+                  Rate Con
+                </Button>
+              )}
+              {load?.broker_user_id && (
+                <Button
+                  component={Link}
+                  to={`/carrier/messages?userId=${load.broker_user_id}`}
+                  variant="outlined"
+                  startIcon={<MessageIcon />}
+                  size="small"
+                >
+                  Message Broker
+                </Button>
+              )}
+            </Stack>
           </Box>
 
           <StatusTimeline status={timelineStatus} />
+
+          {/* TMS milestone stepper — only when dispatched */}
+          {booking.tms_status && (
+            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                Dispatch Milestones
+              </Typography>
+              <Stepper activeStep={tmsStep} alternativeLabel>
+                {TMS_STEPS.map(label => (
+                  <Step key={label}>
+                    <StepLabel sx={{ '& .MuiStepLabel-label': { fontSize: 11 } }}>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </Box>
+          )}
+
+          {/* Driver info — shown if broker set a driver */}
+          {(booking.driver_name || booking.driver_phone) && (
+            <Box sx={{ mt: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <PersonIcon color="action" fontSize="small" />
+              <Box>
+                <Typography variant="caption" color="text.secondary" display="block">Assigned Driver</Typography>
+                <Typography variant="body2" fontWeight={600}>{booking.driver_name || '—'}</Typography>
+                {booking.driver_phone && (
+                  <Typography variant="caption" color="text.secondary">{booking.driver_phone}</Typography>
+                )}
+              </Box>
+            </Box>
+          )}
 
           {/* Action buttons */}
           <Box sx={{ mt: 3 }}>
@@ -351,7 +451,7 @@ export default function ActiveLoadDetail() {
             </Card>
 
             {/* Notes */}
-            {(booking.note || booking.broker_note || load?.notes) && (
+            {(booking.note || booking.broker_note || load?.notes || booking.carrier_visible_notes) && (
               <Card>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight={600} gutterBottom>Notes</Typography>
@@ -360,6 +460,12 @@ export default function ActiveLoadDetail() {
                       <Box>
                         <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Load Instructions</Typography>
                         <Typography variant="body2">{load.notes}</Typography>
+                      </Box>
+                    )}
+                    {booking.carrier_visible_notes && (
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Dispatch Notes</Typography>
+                        <Typography variant="body2">{booking.carrier_visible_notes}</Typography>
                       </Box>
                     )}
                     {booking.note && (
@@ -375,6 +481,71 @@ export default function ActiveLoadDetail() {
                       </Box>
                     )}
                   </Stack>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Check Call Log */}
+            {booking.status !== 'pending' && (
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                    <AddCommentIcon fontSize="small" color="action" />
+                    <Typography variant="subtitle1" fontWeight={600}>Check Call Log</Typography>
+                    {checkCalls.length > 0 && (
+                      <Chip label={checkCalls.length} size="small" />
+                    )}
+                  </Box>
+
+                  {checkCalls.length === 0 ? (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      No check calls yet. Add a note to log transit updates.
+                    </Typography>
+                  ) : (
+                    <Stack spacing={0} sx={{ mb: 2, maxHeight: 280, overflowY: 'auto' }}>
+                      {checkCalls.map((call, idx) => (
+                        <Box key={call.id}>
+                          <Box sx={{ py: 1.5, display: 'flex', gap: 1.5 }}>
+                            <Avatar sx={{ width: 28, height: 28, fontSize: 12, bgcolor: call.author_role === 'broker' ? 'primary.main' : 'secondary.main' }}>
+                              {(call.author_name || '?')[0].toUpperCase()}
+                            </Avatar>
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
+                                <Typography variant="caption" fontWeight={600}>{call.author_name}</Typography>
+                                <Typography variant="caption" color="text.disabled">
+                                  {new Date(call.created_at).toLocaleString()}
+                                </Typography>
+                              </Box>
+                              <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>{call.note}</Typography>
+                            </Box>
+                          </Box>
+                          {idx < checkCalls.length - 1 && <Divider />}
+                        </Box>
+                      ))}
+                      <div ref={callsEndRef} />
+                    </Stack>
+                  )}
+
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Add a check call note..."
+                      value={callNote}
+                      onChange={e => setCallNote(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddCall(); } }}
+                      multiline
+                      maxRows={3}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handleAddCall}
+                      disabled={!callNote.trim() || addingCall}
+                      sx={{ minWidth: 80, alignSelf: 'flex-end' }}
+                    >
+                      {addingCall ? <CircularProgress size={16} color="inherit" /> : 'Add'}
+                    </Button>
+                  </Box>
                 </CardContent>
               </Card>
             )}
@@ -401,6 +572,19 @@ export default function ActiveLoadDetail() {
                     </Box>
                   ))}
                 </Stack>
+                {canDownloadRateCon && (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    startIcon={pdfLoading ? <CircularProgress size={14} /> : <PictureAsPdfIcon />}
+                    onClick={handleRateCon}
+                    disabled={pdfLoading}
+                    sx={{ mt: 1.5 }}
+                  >
+                    Download Rate Confirmation
+                  </Button>
+                )}
               </CardContent>
             </Card>
 
@@ -411,19 +595,13 @@ export default function ActiveLoadDetail() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: paymentStatus?.carrier_amount ? 1.5 : 0 }}>
                   {paymentStatusChip(paymentStatus?.status)}
                   {(!paymentStatus || paymentStatus.status === 'unpaid') && (
-                    <Typography variant="caption" color="text.secondary">
-                      Awaiting broker payment
-                    </Typography>
+                    <Typography variant="caption" color="text.secondary">Awaiting broker payment</Typography>
                   )}
                   {paymentStatus?.status === 'escrowed' && (
-                    <Typography variant="caption" color="info.main">
-                      Funds held in escrow
-                    </Typography>
+                    <Typography variant="caption" color="info.main">Funds held in escrow</Typography>
                   )}
                   {paymentStatus?.status === 'released' && (
-                    <Typography variant="caption" color="success.main">
-                      Payment released to you
-                    </Typography>
+                    <Typography variant="caption" color="success.main">Payment released to you</Typography>
                   )}
                 </Box>
                 {paymentStatus?.carrier_amount && (
