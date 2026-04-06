@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 from typing import Optional
 from uuid import UUID
 from datetime import datetime, timedelta
@@ -146,6 +146,79 @@ def delete_user(
         raise HTTPException(status_code=400, detail="Cannot delete an admin account")
     if str(user.id) == str(current_admin.id):
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
+
+    uid = str(user_id)
+
+    # Delete in FK-dependency order to avoid constraint violations.
+    # Messages first (reference conversations + users)
+    db.execute(text("""
+        DELETE FROM messages
+        WHERE sender_id = :uid
+           OR conversation_id IN (
+               SELECT id FROM conversations
+               WHERE carrier_id = :uid OR broker_id = :uid
+                  OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+           )
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM conversations
+        WHERE carrier_id = :uid OR broker_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM bids
+        WHERE carrier_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM bookings
+        WHERE carrier_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM load_payments
+        WHERE carrier_id = :uid OR broker_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM saved_loads
+        WHERE carrier_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("""
+        DELETE FROM load_history
+        WHERE carrier_id = :uid
+           OR load_id IN (SELECT id FROM loads WHERE broker_user_id = :uid)
+    """), {"uid": uid})
+
+    db.execute(text("DELETE FROM loads WHERE broker_user_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM user_blocks WHERE blocker_id = :uid OR blocked_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM instant_book_allowlist WHERE broker_id = :uid OR carrier_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM carrier_reviews WHERE carrier_id = :uid OR broker_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM broker_reviews WHERE carrier_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM driver_insights WHERE carrier_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM lane_stats WHERE carrier_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM truck_posts WHERE carrier_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM carrier_locations WHERE carrier_id = :uid"), {"uid": uid})
+    db.execute(text("""
+        DELETE FROM broker_network
+        WHERE broker_id = :uid OR carrier_id = :uid OR initiated_by_id = :uid
+    """), {"uid": uid})
+
+    # Delete broker reviews for this user's broker profile, then the profile itself
+    db.execute(text("""
+        DELETE FROM broker_reviews
+        WHERE broker_id IN (SELECT id FROM brokers WHERE user_id = :uid)
+    """), {"uid": uid})
+    db.execute(text("DELETE FROM brokers WHERE user_id = :uid"), {"uid": uid})
+    db.execute(text("DELETE FROM subscriptions WHERE user_id = :uid"), {"uid": uid})
+
     db.delete(user)
     db.commit()
 
