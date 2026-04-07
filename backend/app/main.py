@@ -24,22 +24,21 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Create all tables on startup (use Alembic migrations in production)
-    Base.metadata.create_all(bind=engine)
-    # Ensure new enum values exist in existing PostgreSQL databases
+    # Ensure enum types exist BEFORE create_all references them
     with engine.connect() as conn:
         try:
             conn.execute(text("ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'in_transit'"))
             conn.commit()
         except Exception:
             conn.rollback()
-    # Ensure TMSStatus enum type exists
     with engine.connect() as conn:
         try:
             conn.execute(text("CREATE TYPE tmsstatus AS ENUM ('dispatched','picked_up','in_transit','delivered','pod_received')"))
             conn.commit()
         except Exception:
             conn.rollback()
+    # Create all tables (enum types must exist first)
+    Base.metadata.create_all(bind=engine)
     # Add new address columns to loads table if not present
     address_cols = [
         ("pickup_address",   "TEXT"),
