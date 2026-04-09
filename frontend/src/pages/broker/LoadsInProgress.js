@@ -650,7 +650,7 @@ export default function BrokerLoadsInProgress() {
           <Typography variant="body2" color="text.secondary">Post a load to see it tracked here.</Typography>
         </Paper>
       ) : view === 'cards' ? (
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
           {loads.filter(l => l.status !== 'delivered').map(load => <BrokerLoadCard key={load.id} load={load} />)}
         </Box>
       ) : view === 'table' ? (
