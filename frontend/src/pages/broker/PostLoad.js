@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadsApi, equipmentTypesApi, equipmentClassesApi } from '../../services/api';
+import { loadsApi, equipmentTypesApi, equipmentClassesApi, rateIntelApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
@@ -47,6 +47,7 @@ export default function PostLoad() {
   const [error, setError] = useState(null);
   const [posted, setPosted] = useState(false);
   const [calcingMiles, setCalcingMiles] = useState(false);
+  const [rateIntel, setRateIntel] = useState(null);
   const milesTimer = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -71,6 +72,17 @@ export default function PostLoad() {
     return () => clearTimeout(milesTimer.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.pickupLat, form.pickupLng, form.deliveryLat, form.deliveryLng, form.originCity, form.destCity]);
+
+  // Fetch real rate intel when both states are known
+  useEffect(() => {
+    const originState = form.originCity?.split(', ')[1];
+    const destState   = form.destCity?.split(', ')[1];
+    if (!originState || !destState) { setRateIntel(null); return; }
+    rateIntelApi.lane(originState, destState)
+      .then(data => setRateIntel(data))
+      .catch(() => setRateIntel(null));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.originCity, form.destCity]);
 
   const handlePickup = ({ address, cityState, lat, lng }) => {
     setForm(f => ({
@@ -314,12 +326,25 @@ export default function PostLoad() {
               type="number" value={form.rate} onChange={e => set('rate', e.target.value)}
               placeholder="2500"
               InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
-              helperText={
-                form.rate
-                  ? `Market context: avg for similar loads is ~$2.80–3.20/mi${parseFloat(form.rate) < 1500 ? ' — May appear in "Worst Loads" feed' : ''}`
-                  : ''
-              }
-              FormHelperTextProps={{ sx: { color: parseFloat(form.rate) < 1500 ? 'warning.main' : 'text.secondary' } }}
+              helperText={(() => {
+                if (!form.rate) return rateIntel ? `Lane avg: $${rateIntel.avg_rpm?.toFixed(2)}/mi${rateIntel.sample_count > 0 ? ` (${rateIntel.sample_count} recent loads)` : ' (estimate)'}` : '';
+                const rpm = form.miles ? parseFloat(form.rate) / parseInt(form.miles) : null;
+                const belowMarket = rateIntel && rpm && rpm < rateIntel.avg_rpm * 0.85;
+                const aboveMarket = rateIntel && rpm && rpm > rateIntel.avg_rpm * 1.15;
+                const marketStr = rateIntel ? ` · Lane avg $${rateIntel.avg_rpm?.toFixed(2)}/mi` : ' · avg ~$2.80–3.20/mi';
+                if (parseFloat(form.rate) < 1500) return `May appear in "Worst Loads" feed${marketStr}`;
+                if (belowMarket) return `Below lane average${marketStr}`;
+                if (aboveMarket) return `Above lane average — competitive rate${marketStr}`;
+                return `On par with lane market${marketStr}`;
+              })()}
+              FormHelperTextProps={{ sx: { color: (() => {
+                if (!form.rate) return 'text.secondary';
+                const rpm = form.miles ? parseFloat(form.rate) / parseInt(form.miles) : null;
+                if (parseFloat(form.rate) < 1500) return 'warning.main';
+                if (rateIntel && rpm && rpm < rateIntel.avg_rpm * 0.85) return 'error.main';
+                if (rateIntel && rpm && rpm > rateIntel.avg_rpm * 1.15) return 'success.main';
+                return 'text.secondary';
+              })() } }}
             />
           </Box>
 

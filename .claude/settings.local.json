@@ -12,7 +12,12 @@
       "Bash(mv \"c:/Users/austi/Desktop/HaulIQ/frontend/src/pages/shared/ProfileSettings.js\" /dev/null)",
       "Bash(npx react-scripts:*)",
       "Bash(find c:/Users/austi/Desktop/HaulIQ/frontend -name logo* -o -name urload* -o -name UrLoad*)",
-      "WebFetch(domain:app.urable.com)"
+      "WebFetch(domain:app.urable.com)",
+      "Bash(node_modules/.bin/eslint src/components/layout/TopBar.js src/pages/shared/Messages.js --max-warnings=0)",
+      "Bash(curl -sv \"https://hauliq-production.up.railway.app/api/waitlist/\" -H \"Origin: https://hauliq.vercel.app\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: content-type\" -X OPTIONS)",
+      "Bash(curl -sv -X POST \"https://hauliq-production.up.railway.app/api/waitlist/\" -H \"Origin: https://hauliq.vercel.app\" -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"test@example.com\"\"\"\",\"\"\"\"name\"\"\"\":\"\"\"\"Test User\"\"\"\",\"\"\"\"role\"\"\"\":\"\"\"\"carrier\"\"\"\"}')",
+      "Bash(ls -1 /c/Users/austi/Desktop/HaulIQ/backend/app/routers/*.py)",
+      "Bash(xargs -I {} basename {})"
     ]
   }
 }

@@ -30,6 +30,7 @@ import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
 import PlaceBid from './pages/carrier/PlaceBid';
 import CarrierPayments from './pages/carrier/Payments';
 import Equipment from './pages/carrier/Equipment';
+import LaneWatches from './pages/carrier/LaneWatches';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
@@ -131,6 +132,7 @@ function CarrierRoutes() {
           <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
           <Route path="equipment" element={<Equipment />} />
+          <Route path="lane-watches" element={<LaneWatches />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />

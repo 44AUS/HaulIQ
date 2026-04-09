@@ -10,6 +10,8 @@ from app.middleware.auth import get_current_user, require_carrier, require_broke
 from app.models.user import User
 from app.models.booking import Bid, BidStatus, Booking, BookingStatus
 from app.models.load import Load, LoadStatus
+from app.models.notification import NotificationType
+from app.utils.notify import create_notification
 
 router = APIRouter()
 
@@ -63,6 +65,19 @@ def place_bid(
 
     bid = Bid(load_id=payload.load_id, carrier_id=current_user.id, amount=payload.amount, note=payload.note)
     db.add(bid)
+    db.flush()
+
+    # Notify broker about new bid
+    if load.broker_user_id:
+        carrier_name = current_user.company or current_user.name
+        route = f"{load.origin} → {load.destination}"
+        create_notification(
+            db, load.broker_user_id, NotificationType.new_bid,
+            title=f"New bid on {route}",
+            body=f"{carrier_name} bid ${payload.amount:,.0f} on your load",
+            data={"load_id": str(load.id), "bid_id": None},
+        )
+
     db.commit()
     db.refresh(bid)
     return bid
@@ -190,6 +205,15 @@ def accept_bid(
             note=bid.note,
         ))
 
+    # Notify carrier bid was accepted
+    route = f"{load.origin} → {load.destination}" if load else "a load"
+    create_notification(
+        db, bid.carrier_id, NotificationType.bid_accepted,
+        title="Your bid was accepted!",
+        body=f"Your ${bid.amount:,.0f} bid on {route} was accepted. Check your bookings.",
+        data={"load_id": str(bid.load_id)},
+    )
+
     db.commit()
     db.refresh(bid)
     return bid
@@ -205,6 +229,14 @@ def reject_bid(
     if not bid:
         raise HTTPException(status_code=404, detail="Bid not found")
     bid.status = BidStatus.rejected
+    load = db.query(Load).filter(Load.id == bid.load_id).first()
+    route = f"{load.origin} → {load.destination}" if load else "a load"
+    create_notification(
+        db, bid.carrier_id, NotificationType.bid_rejected,
+        title="Bid not accepted",
+        body=f"Your ${bid.amount:,.0f} bid on {route} was not accepted.",
+        data={"load_id": str(bid.load_id)},
+    )
     db.commit()
     db.refresh(bid)
     return bid
@@ -223,6 +255,14 @@ def counter_bid(
     bid.status = BidStatus.countered
     bid.counter_amount = payload.counter_amount
     bid.counter_note = payload.counter_note
+    load = db.query(Load).filter(Load.id == bid.load_id).first()
+    route = f"{load.origin} → {load.destination}" if load else "a load"
+    create_notification(
+        db, bid.carrier_id, NotificationType.bid_countered,
+        title="Counter-offer received",
+        body=f"Broker countered at ${payload.counter_amount:,.0f} on {route}.",
+        data={"load_id": str(bid.load_id)},
+    )
     db.commit()
     db.refresh(bid)
     return bid

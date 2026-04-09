@@ -22,10 +22,8 @@ import {
   ListAlt as ListChecksIcon,
   AccountBalanceWallet as WalletIcon,
   Payment as PaymentIcon,
-  ChatBubbleOutline as ChatIcon,
   CheckCircleOutline as CheckIcon,
   PendingActions as PendingIcon,
-  NetworkCheck as NetworkIcon,
   MoreVert as MoreVertIcon,
   Layers as LayersIcon,
   LocalShipping as TruckIcon,
@@ -39,7 +37,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
-import { messagesApi, bookingsApi, networkApi, bidsApi, searchApi } from '../../services/api';
+import { searchApi, notificationsApi } from '../../services/api';
 
 const DEFAULT_BAR_COLOR = '#1565C0';
 const BAR_COLOR_HOVER = 'rgba(255,255,255,0.12)';
@@ -53,6 +51,7 @@ const CARRIER_NAV = [
   { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
   { icon: TrendingUpIcon,label: 'Analytics',   path: '/carrier/analytics' },
   { icon: TruckIcon,     label: 'My Trucks',   path: '/carrier/equipment' },
+  { icon: SavedIcon,     label: 'Lane Watch',  path: '/carrier/lane-watches' },
 ];
 
 const BROKER_NAV = [
@@ -119,84 +118,87 @@ function NavLink({ item, active, onClick }) {
   );
 }
 
+// ── Icon by notification type ─────────────────────────────────────────────────
+function NotifIcon({ type }) {
+  const map = {
+    new_bid:             <CheckIcon fontSize="small" color="warning" />,
+    bid_accepted:        <CheckIcon fontSize="small" color="success" />,
+    bid_rejected:        <CloseIcon fontSize="small" color="error" />,
+    bid_countered:       <CheckIcon fontSize="small" color="info" />,
+    booking_approved:    <CheckIcon fontSize="small" color="success" />,
+    booking_denied:      <CloseIcon fontSize="small" color="error" />,
+    new_booking_request: <PendingIcon fontSize="small" color="warning" />,
+    lane_watch_match:    <BellIcon fontSize="small" color="primary" />,
+    tms_update:          <ActivityIcon fontSize="small" color="info" />,
+  };
+  return map[type] || <BellIcon fontSize="small" color="action" />;
+}
+
+function notifPath(notif, role) {
+  const d = notif.data || {};
+  if (notif.type === 'new_bid' || notif.type === 'new_booking_request') {
+    return d.load_id ? `/${role}/loads/${d.load_id}` : `/${role}/loads`;
+  }
+  if (notif.type === 'bid_accepted' || notif.type === 'booking_approved') {
+    return `/${role}/active`;
+  }
+  if (notif.type === 'lane_watch_match') {
+    return d.load_id ? `/carrier/loads/${d.load_id}` : '/carrier/loads';
+  }
+  return `/${role}/dashboard`;
+}
+
 // ── Notifications panel content ───────────────────────────────────────────────
-function NotificationsPanel({ onClose }) {
+function NotificationsPanel({ onClose, onCountChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
+  const [notifs, setNotifs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
     if (!user) return;
-    const fetches = [];
-
-    fetches.push(
-      messagesApi.unreadCount()
-        .then(d => d.unread > 0 ? [{
-          key: 'messages',
-          icon: <ChatIcon fontSize="small" color="primary" />,
-          primary: `${d.unread} unread message${d.unread !== 1 ? 's' : ''}`,
-          secondary: 'Open Message Center',
-          path: `/${user.role}/messages`,
-        }] : [])
-        .catch(() => [])
-    );
-
-    if (user.role === 'broker') {
-      fetches.push(
-        bookingsApi.pending()
-          .then(d => {
-            const pending = Array.isArray(d) ? d.filter(b => b.status === 'pending') : [];
-            return pending.length > 0 ? [{
-              key: 'bookings',
-              icon: <PendingIcon fontSize="small" color="warning" />,
-              primary: `${pending.length} pending booking request${pending.length !== 1 ? 's' : ''}`,
-              secondary: 'Review booking requests',
-              path: '/broker/bookings',
-            }] : [];
-          })
-          .catch(() => [])
-      );
-    }
-
-    if (user.role === 'carrier') {
-      fetches.push(
-        networkApi.requests()
-          .then(d => {
-            const reqs = Array.isArray(d) ? d : [];
-            return reqs.length > 0 ? [{
-              key: 'network',
-              icon: <NetworkIcon fontSize="small" color="info" />,
-              primary: `${reqs.length} network request${reqs.length !== 1 ? 's' : ''}`,
-              secondary: 'View connection requests',
-              path: '/carrier/network',
-            }] : [];
-          })
-          .catch(() => [])
-      );
-
-      fetches.push(
-        bidsApi.my()
-          .then(d => {
-            const countered = Array.isArray(d) ? d.filter(b => b.status === 'countered') : [];
-            return countered.length > 0 ? [{
-              key: 'bids',
-              icon: <CheckIcon fontSize="small" color="success" />,
-              primary: `${countered.length} counter-offer${countered.length !== 1 ? 's' : ''} received`,
-              secondary: 'Review your bids',
-              path: '/carrier/active',
-            }] : [];
-          })
-          .catch(() => [])
-      );
-    }
-
-    Promise.all(fetches)
-      .then(results => setItems(results.flat()))
+    notificationsApi.list()
+      .then(data => {
+        setNotifs(Array.isArray(data) ? data : []);
+        const unread = Array.isArray(data) ? data.filter(n => !n.read).length : 0;
+        if (onCountChange) onCountChange(unread);
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user]);
+  };
 
-  const totalCount = items.length;
+  useEffect(() => { load(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleMarkAllRead = () => {
+    notificationsApi.markAllRead()
+      .then(() => {
+        setNotifs(prev => prev.map(n => ({ ...n, read: true })));
+        if (onCountChange) onCountChange(0);
+      })
+      .catch(() => {});
+  };
+
+  const handleClick = (notif) => {
+    if (!notif.read) {
+      notificationsApi.markRead(notif.id).catch(() => {});
+      setNotifs(prev => prev.map(n => n.id === notif.id ? { ...n, read: true } : n));
+    }
+    navigate(notifPath(notif, user.role));
+    onClose();
+  };
+
+  const unreadCount = notifs.filter(n => !n.read).length;
+
+  const formatTime = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  };
 
   return (
     <Box sx={{ width: NOTIF_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -205,13 +207,22 @@ function NotificationsPanel({ onClose }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <BellIcon fontSize="small" color="primary" />
           <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
-          {totalCount > 0 && (
-            <Chip label={totalCount} size="small" color="error" sx={{ height: 18, fontSize: '0.7rem' }} />
+          {unreadCount > 0 && (
+            <Chip label={unreadCount} size="small" color="error" sx={{ height: 18, fontSize: '0.7rem' }} />
           )}
         </Box>
-        <IconButton size="small" onClick={onClose}>
-          <CloseIcon fontSize="small" />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {unreadCount > 0 && (
+            <Tooltip title="Mark all read">
+              <IconButton size="small" onClick={handleMarkAllRead} sx={{ color: 'text.secondary' }}>
+                <CheckIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          <IconButton size="small" onClick={onClose}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Items */}
@@ -228,26 +239,44 @@ function NotificationsPanel({ onClose }) {
               </Box>
             ))}
           </Box>
-        ) : items.length === 0 ? (
+        ) : notifs.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <CheckIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
-            <Typography variant="body1" fontWeight={600}>You're all caught up!</Typography>
-            <Typography variant="body2" color="text.secondary" mt={0.5}>No pending actions right now.</Typography>
+            <Typography variant="body1" fontWeight={600}>All caught up!</Typography>
+            <Typography variant="body2" color="text.secondary" mt={0.5}>No notifications right now.</Typography>
           </Box>
         ) : (
           <List disablePadding>
-            {items.map((item, i) => (
-              <Box key={item.key}>
+            {notifs.map((notif, i) => (
+              <Box key={notif.id}>
                 {i > 0 && <Divider />}
                 <ListItem
                   button
-                  onClick={() => { navigate(item.path); onClose(); }}
-                  sx={{ px: 2.5, py: 1.75, '&:hover': { bgcolor: 'action.hover' } }}
+                  onClick={() => handleClick(notif)}
+                  sx={{
+                    px: 2.5, py: 1.5,
+                    bgcolor: notif.read ? 'transparent' : 'action.hover',
+                    '&:hover': { bgcolor: 'action.selected' },
+                    alignItems: 'flex-start',
+                  }}
                 >
-                  <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+                  <ListItemIcon sx={{ minWidth: 36, mt: 0.25 }}>
+                    <NotifIcon type={notif.type} />
+                  </ListItemIcon>
                   <ListItemText
-                    primary={<Typography variant="body2" fontWeight={600}>{item.primary}</Typography>}
-                    secondary={<Typography variant="caption" color="text.secondary">{item.secondary}</Typography>}
+                    primary={
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Typography variant="body2" fontWeight={notif.read ? 500 : 700} sx={{ flex: 1, mr: 1 }}>
+                          {notif.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, mt: 0.1 }}>
+                          {formatTime(notif.created_at)}
+                        </Typography>
+                      </Box>
+                    }
+                    secondary={notif.body ? (
+                      <Typography variant="caption" color="text.secondary">{notif.body}</Typography>
+                    ) : null}
                   />
                 </ListItem>
               </Box>
@@ -363,21 +392,17 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const [searchLoading, setSearchLoading] = useState(false);
   const searchPanelRef = useRef(null);
 
-  // Fetch notification count
+  // Fetch notification count — poll every 30s
   useEffect(() => {
     if (!user) return;
-    const fetchCounts = async () => {
-      let count = 0;
-      try { const d = await messagesApi.unreadCount(); count += d.unread || 0; } catch (_) {}
-      if (user.role === 'broker') {
-        try { const d = await bookingsApi.pending(); count += Array.isArray(d) ? d.filter(b => b.status === 'pending').length : 0; } catch (_) {}
-      }
-      if (user.role === 'carrier') {
-        try { const d = await networkApi.requests(); count += Array.isArray(d) ? d.length : 0; } catch (_) {}
-      }
-      setNotifCount(count);
+    const fetchCount = () => {
+      notificationsApi.count()
+        .then(d => setNotifCount(d.unread || 0))
+        .catch(() => {});
     };
-    fetchCounts();
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
   }, [user, location.pathname]);
 
   useEffect(() => {
@@ -655,7 +680,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
         onClose={() => setNotifOpen(false)}
         PaperProps={{ sx: { width: NOTIF_DRAWER_WIDTH, borderRadius: 0 } }}
       >
-        <NotificationsPanel onClose={() => setNotifOpen(false)} />
+        <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
       </Drawer>
     </>
   );

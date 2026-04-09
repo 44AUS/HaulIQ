@@ -12,6 +12,8 @@ from app.schemas.load import LoadCreate, LoadUpdate, LoadOut, LoadListOut
 from app.middleware.auth import get_current_user, require_broker, require_carrier
 from app.utils.profit import calculate_profit, get_market_rate
 from app.utils.fuel_price import get_diesel_price
+from app.models.notification import NotificationType
+from app.utils.notify import create_notification
 
 router = APIRouter()
 
@@ -224,6 +226,63 @@ def worst_loads(
     return [_enrich_load(l) for l in loads]
 
 
+# ─── GET /api/loads/rate-intel ────────────────────────────────────────────────
+@router.get("/rate-intel/lane", summary="Real market rate stats for a lane")
+def lane_rate_intel(
+    origin_state: Optional[str] = Query(None),
+    dest_state:   Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Returns real accepted-booking rate stats for a lane.
+    Uses LoadHistory (written on delivery) for actual accepted rates.
+    """
+    from app.models.analytics import LoadHistory
+    from sqlalchemy import func as sql_func
+
+    q = db.query(
+        sql_func.count(LoadHistory.id).label("sample_count"),
+        sql_func.avg(LoadHistory.rate_per_mile).label("avg_rpm"),
+        sql_func.min(LoadHistory.rate_per_mile).label("min_rpm"),
+        sql_func.max(LoadHistory.rate_per_mile).label("max_rpm"),
+        sql_func.avg(LoadHistory.gross_revenue).label("avg_rate"),
+    )
+
+    if origin_state:
+        q = q.filter(LoadHistory.origin_state == origin_state.upper())
+    if dest_state:
+        q = q.filter(LoadHistory.dest_state == dest_state.upper())
+
+    row = q.one()
+
+    # Fallback to hardcoded if no data
+    fallback = get_market_rate(origin_state, dest_state)
+
+    if row.sample_count and row.sample_count > 0:
+        return {
+            "origin_state":  origin_state,
+            "dest_state":    dest_state,
+            "sample_count":  row.sample_count,
+            "avg_rpm":       round(float(row.avg_rpm), 2),
+            "min_rpm":       round(float(row.min_rpm), 2),
+            "max_rpm":       round(float(row.max_rpm), 2),
+            "avg_rate":      round(float(row.avg_rate), 2),
+            "source":        "actual_bookings",
+        }
+    else:
+        return {
+            "origin_state":  origin_state,
+            "dest_state":    dest_state,
+            "sample_count":  0,
+            "avg_rpm":       fallback,
+            "min_rpm":       None,
+            "max_rpm":       None,
+            "avg_rate":      None,
+            "source":        "market_estimate",
+        }
+
+
 # ─── GET /api/loads/{id} ───────────────────────────────────────────────────────
 @router.get("/{load_id}", response_model=LoadOut, summary="Get full load details")
 def get_load(
@@ -277,6 +336,35 @@ def create_load(
 
     load = Load(**payload.model_dump(), broker_id=broker.id, broker_user_id=current_user.id)
     db.add(load)
+    db.flush()
+
+    # Check lane watches and notify matching carriers
+    from app.models.lane_watch import LaneWatch
+    rpm = round(load.rate / load.miles, 2) if load.miles and load.rate else 0.0
+    watches = db.query(LaneWatch).filter(LaneWatch.active == True).all()
+    notified = set()
+    for w in watches:
+        if str(w.carrier_id) in notified:
+            continue
+        if w.origin_state and (load.origin_state or '').upper() != w.origin_state:
+            continue
+        if w.dest_state and (load.dest_state or '').upper() != w.dest_state:
+            continue
+        if w.equipment_type and load.load_type and w.equipment_type.lower() not in load.load_type.value.lower():
+            continue
+        if w.min_rate and load.rate < w.min_rate:
+            continue
+        if w.min_rpm and rpm < w.min_rpm:
+            continue
+        route = f"{load.origin} → {load.destination}"
+        create_notification(
+            db, w.carrier_id, NotificationType.lane_watch_match,
+            title=f"New load on your watchlist: {route}",
+            body=f"${load.rate:,.0f} · {load.miles} mi · ${rpm:.2f}/mi",
+            data={"load_id": str(load.id)},
+        )
+        notified.add(str(w.carrier_id))
+
     db.commit()
     db.refresh(load)
     load.broker = broker

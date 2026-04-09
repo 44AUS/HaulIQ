@@ -13,6 +13,8 @@ from app.models.load import Load, LoadStatus
 from app.models.broker import Broker
 from app.models.messaging import Conversation, Message
 from app.models.analytics import LoadHistory
+from app.models.notification import NotificationType
+from app.utils.notify import create_notification
 
 router = APIRouter()
 
@@ -85,6 +87,27 @@ def request_booking(
 
     if is_instant:
         load.status = LoadStatus.filled
+
+    db.flush()
+
+    # Notify broker of new booking request (or instant book confirmation)
+    if load.broker_user_id:
+        carrier_name = current_user.company or current_user.name
+        route = f"{load.origin} → {load.destination}"
+        if is_instant:
+            create_notification(
+                db, load.broker_user_id, NotificationType.new_booking_request,
+                title=f"Instant book: {route}",
+                body=f"{carrier_name} instantly booked your load on {route}.",
+                data={"load_id": str(load.id)},
+            )
+        else:
+            create_notification(
+                db, load.broker_user_id, NotificationType.new_booking_request,
+                title=f"New booking request on {route}",
+                body=f"{carrier_name} requested to book your load on {route}.",
+                data={"load_id": str(load.id)},
+            )
 
     db.commit()
     db.refresh(booking)
@@ -535,10 +558,24 @@ def review_booking(
     booking.status = BookingStatus.approved if payload.approved else BookingStatus.denied
     booking.broker_note = payload.broker_note
 
-    if payload.approved:
-        load = db.query(Load).filter(Load.id == booking.load_id).first()
-        if load:
-            load.status = LoadStatus.filled
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    if payload.approved and load:
+        load.status = LoadStatus.filled
+
+    # Notify carrier of decision
+    route = f"{load.origin} → {load.destination}" if load else "a load"
+    notif_type = NotificationType.booking_approved if payload.approved else NotificationType.booking_denied
+    title = "Booking approved!" if payload.approved else "Booking not approved"
+    body_text = (
+        f"Your booking request for {route} was approved. Check your active loads."
+        if payload.approved
+        else f"Your booking request for {route} was not approved."
+    )
+    create_notification(
+        db, booking.carrier_id, notif_type,
+        title=title, body=body_text,
+        data={"load_id": str(booking.load_id), "booking_id": str(booking.id)},
+    )
 
     db.commit()
     db.refresh(booking)

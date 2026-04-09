@@ -279,5 +279,32 @@ export const equipmentTypesApi = {
   adminDelete:  (id)         => request(`/api/equipment-types/${id}`, { method: 'DELETE' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi };
+// ─── Notifications ────────────────────────────────────────────────────────────
+export const notificationsApi = {
+  list:       ()    => request('/api/notifications'),
+  count:      ()    => request('/api/notifications/count'),
+  markRead:   (id)  => request(`/api/notifications/${id}/read`, { method: 'PATCH' }),
+  markAllRead:()    => request('/api/notifications/read-all', { method: 'PATCH' }),
+  delete:     (id)  => request(`/api/notifications/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Lane Watches ─────────────────────────────────────────────────────────────
+export const laneWatchesApi = {
+  list:   ()         => request('/api/lane-watches'),
+  create: (data)     => request('/api/lane-watches', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => request(`/api/lane-watches/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  delete: (id)       => request(`/api/lane-watches/${id}`, { method: 'DELETE' }),
+};
+
+// ─── Rate Intelligence ────────────────────────────────────────────────────────
+export const rateIntelApi = {
+  lane: (originState, destState) => {
+    const params = new URLSearchParams();
+    if (originState) params.set('origin_state', originState);
+    if (destState)   params.set('dest_state', destState);
+    return request(`/api/loads/rate-intel/lane?${params}`);
+  },
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, rateIntelApi };
 export default api;
