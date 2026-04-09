@@ -230,15 +230,16 @@ export default function PostLoad() {
             </Grid>
           </Grid>
 
-          {/* Equipment Class → Type */}
+          {/* Equipment Class → Type → Weight */}
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small" required>
                 <InputLabel>Equipment Class</InputLabel>
                 <Select
                   value={form.equipmentClass}
                   label="Equipment Class"
                   onChange={e => setForm(f => ({ ...f, equipmentClass: e.target.value, equipment: '' }))}
+                  MenuProps={{ PaperProps: { sx: { minWidth: 220 } } }}
                 >
                   {equipmentClasses.map(c => (
                     <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
@@ -246,13 +247,14 @@ export default function PostLoad() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <FormControl fullWidth size="small" required disabled={!form.equipmentClass}>
                 <InputLabel>Equipment Type</InputLabel>
                 <Select
                   value={form.equipment}
                   label="Equipment Type"
                   onChange={e => set('equipment', e.target.value)}
+                  MenuProps={{ PaperProps: { sx: { minWidth: 220 } } }}
                 >
                   {equipmentTypes
                     .filter(t => t.class_id === form.equipmentClass)
@@ -263,11 +265,7 @@ export default function PostLoad() {
                 </Select>
               </FormControl>
             </Grid>
-          </Grid>
-
-          {/* Weight */}
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField fullWidth size="small" label="Weight (lbs)" type="number"
                 value={form.weight} onChange={e => set('weight', e.target.value)} placeholder="42000" />
             </Grid>
