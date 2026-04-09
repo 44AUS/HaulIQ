@@ -436,23 +436,27 @@ export default function BrokerLoadDetail() {
             </Box>
 
             {/* Stats */}
-            <Grid container spacing={1.5} sx={{ mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5, pt: 0.5 }}>
               {[
-                { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}`, icon: <AttachMoneyIcon sx={{ fontSize: 14 }} /> },
-                { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` },
-                { label: 'Views',    value: load.viewCount || 0,  icon: <VisibilityIcon sx={{ fontSize: 14 }} /> },
-                { label: 'Bids',     value: bids.length,          icon: <GroupIcon sx={{ fontSize: 14 }} /> },
-              ].map(({ label, value, icon }) => (
-                <Grid item xs={6} key={label}>
-                  <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.4 }}>
-                      {icon}{label}
-                    </Typography>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
-                  </Paper>
-                </Grid>
+                { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}`,    color: 'text.primary' },
+                { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}/mi`, color: 'text.primary' },
+                { label: 'Views',    value: load.viewCount || 0,                          color: 'text.primary' },
+                { label: 'Bids',     value: bids.length,                                  color: bids.length > 0 ? 'warning.main' : 'text.primary' },
+              ].map(({ label, value, color }, idx, arr) => (
+                <Box
+                  key={label}
+                  sx={{
+                    flex: 1,
+                    textAlign: 'center',
+                    borderRight: idx < arr.length - 1 ? '1px solid' : 'none',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color, lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
+                </Box>
               ))}
-            </Grid>
+            </Box>
 
             {/* Pickup / Delivery */}
             <Grid container spacing={2}>
