@@ -531,7 +531,8 @@ function LoadsMap({ loads, stats }) {
 export default function BrokerLoadsInProgress() {
   const [loads, setLoads] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('cards');
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+  const [view, setView] = useState(isMobile ? 'cards' : 'table');
   const [dispatcherRows, setDispatcherRows] = useState([]);
   const [dispatcherLoading, setDispatcherLoading] = useState(false);
   const [dispatchTarget, setDispatchTarget] = useState(null);
