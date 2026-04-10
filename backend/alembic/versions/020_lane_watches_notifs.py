@@ -1,13 +1,13 @@
 """Add lane_watches and notifications tables
 
-Revision ID: 020_lane_watches_and_notifications
+Revision ID: 020_lane_watches_notifs
 Revises: 019_tms_and_ratecon
 Create Date: 2026-04-06
 
 """
 from alembic import op
 
-revision = '020_lane_watches_and_notifications'
+revision = '020_lane_watches_notifs'
 down_revision = '019_tms_and_ratecon'
 branch_labels = None
 depends_on = None
