@@ -16,16 +16,21 @@ depends_on = None
 
 
 def upgrade():
-    # 1. Create notificationtype enum
+    # 1. Create notificationtype enum — guard against already existing
     op.execute("""
-        CREATE TYPE notificationtype AS ENUM (
-            'new_bid', 'bid_accepted', 'bid_rejected', 'bid_countered',
-            'booking_approved', 'booking_denied', 'new_booking_request',
-            'lane_watch_match', 'tms_update'
-        )
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notificationtype') THEN
+                CREATE TYPE notificationtype AS ENUM (
+                    'new_bid', 'bid_accepted', 'bid_rejected', 'bid_countered',
+                    'booking_approved', 'booking_denied', 'new_booking_request',
+                    'lane_watch_match', 'tms_update'
+                );
+            END IF;
+        END$$;
     """)
 
-    # 2. notifications table
+    # 2. notifications table — create_type=False because we handle it above
     op.create_table(
         'notifications',
         sa.Column('id',         UUID(as_uuid=True), primary_key=True),
@@ -34,7 +39,8 @@ def upgrade():
             'new_bid', 'bid_accepted', 'bid_rejected', 'bid_countered',
             'booking_approved', 'booking_denied', 'new_booking_request',
             'lane_watch_match', 'tms_update',
-            name='notificationtype'
+            name='notificationtype',
+            create_type=False,
         ), nullable=False),
         sa.Column('title',      sa.String(255), nullable=False),
         sa.Column('body',       sa.Text(), nullable=True),
@@ -63,4 +69,4 @@ def downgrade():
     op.drop_table('lane_watches')
     op.drop_index('ix_notifications_user_id_created', table_name='notifications')
     op.drop_table('notifications')
-    op.execute('DROP TYPE notificationtype')
+    op.execute('DROP TYPE IF EXISTS notificationtype')
