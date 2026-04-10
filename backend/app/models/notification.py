@@ -1,8 +1,8 @@
 import uuid
 import enum
 from datetime import datetime
-from sqlalchemy import Column, String, Text, Boolean, DateTime, ForeignKey, Enum as SAEnum
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import Column, String, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID, JSONB, ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -24,7 +24,7 @@ class Notification(Base):
 
     id         = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     user_id    = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
-    type       = Column(SAEnum(NotificationType, create_type=False), nullable=False)
+    type       = Column(PG_ENUM(NotificationType, name='notificationtype', create_type=False), nullable=False)
     title      = Column(String(255), nullable=False)
     body       = Column(Text, nullable=True)
     data       = Column(JSONB, nullable=True)   # {load_id, booking_id, bid_id, …}
