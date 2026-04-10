@@ -6,31 +6,17 @@ Create Date: 2026-04-06
 
 """
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy import inspect
-from sqlalchemy.dialects.postgresql import UUID, JSONB, ENUM as PG_ENUM
 
 revision = '020_lane_watches_and_notifications'
 down_revision = '019_tms_and_ratecon'
 branch_labels = None
 depends_on = None
 
-# Reference the existing enum without ever issuing CREATE TYPE
-notificationtype = PG_ENUM(
-    'new_bid', 'bid_accepted', 'bid_rejected', 'bid_countered',
-    'booking_approved', 'booking_denied', 'new_booking_request',
-    'lane_watch_match', 'tms_update',
-    name='notificationtype',
-    create_type=False,   # PG_ENUM honours this flag reliably
-)
-
 
 def upgrade():
-    conn = op.get_bind()
-    inspector = inspect(conn)
-    existing_tables = inspector.get_table_names()
+    # Use raw SQL throughout — avoids all SQLAlchemy DDL event hooks
+    # that try to re-issue CREATE TYPE regardless of create_type=False.
 
-    # 1. Ensure notificationtype enum exists (safe if already present)
     op.execute("""
         DO $$
         BEGIN
@@ -44,52 +30,45 @@ def upgrade():
         END$$;
     """)
 
-    # 2. notifications table
-    if 'notifications' not in existing_tables:
-        op.create_table(
-            'notifications',
-            sa.Column('id',         UUID(as_uuid=True), primary_key=True),
-            sa.Column('user_id',    UUID(as_uuid=True),
-                      sa.ForeignKey('users.id', ondelete='CASCADE'),
-                      nullable=False, index=True),
-            sa.Column('type',       notificationtype, nullable=False),
-            sa.Column('title',      sa.String(255), nullable=False),
-            sa.Column('body',       sa.Text(), nullable=True),
-            sa.Column('data',       JSONB, nullable=True),
-            sa.Column('read',       sa.Boolean(), nullable=False, server_default='false'),
-            sa.Column('created_at', sa.DateTime(), server_default=sa.func.now()),
-        )
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            type        notificationtype NOT NULL,
+            title       VARCHAR(255) NOT NULL,
+            body        TEXT,
+            data        JSONB,
+            read        BOOLEAN NOT NULL DEFAULT false,
+            created_at  TIMESTAMP DEFAULT now()
+        );
+    """)
 
-    # Index
-    if 'notifications' in existing_tables or 'notifications' not in existing_tables:
-        try:
-            op.create_index(
-                'ix_notifications_user_id_created',
-                'notifications', ['user_id', 'created_at']
-            )
-        except Exception:
-            pass  # already exists
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS ix_notifications_user_id_created
+        ON notifications (user_id, created_at);
+    """)
 
-    # 3. lane_watches table
-    if 'lane_watches' not in existing_tables:
-        op.create_table(
-            'lane_watches',
-            sa.Column('id',             UUID(as_uuid=True), primary_key=True),
-            sa.Column('carrier_id',     UUID(as_uuid=True),
-                      sa.ForeignKey('users.id', ondelete='CASCADE'),
-                      nullable=False, index=True),
-            sa.Column('origin_state',   sa.String(2),   nullable=True),
-            sa.Column('dest_state',     sa.String(2),   nullable=True),
-            sa.Column('equipment_type', sa.String(100), nullable=True),
-            sa.Column('min_rate',       sa.Float(),     nullable=True),
-            sa.Column('min_rpm',        sa.Float(),     nullable=True),
-            sa.Column('active',         sa.Boolean(),   nullable=False, server_default='true'),
-            sa.Column('created_at',     sa.DateTime(),  server_default=sa.func.now()),
-        )
+    op.execute("""
+        CREATE TABLE IF NOT EXISTS lane_watches (
+            id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            carrier_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            origin_state    VARCHAR(2),
+            dest_state      VARCHAR(2),
+            equipment_type  VARCHAR(100),
+            min_rate        FLOAT,
+            min_rpm         FLOAT,
+            active          BOOLEAN NOT NULL DEFAULT true,
+            created_at      TIMESTAMP DEFAULT now()
+        );
+    """)
+
+    op.execute("""
+        CREATE INDEX IF NOT EXISTS ix_lane_watches_carrier_id
+        ON lane_watches (carrier_id);
+    """)
 
 
 def downgrade():
-    op.drop_table('lane_watches')
-    op.drop_index('ix_notifications_user_id_created', table_name='notifications')
-    op.drop_table('notifications')
+    op.execute('DROP TABLE IF EXISTS lane_watches')
+    op.execute('DROP TABLE IF EXISTS notifications')
     op.execute('DROP TYPE IF EXISTS notificationtype')
