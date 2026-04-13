@@ -98,6 +98,8 @@ export const bookingsApi = {
   checkCalls:   (id)        => request(`/api/bookings/${id}/check-calls`),
   addCheckCall: (id, note)  => request(`/api/bookings/${id}/check-calls`, { method: 'POST', body: JSON.stringify({ note }) }),
   dispatcher:   ()          => request('/api/bookings/dispatcher'),
+  archive:      (id)        => request(`/api/bookings/${id}/archive`, { method: 'PATCH' }),
+  destroy:      (id)        => request(`/api/bookings/${id}`, { method: 'DELETE' }),
 };
 
 // ─── Rate Confirmation ────────────────────────────────────────────────────────

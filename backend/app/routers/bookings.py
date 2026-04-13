@@ -769,3 +769,40 @@ def add_check_call(
     db.refresh(entry)
     return {"ok": True, "id": str(entry.id), "created_at": entry.created_at}
 
+
+# ── Archive / permanent-delete (carrier only) ─────────────────────────────────
+
+@router.patch("/{booking_id}/archive", summary="Carrier: move completed booking to archived")
+def archive_booking(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if str(booking.carrier_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if booking.status != BookingStatus.completed:
+        raise HTTPException(status_code=400, detail="Only completed bookings can be archived")
+    booking.status = BookingStatus.archived
+    db.commit()
+    return {"ok": True}
+
+
+@router.delete("/{booking_id}", summary="Carrier: permanently delete an archived booking record")
+def delete_booking(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if str(booking.carrier_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if booking.status != BookingStatus.archived:
+        raise HTTPException(status_code=400, detail="Only archived bookings can be permanently deleted")
+    db.delete(booking)
+    db.commit()
+    return {"ok": True}

@@ -30,6 +30,7 @@ class BookingStatus(str, enum.Enum):
     cancelled = "cancelled"
     in_transit = "in_transit"
     completed = "completed"
+    archived  = "archived"
 
 
 class Bid(Base):

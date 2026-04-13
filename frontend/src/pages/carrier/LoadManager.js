@@ -39,6 +39,7 @@ const STATUS_CHIP = {
   in_transit: { label: 'In Progress', color: 'warning' },
   completed:  { label: 'Completed',   color: 'success' },
   saved:      { label: 'Saved',       color: 'primary' },
+  archived:   { label: 'Archived',    color: 'default' },
 };
 
 // Left accent bar color per status
@@ -48,6 +49,7 @@ const STATUS_BAR_COLOR = {
   in_transit: '#ED6C02', // yellow/orange — in progress
   completed:  '#2e7d32', // green  — completed
   saved:      '#1565C0', // blue
+  archived:   '#616161', // dark grey — archived
 };
 
 // ── Filter drawer ──────────────────────────────────────────────────────────────
@@ -121,6 +123,7 @@ export default function LoadManager() {
   const [active,   setActive]   = useState([]);   // from inProgress
   const [history,  setHistory]  = useState([]);   // from analyticsApi.history
   const [saved,    setSaved]    = useState([]);   // from savedList
+  const [archived, setArchived] = useState([]);   // from bookingsApi.my (status=archived)
   const [loading,  setLoading]  = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [showProgress, setShowProgress] = useState(false);
@@ -132,33 +135,30 @@ export default function LoadManager() {
   const [hoveredHeader, setHoveredHeader] = useState(false);
   const [selected,      setSelected]      = useState(new Set());
 
-  const load = () => {
-    setLoading(true);
-    Promise.all([
-      bookingsApi.inProgress().catch(() => []),
-      analyticsApi.history().catch(() => []),
-      loadsApi.savedList().catch(() => []),
-    ]).then(([act, hist, sv]) => {
-      setActive(Array.isArray(act) ? act : []);
-      setHistory(Array.isArray(hist) ? hist.map(adaptHistory) : []);
-      const adapted = adaptLoadList(Array.isArray(sv) ? sv : []);
-      setSaved(adapted);
-    }).finally(() => setLoading(false));
+  const fetchAll = () => Promise.all([
+    bookingsApi.inProgress().catch(() => []),
+    analyticsApi.history().catch(() => []),
+    loadsApi.savedList().catch(() => []),
+    bookingsApi.my().catch(() => []),
+  ]);
+
+  const applyFetch = ([act, hist, sv, myBookings]) => {
+    setActive(Array.isArray(act) ? act : []);
+    setHistory(Array.isArray(hist) ? hist.map(adaptHistory) : []);
+    setSaved(adaptLoadList(Array.isArray(sv) ? sv : []));
+    setArchived(Array.isArray(myBookings) ? myBookings.filter(b => b.status === 'archived') : []);
   };
 
-  useEffect(() => { load(); }, []);
+  const load = () => {
+    setLoading(true);
+    fetchAll().then(applyFetch).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refresh = () => {
     setSpinning(true);
-    Promise.all([
-      bookingsApi.inProgress().catch(() => []),
-      analyticsApi.history().catch(() => []),
-      loadsApi.savedList().catch(() => []),
-    ]).then(([act, hist, sv]) => {
-      setActive(Array.isArray(act) ? act : []);
-      setHistory(Array.isArray(hist) ? hist.map(adaptHistory) : []);
-      setSaved(adaptLoadList(Array.isArray(sv) ? sv : []));
-    }).finally(() => setSpinning(false));
+    fetchAll().then(applyFetch).finally(() => setSpinning(false));
   };
 
   // Normalise all items into a single shape
@@ -230,20 +230,34 @@ export default function LoadManager() {
       chipKey:   'saved',
     })));
 
-    return [...activeItems, ...histItems, ...savedItems];
-  }, [active, history, saved, applied, navigate]);
+    const archivedItems = applyFilter(archived.map((b, i) => ({
+      _key:      b.id,
+      _tab:      'archived',
+      _nav:      () => {},
+      rowNum:    i + 1,
+      date:      fmtDateTime(b.created_at || b.updated_at),
+      origin:    b.origin,
+      dest:      b.destination,
+      equipment: b.load_type,
+      miles:     b.miles,
+      rate:      b.rate,
+      broker:    b.broker_name,
+      status:    'archived',
+      chipKey:   'archived',
+    })));
+
+    return [...activeItems, ...histItems, ...savedItems, ...archivedItems];
+  }, [active, history, saved, archived, applied, navigate]);
 
   const tabItems = useMemo(() => {
-    if (activeTab === 'all')      return allItems;
-    if (activeTab === 'archived') return [];
+    if (activeTab === 'all') return allItems.filter(i => i._tab !== 'archived');
     return allItems.filter(i => i._tab === activeTab);
   }, [allItems, activeTab]);
 
   const tabCounts = useMemo(() => {
     const c = {};
     TABS.forEach(t => {
-      if (t.key === 'all')      c.all      = allItems.length;
-      else if (t.key === 'archived') c.archived = 0;
+      if (t.key === 'all') c.all = allItems.filter(i => i._tab !== 'archived').length;
       else c[t.key] = allItems.filter(i => i._tab === t.key).length;
     });
     return c;
@@ -466,20 +480,29 @@ export default function LoadManager() {
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell>
-                        {isSelected && item.chipKey === 'completed' ? (
+                        {isSelected && (item.chipKey === 'completed' || item.chipKey === 'archived') ? (
                           <Button
                             size="small"
                             variant="outlined"
                             color="error"
                             startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
-                            onClick={e => {
+                            onClick={async e => {
                               e.stopPropagation();
-                              // TODO: wire to delete API
-                              setSelected(prev => { const n = new Set(prev); n.delete(rowKey); return n; });
+                              try {
+                                if (item.chipKey === 'completed') {
+                                  await bookingsApi.archive(rowKey);
+                                } else {
+                                  await bookingsApi.destroy(rowKey);
+                                }
+                                setSelected(prev => { const n = new Set(prev); n.delete(rowKey); return n; });
+                                refresh();
+                              } catch (err) {
+                                alert(err.message || 'Failed to delete');
+                              }
                             }}
                             sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 1, py: 0, minWidth: 0, textTransform: 'none' }}
                           >
-                            Delete
+                            {item.chipKey === 'archived' ? 'Delete' : 'Archive'}
                           </Button>
                         ) : (
                           <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
