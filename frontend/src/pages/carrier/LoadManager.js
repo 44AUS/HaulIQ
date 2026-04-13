@@ -11,6 +11,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { bookingsApi, analyticsApi, loadsApi } from '../../services/api';
 import { adaptHistory, adaptLoadList } from '../../services/adapters';
 
@@ -175,8 +176,8 @@ export default function LoadManager() {
       if (!iso) return null;
       const d = new Date(iso);
       if (isNaN(d)) return null;
-      const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
       return { date, time };
     };
 
@@ -326,8 +327,6 @@ export default function LoadManager() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {/* accent bar column — no header */}
-                  <TableCell sx={{ p: 0, width: 4, bgcolor: 'action.hover' }} />
                   {/* Date header — hover shows select-all checkbox */}
                   {(() => {
                     const allKeys     = tabItems.map((item, i) => item._key || i);
@@ -403,10 +402,6 @@ export default function LoadManager() {
                       onMouseLeave={() => setHoveredRow(null)}
                       sx={rowSx}
                     >
-                      {/* Colored accent bar */}
-                      <TableCell sx={{ p: 0, width: 4 }}>
-                        <Box sx={{ width: 4, height: 64, bgcolor: barColor }} />
-                      </TableCell>
                       {/* Date / checkbox toggle */}
                       <TableCell sx={{ width: 90, minWidth: 90 }} onClick={isHovered ? toggleSelect : undefined}>
                         {isHovered || isSelected ? (
@@ -432,7 +427,8 @@ export default function LoadManager() {
                           <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 2 }}>
+                      {/* Route — accent bar as left border */}
+                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 1.5, borderLeft: `4px solid ${barColor}` }}>
                         <Typography variant="body2" fontWeight={700}>{item.origin} → {item.dest}</Typography>
                       </TableCell>
                       <TableCell>
@@ -468,7 +464,24 @@ export default function LoadManager() {
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell>
-                        <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
+                        {isSelected && item.chipKey === 'completed' ? (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
+                            onClick={e => {
+                              e.stopPropagation();
+                              // TODO: wire to delete API
+                              setSelected(prev => { const n = new Set(prev); n.delete(rowKey); return n; });
+                            }}
+                            sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 1, py: 0, minWidth: 0, textTransform: 'none' }}
+                          >
+                            Delete
+                          </Button>
+                        ) : (
+                          <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
+                        )}
                       </TableCell>
                     </TableRow>
                   );
