@@ -531,7 +531,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
           </Box>
 
           {/* Row 2 — Tabs */}
-          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 44, width: '100%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
             <NetworkTab
               label="Connections"
               active={activeTab === 'connections'}
