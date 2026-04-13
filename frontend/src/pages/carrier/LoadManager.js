@@ -4,7 +4,7 @@ import {
   Box, Typography, Chip, CircularProgress, IconButton, Button,
   Drawer, MenuItem, Select, FormControl, Tooltip, useTheme,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TextField,
+  TextField, Checkbox,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -127,6 +127,8 @@ export default function LoadManager() {
   const [filters, setFilters]   = useState({});
   const [applied, setApplied]   = useState({});
   const [spinning, setSpinning] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState(null);
+  const [selected,  setSelected]   = useState(new Set());
 
   const load = () => {
     setLoading(true);
@@ -163,17 +165,26 @@ export default function LoadManager() {
 
     const applyFilter = (items) => items.filter(item => {
       if (f.equipment && !(item.equipment || '').toLowerCase().includes(f.equipment.toLowerCase())) return false;
-      if (f.date_from && item.date && new Date(item.date) < new Date(f.date_from)) return false;
-      if (f.date_to   && item.date && new Date(item.date) > new Date(f.date_to + 'T23:59:59')) return false;
+      if (f.date_from && item.date && new Date(item.date.date) < new Date(f.date_from)) return false;
+      if (f.date_to   && item.date && new Date(item.date.date) > new Date(f.date_to + 'T23:59:59')) return false;
       return true;
     });
+
+    const fmtDateTime = (iso) => {
+      if (!iso) return null;
+      const d = new Date(iso);
+      if (isNaN(d)) return null;
+      const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      return { date, time };
+    };
 
     const activeItems = applyFilter(active.map((b, i) => ({
       _key:      b.booking_id || b.id,
       _tab:      STATUS_TAB[b.status] || 'scheduled',
       _nav:      () => navigate(`/carrier/active/${b.booking_id}`),
       rowNum:    i + 1,
-      date:      null,
+      date:      fmtDateTime(b.created_at || b.booked_at || b.updated_at),
       origin:    b.origin,
       dest:      b.destination,
       equipment: b.load_type,
@@ -189,7 +200,7 @@ export default function LoadManager() {
       _tab:      'completed',
       _nav:      () => {},
       rowNum:    i + 1,
-      date:      h.date,
+      date:      h.date ? { date: h.date, time: null } : null,
       origin:    h.origin,
       dest:      h.dest,
       equipment: null,
@@ -316,7 +327,7 @@ export default function LoadManager() {
                 <TableRow>
                   {/* accent bar column — no header */}
                   <TableCell sx={{ p: 0, width: 4, bgcolor: 'action.hover' }} />
-                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
+                  {['Date', 'Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
                     <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
@@ -325,24 +336,66 @@ export default function LoadManager() {
               </TableHead>
               <TableBody>
                 {tabItems.map((item, idx) => {
-                  const chip    = STATUS_CHIP[item.chipKey] || { label: item.status, color: 'default' };
+                  const chip     = STATUS_CHIP[item.chipKey] || { label: item.status, color: 'default' };
                   const barColor = STATUS_BAR_COLOR[item.chipKey] || '#9e9e9e';
+                  const rowKey   = item._key || idx;
+                  const isHovered  = hoveredRow === rowKey;
+                  const isSelected = selected.has(rowKey);
                   const rowSx = {
                     cursor: 'pointer',
                     height: 64,
                     '& td': { py: 0 },
-                    '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                    '&:nth-of-type(odd)': { bgcolor: isSelected ? 'action.selected' : 'action.hover' },
+                    bgcolor: isSelected ? 'action.selected' : undefined,
                     '&:hover': { bgcolor: 'action.selected' },
                   };
+                  const toggleSelect = (e) => {
+                    e.stopPropagation();
+                    setSelected(prev => {
+                      const next = new Set(prev);
+                      next.has(rowKey) ? next.delete(rowKey) : next.add(rowKey);
+                      return next;
+                    });
+                  };
                   return (
-                    <TableRow key={item._key || idx} onClick={item._nav} sx={rowSx}>
+                    <TableRow
+                      key={rowKey}
+                      onClick={item._nav}
+                      onMouseEnter={() => setHoveredRow(rowKey)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                      sx={rowSx}
+                    >
                       {/* Colored accent bar */}
                       <TableCell sx={{ p: 0, width: 4 }}>
                         <Box sx={{ width: 4, height: 64, bgcolor: barColor }} />
                       </TableCell>
+                      {/* Date / checkbox toggle */}
+                      <TableCell sx={{ width: 90, minWidth: 90 }} onClick={isHovered ? toggleSelect : undefined}>
+                        {isHovered || isSelected ? (
+                          <Checkbox
+                            size="small"
+                            checked={isSelected}
+                            onChange={toggleSelect}
+                            onClick={e => e.stopPropagation()}
+                            sx={{ p: 0.5 }}
+                          />
+                        ) : item.date ? (
+                          <Box>
+                            <Typography variant="caption" fontWeight={600} display="block" sx={{ lineHeight: 1.3 }}>
+                              {item.date.date}
+                            </Typography>
+                            {item.date.time && (
+                              <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.3 }}>
+                                {item.date.time}
+                              </Typography>
+                            )}
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.disabled">—</Typography>
+                        )}
+                      </TableCell>
                       <TableCell sx={{ whiteSpace: 'nowrap', pl: 2 }}>
                         <Typography variant="body2" fontWeight={700}>{item.origin} → {item.dest}</Typography>
-                        {item.date && <Typography variant="caption" color="text.disabled" display="block">{item.date}</Typography>}
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">{item.equipment || '—'}</Typography>
