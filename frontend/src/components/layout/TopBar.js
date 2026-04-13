@@ -392,9 +392,8 @@ function NetworkTab({ label, active, onClick }) {
         fontSize: '13px',
         fontWeight: 700,
         textTransform: 'uppercase',
-        bgcolor: active ? BAR_COLOR_HOVER : 'transparent',
-        '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER },
-        transition: 'color 0.15s, background 0.15s',
+        '&:hover': { color: '#fff' },
+        transition: 'color 0.15s',
         '&::after': active ? {
           content: '""',
           position: 'absolute',
