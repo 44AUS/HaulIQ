@@ -45,8 +45,7 @@ const NOTIF_DRAWER_WIDTH = 360;
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
   { icon: CalendarIcon,  label: 'Calendar',    path: '/carrier/calendar' },
-  { icon: SearchIcon,    label: 'Load Board',  path: '/carrier/loads' },
-  { icon: ActivityIcon,  label: 'In Progress', path: '/carrier/active' },
+  { icon: ActivityIcon,  label: 'Loads',       path: '/carrier/job-manager' },
   { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
   { icon: TruckIcon,     label: 'My Trucks',   path: '/carrier/equipment' },
   { icon: SavedIcon,     label: 'Lane Watch',  path: '/carrier/lane-watches' },

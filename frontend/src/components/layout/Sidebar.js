@@ -7,10 +7,8 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  Search as SearchIcon,
   Calculate as CalculateIcon,
   Psychology as BrainIcon,
-  Bookmark as BookmarkIcon,
   History as HistoryIcon,
   TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
@@ -53,13 +51,9 @@ const DRIVER_LINKS = [
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
-  { icon: ListChecksIcon,label: 'Load Manager',      path: '/carrier/job-manager' },
-  { icon: SearchIcon,    label: 'Load Board',        path: '/carrier/loads' },
   { icon: CalculateIcon, label: 'Profit Calculator', path: '/carrier/calculator' },
   { icon: BrainIcon,     label: 'Earnings Brain',    path: '/carrier/brain' },
-  { icon: BookmarkIcon,  label: 'Saved Loads',       path: '/carrier/saved' },
   { icon: HistoryIcon,   label: 'Load History',      path: '/carrier/history' },
-  { icon: ActivityIcon,  label: 'In Progress',       path: '/carrier/active' },
   { icon: WalletIcon,    label: 'Payments',          path: '/carrier/payments' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: BadgeIcon,     label: 'My Drivers',        path: '/carrier/drivers' },
