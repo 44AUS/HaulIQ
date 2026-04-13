@@ -12,9 +12,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/PendingActions';
 import { driversApi } from '../../services/api';
 
-const BASE_URL = process.env.REACT_APP_API_URL
-  ? process.env.REACT_APP_API_URL.replace('/api', '').replace(':8000', ':3000')
-  : window.location.origin;
+const BASE_URL = window.location.origin;
 
 export default function Drivers() {
   const [drivers, setDrivers] = useState([]);
