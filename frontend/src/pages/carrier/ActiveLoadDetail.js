@@ -20,10 +20,10 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PersonIcon from '@mui/icons-material/Person';
 import AddCommentIcon from '@mui/icons-material/AddComment';
-import { bookingsApi, bidsApi, freightPaymentsApi, rateConfirmationApi } from '../../services/api';
+import { bookingsApi, bidsApi, freightPaymentsApi } from '../../services/api';
+import RateConSignature from '../../components/shared/RateConSignature';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
 
@@ -109,7 +109,6 @@ export default function ActiveLoadDetail() {
   const [checkCalls, setCheckCalls]     = useState([]);
   const [callNote, setCallNote]         = useState('');
   const [addingCall, setAddingCall]     = useState(false);
-  const [pdfLoading, setPdfLoading]     = useState(false);
   const callsEndRef = useRef(null);
 
   const load = booking?.load;
@@ -187,17 +186,6 @@ export default function ActiveLoadDetail() {
     }
   };
 
-  const handleRateCon = async () => {
-    setPdfLoading(true);
-    try {
-      await rateConfirmationApi.download(bookingId);
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setPdfLoading(false);
-    }
-  };
-
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
       <CircularProgress />
@@ -259,17 +247,6 @@ export default function ActiveLoadDetail() {
               </Typography>
             </Box>
             <Stack direction="row" spacing={1} flexWrap="wrap">
-              {canDownloadRateCon && (
-                <Button
-                  variant="outlined"
-                  startIcon={pdfLoading ? <CircularProgress size={14} /> : <PictureAsPdfIcon />}
-                  onClick={handleRateCon}
-                  disabled={pdfLoading}
-                  size="small"
-                >
-                  Rate Con
-                </Button>
-              )}
               {load?.broker_user_id && (
                 <Button
                   component={Link}
@@ -573,17 +550,9 @@ export default function ActiveLoadDetail() {
                   ))}
                 </Stack>
                 {canDownloadRateCon && (
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    startIcon={pdfLoading ? <CircularProgress size={14} /> : <PictureAsPdfIcon />}
-                    onClick={handleRateCon}
-                    disabled={pdfLoading}
-                    sx={{ mt: 1.5 }}
-                  >
-                    Download Rate Confirmation
-                  </Button>
+                  <Box sx={{ mt: 1.5 }}>
+                    <RateConSignature bookingId={bookingId} role="carrier" />
+                  </Box>
                 )}
               </CardContent>
             </Card>

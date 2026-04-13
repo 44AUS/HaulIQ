@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from io import BytesIO
 from datetime import datetime
+import base64
+from pydantic import BaseModel
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 from app.database import get_db
@@ -28,6 +30,18 @@ LIGHT  = colors.HexColor("#F0F4F8")
 GREY   = colors.HexColor("#64748B")
 BLACK  = colors.black
 WHITE  = colors.white
+
+
+def _sig_image(data_url: str | None):
+    """Return a reportlab Image from a base64 data URL, or None if absent/invalid."""
+    if not data_url or not data_url.startswith('data:image'):
+        return None
+    try:
+        b64 = data_url.split(',', 1)[1]
+        img_bytes = base64.b64decode(b64)
+        return RLImage(BytesIO(img_bytes), width=2.0 * inch, height=0.6 * inch)
+    except Exception:
+        return None
 
 
 def _build_pdf(booking: Booking, load: Load, carrier: User, broker_profile: Broker | None) -> BytesIO:
@@ -216,12 +230,20 @@ def _build_pdf(booking: Booking, load: Load, carrier: User, broker_profile: Brok
     story.append(section_header("SIGNATURES"))
     story.append(Spacer(1, 8))
 
+    broker_sig_img  = _sig_image(booking.broker_signature)
+    carrier_sig_img = _sig_image(booking.carrier_signature)
     sig_line = "_" * 45
+
+    broker_date  = booking.broker_signed_at.strftime("%-d %b %Y  %H:%M UTC") if booking.broker_signed_at else "Date: ___________________"
+    carrier_date = booking.carrier_signed_at.strftime("%-d %b %Y  %H:%M UTC") if booking.carrier_signed_at else "Date: ___________________"
+    broker_sname  = booking.broker_signed_name or broker_name
+    carrier_sname = booking.carrier_signed_name or carrier_name
+
     sig_tbl = Table([
-        [Paragraph("Broker Signature", sig_label), Paragraph("Carrier Signature", sig_label)],
-        [Paragraph(sig_line, value_style),         Paragraph(sig_line, value_style)],
-        [Paragraph(broker_name, sig_label),         Paragraph(carrier_name, sig_label)],
-        [Paragraph("Date: ___________________", sig_label), Paragraph("Date: ___________________", sig_label)],
+        [Paragraph("Broker Signature", sig_label),                Paragraph("Carrier Signature", sig_label)],
+        [broker_sig_img or Paragraph(sig_line, value_style),      carrier_sig_img or Paragraph(sig_line, value_style)],
+        [Paragraph(broker_sname, sig_label),                      Paragraph(carrier_sname, sig_label)],
+        [Paragraph(broker_date, sig_label),                       Paragraph(carrier_date, sig_label)],
     ], colWidths=[3.5 * inch, 3.5 * inch])
     sig_tbl.setStyle(TableStyle([
         ("TOPPADDING",    (0, 0), (-1, -1), 6),
@@ -242,6 +264,84 @@ def _build_pdf(booking: Booking, load: Load, carrier: User, broker_profile: Brok
     doc.build(story)
     buffer.seek(0)
     return buffer
+
+
+class SignPayload(BaseModel):
+    signature: str  # base64 data URL from canvas
+
+
+def _sign_status(booking: Booking) -> dict:
+    return {
+        "broker_signed":       bool(booking.broker_signature),
+        "broker_signed_at":    booking.broker_signed_at.isoformat() if booking.broker_signed_at else None,
+        "broker_signed_name":  booking.broker_signed_name,
+        "carrier_signed":      bool(booking.carrier_signature),
+        "carrier_signed_at":   booking.carrier_signed_at.isoformat() if booking.carrier_signed_at else None,
+        "carrier_signed_name": booking.carrier_signed_name,
+        "fully_signed":        bool(booking.broker_signature and booking.carrier_signature),
+    }
+
+
+@router.get("/{booking_id}/sign-status", summary="Get signature status for a booking")
+def get_sign_status(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    is_carrier = str(booking.carrier_id) == str(current_user.id)
+    is_broker  = load and load.broker_user_id and str(load.broker_user_id) == str(current_user.id)
+    if not (is_carrier or is_broker):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return _sign_status(booking)
+
+
+@router.post("/{booking_id}/sign", summary="Submit e-signature for a rate confirmation")
+def sign_rate_confirmation(
+    booking_id: UUID,
+    payload: SignPayload,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    load = db.query(Load).filter(Load.id == booking.load_id).first()
+    if not load:
+        raise HTTPException(status_code=404, detail="Load not found")
+
+    is_carrier = str(booking.carrier_id) == str(current_user.id)
+    is_broker  = load.broker_user_id and str(load.broker_user_id) == str(current_user.id)
+    if not (is_carrier or is_broker):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    if booking.status not in (BookingStatus.approved, BookingStatus.in_transit, BookingStatus.completed):
+        raise HTTPException(status_code=400, detail="Booking must be approved before signing")
+
+    if not payload.signature or not payload.signature.startswith('data:image'):
+        raise HTTPException(status_code=400, detail="Invalid signature data")
+
+    signer_name = current_user.company or current_user.name or current_user.email
+
+    if is_broker and not is_carrier:
+        booking.broker_signature  = payload.signature
+        booking.broker_signed_at  = datetime.utcnow()
+        booking.broker_signed_name = signer_name
+    else:
+        # carrier (or someone who is both — edge case on their own booking)
+        booking.carrier_signature  = payload.signature
+        booking.carrier_signed_at  = datetime.utcnow()
+        booking.carrier_signed_name = signer_name
+
+    db.commit()
+    db.refresh(booking)
+    return _sign_status(booking)
 
 
 @router.get("/{booking_id}", summary="Download rate confirmation PDF")

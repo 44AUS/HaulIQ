@@ -6,13 +6,13 @@ import {
   Stepper, Step, StepLabel
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import SaveIcon from '@mui/icons-material/Save';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { bookingsApi, rateConfirmationApi } from '../../services/api';
+import { bookingsApi } from '../../services/api';
+import RateConSignature from '../../components/shared/RateConSignature';
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
@@ -27,7 +27,6 @@ export default function DispatchDetail() {
   const [checkCalls, setCheckCalls] = useState([]);
   const [callNote, setCallNote] = useState('');
   const [addingCall, setAddingCall] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
   const [saving, setSaving]     = useState(false);
   const [markingPOD, setMarkingPOD] = useState(false);
   const [dispatchForm, setDispatchForm] = useState({
@@ -105,17 +104,6 @@ export default function DispatchDetail() {
     }
   };
 
-  const handleRateCon = async () => {
-    setPdfLoading(true);
-    try {
-      await rateConfirmationApi.download(bookingId);
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setPdfLoading(false);
-    }
-  };
-
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
   );
@@ -157,19 +145,6 @@ export default function DispatchDetail() {
                 {load?.rate ? ` · $${load.rate.toLocaleString()}` : ''}
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1}>
-              {canDownloadRateCon && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={pdfLoading ? <CircularProgress size={14} /> : <PictureAsPdfIcon />}
-                  onClick={handleRateCon}
-                  disabled={pdfLoading}
-                >
-                  Rate Confirmation
-                </Button>
-              )}
-            </Stack>
           </Box>
 
           {/* TMS Stepper */}
@@ -202,6 +177,10 @@ export default function DispatchDetail() {
           )}
         </CardContent>
       </Card>
+
+      {canDownloadRateCon && (
+        <RateConSignature bookingId={bookingId} role="broker" />
+      )}
 
       <Grid container spacing={3}>
         {/* Left — dispatch form + check calls */}

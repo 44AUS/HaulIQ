@@ -102,6 +102,8 @@ export const bookingsApi = {
 
 // ─── Rate Confirmation ────────────────────────────────────────────────────────
 export const rateConfirmationApi = {
+  signStatus: (bookingId) => request(`/api/rate-confirmation/${bookingId}/sign-status`),
+  sign:       (bookingId, signature) => request(`/api/rate-confirmation/${bookingId}/sign`, { method: 'POST', body: JSON.stringify({ signature }) }),
   download: async (bookingId) => {
     const token = localStorage.getItem('urload_token');
     const res = await fetch(`${BASE}/api/rate-confirmation/${bookingId}`, {

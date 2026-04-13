@@ -89,4 +89,12 @@ class Booking(Base):
     pod_received_at       = Column(DateTime, nullable=True)
     tms_status            = Column(SAEnum(TMSStatus, create_type=False), nullable=True)
 
+    # E-signatures
+    broker_signature   = Column(Text, nullable=True)
+    broker_signed_at   = Column(DateTime, nullable=True)
+    broker_signed_name = Column(String(255), nullable=True)
+    carrier_signature  = Column(Text, nullable=True)
+    carrier_signed_at  = Column(DateTime, nullable=True)
+    carrier_signed_name = Column(String(255), nullable=True)
+
     check_calls = relationship("CheckCallLog", back_populates="booking", order_by="CheckCallLog.created_at")
