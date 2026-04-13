@@ -40,6 +40,15 @@ const STATUS_CHIP = {
   saved:      { label: 'Saved',       color: 'primary' },
 };
 
+// Left accent bar color per status
+const STATUS_BAR_COLOR = {
+  quoted:     '#9e9e9e', // gray   — booked/pending
+  booked:     '#1565C0', // blue   — scheduled
+  in_transit: '#ED6C02', // yellow/orange — in progress
+  completed:  '#2e7d32', // green  — completed
+  saved:      '#1565C0', // blue
+};
+
 // ── Filter drawer ──────────────────────────────────────────────────────────────
 const FILTER_FIELDS = [
   { key: 'equipment', label: 'Equipment Type', options: ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Box Truck'] },
@@ -305,8 +314,10 @@ export default function LoadManager() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  {['#', 'Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
-                    <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1 }}>
+                  {/* accent bar column — no header */}
+                  <TableCell sx={{ p: 0, width: 4, bgcolor: 'action.hover' }} />
+                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
+                    <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
                   ))}
@@ -314,17 +325,22 @@ export default function LoadManager() {
               </TableHead>
               <TableBody>
                 {tabItems.map((item, idx) => {
-                  const chip = STATUS_CHIP[item.chipKey] || { label: item.status, color: 'default' };
+                  const chip    = STATUS_CHIP[item.chipKey] || { label: item.status, color: 'default' };
+                  const barColor = STATUS_BAR_COLOR[item.chipKey] || '#9e9e9e';
+                  const rowSx = {
+                    cursor: 'pointer',
+                    height: 64,
+                    '& td': { py: 0 },
+                    '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                    '&:hover': { bgcolor: 'action.selected' },
+                  };
                   return (
-                    <TableRow
-                      key={item._key || idx}
-                      onClick={item._nav}
-                      sx={{ cursor: 'pointer', '&:nth-of-type(odd)': { bgcolor: 'action.hover' }, '&:hover': { bgcolor: 'action.selected' } }}
-                    >
-                      <TableCell sx={{ color: 'text.disabled', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>
-                        {item.rowNum}
+                    <TableRow key={item._key || idx} onClick={item._nav} sx={rowSx}>
+                      {/* Colored accent bar */}
+                      <TableCell sx={{ p: 0, width: 4 }}>
+                        <Box sx={{ width: 4, height: 64, bgcolor: barColor }} />
                       </TableCell>
-                      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 2 }}>
                         <Typography variant="body2" fontWeight={700}>{item.origin} → {item.dest}</Typography>
                         {item.date && <Typography variant="caption" color="text.disabled" display="block">{item.date}</Typography>}
                       </TableCell>
@@ -339,7 +355,7 @@ export default function LoadManager() {
                           ? <Typography variant="body2" fontWeight={700} color="success.main">${Number(item.rate).toLocaleString()}</Typography>
                           : <Typography variant="body2" color="text.disabled">—</Typography>}
                         {item.net != null && (
-                          <Typography variant="caption" color={item.net >= 0 ? 'success.main' : 'error.main'}>
+                          <Typography variant="caption" color={item.net >= 0 ? 'success.main' : 'error.main'} display="block">
                             Net {item.net >= 0 ? '+' : ''}${Number(item.net).toLocaleString()}
                           </Typography>
                         )}
