@@ -97,4 +97,10 @@ class Booking(Base):
     carrier_signed_at  = Column(DateTime, nullable=True)
     carrier_signed_name = Column(String(255), nullable=True)
 
+    # Driver assignment
+    assigned_driver_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    driver_pay         = Column(Float, nullable=True)
+    driver_pay_status  = Column(String(20), nullable=False, default="unpaid")
+
+    assigned_driver = relationship("User", foreign_keys=[assigned_driver_id])
     check_calls = relationship("CheckCallLog", back_populates="booking", order_by="CheckCallLog.created_at")

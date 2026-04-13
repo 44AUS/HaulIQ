@@ -63,3 +63,4 @@ def require_plan(*plans: str):
 require_carrier = require_role(UserRole.carrier)
 require_broker  = require_role(UserRole.broker)
 require_admin   = require_role(UserRole.admin)
+require_driver  = require_role(UserRole.driver)

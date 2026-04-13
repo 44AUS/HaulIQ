@@ -317,5 +317,25 @@ export const rateIntelApi = {
   },
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi };
+// ─── Drivers (carrier manages) ────────────────────────────────────────────────
+export const driversApi = {
+  list:   ()           => request('/api/drivers'),
+  invite: (data)       => request('/api/drivers/invite', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data)   => request(`/api/drivers/${id}`,  { method: 'PATCH', body: JSON.stringify(data) }),
+  remove: (id)         => request(`/api/drivers/${id}`,  { method: 'DELETE' }),
+  assign: (bookingId, data) => request(`/api/drivers/bookings/${bookingId}/assign`, { method: 'POST', body: JSON.stringify(data) }),
+  unassign: (bookingId)     => request(`/api/drivers/bookings/${bookingId}/assign`, { method: 'DELETE' }),
+  location: (driverId)      => request(`/api/drivers/${driverId}/location`),
+};
+
+// ─── Driver (driver's own endpoints) ─────────────────────────────────────────
+export const driverApi = {
+  loads:        ()            => request('/api/driver/loads'),
+  loadDetail:   (bookingId)   => request(`/api/driver/loads/${bookingId}`),
+  updateStatus: (bookingId, status) => request(`/api/driver/loads/${bookingId}/status`, { method: 'POST', body: JSON.stringify({ status }) }),
+  pingLocation: (data)        => request('/api/driver/location', { method: 'POST', body: JSON.stringify(data) }),
+  earnings:     ()            => request('/api/driver/earnings'),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi, driversApi, driverApi };
 export default api;

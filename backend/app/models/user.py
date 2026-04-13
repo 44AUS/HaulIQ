@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Boolean, DateTime, Enum as SAEnum
+from sqlalchemy import Column, String, Boolean, DateTime, Enum as SAEnum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -11,6 +11,7 @@ class UserRole(str, enum.Enum):
     carrier = "carrier"
     broker  = "broker"
     admin   = "admin"
+    driver  = "driver"
 
 
 class UserPlan(str, enum.Enum):
@@ -52,6 +53,12 @@ class User(Base):
     updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     stripe_connect_account_id = Column(String(255), nullable=True)
     brand_color               = Column(String(20), nullable=True)
+
+    # Driver-specific fields
+    carrier_id      = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    invite_token    = Column(String(64), nullable=True)
+    invite_accepted = Column(Boolean, default=False)
+    license_number  = Column(String(50), nullable=True)
 
     # Relationships
     subscription   = relationship("Subscription", back_populates="user", uselist=False)

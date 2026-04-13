@@ -16,6 +16,15 @@ import Contact from './pages/Contact';
 import Careers from './pages/Careers';
 import ManageSubscription from './pages/shared/ManageSubscription';
 
+// Pages — Public (no auth)
+import DriverInvite from './pages/public/DriverInvite';
+
+// Pages — Driver
+import DriverDashboard from './pages/driver/Dashboard';
+import DriverLoads from './pages/driver/Loads';
+import DriverLoadDetail from './pages/driver/LoadDetail';
+import DriverEarnings from './pages/driver/Earnings';
+
 // Pages — Carrier
 import CarrierDashboard from './pages/carrier/Dashboard';
 import LoadBoard from './pages/carrier/LoadBoard';
@@ -31,6 +40,7 @@ import PlaceBid from './pages/carrier/PlaceBid';
 import CarrierPayments from './pages/carrier/Payments';
 import Equipment from './pages/carrier/Equipment';
 import LaneWatches from './pages/carrier/LaneWatches';
+import Drivers from './pages/carrier/Drivers';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
@@ -92,13 +102,18 @@ function BrandColorSync() {
 }
 
 // ─── Route guards ─────────────────────────────────────────────────────────────
+function roleDashboard(role) {
+  if (role === 'admin')   return '/admin';
+  if (role === 'driver')  return '/driver/dashboard';
+  return `/${role}/dashboard`;
+}
+
 function ProtectedRoute({ children, requiredRole }) {
   const { user, loading } = useAuth();
   if (loading) return <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>;
   if (!user) return <Navigate to="/login" replace />;
   if (requiredRole && user.role !== requiredRole) {
-    if (user.role === 'admin') return <Navigate to="/admin" replace />;
-    return <Navigate to={`/${user.role}/dashboard`} replace />;
+    return <Navigate to={roleDashboard(user.role)} replace />;
   }
   return children;
 }
@@ -106,12 +121,25 @@ function ProtectedRoute({ children, requiredRole }) {
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  if (user) {
-    if (user.role === 'admin')  return <Navigate to="/admin" replace />;
-    if (user.role === 'broker') return <Navigate to="/broker/dashboard" replace />;
-    return <Navigate to="/carrier/dashboard" replace />;
-  }
+  if (user) return <Navigate to={roleDashboard(user.role)} replace />;
   return children;
+}
+
+// ─── Driver routes ────────────────────────────────────────────────────────────
+function DriverRoutes() {
+  return (
+    <ProtectedRoute requiredRole="driver">
+      <DashboardLayout>
+        <Routes>
+          <Route path="dashboard" element={<DriverDashboard />} />
+          <Route path="loads" element={<DriverLoads />} />
+          <Route path="loads/:bookingId" element={<DriverLoadDetail />} />
+          <Route path="earnings" element={<DriverEarnings />} />
+          <Route path="*" element={<Navigate to="dashboard" replace />} />
+        </Routes>
+      </DashboardLayout>
+    </ProtectedRoute>
+  );
 }
 
 // ─── Carrier routes ──────────────────────────────────────────────────────────
@@ -134,6 +162,7 @@ function CarrierRoutes() {
           <Route path="analytics" element={<CarrierAnalytics />} />
           <Route path="equipment" element={<Equipment />} />
           <Route path="lane-watches" element={<LaneWatches />} />
+          <Route path="drivers" element={<Drivers />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />
@@ -242,6 +271,8 @@ function AppRoutes() {
       } />
       <Route path="/map/:lat/:lng/:city/:name" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
       <Route path="/map/:lat/:lng/:city" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/invite/driver" element={<DriverInvite />} />
+      <Route path="/driver/*" element={<DriverRoutes />} />
       <Route path="/carrier/*" element={<CarrierRoutes />} />
       <Route path="/broker/*" element={<BrokerRoutes />} />
       <Route path="/admin/*" element={<AdminRoutes />} />

@@ -35,6 +35,7 @@ import {
   CheckCircle as DoneIcon,
   LocalAtm as PayIcon,
   EventNote as CalendarIcon,
+  Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -65,6 +66,11 @@ const BROKER_NAV = [
   { icon: TruckIcon,     label: 'Trucks',      path: '/broker/trucks' },
 ];
 
+const DRIVER_NAV = [
+  { icon: TruckIcon,  label: 'My Loads', path: '/driver/loads' },
+  { icon: WalletIcon, label: 'Earnings', path: '/driver/earnings' },
+];
+
 const ADMIN_NAV = [
   { icon: DashboardIcon,  label: 'Overview',  path: '/admin' },
   { icon: UsersIcon,      label: 'Users',     path: '/admin/users' },
@@ -73,8 +79,8 @@ const ADMIN_NAV = [
   { icon: PaymentIcon,    label: 'Payments',  path: '/admin/payments' },
   { icon: ListChecksIcon, label: 'Waitlist',  path: '/admin/waitlist' },
   { icon: LayersIcon,     label: 'Plans',     path: '/admin/plans' },
-  { icon: TruckIcon,    label: 'Equipment', path: '/admin/equipment' },
-  { icon: CategoryIcon, label: 'Classes',   path: '/admin/equipment-classes' },
+  { icon: TruckIcon,      label: 'Equipment', path: '/admin/equipment' },
+  { icon: CategoryIcon,   label: 'Classes',   path: '/admin/equipment-classes' },
 ];
 
 // ── Single top nav link ───────────────────────────────────────────────────────
@@ -576,6 +582,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
 
   const nav = user.role === 'carrier' ? CARRIER_NAV
             : user.role === 'broker'  ? BROKER_NAV
+            : user.role === 'driver'  ? DRIVER_NAV
             : ADMIN_NAV;
 
   const isActive = (path) =>

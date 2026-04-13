@@ -34,6 +34,8 @@ import {
   ChatBubbleOutline as ChatIcon,
   Tune as PreferencesIcon,
   Folder as FolderIcon,
+  LocalShipping as TruckIcon,
+  Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -41,6 +43,12 @@ import { messagesApi, bookingsApi, networkApi } from '../../services/api';
 
 export const DRAWER_WIDTH = 280;
 export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
+
+const DRIVER_LINKS = [
+  { icon: DashboardIcon, label: 'Dashboard', path: '/driver/dashboard' },
+  { icon: TruckIcon,     label: 'My Loads',  path: '/driver/loads' },
+  { icon: WalletIcon,    label: 'Earnings',  path: '/driver/earnings' },
+];
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
@@ -52,6 +60,7 @@ const CARRIER_LINKS = [
   { icon: ActivityIcon,  label: 'In Progress',       path: '/carrier/active' },
   { icon: WalletIcon,    label: 'Payments',          path: '/carrier/payments' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
+  { icon: BadgeIcon,     label: 'My Drivers',        path: '/carrier/drivers' },
   { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },
   { icon: FolderIcon,    label: 'Documents',         path: '/carrier/documents' },
   { icon: CreditCardIcon,label: 'Billing',           path: '/carrier/billing' },
@@ -174,6 +183,7 @@ function SidebarContent({ onNavigate, onClose }) {
 
   const links = user.role === 'carrier' ? CARRIER_LINKS
               : user.role === 'broker'  ? BROKER_LINKS
+              : user.role === 'driver'  ? DRIVER_LINKS
               : ADMIN_LINKS;
 
   const messagesPath = user.role === 'carrier' ? '/carrier/messages'

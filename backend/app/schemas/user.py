@@ -66,6 +66,9 @@ class UserOut(BaseModel):
     vetting_flags:     Optional[str] = None
     vetting_summary:   Optional[str] = None
     brand_color:       Optional[str] = None
+    carrier_id:        Optional[UUID] = None
+    invite_accepted:   Optional[bool] = None
+    license_number:    Optional[str] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact, rate_confirmation, notifications, lane_watches, load_templates
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact, rate_confirmation, notifications, lane_watches, load_templates, drivers, driver_invite, driver_loads
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
 from app.models import truck_post as _truck_post_model  # noqa: ensure table is registered
 from app.models import network as _network_model  # noqa: ensure table is registered
@@ -21,6 +21,7 @@ from app.models import contact as _contact_model  # noqa: ensure table is regist
 from app.models import notification as _notification_model  # noqa: ensure table is registered
 from app.models import lane_watch as _lane_watch_model  # noqa: ensure table is registered
 from app.models import load_template as _load_template_model  # noqa: ensure table is registered
+from app.models import driver_location as _driver_location_model  # noqa: ensure table is registered
 
 settings = get_settings()
 
@@ -28,6 +29,12 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Ensure enum types exist BEFORE create_all references them
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TYPE userrole ADD VALUE IF NOT EXISTS 'driver'"))
+            conn.commit()
+        except Exception:
+            conn.rollback()
     with engine.connect() as conn:
         try:
             conn.execute(text("ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'in_transit'"))
@@ -144,6 +151,9 @@ app.include_router(rate_confirmation.router, prefix="/api/rate-confirmation",  t
 app.include_router(notifications.router,     prefix="/api/notifications",      tags=["Notifications"])
 app.include_router(lane_watches.router,      prefix="/api/lane-watches",       tags=["Lane Watches"])
 app.include_router(load_templates.router,    prefix="/api/load-templates",     tags=["Load Templates"])
+app.include_router(drivers.router,           prefix="/api/drivers",             tags=["Drivers"])
+app.include_router(driver_invite.router,     prefix="/api/driver-invite",       tags=["Driver Invite"])
+app.include_router(driver_loads.router,      prefix="/api/driver",              tags=["Driver"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────

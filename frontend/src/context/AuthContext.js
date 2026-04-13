@@ -3,7 +3,7 @@ import { authApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
-export const ROLES = { CARRIER: 'carrier', BROKER: 'broker', ADMIN: 'admin' };
+export const ROLES = { CARRIER: 'carrier', BROKER: 'broker', ADMIN: 'admin', DRIVER: 'driver' };
 
 // Map backend UserOut → frontend user shape
 function mapUser(apiUser) {
@@ -21,6 +21,8 @@ function mapUser(apiUser) {
     avatar:     apiUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
     avatar_url: apiUser.avatar_url || null,
     brand_color: apiUser.brand_color || null,
+    carrier_id:  apiUser.carrier_id  || null,
+    license_number: apiUser.license_number || null,
   };
 }
 
