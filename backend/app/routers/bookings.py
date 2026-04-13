@@ -187,6 +187,41 @@ def carrier_in_progress(
             "weight_lbs": load.weight_lbs,
             "broker_name": broker_name,
             "note": bk.note,
+            "tms_status": bk.tms_status.value if bk.tms_status else None,
+            "created_at": bk.created_at.isoformat() if bk.created_at else None,
+        })
+    return result
+
+
+@router.get("/completed", summary="Carrier: completed bookings with load details")
+def carrier_completed(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.carrier_id == current_user.id,
+            Booking.status == BookingStatus.completed,
+        )
+        .order_by(Booking.updated_at.desc())
+        .all()
+    )
+    result = []
+    for bk in bookings:
+        load = db.query(Load).filter(Load.id == bk.load_id).first()
+        if not load:
+            continue
+        broker_name = load.broker.name if load.broker else None
+        result.append({
+            "booking_id": str(bk.id),
+            "load_type": load.load_type.value if load.load_type else None,
+            "origin": load.origin,
+            "destination": load.destination,
+            "miles": load.miles,
+            "rate": load.rate,
+            "broker_name": broker_name,
+            "completed_at": bk.updated_at.isoformat() if bk.updated_at else None,
         })
     return result
 

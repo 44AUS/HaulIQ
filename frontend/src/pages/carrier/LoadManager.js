@@ -4,7 +4,7 @@ import {
   Box, Typography, Chip, CircularProgress, IconButton, Button,
   Drawer, MenuItem, Select, FormControl, Tooltip, useTheme,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TextField, Checkbox,
+  TextField, Checkbox, Collapse, Stepper, Step, StepLabel,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -12,8 +12,8 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { bookingsApi, analyticsApi, loadsApi } from '../../services/api';
-import { adaptHistory, adaptLoadList } from '../../services/adapters';
+import { bookingsApi, loadsApi } from '../../services/api';
+import { adaptLoadList } from '../../services/adapters';
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS = [
@@ -120,10 +120,10 @@ export default function LoadManager() {
   const theme    = useTheme();
   const isDark   = theme.palette.mode === 'dark';
 
-  const [active,   setActive]   = useState([]);   // from inProgress
-  const [history,  setHistory]  = useState([]);   // from analyticsApi.history
-  const [saved,    setSaved]    = useState([]);   // from savedList
-  const [archived, setArchived] = useState([]);   // from bookingsApi.my (status=archived)
+  const [active,     setActive]     = useState([]);   // from inProgress
+  const [completed,  setCompleted]  = useState([]);   // from bookingsApi.completed
+  const [saved,      setSaved]      = useState([]);   // from savedList
+  const [archived,   setArchived]   = useState([]);   // from bookingsApi.my (status=archived)
   const [loading,  setLoading]  = useState(true);
   const [activeTab, setActiveTab] = useState('all');
   const [showProgress, setShowProgress] = useState(false);
@@ -137,14 +137,14 @@ export default function LoadManager() {
 
   const fetchAll = () => Promise.all([
     bookingsApi.inProgress().catch(() => []),
-    analyticsApi.history().catch(() => []),
+    bookingsApi.completed().catch(() => []),
     loadsApi.savedList().catch(() => []),
     bookingsApi.my().catch(() => []),
   ]);
 
-  const applyFetch = ([act, hist, sv, myBookings]) => {
+  const applyFetch = ([act, comp, sv, myBookings]) => {
     setActive(Array.isArray(act) ? act : []);
-    setHistory(Array.isArray(hist) ? hist.map(adaptHistory) : []);
+    setCompleted(Array.isArray(comp) ? comp : []);
     setSaved(adaptLoadList(Array.isArray(sv) ? sv : []));
     setArchived(Array.isArray(myBookings) ? myBookings.filter(b => b.status === 'archived') : []);
   };
@@ -176,78 +176,77 @@ export default function LoadManager() {
       if (!iso) return null;
       const d = new Date(iso);
       if (isNaN(d)) return null;
-      const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+      const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
       const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase().replace(' ', '');
       return { date, time };
     };
 
-    const activeItems = applyFilter(active.map((b, i) => ({
-      _key:      b.booking_id || b.id,
-      _tab:      STATUS_TAB[b.status] || 'scheduled',
-      _nav:      () => navigate(`/carrier/active/${b.booking_id}`),
-      rowNum:    i + 1,
-      date:      fmtDateTime(b.created_at || b.booked_at || b.updated_at),
-      origin:    b.origin,
-      dest:      b.destination,
-      equipment: b.load_type,
-      miles:     b.miles,
-      rate:      b.rate,
-      broker:    b.broker_name,
-      status:    b.status,
-      chipKey:   b.status,
+    const activeItems = applyFilter(active.map((b) => ({
+      _key:       b.booking_id || b.id,
+      _tab:       STATUS_TAB[b.status] || 'scheduled',
+      _nav:       () => navigate(`/carrier/active/${b.booking_id}`),
+      date:       fmtDateTime(b.created_at),
+      origin:     b.origin,
+      dest:       b.destination,
+      equipment:  b.load_type,
+      miles:      b.miles,
+      rate:       b.rate,
+      broker:     b.broker_name,
+      status:     b.status,
+      chipKey:    b.status,
+      tmsStatus:  b.tms_status || null,
     })));
 
-    const histItems = applyFilter(history.map((h, i) => ({
-      _key:      h.id,
-      _tab:      'completed',
-      _nav:      () => {},
-      rowNum:    i + 1,
-      date:      h.date ? { date: h.date, time: null } : null,
-      origin:    h.origin,
-      dest:      h.dest,
-      equipment: null,
-      miles:     h.miles,
-      rate:      h.rate,
-      net:       h.net,
-      broker:    h.broker,
-      status:    'completed',
-      chipKey:   'completed',
+    const completedItems = applyFilter(completed.map((b) => ({
+      _key:       b.booking_id,
+      _tab:       'completed',
+      _nav:       () => {},
+      date:       fmtDateTime(b.completed_at),
+      origin:     b.origin,
+      dest:       b.destination,
+      equipment:  b.load_type,
+      miles:      b.miles,
+      rate:       b.rate,
+      broker:     b.broker_name,
+      status:     'completed',
+      chipKey:    'completed',
+      tmsStatus:  null,
     })));
 
-    const savedItems = applyFilter(saved.map((l, i) => ({
-      _key:      l.id,
-      _tab:      'saved',
-      _nav:      () => navigate(`/carrier/loads/${l.id}`),
-      rowNum:    i + 1,
-      date:      null,
-      origin:    l.origin,
-      dest:      l.destination,
-      equipment: l.load_type,
-      miles:     l.miles,
-      rate:      l.rate,
-      broker:    null,
-      status:    'saved',
-      chipKey:   'saved',
+    const savedItems = applyFilter(saved.map((l) => ({
+      _key:       l.id,
+      _tab:       'saved',
+      _nav:       () => navigate(`/carrier/loads/${l.id}`),
+      date:       null,
+      origin:     l.origin,
+      dest:       l.destination,
+      equipment:  l.load_type,
+      miles:      l.miles,
+      rate:       l.rate,
+      broker:     null,
+      status:     'saved',
+      chipKey:    'saved',
+      tmsStatus:  null,
     })));
 
-    const archivedItems = applyFilter(archived.map((b, i) => ({
-      _key:      b.id,
-      _tab:      'archived',
-      _nav:      () => {},
-      rowNum:    i + 1,
-      date:      fmtDateTime(b.created_at || b.updated_at),
-      origin:    b.origin,
-      dest:      b.destination,
-      equipment: b.load_type,
-      miles:     b.miles,
-      rate:      b.rate,
-      broker:    b.broker_name,
-      status:    'archived',
-      chipKey:   'archived',
+    const archivedItems = applyFilter(archived.map((b) => ({
+      _key:       b.id,
+      _tab:       'archived',
+      _nav:       () => {},
+      date:       fmtDateTime(b.created_at || b.updated_at),
+      origin:     b.origin,
+      dest:       b.destination,
+      equipment:  b.load_type,
+      miles:      b.miles,
+      rate:       b.rate,
+      broker:     b.broker_name,
+      status:     'archived',
+      chipKey:    'archived',
+      tmsStatus:  null,
     })));
 
-    return [...activeItems, ...histItems, ...savedItems, ...archivedItems];
-  }, [active, history, saved, archived, applied, navigate]);
+    return [...activeItems, ...completedItems, ...savedItems, ...archivedItems];
+  }, [active, completed, saved, archived, applied, navigate]);
 
   const tabItems = useMemo(() => {
     if (activeTab === 'all') return allItems.filter(i => i._tab !== 'archived');
@@ -380,7 +379,7 @@ export default function LoadManager() {
                       </TableCell>
                     );
                   })()}
-                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker'].map(h => (
+                  {['Route', 'Equipment', 'Miles', 'Rate', 'Broker'].map(h => (
                     <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
@@ -503,19 +502,6 @@ export default function LoadManager() {
                           </Typography>
                         )}
                       </TableCell>
-                      {showProgress && (
-                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          {item._tab === 'in_progress' ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              {['D', 'P', 'T', 'Del'].map((s, i) => (
-                                <Box key={s} sx={{ width: 16, height: 16, borderRadius: '50%', bgcolor: i === 0 ? 'warning.main' : 'action.disabledBackground', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Typography sx={{ fontSize: '0.5rem', color: '#fff', fontWeight: 700 }}>{s}</Typography>
-                                </Box>
-                              ))}
-                            </Box>
-                          ) : <Typography variant="caption" color="text.disabled">—</Typography>}
-                        </TableCell>
-                      )}
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
@@ -523,6 +509,31 @@ export default function LoadManager() {
                         <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
                       </TableCell>
                     </TableRow>
+                    {/* Expand row — stepper shown when showProgress is on */}
+                    {showProgress && (
+                      <TableRow key={`${rowKey}-progress`} sx={{ '& td': { py: 0, borderBottom: 0 } }}>
+                        <TableCell colSpan={8} sx={{ p: 0 }}>
+                          <Collapse in={showProgress} unmountOnExit>
+                            <Box sx={{ px: 3, py: 1.5, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', borderBottom: 1, borderColor: 'divider' }}>
+                              {item._tab === 'in_progress' ? (() => {
+                                const TMS_STEPS = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
+                                const TMS_LABELS = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
+                                const activeStep = item.tmsStatus ? TMS_STEPS.indexOf(item.tmsStatus) : -1;
+                                return (
+                                  <Stepper activeStep={activeStep} alternativeLabel sx={{ '& .MuiStepLabel-label': { fontSize: '0.65rem' }, '& .MuiSvgIcon-root': { fontSize: 18 } }}>
+                                    {TMS_LABELS.map(label => (
+                                      <Step key={label}><StepLabel>{label}</StepLabel></Step>
+                                    ))}
+                                  </Stepper>
+                                );
+                              })() : (
+                                <Typography variant="caption" color="text.disabled">No progress tracking for this load</Typography>
+                              )}
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    )}
                   );
                 })}
               </TableBody>
