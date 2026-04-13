@@ -399,18 +399,24 @@ export default function LoadManager() {
   };
 
   const tabBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-  const headerBg = isDark ? '#0d0d0d' : '#fff';
   const activeFg = isDark ? '#fff' : '#000';
   const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{
+      display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden',
+      bgcolor: 'background.paper',
+      border: 1, borderColor: 'divider',
+      borderRadius: 2,
+    }}>
 
       {/* ── Top bar ── */}
       <Box sx={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        px: 3, py: 1.5, bgcolor: headerBg,
+        px: 3, py: 1.5, bgcolor: 'background.paper',
         borderBottom: 1, borderColor: 'divider', flexShrink: 0,
+        borderRadius: '8px 8px 0 0',
       }}>
         <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Loads</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -464,7 +470,7 @@ export default function LoadManager() {
       {/* ── Tab bar ── */}
       <Box sx={{
         display: 'flex', alignItems: 'stretch',
-        bgcolor: headerBg, borderBottom: 1, borderColor: 'divider',
+        bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider',
         flexShrink: 0, overflowX: 'auto',
         '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none',
       }}>
@@ -511,7 +517,7 @@ export default function LoadManager() {
       <Box sx={{
         display: 'flex', alignItems: 'center',
         px: 1.5, py: 0.75,
-        bgcolor: isDark ? '#0a0a0a' : '#f0f0f0',
+        bgcolor: 'action.hover',
         borderBottom: 1, borderColor: 'divider', flexShrink: 0,
       }}>
         <Typography variant="caption" sx={{ width: 70, color: 'text.disabled', fontSize: '0.68rem', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
@@ -547,6 +553,8 @@ export default function LoadManager() {
           ))
         )}
       </Box>
+
+    </Box>
 
       {/* ── Floating ADD button ── */}
       <Box sx={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>

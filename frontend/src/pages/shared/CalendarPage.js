@@ -47,7 +47,7 @@ function ViewButton({ active, onClick, children }) {
         fontSize: '0.78rem',
         fontWeight: 600,
         textTransform: 'none',
-        borderRadius: '20px',
+        borderRadius: '8px',
         color: active ? '#fff' : 'text.secondary',
         bgcolor: active ? 'primary.main' : 'transparent',
         '&:hover': { bgcolor: active ? 'primary.dark' : 'action.hover' },
