@@ -528,6 +528,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
       preferences: {
         title: 'Preferences',
         tabs: [
+          { key: 'all',           label: 'All' },
           { key: 'branding',      label: 'Branding' },
           { key: 'notifications', label: 'Notifications' },
           { key: 'equipment',     label: 'Equipment' },
