@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
-import { loadsApi, bidsApi, bookingsApi } from '../../services/api';
+import { loadsApi, bidsApi, bookingsApi, loadTemplatesApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress,
-  Paper, Alert, Divider, Stack,
+  Paper, Alert, Divider, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
 } from '@mui/material';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -19,6 +19,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import NavigationIcon from '@mui/icons-material/Navigation';
 import PlaceIcon from '@mui/icons-material/Place';
+import LayersIcon from '@mui/icons-material/Layers';
 
 const LIBRARIES = ['places'];
 
@@ -318,6 +319,10 @@ export default function BrokerLoadDetail() {
   const [loading, setLoading]     = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError]         = useState(null);
+  const [templateDialog, setTemplateDialog] = useState(false);
+  const [templateName, setTemplateName]     = useState('');
+  const [templateSaving, setTemplateSaving] = useState(false);
+  const [templateSaved, setTemplateSaved]   = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -348,6 +353,39 @@ export default function BrokerLoadDetail() {
       .then(() => setBids(prev => prev.map(b => b.id === bidId ? { ...b, status: 'rejected' } : b)))
       .catch(err => alert(err.message))
       .finally(() => setActionLoading(null));
+  };
+
+  const handleSaveTemplate = () => {
+    if (!load || !templateName.trim()) return;
+    setTemplateSaving(true);
+    const raw = load._raw || {};
+    loadTemplatesApi.create({
+      name: templateName.trim(),
+      origin: load.origin,
+      origin_state: raw.origin_state || null,
+      destination: load.dest,
+      dest_state: raw.dest_state || null,
+      miles: load.miles || 0,
+      deadhead_miles: load.deadhead || 0,
+      pickup_address: load.pickupAddress || null,
+      delivery_address: load.deliveryAddress || null,
+      pickup_lat: load.pickupLat || null,
+      pickup_lng: load.pickupLng || null,
+      delivery_lat: load.deliveryLat || null,
+      delivery_lng: load.deliveryLng || null,
+      load_type: raw.load_type || null,
+      load_size: raw.load_size || null,
+      trailer_length_ft: raw.trailer_length_ft || null,
+      weight_lbs: raw.weight_lbs || null,
+      commodity: load.commodity || null,
+      dimensions: load.dims || null,
+      rate: load.rate || 0,
+      notes: load.notes || null,
+      instant_book: load.instantBook || false,
+    })
+      .then(() => { setTemplateSaved(true); setTemplateDialog(false); })
+      .catch(err => alert(err.message))
+      .finally(() => setTemplateSaving(false));
   };
 
   if (loading) return (
@@ -430,6 +468,15 @@ export default function BrokerLoadDetail() {
                   />
                 )}
                 {bookingStatus === 'completed' && <Chip label="Delivered" color="success" size="small" variant="outlined" />}
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<LayersIcon sx={{ fontSize: 14 }} />}
+                  onClick={() => { setTemplateDialog(true); setTemplateName(`${load.origin} → ${load.dest}`); setTemplateSaved(false); }}
+                  sx={{ fontSize: '0.72rem', py: 0.35 }}
+                >
+                  {templateSaved ? 'Saved!' : 'Save as Template'}
+                </Button>
               </Box>
             </Box>
 
@@ -584,6 +631,38 @@ export default function BrokerLoadDetail() {
 
         </Box>
       </Box>
+
+      {/* Save as Template dialog */}
+      <Dialog open={templateDialog} onClose={() => setTemplateDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LayersIcon color="primary" fontSize="small" /> Save as Template
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Give this lane a name so you can re-post it instantly next time.
+          </Typography>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            label="Template Name"
+            value={templateName}
+            onChange={e => setTemplateName(e.target.value)}
+            placeholder="e.g. Chicago → Atlanta weekly"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTemplateDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveTemplate}
+            disabled={templateSaving || !templateName.trim()}
+            startIcon={templateSaving ? <CircularProgress size={14} color="inherit" /> : null}
+          >
+            Save Template
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

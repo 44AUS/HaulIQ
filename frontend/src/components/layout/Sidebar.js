@@ -62,6 +62,7 @@ const BROKER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',         path: '/broker/dashboard' },
   { icon: AddIcon,       label: 'Post Load',         path: '/broker/post' },
   { icon: PackageIcon,   label: 'Manage Loads',      path: '/broker/loads' },
+  { icon: ListChecksIcon,label: 'Templates',          path: '/broker/templates' },
   { icon: ActivityIcon,  label: 'In Progress',       path: '/broker/active' },
   { icon: BarChartIcon,  label: 'Analytics',         path: '/broker/analytics' },
   { icon: NetworkIcon,   label: 'Network',           path: '/broker/network' },

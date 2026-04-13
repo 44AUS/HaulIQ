@@ -45,6 +45,7 @@ import TruckBoard from './pages/broker/TruckBoard';
 import TrackLoad from './pages/broker/TrackLoad';
 import DispatchDetail from './pages/broker/DispatchDetail';
 import BrokerLoadDetail from './pages/broker/LoadDetail';
+import LoadTemplates from './pages/broker/LoadTemplates';
 
 // Pages — Shared
 import Messages from './pages/shared/Messages';
@@ -156,6 +157,7 @@ function BrokerRoutes() {
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
           <Route path="loads/:id" element={<BrokerLoadDetail />} />
+          <Route path="templates" element={<LoadTemplates />} />
           <Route path="analytics" element={<BrokerAnalytics />} />
           <Route path="messages" element={<Messages />} />
           <Route path="bookings" element={<BookingRequests />} />

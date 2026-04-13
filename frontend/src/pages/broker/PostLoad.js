@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loadsApi, equipmentTypesApi, equipmentClassesApi, rateIntelApi } from '../../services/api';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { loadsApi, equipmentTypesApi, equipmentClassesApi, rateIntelApi, loadTemplatesApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
@@ -12,11 +12,13 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BoltIcon from '@mui/icons-material/Bolt';
+import LayersIcon from '@mui/icons-material/Layers';
 
 const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 
 export default function PostLoad() {
   const navigate = useNavigate();
+  const { state: routeState } = useLocation();
   const [equipmentClasses, setEquipmentClasses] = useState([]);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
 
@@ -29,25 +31,29 @@ export default function PostLoad() {
       .catch(() => {});
   }, []);
 
+  const tpl = routeState?.template || null;
+
   const [form, setForm] = useState({
     // City/state display values (for origin/destination fields)
-    originCity: '', destCity: '',
+    originCity: tpl?.origin || '', destCity: tpl?.destination || '',
     // Full addresses + coords
-    pickupAddress: '', deliveryAddress: '',
-    pickupLat: null, pickupLng: null,
-    deliveryLat: null, deliveryLng: null,
+    pickupAddress: tpl?.pickup_address || '', deliveryAddress: tpl?.delivery_address || '',
+    pickupLat: tpl?.pickup_lat || null, pickupLng: tpl?.pickup_lng || null,
+    deliveryLat: tpl?.delivery_lat || null, deliveryLng: tpl?.delivery_lng || null,
     // Rest of form
     pickup: '', delivery: '',
-    equipmentClass: '', equipment: '', weight: '', dims: '48x102',
-    loadSize: 'full', trailerLength: '',
-    commodity: '', rate: '', miles: '', deadhead: '', notes: '',
-    instantBook: false,
+    equipmentClass: '', equipment: tpl?.load_type || '', weight: tpl?.weight_lbs ? String(tpl.weight_lbs) : '', dims: tpl?.dimensions || '48x102',
+    loadSize: tpl?.load_size || 'full', trailerLength: tpl?.trailer_length_ft ? String(tpl.trailer_length_ft) : '',
+    commodity: tpl?.commodity || '', rate: tpl?.rate ? String(tpl.rate) : '', miles: tpl?.miles ? String(tpl.miles) : '', deadhead: tpl?.deadhead_miles ? String(tpl.deadhead_miles) : '', notes: tpl?.notes || '',
+    instantBook: tpl?.instant_book || false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [posted, setPosted] = useState(false);
   const [calcingMiles, setCalcingMiles] = useState(false);
   const [rateIntel, setRateIntel] = useState(null);
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState(tpl ? tpl.name : '');
   const milesTimer = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -132,7 +138,35 @@ export default function PostLoad() {
       load_size:         form.loadSize,
       trailer_length_ft: form.trailerLength ? parseInt(form.trailerLength) : null,
     })
-      .then(() => setPosted(true))
+      .then(() => {
+        if (saveAsTemplate && templateName.trim()) {
+          loadTemplatesApi.create({
+            name: templateName.trim(),
+            origin: form.originCity,
+            origin_state: form.originCity.split(', ')[1] || null,
+            destination: form.destCity,
+            dest_state: form.destCity.split(', ')[1] || null,
+            miles: parseInt(form.miles) || 0,
+            deadhead_miles: parseInt(form.deadhead) || 0,
+            pickup_address: form.pickupAddress || null,
+            delivery_address: form.deliveryAddress || null,
+            pickup_lat: form.pickupLat || null,
+            pickup_lng: form.pickupLng || null,
+            delivery_lat: form.deliveryLat || null,
+            delivery_lng: form.deliveryLng || null,
+            load_type: form.equipment || null,
+            load_size: form.loadSize || null,
+            trailer_length_ft: form.trailerLength ? parseInt(form.trailerLength) : null,
+            weight_lbs: form.weight ? parseInt(form.weight) : null,
+            commodity: form.commodity || null,
+            dimensions: form.dims || null,
+            rate: parseFloat(form.rate),
+            notes: form.notes || null,
+            instant_book: form.instantBook,
+          }).catch(() => {});
+        }
+        setPosted(true);
+      })
       .catch(err => { setError(err.message); setSubmitting(false); });
   };
 
@@ -146,6 +180,8 @@ export default function PostLoad() {
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 4 }}>
         <Button variant="outlined" onClick={() => {
           setPosted(false);
+          setSaveAsTemplate(false);
+          setTemplateName('');
           setForm({
             originCity: '', destCity: '', pickupAddress: '', deliveryAddress: '',
             pickupLat: null, pickupLng: null, deliveryLat: null, deliveryLng: null,
@@ -168,10 +204,10 @@ export default function PostLoad() {
     <Box sx={{ maxWidth: 680, mx: 'auto' }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <AddCircleOutlineIcon color="primary" /> Post a Load
+          <AddCircleOutlineIcon color="primary" /> {tpl ? `Re-post: ${tpl.name}` : 'Post a Load'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Fill out the details and your load will be live instantly
+          {tpl ? 'Lane details pre-filled from template — just set the dates.' : 'Fill out the details and your load will be live instantly'}
         </Typography>
       </Box>
 
@@ -368,6 +404,30 @@ export default function PostLoad() {
           <TextField fullWidth size="small" label="Special Instructions" multiline rows={3}
             value={form.notes} onChange={e => set('notes', e.target.value)}
             placeholder="Any special requirements, hazmat info, contact details..." />
+
+          {/* Save as Template */}
+          <Box sx={{ border: '1px solid', borderColor: saveAsTemplate ? 'primary.main' : 'divider', borderRadius: 2, p: 2 }}>
+            <FormControlLabel
+              control={<Switch checked={saveAsTemplate} onChange={e => setSaveAsTemplate(e.target.checked)} color="primary" />}
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <LayersIcon fontSize="small" sx={{ color: saveAsTemplate ? 'primary.main' : 'text.disabled' }} />
+                  <Typography variant="body2" fontWeight={600}>Save as Template</Typography>
+                </Box>
+              }
+            />
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5, ml: 4.5 }}>
+              Save this lane so you can re-post it in one click next time.
+            </Typography>
+            {saveAsTemplate && (
+              <TextField
+                fullWidth size="small" label="Template Name" required
+                value={templateName} onChange={e => setTemplateName(e.target.value)}
+                placeholder={form.originCity && form.destCity ? `${form.originCity} → ${form.destCity}` : 'e.g. Chicago → Atlanta weekly'}
+                sx={{ mt: 1.5, ml: 0 }}
+              />
+            )}
+          </Box>
 
           {error && <Alert severity="error">{error}</Alert>}
 

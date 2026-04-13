@@ -296,6 +296,15 @@ export const laneWatchesApi = {
   delete: (id)       => request(`/api/lane-watches/${id}`, { method: 'DELETE' }),
 };
 
+// ─── Load Templates ───────────────────────────────────────────────────────────
+export const loadTemplatesApi = {
+  list:    ()                => request('/api/load-templates'),
+  create:  (data)            => request('/api/load-templates', { method: 'POST', body: JSON.stringify(data) }),
+  update:  (id, data)        => request(`/api/load-templates/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  delete:  (id)              => request(`/api/load-templates/${id}`, { method: 'DELETE' }),
+  repost:  (id, data)        => request(`/api/load-templates/${id}/repost`, { method: 'POST', body: JSON.stringify(data) }),
+};
+
 // ─── Rate Intelligence ────────────────────────────────────────────────────────
 export const rateIntelApi = {
   lane: (originState, destState) => {
@@ -306,5 +315,5 @@ export const rateIntelApi = {
   },
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, rateIntelApi };
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi };
 export default api;
