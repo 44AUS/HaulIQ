@@ -127,8 +127,9 @@ export default function LoadManager() {
   const [filters, setFilters]   = useState({});
   const [applied, setApplied]   = useState({});
   const [spinning, setSpinning] = useState(false);
-  const [hoveredRow, setHoveredRow] = useState(null);
-  const [selected,  setSelected]   = useState(new Set());
+  const [hoveredRow,    setHoveredRow]    = useState(null);
+  const [hoveredHeader, setHoveredHeader] = useState(false);
+  const [selected,      setSelected]      = useState(new Set());
 
   const load = () => {
     setLoading(true);
@@ -327,7 +328,44 @@ export default function LoadManager() {
                 <TableRow>
                   {/* accent bar column — no header */}
                   <TableCell sx={{ p: 0, width: 4, bgcolor: 'action.hover' }} />
-                  {['Date', 'Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
+                  {/* Date header — hover shows select-all checkbox */}
+                  {(() => {
+                    const allKeys     = tabItems.map((item, i) => item._key || i);
+                    const allSelected = allKeys.length > 0 && allKeys.every(k => selected.has(k));
+                    const someSelected = !allSelected && allKeys.some(k => selected.has(k));
+                    const toggleAll = () => {
+                      setSelected(prev => {
+                        const next = new Set(prev);
+                        if (allSelected) { allKeys.forEach(k => next.delete(k)); }
+                        else             { allKeys.forEach(k => next.add(k)); }
+                        return next;
+                      });
+                    };
+                    return (
+                      <TableCell
+                        sx={{ width: 90, minWidth: 90, bgcolor: 'action.hover', cursor: 'pointer', py: 1.25 }}
+                        onMouseEnter={() => setHoveredHeader(true)}
+                        onMouseLeave={() => setHoveredHeader(false)}
+                        onClick={toggleAll}
+                      >
+                        {hoveredHeader || allSelected || someSelected ? (
+                          <Checkbox
+                            size="small"
+                            checked={allSelected}
+                            indeterminate={someSelected}
+                            onChange={toggleAll}
+                            onClick={e => e.stopPropagation()}
+                            sx={{ p: 0.5 }}
+                          />
+                        ) : (
+                          <Typography sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', whiteSpace: 'nowrap' }}>
+                            Date
+                          </Typography>
+                        )}
+                      </TableCell>
+                    );
+                  })()}
+                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
                     <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
