@@ -282,7 +282,7 @@ export default function LoadManager() {
           const count    = tabCounts[tab.key] ?? 0;
           return (
             <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
-              sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 2.5, py: 1.5, cursor: 'pointer', flexShrink: 0, borderBottom: isActive ? '2px solid' : '2px solid transparent', borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent', color: isActive ? activeFg : inactiveFg, '&:hover': { color: isActive ? activeFg : (isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.7)') }, transition: 'color 0.15s' }}>
+              sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 2.5, py: 2.25, cursor: 'pointer', flexShrink: 0, borderBottom: isActive ? '2px solid' : '2px solid transparent', borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent', color: isActive ? activeFg : inactiveFg, '&:hover': { color: isActive ? activeFg : (isDark ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.7)') }, transition: 'color 0.15s' }}>
               <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
               <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, opacity: isActive ? 1 : 0.65 }}>{count}</Typography>
             </Box>
