@@ -253,11 +253,11 @@ export default function LoadManager() {
   const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '6px' }}>
 
       {/* ── Top bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, borderRadius: '8px 8px 0 0' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
         <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Loads</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Button size="small" startIcon={<span style={{ fontSize: 14 }}>≡</span>} onClick={() => setShowProgress(v => !v)}
