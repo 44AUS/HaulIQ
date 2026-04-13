@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 from app.database import get_db
-from app.middleware.auth import get_current_user, require_carrier
+from app.middleware.auth import require_carrier
 from app.models.user import User
 from app.models.lane_watch import LaneWatch
 
@@ -13,7 +13,9 @@ router = APIRouter()
 
 
 class LaneWatchCreate(BaseModel):
+    origin_city:    Optional[str] = None
     origin_state:   Optional[str] = None
+    dest_city:      Optional[str] = None
     dest_state:     Optional[str] = None
     equipment_type: Optional[str] = None
     min_rate:       Optional[float] = None
@@ -30,7 +32,9 @@ class LaneWatchUpdate(BaseModel):
 def _out(lw: LaneWatch) -> dict:
     return {
         "id":             str(lw.id),
+        "origin_city":    lw.origin_city,
         "origin_state":   lw.origin_state,
+        "dest_city":      lw.dest_city,
         "dest_state":     lw.dest_state,
         "equipment_type": lw.equipment_type,
         "min_rate":       lw.min_rate,
@@ -68,7 +72,9 @@ def create_watch(
 
     watch = LaneWatch(
         carrier_id=current_user.id,
+        origin_city=payload.origin_city.strip().title() if payload.origin_city else None,
         origin_state=payload.origin_state.upper() if payload.origin_state else None,
+        dest_city=payload.dest_city.strip().title() if payload.dest_city else None,
         dest_state=payload.dest_state.upper() if payload.dest_state else None,
         equipment_type=payload.equipment_type,
         min_rate=payload.min_rate,

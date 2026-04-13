@@ -346,7 +346,11 @@ def create_load(
     for w in watches:
         if str(w.carrier_id) in notified:
             continue
+        if w.origin_city and w.origin_city.lower() not in (load.origin or '').lower():
+            continue
         if w.origin_state and (load.origin_state or '').upper() != w.origin_state:
+            continue
+        if w.dest_city and w.dest_city.lower() not in (load.destination or '').lower():
             continue
         if w.dest_state and (load.dest_state or '').upper() != w.dest_state:
             continue

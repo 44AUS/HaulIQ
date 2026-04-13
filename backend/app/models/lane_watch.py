@@ -13,7 +13,9 @@ class LaneWatch(Base):
     carrier_id     = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Match criteria — None means "any"
-    origin_state   = Column(String(2), nullable=True)   # e.g. "IL" or None = any
+    origin_city    = Column(String(100), nullable=True)  # e.g. "Chicago" or None = any
+    origin_state   = Column(String(2), nullable=True)    # e.g. "IL" or None = any
+    dest_city      = Column(String(100), nullable=True)
     dest_state     = Column(String(2), nullable=True)
     equipment_type = Column(String(100), nullable=True)  # e.g. "Dry Van" or None = any
     min_rate       = Column(Float, nullable=True)        # minimum all-in rate
