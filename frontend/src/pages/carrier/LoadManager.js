@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Chip, CircularProgress, IconButton, Button,
@@ -447,8 +447,8 @@ export default function LoadManager() {
                     });
                   };
                   return (
+                    <Fragment key={rowKey}>
                     <TableRow
-                      key={rowKey}
                       onClick={item._nav}
                       onMouseEnter={() => setHoveredRow(rowKey)}
                       onMouseLeave={() => setHoveredRow(null)}
@@ -534,6 +534,7 @@ export default function LoadManager() {
                         </TableCell>
                       </TableRow>
                     )}
+                    </Fragment>
                   );
                 })}
               </TableBody>
