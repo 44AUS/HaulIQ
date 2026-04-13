@@ -9,7 +9,6 @@ import {
   Dashboard as DashboardIcon,
   Calculate as CalculateIcon,
   Psychology as BrainIcon,
-  History as HistoryIcon,
   TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
   AddCircleOutline as AddIcon,
@@ -51,11 +50,8 @@ const DRIVER_LINKS = [
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
-  { icon: ListChecksIcon,label: 'Loads',             path: '/carrier/job-manager' },
   { icon: CalculateIcon, label: 'Profit Calculator', path: '/carrier/calculator' },
   { icon: BrainIcon,     label: 'Earnings Brain',    path: '/carrier/brain' },
-  { icon: HistoryIcon,   label: 'Load History',      path: '/carrier/history' },
-  { icon: WalletIcon,    label: 'Payments',          path: '/carrier/payments' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: BadgeIcon,     label: 'My Drivers',        path: '/carrier/drivers' },
   { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },
