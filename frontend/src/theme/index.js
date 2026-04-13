@@ -1,4 +1,4 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, lighten, darken } from '@mui/material/styles';
 
 const baseTokens = {
   typography: {
@@ -43,11 +43,14 @@ const baseTokens = {
 };
 
 export function buildLightTheme(brandColor) {
+  const primary = brandColor
+    ? { main: brandColor, light: lighten(brandColor, 0.35), dark: darken(brandColor, 0.25), contrastText: '#fff' }
+    : { main: '#1565C0', light: '#5E92F3', dark: '#003c8f', contrastText: '#fff' };
   return createTheme({
   ...baseTokens,
   palette: {
     mode: 'light',
-    primary:   { main: '#1565C0', light: '#5E92F3', dark: '#003c8f', contrastText: '#fff' },
+    primary,
     secondary: { main: '#E65100', light: '#FF833A', dark: '#AC1900', contrastText: '#fff' },
     success:   { main: '#2E7D32' },
     warning:   { main: '#F57F17' },
@@ -121,11 +124,14 @@ export function buildLightTheme(brandColor) {
 export const lightTheme = buildLightTheme(null);
 
 export function buildDarkTheme(brandColor) {
+  const primary = brandColor
+    ? { main: lighten(brandColor, 0.15), light: lighten(brandColor, 0.4), dark: darken(brandColor, 0.1), contrastText: '#fff' }
+    : { main: '#5E92F3', light: '#90CAF9', dark: '#1565C0', contrastText: '#fff' };
   return createTheme({
   ...baseTokens,
   palette: {
     mode: 'dark',
-    primary:   { main: '#5E92F3', light: '#90CAF9', dark: '#1565C0', contrastText: '#fff' },
+    primary,
     secondary: { main: '#FF833A', light: '#FFAD75', dark: '#E65100', contrastText: '#fff' },
     success:   { main: '#66BB6A' },
     warning:   { main: '#FFA726' },
