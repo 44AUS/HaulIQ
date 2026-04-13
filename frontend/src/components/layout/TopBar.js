@@ -494,15 +494,14 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
           sx={{
             bgcolor: barColor,
             color: '#fff',
-            height: 60,
             flexShrink: 0,
             zIndex: theme.zIndex.appBar,
             borderRadius: 0,
             boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
           }}
         >
-          <Toolbar disableGutters sx={{ height: 60, minHeight: '60px !important', px: 0 }}>
-            {/* Back + Title */}
+          {/* Row 1 — Back + Title + Bell */}
+          <Box sx={{ display: 'flex', alignItems: 'center', height: 56, px: 0 }}>
             <Box
               onClick={() => navigate(-1)}
               sx={{
@@ -510,7 +509,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
                 alignItems: 'center',
                 gap: 0.5,
                 pl: 1.5,
-                pr: 3,
+                pr: 2,
                 height: '100%',
                 cursor: 'pointer',
                 color: '#fff',
@@ -519,27 +518,14 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
                 transition: 'background 0.15s',
               }}
             >
-              <ChevronLeftIcon sx={{ fontSize: 26, mr: 0.5 }} />
+              <ChevronLeftIcon sx={{ fontSize: 26 }} />
               <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
                 Network
               </Typography>
             </Box>
 
-            {/* Tabs — fill remaining width */}
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'stretch', height: 60 }}>
-              <NetworkTab
-                label="Connections"
-                active={activeTab === 'connections'}
-                onClick={() => setTab('connections')}
-              />
-              <NetworkTab
-                label="People You May Know"
-                active={activeTab === 'know'}
-                onClick={() => setTab('know')}
-              />
-            </Box>
+            <Box sx={{ flex: 1 }} />
 
-            {/* Notifications bell */}
             <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
               <Tooltip title="Notifications" placement="bottom">
                 <IconButton
@@ -553,7 +539,21 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
                 </IconButton>
               </Tooltip>
             </Box>
-          </Toolbar>
+          </Box>
+
+          {/* Row 2 — Tabs */}
+          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 44 }}>
+            <NetworkTab
+              label="Connections"
+              active={activeTab === 'connections'}
+              onClick={() => setTab('connections')}
+            />
+            <NetworkTab
+              label="People You May Know"
+              active={activeTab === 'know'}
+              onClick={() => setTab('know')}
+            />
+          </Box>
         </AppBar>
 
         <Drawer
