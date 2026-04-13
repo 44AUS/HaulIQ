@@ -284,7 +284,7 @@ export default function LoadManager() {
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '6px' }}>
 
       {/* ── Top bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
         <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Loads</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Button size="small" startIcon={<span style={{ fontSize: 14 }}>≡</span>} onClick={() => setShowProgress(v => !v)}
@@ -380,11 +380,48 @@ export default function LoadManager() {
                       </TableCell>
                     );
                   })()}
-                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker', 'Status'].map(h => (
+                  {['Route', 'Equipment', 'Miles', 'Rate', ...(showProgress ? ['Progress'] : []), 'Broker'].map(h => (
                     <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
                   ))}
+                  {/* Status header — becomes bulk Delete when deletable rows selected */}
+                  {(() => {
+                    const deletableKeys = tabItems
+                      .filter(i => i.chipKey === 'completed' || i.chipKey === 'archived')
+                      .map((i, idx) => i._key || idx)
+                      .filter(k => selected.has(k));
+                    const handleBulkDelete = async () => {
+                      for (const key of deletableKeys) {
+                        const item = tabItems.find((i, idx) => (i._key || idx) === key);
+                        if (!item) continue;
+                        try {
+                          if (item.chipKey === 'completed') await bookingsApi.archive(key);
+                          else await bookingsApi.destroy(key);
+                        } catch (_) {}
+                      }
+                      setSelected(prev => { const n = new Set(prev); deletableKeys.forEach(k => n.delete(k)); return n; });
+                      refresh();
+                    };
+                    return deletableKeys.length > 0 ? (
+                      <TableCell sx={{ bgcolor: 'action.hover', py: 1.25 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
+                          onClick={handleBulkDelete}
+                          sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 1, py: 0, minWidth: 0, textTransform: 'none' }}
+                        >
+                          {deletableKeys.length > 1 ? `Delete (${deletableKeys.length})` : (tabItems.find((i, idx) => (i._key || idx) === deletableKeys[0])?.chipKey === 'archived' ? 'Delete' : 'Archive')}
+                        </Button>
+                      </TableCell>
+                    ) : (
+                      <TableCell sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
+                        Status
+                      </TableCell>
+                    );
+                  })()}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -443,9 +480,12 @@ export default function LoadManager() {
                           <Typography variant="caption" color="text.disabled">—</Typography>
                         )}
                       </TableCell>
-                      {/* Route — accent bar as left border */}
-                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 1.5, borderLeft: `4px solid ${barColor}` }}>
-                        <Typography variant="body2" fontWeight={700}>{item.origin} → {item.dest}</Typography>
+                      {/* Route — accent bar with vertical spacing */}
+                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 0, position: 'relative' }}>
+                        <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
+                        <Box sx={{ pl: 2 }}>
+                          <Typography variant="body2">{item.origin} → {item.dest}</Typography>
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" color="text.secondary">{item.equipment || '—'}</Typography>
@@ -480,33 +520,7 @@ export default function LoadManager() {
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell>
-                        {isSelected && (item.chipKey === 'completed' || item.chipKey === 'archived') ? (
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="error"
-                            startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
-                            onClick={async e => {
-                              e.stopPropagation();
-                              try {
-                                if (item.chipKey === 'completed') {
-                                  await bookingsApi.archive(rowKey);
-                                } else {
-                                  await bookingsApi.destroy(rowKey);
-                                }
-                                setSelected(prev => { const n = new Set(prev); n.delete(rowKey); return n; });
-                                refresh();
-                              } catch (err) {
-                                alert(err.message || 'Failed to delete');
-                              }
-                            }}
-                            sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 1, py: 0, minWidth: 0, textTransform: 'none' }}
-                          >
-                            {item.chipKey === 'archived' ? 'Delete' : 'Archive'}
-                          </Button>
-                        ) : (
-                          <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
-                        )}
+                        <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
                       </TableCell>
                     </TableRow>
                   );
