@@ -96,8 +96,8 @@ export default function Drivers() {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '8px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px', alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '8px', width: '100%', maxWidth: 1200, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
       {/* ── Filter row ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0 }}>
@@ -133,7 +133,7 @@ export default function Drivers() {
             return (
               <Box key={group.key}>
                 {/* Section header */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 0.75, borderBottom: 1, borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 0.75, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
                   <Typography variant="caption" sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.disabled', letterSpacing: '0.04em' }}>
                     {group.label}
                   </Typography>
