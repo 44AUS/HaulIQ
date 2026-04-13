@@ -135,6 +135,7 @@ function DriverRoutes() {
           <Route path="loads" element={<DriverLoads />} />
           <Route path="loads/:bookingId" element={<DriverLoadDetail />} />
           <Route path="earnings" element={<DriverEarnings />} />
+          <Route path="messages" element={<Messages />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
       </DashboardLayout>

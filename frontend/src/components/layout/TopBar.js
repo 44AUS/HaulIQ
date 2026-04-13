@@ -68,6 +68,7 @@ const BROKER_NAV = [
 const DRIVER_NAV = [
   { icon: TruckIcon,  label: 'My Loads', path: '/driver/loads' },
   { icon: WalletIcon, label: 'Earnings', path: '/driver/earnings' },
+  { icon: MsgIcon,    label: 'Messages', path: '/driver/messages' },
 ];
 
 const ADMIN_NAV = [

@@ -48,6 +48,7 @@ const DRIVER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard', path: '/driver/dashboard' },
   { icon: TruckIcon,     label: 'My Loads',  path: '/driver/loads' },
   { icon: WalletIcon,    label: 'Earnings',  path: '/driver/earnings' },
+  { icon: ChatIcon,      label: 'Messages',  path: '/driver/messages' },
 ];
 
 const CARRIER_LINKS = [
@@ -188,6 +189,7 @@ function SidebarContent({ onNavigate, onClose }) {
 
   const messagesPath = user.role === 'carrier' ? '/carrier/messages'
                      : user.role === 'broker'  ? '/broker/messages'
+                     : user.role === 'driver'  ? '/driver/messages'
                      : null;
 
   const getBadge = (badge) => {

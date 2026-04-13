@@ -558,16 +558,18 @@ export default function Messages() {
           <Typography variant="subtitle1" fontWeight={700} sx={{ flex: 1 }}>Message Center</Typography>
         </Box>
 
-        {/* New Message button */}
-        <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
-          <Button
-            fullWidth variant="contained" size="small" startIcon={<EditNoteIcon />}
-            onClick={() => setComposing(v => !v)}
-            sx={{ fontWeight: 700, letterSpacing: 0.5, fontSize: '0.78rem' }}
-          >
-            New Message
-          </Button>
-        </Box>
+        {/* New Message button — hidden for drivers (they only message their carrier) */}
+        {user?.role !== 'driver' && (
+          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+            <Button
+              fullWidth variant="contained" size="small" startIcon={<EditNoteIcon />}
+              onClick={() => setComposing(v => !v)}
+              sx={{ fontWeight: 700, letterSpacing: 0.5, fontSize: '0.78rem' }}
+            >
+              New Message
+            </Button>
+          </Box>
+        )}
 
         {/* Compose panel */}
         {composing && (
@@ -614,7 +616,20 @@ export default function Messages() {
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
               <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
-              <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>Use New Message to start one</Typography>
+              {user?.role === 'driver' && user?.carrier_id ? (
+                <Button
+                  variant="contained" size="small" sx={{ mt: 1.5, fontWeight: 700 }}
+                  onClick={() => {
+                    messagesApi.direct(user.carrier_id)
+                      .then(convo => { setConversations([convo]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
+                      .catch(() => {});
+                  }}
+                >
+                  Message your carrier
+                </Button>
+              ) : (
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>Use New Message to start one</Typography>
+              )}
             </Box>
           ) : (() => {
             const loadConvos = conversations.filter(c => c.load_id);

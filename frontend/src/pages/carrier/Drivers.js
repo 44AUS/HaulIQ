@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Button, Chip, Stack,
   CircularProgress, Avatar, Dialog, DialogTitle, DialogContent,
@@ -10,11 +11,13 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import PersonIcon from '@mui/icons-material/Person';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/PendingActions';
-import { driversApi } from '../../services/api';
+import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
+import { driversApi, messagesApi } from '../../services/api';
 
 const BASE_URL = window.location.origin;
 
 export default function Drivers() {
+  const navigate = useNavigate();
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -63,6 +66,15 @@ export default function Drivers() {
       alert(err.message);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleMessage = async (driver) => {
+    try {
+      const convo = await messagesApi.direct(driver.id);
+      navigate(`/carrier/messages?conv=${convo.id}`);
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -129,6 +141,17 @@ export default function Drivers() {
                       color={driver.invite_accepted ? 'success' : 'warning'}
                       variant="outlined"
                     />
+                    {driver.invite_accepted && (
+                      <Tooltip title="Message driver">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleMessage(driver)}
+                          sx={{ color: 'primary.main', '&:hover': { bgcolor: 'primary.light', color: 'primary.contrastText' } }}
+                        >
+                          <ChatIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     <Tooltip title="Remove driver">
                       <IconButton
                         size="small"
