@@ -41,6 +41,7 @@ import CarrierPayments from './pages/carrier/Payments';
 import Equipment from './pages/carrier/Equipment';
 import LaneWatches from './pages/carrier/LaneWatches';
 import Drivers from './pages/carrier/Drivers';
+import LoadManager from './pages/carrier/LoadManager';
 
 // Pages — Broker
 import BrokerDashboard from './pages/broker/Dashboard';
@@ -164,6 +165,7 @@ function CarrierRoutes() {
           <Route path="equipment" element={<Equipment />} />
           <Route path="lane-watches" element={<LaneWatches />} />
           <Route path="drivers" element={<Drivers />} />
+          <Route path="job-manager" element={<LoadManager />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="network" element={<Network />} />
           <Route path="messages" element={<Messages />} />

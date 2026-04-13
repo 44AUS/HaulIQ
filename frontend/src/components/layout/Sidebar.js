@@ -53,6 +53,7 @@ const DRIVER_LINKS = [
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
+  { icon: ListChecksIcon,label: 'Load Manager',      path: '/carrier/job-manager' },
   { icon: SearchIcon,    label: 'Load Board',        path: '/carrier/loads' },
   { icon: CalculateIcon, label: 'Profit Calculator', path: '/carrier/calculator' },
   { icon: BrainIcon,     label: 'Earnings Brain',    path: '/carrier/brain' },
