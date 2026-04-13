@@ -23,12 +23,15 @@ class DriverInviteIn(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     license_number: Optional[str] = None
+    driver_level: Optional[str] = 'level_1'
 
 
 class DriverUpdateIn(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     license_number: Optional[str] = None
+    driver_level: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
 class AssignDriverIn(BaseModel):
@@ -44,6 +47,8 @@ class DriverOut(BaseModel):
     license_number: Optional[str] = None
     invite_accepted: bool
     is_active: bool
+    driver_level: Optional[str] = 'level_1'
+    last_active_at: Optional[datetime] = None
     created_at: datetime
     model_config = {"from_attributes": True}
 
@@ -91,6 +96,7 @@ def invite_driver(
         is_active=False,
         is_verified=False,
         license_number=payload.license_number,
+        driver_level=payload.driver_level or 'level_1',
     )
     db.add(driver)
     db.commit()

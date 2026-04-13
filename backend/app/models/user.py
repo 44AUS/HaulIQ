@@ -59,6 +59,7 @@ class User(Base):
     invite_token    = Column(String(64), nullable=True)
     invite_accepted = Column(Boolean, default=False)
     license_number  = Column(String(50), nullable=True)
+    driver_level    = Column(String(20), nullable=True, default='level_1')
 
     # Relationships
     subscription   = relationship("Subscription", back_populates="user", uselist=False)

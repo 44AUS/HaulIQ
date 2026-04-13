@@ -521,6 +521,10 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'calculator', label: 'Profit Calculator' },
         ],
       },
+      drivers: {
+        title: 'My Drivers',
+        tabs: [],
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
     const hasTabs = config.tabs.length > 0;
