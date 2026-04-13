@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  Search as SearchIcon,
   Calculate as CalculateIcon,
   Psychology as BrainIcon,
   History as HistoryIcon,
@@ -52,7 +51,6 @@ const DRIVER_LINKS = [
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
-  { icon: SearchIcon,    label: 'Load Board',        path: '/carrier/loads' },
   { icon: ListChecksIcon,label: 'Loads',             path: '/carrier/job-manager' },
   { icon: CalculateIcon, label: 'Profit Calculator', path: '/carrier/calculator' },
   { icon: BrainIcon,     label: 'Earnings Brain',    path: '/carrier/brain' },
