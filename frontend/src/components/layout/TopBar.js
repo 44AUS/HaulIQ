@@ -50,7 +50,6 @@ const CARRIER_NAV = [
   { icon: SearchIcon,    label: 'Load Board',  path: '/carrier/loads' },
   { icon: ActivityIcon,  label: 'In Progress', path: '/carrier/active' },
   { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
-  { icon: TrendingUpIcon,label: 'Analytics',   path: '/carrier/analytics' },
   { icon: TruckIcon,     label: 'My Trucks',   path: '/carrier/equipment' },
   { icon: SavedIcon,     label: 'Lane Watch',  path: '/carrier/lane-watches' },
 ];
@@ -61,7 +60,6 @@ const BROKER_NAV = [
   { icon: PackageIcon,   label: 'Loads',       path: '/broker/loads' },
   { icon: EventIcon,     label: 'Bookings',    path: '/broker/bookings' },
   { icon: PaymentIcon,   label: 'Payments',    path: '/broker/payments' },
-  { icon: BarChartIcon,  label: 'Analytics',   path: '/broker/analytics' },
   { icon: TruckIcon,     label: 'Trucks',      path: '/broker/trucks' },
 ];
 
@@ -508,6 +506,15 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
       messages: {
         title: 'Message Center',
         tabs: [],
+      },
+      analytics: {
+        title: 'Analytics',
+        tabs: [
+          { key: 'loads',    label: 'Loads' },
+          { key: 'payments', label: 'Payments' },
+          { key: 'drivers',  label: 'Drivers' },
+          { key: 'imports',  label: 'Imports' },
+        ],
       },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
