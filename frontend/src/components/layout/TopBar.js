@@ -379,10 +379,10 @@ function NetworkTab({ label, active, onClick }) {
     <Box
       onClick={onClick}
       sx={{
+        flex: 1,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        px: { xs: 2, sm: 4 },
         height: '100%',
         cursor: 'pointer',
         position: 'relative',
@@ -542,7 +542,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
           </Box>
 
           {/* Row 2 — Tabs */}
-          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 44 }}>
+          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 44, width: '100%' }}>
             <NetworkTab
               label="Connections"
               active={activeTab === 'connections'}
