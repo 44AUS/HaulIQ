@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Chip,
-  CircularProgress, Stack, Alert, Stepper, Step, StepLabel, Divider,
+  CircularProgress, Stack, Alert, Stepper, Step, StepLabel,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';

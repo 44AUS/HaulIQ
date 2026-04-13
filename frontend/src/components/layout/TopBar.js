@@ -35,7 +35,6 @@ import {
   CheckCircle as DoneIcon,
   LocalAtm as PayIcon,
   EventNote as CalendarIcon,
-  Badge as BadgeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
