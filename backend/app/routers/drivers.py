@@ -10,6 +10,7 @@ from app.database import get_db
 from app.models.user import User, UserRole, UserPlan
 from app.models.booking import Booking
 from app.models.driver_location import DriverLocation
+from app.models.messaging import Conversation, Message
 from app.middleware.auth import require_carrier
 
 router = APIRouter()
@@ -129,6 +130,20 @@ def remove_driver(
     driver = db.query(User).filter(User.id == driver_id, User.carrier_id == carrier.id).first()
     if not driver:
         raise HTTPException(404, "Driver not found")
+
+    # Clean up conversations (driver sits in broker_id slot; no DB-level cascade)
+    convo_ids = [
+        c.id for c in db.query(Conversation.id).filter(
+            (Conversation.broker_id == driver_id) | (Conversation.carrier_id == driver_id)
+        ).all()
+    ]
+    if convo_ids:
+        db.query(Message).filter(Message.conversation_id.in_(convo_ids)).delete(synchronize_session=False)
+        db.query(Conversation).filter(Conversation.id.in_(convo_ids)).delete(synchronize_session=False)
+
+    # Clean up any stray messages sent by this driver in other conversations
+    db.query(Message).filter(Message.sender_id == driver_id).delete(synchronize_session=False)
+
     db.delete(driver)
     db.commit()
 
