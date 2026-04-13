@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Chip, CircularProgress, IconButton, Button,
-  Drawer, MenuItem, Select, FormControl, InputLabel, Divider,
+  Drawer, MenuItem, Select, FormControl,
   TextField, Tooltip, useTheme,
 } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -398,7 +398,6 @@ export default function LoadManager() {
     }
   };
 
-  const barBg = isDark ? '#111' : '#f5f5f5';
   const tabBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
   const headerBg = isDark ? '#0d0d0d' : '#fff';
   const activeFg = isDark ? '#fff' : '#000';
