@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Avatar, Button, IconButton,
   Chip, CircularProgress, Divider, Menu, MenuItem,
@@ -226,6 +226,9 @@ function SuggestCard({ user, onConnect, connecting }) {
 
 export default function Network() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'connections';
+
   const [connections, setConnections] = useState([]);
   const [pending, setPending] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -317,75 +320,64 @@ export default function Network() {
     : suggestions;
 
   if (loading) return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 680, mx: 'auto' }}>
       {[...Array(5)].map((_, i) => (
         <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
       ))}
     </Box>
   );
 
-  return (
-    <Box sx={{ maxWidth: 1100 }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <PeopleIcon sx={{ color: 'primary.main' }} />
-          <Typography variant="h5" fontWeight={700}>My Network</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          {user?.role === 'broker' ? "Carriers you've connected with" : "Brokers you're connected with"}
-        </Typography>
+  // ── Shared search bar ────────────────────────────────────────────────────────
+  const SearchBar = (
+    <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
+        <TextField
+          size="small"
+          placeholder="Search by name, company, or MC number…"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+              </InputAdornment>
+            ),
+            endAdornment: searching ? (
+              <InputAdornment position="end"><CircularProgress size={14} /></InputAdornment>
+            ) : null,
+          }}
+          sx={{ flex: 1, minWidth: 220 }}
+        />
+        <Autocomplete
+          options={US_STATES}
+          value={stateFilter}
+          onChange={(_, val) => setStateFilter(val)}
+          size="small"
+          sx={{ minWidth: 120 }}
+          renderInput={params => <TextField {...params} label="State" />}
+          clearOnEscape
+        />
+        {isSearchActive && (
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => { setQuery(''); setStateFilter(null); }}
+            sx={{ textTransform: 'none', color: 'text.secondary' }}
+          >
+            Clear
+          </Button>
+        )}
       </Box>
+    </Paper>
+  );
 
-      {/* Search bar */}
-      <Paper variant="outlined" sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-          <TextField
-            size="small"
-            placeholder="Search by name, company, or MC number…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
-                </InputAdornment>
-              ),
-              endAdornment: searching ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={14} />
-                </InputAdornment>
-              ) : null,
-            }}
-            sx={{ flex: 1, minWidth: 220 }}
-          />
-          <Autocomplete
-            options={US_STATES}
-            value={stateFilter}
-            onChange={(_, val) => setStateFilter(val)}
-            size="small"
-            sx={{ minWidth: 120 }}
-            renderInput={params => <TextField {...params} label="State" />}
-            clearOnEscape
-          />
-          {isSearchActive && (
-            <Button
-              variant="text"
-              size="small"
-              onClick={() => { setQuery(''); setStateFilter(null); }}
-              sx={{ textTransform: 'none', color: 'text.secondary' }}
-            >
-              Clear
-            </Button>
-          )}
-        </Box>
-      </Paper>
+  return (
+    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
 
-      {/* Two-column layout */}
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', md: 'row' } }}>
-
-        {/* ── LEFT: Pending + Connections ── */}
-        <Box sx={{ flex: '0 0 480px', minWidth: 0, maxWidth: { xs: '100%', md: 480 }, width: '100%' }}>
+      {/* ── TAB: CONNECTIONS ── */}
+      {activeTab === 'connections' && (
+        <Box>
+          {SearchBar}
 
           {/* Pending requests */}
           {pending.length > 0 && (
@@ -407,62 +399,54 @@ export default function Network() {
             </Box>
           )}
 
-          {/* Connections */}
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Typography variant="subtitle1" fontWeight={700}>Connections</Typography>
-              <Typography variant="body2" color="text.secondary">· {filteredConnections.length}</Typography>
-              {isSearchActive && query && connections.length !== filteredConnections.length && (
-                <Typography variant="caption" color="text.disabled">
-                  (filtered from {connections.length})
+          {/* Connections list */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Typography variant="subtitle1" fontWeight={700}>Connections</Typography>
+            <Typography variant="body2" color="text.secondary">· {filteredConnections.length}</Typography>
+            {isSearchActive && query && connections.length !== filteredConnections.length && (
+              <Typography variant="caption" color="text.disabled">
+                (filtered from {connections.length})
+              </Typography>
+            )}
+          </Box>
+          <Divider />
+          {filteredConnections.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <PeopleIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                {isSearchActive ? 'No connections match your search' : 'No connections yet'}
+              </Typography>
+              {!isSearchActive && (
+                <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
+                  Switch to "People You May Know" to find carriers and brokers to connect with
                 </Typography>
               )}
             </Box>
-            <Divider />
-            {filteredConnections.length === 0 ? (
-              <Box sx={{ textAlign: 'center', py: 6 }}>
-                <PeopleIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
-                <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                  {isSearchActive ? 'No connections match your search' : 'No connections yet'}
-                </Typography>
-                {!isSearchActive && (
-                  <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
-                    Use the search or suggestions to find people to connect with
-                  </Typography>
-                )}
-              </Box>
-            ) : (
-              filteredConnections.map(conn => (
-                <ConnectionRow
-                  key={conn.id}
-                  conn={conn}
-                  onRemove={handleRemove}
-                  userRole={user?.role}
-                />
-              ))
-            )}
-          </Box>
+          ) : (
+            filteredConnections.map(conn => (
+              <ConnectionRow
+                key={conn.id}
+                conn={conn}
+                onRemove={handleRemove}
+                userRole={user?.role}
+              />
+            ))
+          )}
         </Box>
+      )}
 
-        {/* ── RIGHT: People You May Know / Search Results ── */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-            <PersonSearchIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-            <Typography variant="subtitle1" fontWeight={700}>
-              {isSearchActive ? 'Search Results' : 'People You May Know'}
-            </Typography>
-            {isSearchActive && (
-              <Typography variant="body2" color="text.secondary">· {rightColumnItems.length}</Typography>
-            )}
-          </Box>
+      {/* ── TAB: PEOPLE YOU MAY KNOW ── */}
+      {activeTab === 'know' && (
+        <Box>
+          {SearchBar}
 
           {searching ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress size={24} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <CircularProgress size={28} />
             </Box>
           ) : rightColumnItems.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 6 }}>
-              <PersonSearchIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <PersonSearchIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary" fontWeight={600}>
                 {isSearchActive ? 'No results found' : 'No suggestions right now'}
               </Typography>
@@ -483,8 +467,7 @@ export default function Network() {
             ))
           )}
         </Box>
-
-      </Box>
+      )}
     </Box>
   );
 }

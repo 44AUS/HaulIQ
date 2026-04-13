@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
@@ -11,6 +11,7 @@ import {
   Search as SearchIcon,
   Close as CloseIcon,
   Notifications as BellIcon,
+  ChevronLeft as ChevronLeftIcon,
   ShowChart as ActivityIcon,
   TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
@@ -372,8 +373,46 @@ function SearchResultsPanel({ results, loading, onNavigate }) {
   );
 }
 
+// ── Network tab item ──────────────────────────────────────────────────────────
+function NetworkTab({ label, active, onClick }) {
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: { xs: 2, sm: 4 },
+        height: '100%',
+        cursor: 'pointer',
+        position: 'relative',
+        color: active ? '#fff' : 'rgba(255,255,255,0.60)',
+        userSelect: 'none',
+        letterSpacing: '0.08em',
+        fontSize: '13px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        '&:hover': { color: '#fff' },
+        transition: 'color 0.15s',
+        '&::after': active ? {
+          content: '""',
+          position: 'absolute',
+          bottom: 0,
+          left: 12,
+          right: 12,
+          height: 3,
+          borderRadius: '3px 3px 0 0',
+          bgcolor: '#fff',
+        } : {},
+      }}
+    >
+      {label}
+    </Box>
+  );
+}
+
 // ── Main TopBar ───────────────────────────────────────────────────────────────
-export default function TopBar({ sidebarOpen, onToggleSidebar }) {
+export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
   const { user } = useAuth();
   const { brandColor } = useThemeMode();
   const barColor = brandColor || DEFAULT_BAR_COLOR;
@@ -382,6 +421,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
@@ -441,6 +481,92 @@ export default function TopBar({ sidebarOpen, onToggleSidebar }) {
   };
 
   if (!user) return null;
+
+  // ── Network-mode bar ───────────────────────────────────────────────────────
+  if (networkMode) {
+    const activeTab = searchParams.get('tab') || 'connections';
+    const setTab = (t) => setSearchParams({ tab: t }, { replace: true });
+    return (
+      <>
+        <AppBar
+          position="static"
+          elevation={0}
+          sx={{
+            bgcolor: barColor,
+            color: '#fff',
+            height: 60,
+            flexShrink: 0,
+            zIndex: theme.zIndex.appBar,
+            borderRadius: 0,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+          }}
+        >
+          <Toolbar disableGutters sx={{ height: 60, minHeight: '60px !important', px: 0 }}>
+            {/* Back + Title */}
+            <Box
+              onClick={() => navigate(-1)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+                pl: 1.5,
+                pr: 3,
+                height: '100%',
+                cursor: 'pointer',
+                color: '#fff',
+                flexShrink: 0,
+                '&:hover': { bgcolor: BAR_COLOR_HOVER },
+                transition: 'background 0.15s',
+              }}
+            >
+              <ChevronLeftIcon sx={{ fontSize: 26, mr: 0.5 }} />
+              <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
+                Network
+              </Typography>
+            </Box>
+
+            {/* Tabs — fill remaining width */}
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'stretch', height: 60 }}>
+              <NetworkTab
+                label="Connections"
+                active={activeTab === 'connections'}
+                onClick={() => setTab('connections')}
+              />
+              <NetworkTab
+                label="People You May Know"
+                active={activeTab === 'know'}
+                onClick={() => setTab('know')}
+              />
+            </Box>
+
+            {/* Notifications bell */}
+            <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
+              <Tooltip title="Notifications" placement="bottom">
+                <IconButton
+                  onClick={() => setNotifOpen(true)}
+                  size="small"
+                  sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
+                >
+                  <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
+                    <BellIcon sx={{ fontSize: 22 }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        <Drawer
+          anchor="right"
+          open={notifOpen}
+          onClose={() => setNotifOpen(false)}
+          PaperProps={{ sx: { width: NOTIF_DRAWER_WIDTH, borderRadius: 0 } }}
+        >
+          <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
+        </Drawer>
+      </>
+    );
+  }
 
   const nav = user.role === 'carrier' ? CARRIER_NAV
             : user.role === 'broker'  ? BROKER_NAV
