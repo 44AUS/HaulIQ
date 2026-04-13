@@ -502,27 +502,16 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
         >
           {/* Row 1 — Back + Title + Bell */}
           <Box sx={{ display: 'flex', alignItems: 'center', height: 56, px: 0 }}>
-            <Box
+            <IconButton
               onClick={() => navigate(-1)}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                pl: 1.5,
-                pr: 2,
-                height: '100%',
-                cursor: 'pointer',
-                color: '#fff',
-                flexShrink: 0,
-                '&:hover': { bgcolor: BAR_COLOR_HOVER },
-                transition: 'background 0.15s',
-              }}
+              size="small"
+              sx={{ ml: 1, color: '#fff', '&:hover': { bgcolor: BAR_COLOR_HOVER } }}
             >
               <ChevronLeftIcon sx={{ fontSize: 26 }} />
-              <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
-                Network
-              </Typography>
-            </Box>
+            </IconButton>
+            <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap', ml: 1, color: '#fff' }}>
+              Network
+            </Typography>
 
             <Box sx={{ flex: 1 }} />
 
