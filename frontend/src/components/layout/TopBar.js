@@ -505,9 +505,14 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'referrals', label: 'Referrals' },
         ],
       },
+      messages: {
+        title: 'Message Center',
+        tabs: [],
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
-    const defaultTab = config.tabs[0].key;
+    const hasTabs = config.tabs.length > 0;
+    const defaultTab = hasTabs ? config.tabs[0].key : null;
     const activeTab = searchParams.get('tab') || defaultTab;
     const setTab = (t) => setSearchParams({ tab: t }, { replace: true });
 
@@ -555,17 +560,19 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
             </Box>
           </Box>
 
-          {/* Row 2 — Tabs */}
-          <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
-            {config.tabs.map(({ key, label }) => (
-              <NetworkTab
-                key={key}
-                label={label}
-                active={activeTab === key}
-                onClick={() => setTab(key)}
-              />
-            ))}
-          </Box>
+          {/* Row 2 — Tabs (only when config has tabs) */}
+          {hasTabs && (
+            <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
+              {config.tabs.map(({ key, label }) => (
+                <NetworkTab
+                  key={key}
+                  label={label}
+                  active={activeTab === key}
+                  onClick={() => setTab(key)}
+                />
+              ))}
+            </Box>
+          )}
         </AppBar>
 
         <Drawer

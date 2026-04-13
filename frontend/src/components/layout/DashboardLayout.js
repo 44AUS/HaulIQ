@@ -6,8 +6,9 @@ import TopBar from './TopBar';
 
 export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
 
-const NETWORK_PATHS = ['/carrier/network',  '/broker/network'];
-const BILLING_PATHS = ['/carrier/billing',  '/broker/billing'];
+const NETWORK_PATHS  = ['/carrier/network',   '/broker/network'];
+const BILLING_PATHS  = ['/carrier/billing',   '/broker/billing'];
+const MESSAGES_PATHS = ['/carrier/messages',  '/broker/messages', '/driver/messages'];
 
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
@@ -16,8 +17,9 @@ export default function DashboardLayout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const immersiveMode = NETWORK_PATHS.includes(location.pathname) ? 'network'
-    : BILLING_PATHS.includes(location.pathname) ? 'billing'
+  const immersiveMode = NETWORK_PATHS.includes(location.pathname)  ? 'network'
+    : BILLING_PATHS.includes(location.pathname)  ? 'billing'
+    : MESSAGES_PATHS.includes(location.pathname) ? 'messages'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 
