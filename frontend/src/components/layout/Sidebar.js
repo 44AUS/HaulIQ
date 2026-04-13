@@ -7,8 +7,6 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  Calculate as CalculateIcon,
-  Psychology as BrainIcon,
   TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
   AddCircleOutline as AddIcon,
@@ -30,6 +28,7 @@ import {
   Brightness7 as LightIcon,
   ChatBubbleOutline as ChatIcon,
   Tune as PreferencesIcon,
+  Build as ToolsIcon,
   Folder as FolderIcon,
   LocalShipping as TruckIcon,
   Badge as BadgeIcon,
@@ -50,8 +49,7 @@ const DRIVER_LINKS = [
 
 const CARRIER_LINKS = [
   { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
-  { icon: CalculateIcon, label: 'Profit Calculator', path: '/carrier/calculator' },
-  { icon: BrainIcon,     label: 'Earnings Brain',    path: '/carrier/brain' },
+  { icon: ToolsIcon,     label: 'Tools',             path: '/carrier/tools' },
   { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
   { icon: BadgeIcon,     label: 'My Drivers',        path: '/carrier/drivers' },
   { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },

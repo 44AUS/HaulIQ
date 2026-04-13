@@ -10,6 +10,7 @@ const NETWORK_PATHS   = ['/carrier/network',    '/broker/network'];
 const BILLING_PATHS   = ['/carrier/billing',    '/broker/billing'];
 const MESSAGES_PATHS  = ['/carrier/messages',   '/broker/messages',  '/driver/messages'];
 const ANALYTICS_PATHS = ['/carrier/analytics',  '/broker/analytics'];
+const TOOLS_PATHS     = ['/carrier/tools'];
 
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
@@ -22,6 +23,7 @@ export default function DashboardLayout({ children }) {
     : BILLING_PATHS.includes(location.pathname)   ? 'billing'
     : MESSAGES_PATHS.includes(location.pathname)  ? 'messages'
     : ANALYTICS_PATHS.includes(location.pathname) ? 'analytics'
+    : TOOLS_PATHS.includes(location.pathname)     ? 'tools'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 

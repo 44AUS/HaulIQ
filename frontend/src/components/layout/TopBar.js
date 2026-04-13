@@ -514,6 +514,13 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'imports',  label: 'Imports' },
         ],
       },
+      tools: {
+        title: 'Tools',
+        tabs: [
+          { key: 'brain',      label: 'Earnings Brain' },
+          { key: 'calculator', label: 'Profit Calculator' },
+        ],
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
     const hasTabs = config.tabs.length > 0;
