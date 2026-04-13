@@ -412,7 +412,7 @@ function NetworkTab({ label, active, onClick }) {
 }
 
 // ── Main TopBar ───────────────────────────────────────────────────────────────
-export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
+export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) {
   const { user } = useAuth();
   const { brandColor } = useThemeMode();
   const barColor = brandColor || DEFAULT_BAR_COLOR;
@@ -482,10 +482,29 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
 
   if (!user) return null;
 
-  // ── Network-mode bar ───────────────────────────────────────────────────────
-  if (networkMode) {
-    const activeTab = searchParams.get('tab') || 'connections';
+  // ── Immersive-mode bar (network or billing) ────────────────────────────────
+  if (immersiveMode) {
+    const IMMERSIVE_CONFIG = {
+      network: {
+        title: 'Network',
+        tabs: [
+          { key: 'connections', label: 'Connections' },
+          { key: 'know',        label: 'People You May Know' },
+        ],
+      },
+      billing: {
+        title: 'Billing',
+        tabs: [
+          { key: 'plans',     label: 'Subscription Plans' },
+          { key: 'referrals', label: 'Referrals' },
+        ],
+      },
+    };
+    const config = IMMERSIVE_CONFIG[immersiveMode];
+    const defaultTab = config.tabs[0].key;
+    const activeTab = searchParams.get('tab') || defaultTab;
     const setTab = (t) => setSearchParams({ tab: t }, { replace: true });
+
     return (
       <>
         <AppBar
@@ -510,7 +529,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
               <ChevronLeftIcon sx={{ fontSize: 26 }} />
             </IconButton>
             <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap', ml: 1, color: '#fff' }}>
-              Network
+              {config.title}
             </Typography>
 
             <Box sx={{ flex: 1 }} />
@@ -532,16 +551,14 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, networkMode }) {
 
           {/* Row 2 — Tabs */}
           <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
-            <NetworkTab
-              label="Connections"
-              active={activeTab === 'connections'}
-              onClick={() => setTab('connections')}
-            />
-            <NetworkTab
-              label="People You May Know"
-              active={activeTab === 'know'}
-              onClick={() => setTab('know')}
-            />
+            {config.tabs.map(({ key, label }) => (
+              <NetworkTab
+                key={key}
+                label={label}
+                active={activeTab === key}
+                onClick={() => setTab(key)}
+              />
+            ))}
           </Box>
         </AppBar>
 

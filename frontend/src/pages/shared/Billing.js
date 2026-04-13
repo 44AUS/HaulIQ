@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box, Typography, Tabs, Tab, Card, CardContent, Button, Chip,
+  Box, Typography, Card, CardContent, Button, Chip,
   CircularProgress, ToggleButtonGroup, ToggleButton, Paper,
   Table, TableHead, TableRow, TableCell, TableBody, Divider,
   TextField, InputAdornment, IconButton, Alert, Tooltip, Skeleton, Grid,
@@ -10,7 +10,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
@@ -395,7 +394,8 @@ function ReferralsTab({ user, currentSub }) {
 export default function Billing() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState(0);
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'plans';
   const [billing, setBilling] = useState('monthly');
   const [currentSub, setCurrentSub] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -452,23 +452,8 @@ export default function Billing() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header */}
-      <Box>
-        <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <CreditCardIcon color="primary" /> Billing
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Manage your subscription plan and referrals
-        </Typography>
-      </Box>
-
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tab label="Subscription Plans" sx={{ fontWeight: 600, textTransform: 'none' }} />
-        <Tab label="Referrals" sx={{ fontWeight: 600, textTransform: 'none' }} />
-      </Tabs>
-
       {/* ── Subscription Plans Tab ─────────────────────────────────────────── */}
-      {tab === 0 && (
+      {activeTab === 'plans' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
           {loading ? (
             <Grid container spacing={3}>
@@ -632,7 +617,7 @@ export default function Billing() {
       )}
 
       {/* ── Referrals Tab ─────────────────────────────────────────────────── */}
-      {tab === 1 && <ReferralsTab user={user} currentSub={currentSub} />}
+      {activeTab === 'referrals' && <ReferralsTab user={user} currentSub={currentSub} />}
     </Box>
   );
 }
