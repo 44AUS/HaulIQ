@@ -4,7 +4,6 @@ import {
   Box, Typography, Card, CardContent, Alert, Skeleton,
   Table, TableHead, TableRow, TableCell, TableBody, TableContainer,
 } from '@mui/material';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import GroupIcon from '@mui/icons-material/Group';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -119,7 +118,6 @@ function PaymentsTab({ data, loading, error }) {
   const total  = data?.total_revenue    || 0;
   const paid   = data?.total_paid       || 0;
   const unpaid = data?.total_unpaid     || 0;
-  const weekly = data?.weekly_revenue   || [];
 
   if (total === 0 && paid === 0 && unpaid === 0) return (
     <EmptyState icon={AttachMoneyIcon} title="No payment data yet" subtitle="Payment analytics will appear once loads are booked." />

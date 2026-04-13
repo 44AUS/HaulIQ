@@ -13,8 +13,6 @@ import {
   Notifications as BellIcon,
   ChevronLeft as ChevronLeftIcon,
   ShowChart as ActivityIcon,
-  TrendingUp as TrendingUpIcon,
-  BarChart as BarChartIcon,
   AddCircleOutline as AddIcon,
   Inventory2 as PackageIcon,
   Event as EventIcon,
