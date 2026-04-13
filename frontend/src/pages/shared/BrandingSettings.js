@@ -19,7 +19,7 @@ const PRESET_COLORS = [
 
 const DEFAULT_COLOR = '#1565C0';
 
-export default function BrandingSettings() {
+export default function BrandingSettings({ embedded = false }) {
   const navigate = useNavigate();
   const { brandColor, setBrandColor } = useThemeMode();
   const currentColor = brandColor || DEFAULT_COLOR;
@@ -33,13 +33,15 @@ export default function BrandingSettings() {
 
   return (
     <Box sx={{ maxWidth: 640 }}>
-      {/* Back header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <IconButton size="small" onClick={() => navigate('/preferences')}>
-          <ArrowBackIcon fontSize="small" />
-        </IconButton>
-        <Typography variant="h5" fontWeight={700}>Branding</Typography>
-      </Box>
+      {/* Back header — hidden when embedded as a tab */}
+      {!embedded && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+          <IconButton size="small" onClick={() => navigate('/preferences')}>
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="h5" fontWeight={700}>Branding</Typography>
+        </Box>
+      )}
 
       <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600, mb: 1, display: 'block' }}>
         Design Elements

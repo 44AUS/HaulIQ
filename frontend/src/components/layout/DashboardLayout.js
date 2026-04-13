@@ -12,6 +12,7 @@ const MESSAGES_PATHS  = ['/carrier/messages',   '/broker/messages',  '/driver/me
 const ANALYTICS_PATHS = ['/carrier/analytics',  '/broker/analytics'];
 const TOOLS_PATHS     = ['/carrier/tools'];
 const DRIVERS_PATHS   = ['/carrier/drivers'];
+const PREFERENCES_PATHS = ['/preferences'];
 
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
@@ -25,7 +26,8 @@ export default function DashboardLayout({ children }) {
     : MESSAGES_PATHS.includes(location.pathname)  ? 'messages'
     : ANALYTICS_PATHS.includes(location.pathname) ? 'analytics'
     : TOOLS_PATHS.includes(location.pathname)     ? 'tools'
-    : DRIVERS_PATHS.includes(location.pathname)   ? 'drivers'
+    : DRIVERS_PATHS.includes(location.pathname)     ? 'drivers'
+    : PREFERENCES_PATHS.includes(location.pathname) ? 'preferences'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 

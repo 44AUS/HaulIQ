@@ -67,7 +67,6 @@ import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
 import Preferences from './pages/shared/Preferences';
-import BrandingSettings from './pages/shared/BrandingSettings';
 import Billing from './pages/shared/Billing';
 import MapView from './pages/shared/MapView';
 import CalendarPage from './pages/shared/CalendarPage';
@@ -269,11 +268,7 @@ function AppRoutes() {
           <DashboardLayout><Preferences /></DashboardLayout>
         </ProtectedRoute>
       } />
-      <Route path="/preferences/branding" element={
-        <ProtectedRoute>
-          <DashboardLayout><BrandingSettings /></DashboardLayout>
-        </ProtectedRoute>
-      } />
+      <Route path="/preferences/branding" element={<Navigate to="/preferences?tab=branding" replace />} />
       <Route path="/map/:lat/:lng/:city/:name" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
       <Route path="/map/:lat/:lng/:city" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
       <Route path="/invite/driver" element={<DriverInvite />} />

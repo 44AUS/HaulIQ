@@ -525,6 +525,19 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
         title: 'My Drivers',
         tabs: [],
       },
+      preferences: {
+        title: 'Preferences',
+        tabs: [
+          { key: 'branding',      label: 'Branding' },
+          { key: 'notifications', label: 'Notifications' },
+          { key: 'equipment',     label: 'Equipment' },
+          { key: 'documents',     label: 'Documents' },
+          { key: 'billing',       label: 'Billing' },
+          { key: 'privacy',       label: 'Privacy' },
+          { key: 'security',      label: 'Security' },
+          { key: 'support',       label: 'Support' },
+        ],
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
     const hasTabs = config.tabs.length > 0;
