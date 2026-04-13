@@ -176,8 +176,8 @@ export default function LoadManager() {
       if (!iso) return null;
       const d = new Date(iso);
       if (isNaN(d)) return null;
-      const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
-      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+      const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase().replace(' ', '');
       return { date, time };
     };
 
@@ -430,7 +430,7 @@ export default function LoadManager() {
                           />
                         ) : item.date ? (
                           <Box>
-                            <Typography variant="caption" fontWeight={600} display="block" sx={{ lineHeight: 1.3 }}>
+                            <Typography variant="caption" display="block" sx={{ lineHeight: 1.3 }}>
                               {item.date.date}
                             </Typography>
                             {item.date.time && (
