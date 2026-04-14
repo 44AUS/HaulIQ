@@ -436,7 +436,7 @@ export default function LoadManager() {
                     '& td': { py: 0, borderBottom: 0 },
                     '& td:not(:nth-of-type(1)):not(:nth-of-type(2))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
                     bgcolor: isSelected ? 'action.selected' : undefined,
-                    '&:hover': { bgcolor: 'action.selected' },
+                    '&:hover': { bgcolor: isSelected ? 'action.selected' : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') },
                   };
                   const toggleSelect = (e) => {
                     e.stopPropagation();
