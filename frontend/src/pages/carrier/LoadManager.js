@@ -280,7 +280,7 @@ export default function LoadManager() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '6px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
       {/* ── Top bar ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
@@ -433,8 +433,8 @@ export default function LoadManager() {
                   const rowSx = {
                     cursor: 'pointer',
                     height: 64,
-                    '& td': { py: 0 },
-                    '&:nth-of-type(odd)': { bgcolor: isSelected ? 'action.selected' : 'action.hover' },
+                    '& td': { py: 0, borderBottom: 0 },
+                    '& td:not(:nth-of-type(1)):not(:nth-of-type(2))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
                     bgcolor: isSelected ? 'action.selected' : undefined,
                     '&:hover': { bgcolor: 'action.selected' },
                   };
