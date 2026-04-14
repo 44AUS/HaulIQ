@@ -168,7 +168,8 @@ function SidebarContent({ onNavigate, onClose }) {
   // Clock in/out  — states: 'out' | 'in' | 'paused'
   const [clockState, setClockState] = useState(user?.clocked_in ? 'in' : 'out');
   const [clockLoading, setClockLoading] = useState(false);
-  const [clockedInAt, setClockedInAt] = useState(user?.clocked_in_at ? new Date(user.clocked_in_at) : null);
+  const parseUtc = (ts) => ts ? new Date(ts.endsWith('Z') ? ts : ts + 'Z') : null;
+  const [clockedInAt, setClockedInAt] = useState(parseUtc(user?.clocked_in_at));
   const [elapsed, setElapsed] = useState('');
 
   useEffect(() => {
@@ -198,7 +199,7 @@ function SidebarContent({ onNavigate, onClose }) {
       const updated = action === 'in' ? await authApi.clockIn() : await authApi.clockOut();
       const newState = updated.clocked_in ? 'in' : 'out';
       setClockState(newState);
-      setClockedInAt(updated.clocked_in_at ? new Date(updated.clocked_in_at) : null);
+      setClockedInAt(newState === 'in' ? new Date() : null);
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
     } catch {}
     setClockLoading(false);
