@@ -250,25 +250,116 @@ function SidebarContent({ onNavigate, onClose }) {
 
       <Divider sx={{ borderColor: sc.divider }} />
 
-      {/* ── Business row ── */}
-      <Box
-        onClick={e => setBizAnchor(e.currentTarget)}
-        sx={{
-          display: 'flex', alignItems: 'center', gap: 1.5,
-          px: 2, py: 1.25, cursor: 'pointer',
-          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
-        }}
-      >
-        <Avatar sx={{ width: 36, height: 36, bgcolor: isDark ? '#3a3a3a' : '#e0e0e0', fontSize: '0.85rem', fontWeight: 700, color: sc.nameColor }}>
-          {(user.company || user.name)?.charAt(0)?.toUpperCase()}
-        </Avatar>
-        <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-          <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, display: 'block', lineHeight: 1.2 }}>Business</Typography>
-          <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
-            {user.company || user.name}
-          </Typography>
+      {/* ═══ User identity block ═══ */}
+      <Box sx={{
+        flexShrink: 0,
+        bgcolor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)',
+        borderBottom: `1px solid ${sc.divider}`,
+      }}>
+        {/* Business row */}
+        <Box
+          onClick={e => setBizAnchor(e.currentTarget)}
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 1.5,
+            px: 2.5, py: 1.5, cursor: 'pointer',
+            borderBottom: `1px solid ${sc.divider}`,
+            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
+          }}
+        >
+          <Avatar sx={{
+            width: 40, height: 40,
+            bgcolor: isDark ? '#444' : '#d0d0d0',
+            color: isDark ? '#fff' : '#333',
+            fontSize: '1rem', fontWeight: 700, flexShrink: 0,
+          }}>
+            {(user.company || user.name)?.charAt(0)?.toUpperCase()}
+          </Avatar>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px' }}>
+              Business
+            </Typography>
+            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: sc.nameColor, lineHeight: 1.3 }} noWrap>
+              {user.company || user.name}
+            </Typography>
+          </Box>
+          <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
         </Box>
-        <ChevronRightIcon sx={{ fontSize: 16, color: sc.subtitleColor, flexShrink: 0 }} />
+
+        {/* Employee/User row */}
+        <Box
+          onClick={e => setUserAnchor(e.currentTarget)}
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 1.5,
+            px: 2.5, py: 1.5, cursor: 'pointer',
+            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
+          }}
+        >
+          <Box sx={{ position: 'relative', flexShrink: 0 }}>
+            <Avatar
+              src={user.avatar_url || undefined}
+              sx={{
+                width: 40, height: 40,
+                bgcolor: isDark ? '#444' : '#d0d0d0',
+                color: isDark ? '#fff' : '#333',
+                fontSize: '1rem', fontWeight: 700,
+              }}
+            >
+              {!user.avatar_url && (user.avatar || user.name?.charAt(0)?.toUpperCase())}
+            </Avatar>
+            <Box sx={{
+              position: 'absolute', bottom: 1, right: 1,
+              width: 10, height: 10, borderRadius: '50%',
+              bgcolor: clockedIn ? '#2dd36f' : '#eb445a',
+              border: `2px solid ${isDark ? '#111' : '#f5f5f5'}`,
+            }} />
+          </Box>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px', textTransform: 'capitalize' }}>
+              {user.role}
+            </Typography>
+            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: sc.nameColor, lineHeight: 1.3 }} noWrap>
+              {user.name}
+            </Typography>
+          </Box>
+          <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
+        </Box>
+
+        {/* Clock In / Clock Out */}
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+          <Box
+            component="button"
+            onClick={() => !clockedIn && !clockLoading && handleClockToggle('in')}
+            sx={{
+              all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 0.75, py: 1.25, cursor: clockedIn ? 'default' : 'pointer',
+              bgcolor: clockedIn ? (isDark ? 'rgba(45,211,111,0.12)' : 'rgba(45,211,111,0.15)') : '#2dd36f',
+              color: clockedIn ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)') : '#fff',
+              fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.07em',
+              borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'}`,
+              '&:hover': !clockedIn ? { bgcolor: '#27bc61' } : {},
+              transition: 'background-color 0.15s',
+            }}
+          >
+            <Box component="span" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>▶</Box>
+            CLOCK-IN
+          </Box>
+          <Box
+            component="button"
+            onClick={() => clockedIn && !clockLoading && handleClockToggle('out')}
+            sx={{
+              all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 0.75, py: 1.25, cursor: !clockedIn ? 'default' : 'pointer',
+              bgcolor: !clockedIn ? (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.12)') : '#eb445a',
+              color: !clockedIn ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)') : '#fff',
+              fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.07em',
+              '&:hover': clockedIn ? { bgcolor: '#d03a4e' } : {},
+              transition: 'background-color 0.15s',
+            }}
+          >
+            <Box component="span" sx={{ fontSize: '0.8rem', lineHeight: 1, fontWeight: 400 }}>□</Box>
+            CLOCK-OUT
+          </Box>
+        </Box>
       </Box>
 
       {/* Business popover */}
@@ -278,56 +369,39 @@ function SidebarContent({ onNavigate, onClose }) {
         onClose={() => setBizAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{ sx: { borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.22)', mt: 0.5, minWidth: 220 } }}
+        PaperProps={{ sx: {
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
+          mt: 0.5, minWidth: 240,
+          bgcolor: isDark ? '#1e1e1e' : '#fff',
+        }}}
       >
+        {/* Header: business name */}
+        <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
+          <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px' }}>Business</Typography>
+          <Typography sx={{ fontSize: '0.95rem', fontWeight: 700, color: sc.nameColor }} noWrap>
+            {user.company || user.name}
+          </Typography>
+        </Box>
         {[
-          { icon: BusinessIcon,    label: 'Manage Business',  action: () => { navigate('/settings'); setBizAnchor(null); } },
+          { icon: BusinessIcon,      label: 'Manage Business', action: () => { navigate('/settings'); setBizAnchor(null); } },
           { icon: SwitchAccountIcon, label: 'Switch Business', action: () => setBizAnchor(null) },
-          { icon: AddBusinessIcon, label: 'Add a business',   action: () => setBizAnchor(null) },
+          { icon: AddBusinessIcon,   label: 'Add a business',  action: () => setBizAnchor(null) },
         ].map(({ icon: Icon, label, action }, i, arr) => (
           <Box key={label}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }} onClick={action}>
-              <Icon sx={{ fontSize: 18, color: 'text.secondary' }} />
-              <Typography variant="body2" fontWeight={500}>{label}</Typography>
+            <Box
+              onClick={action}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
+                '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
+            >
+              <Icon sx={{ fontSize: 20, color: 'text.secondary' }} />
+              <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: sc.nameColor }}>{label}</Typography>
             </Box>
-            {i < arr.length - 1 && <Divider />}
+            {i < arr.length - 1 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
           </Box>
         ))}
+        <Box sx={{ height: 4 }} />
       </Popover>
-
-      <Divider sx={{ borderColor: sc.divider }} />
-
-      {/* ── Employee/User row ── */}
-      <Box
-        onClick={e => setUserAnchor(e.currentTarget)}
-        sx={{
-          display: 'flex', alignItems: 'center', gap: 1.5,
-          px: 2, py: 1.25, cursor: 'pointer',
-          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
-        }}
-      >
-        <Box sx={{ position: 'relative', flexShrink: 0 }}>
-          <Avatar src={user.avatar_url || undefined} sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.85rem', fontWeight: 700 }}>
-            {!user.avatar_url && (user.avatar || user.name?.charAt(0))}
-          </Avatar>
-          {/* Online/clocked-in dot */}
-          <Box sx={{
-            position: 'absolute', bottom: 1, right: 1,
-            width: 9, height: 9, borderRadius: '50%',
-            bgcolor: clockedIn ? '#2dd36f' : '#eb445a',
-            border: `2px solid ${isDark ? '#1a1a1a' : '#fff'}`,
-          }} />
-        </Box>
-        <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-          <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, display: 'block', lineHeight: 1.2, textTransform: 'capitalize' }}>
-            {user.role}
-          </Typography>
-          <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
-            {user.name}
-          </Typography>
-        </Box>
-        <ChevronRightIcon sx={{ fontSize: 16, color: sc.subtitleColor, flexShrink: 0 }} />
-      </Box>
 
       {/* User popover */}
       <Popover
@@ -336,62 +410,37 @@ function SidebarContent({ onNavigate, onClose }) {
         onClose={() => setUserAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{ sx: { borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.22)', mt: 0.5, minWidth: 200 } }}
+        PaperProps={{ sx: {
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
+          mt: 0.5, minWidth: 220,
+          bgcolor: isDark ? '#1e1e1e' : '#fff',
+        }}}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
-          onClick={() => { navigate('/profile'); setUserAnchor(null); }}>
-          <ManageAccountsIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-          <Typography variant="body2" fontWeight={500}>Manage profile</Typography>
+        {/* Header: user name */}
+        <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
+          <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px', textTransform: 'capitalize' }}>{user.role}</Typography>
+          <Typography sx={{ fontSize: '0.95rem', fontWeight: 700, color: sc.nameColor }} noWrap>{user.name}</Typography>
         </Box>
-        <Divider />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
-          onClick={() => { setUserAnchor(null); logout(); navigate('/'); }}>
-          <LogoutIcon sx={{ fontSize: 18, color: 'error.main' }} />
-          <Typography variant="body2" fontWeight={500} color="error.main">Log out</Typography>
+        <Box
+          onClick={() => { navigate('/profile'); setUserAnchor(null); }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
+            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
+        >
+          <ManageAccountsIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+          <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: sc.nameColor }}>Manage profile</Typography>
         </Box>
+        <Divider sx={{ borderColor: sc.dividerFaint }} />
+        <Box
+          onClick={() => { setUserAnchor(null); logout(); navigate('/'); }}
+          sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
+            '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
+        >
+          <LogoutIcon sx={{ fontSize: 20, color: 'error.main' }} />
+          <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: 'error.main' }}>Log out</Typography>
+        </Box>
+        <Box sx={{ height: 4 }} />
       </Popover>
-
-      {/* ── Clock In / Clock Out buttons ── */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, flexShrink: 0 }}>
-        <Button
-          disabled={clockedIn || clockLoading}
-          onClick={() => handleClockToggle('in')}
-          startIcon={<Box component="span" sx={{ fontSize: 10 }}>▶</Box>}
-          sx={{
-            borderRadius: 0,
-            py: 1.1,
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            letterSpacing: '0.06em',
-            bgcolor: clockedIn ? (isDark ? 'rgba(45,211,111,0.15)' : 'rgba(45,211,111,0.12)') : '#2dd36f',
-            color: clockedIn ? (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)') : '#fff',
-            '&:hover': { bgcolor: clockedIn ? undefined : '#27bc61' },
-            '&.Mui-disabled': { bgcolor: isDark ? 'rgba(45,211,111,0.15)' : 'rgba(45,211,111,0.12)', color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)' },
-            transition: 'background-color 0.2s',
-          }}
-        >
-          CLOCK-IN
-        </Button>
-        <Button
-          disabled={!clockedIn || clockLoading}
-          onClick={() => handleClockToggle('out')}
-          startIcon={<Box component="span" sx={{ fontSize: 11, lineHeight: 1 }}>□</Box>}
-          sx={{
-            borderRadius: 0,
-            py: 1.1,
-            fontSize: '0.72rem',
-            fontWeight: 700,
-            letterSpacing: '0.06em',
-            bgcolor: !clockedIn ? (isDark ? 'rgba(235,68,90,0.15)' : 'rgba(235,68,90,0.1)') : '#eb445a',
-            color: !clockedIn ? (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)') : '#fff',
-            '&:hover': { bgcolor: !clockedIn ? undefined : '#d03a4e' },
-            '&.Mui-disabled': { bgcolor: isDark ? 'rgba(235,68,90,0.15)' : 'rgba(235,68,90,0.1)', color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)' },
-            transition: 'background-color 0.2s',
-          }}
-        >
-          CLOCK-OUT
-        </Button>
-      </Box>
 
       {/* Message Center button */}
       {messagesPath && (
