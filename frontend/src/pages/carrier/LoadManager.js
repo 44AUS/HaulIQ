@@ -350,7 +350,7 @@ export default function LoadManager() {
           <TableContainer sx={{ overflowX: 'auto' }}>
             <Table size="small" sx={{ minWidth: 700 }}>
               <TableHead>
-                <TableRow>
+                <TableRow sx={{ '& .MuiTableCell-root': { fontWeight: '400 !important', textTransform: 'none !important', color: theme => `${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important` } }}>
                   {/* Date header — hover shows select-all checkbox */}
                   {(() => {
                     const allKeys     = tabItems.map((item, i) => item._key || i);

@@ -56,7 +56,18 @@ const TABS = [
 
 // ─── Table header cell ─────────────────────────────────────────────────────────
 const TH = ({ children, sx: sxProp }) => (
-  <TableCell sx={{ fontSize: '0.78rem', fontWeight: '400 !important', textTransform: 'none !important', color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, ...sxProp }}>
+  <TableCell
+    sx={theme => ({
+      fontSize: '0.78rem',
+      fontWeight: '400 !important',
+      textTransform: 'none !important',
+      color: `${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important`,
+      bgcolor: 'action.hover',
+      whiteSpace: 'nowrap',
+      py: 1.25,
+      ...sxProp,
+    })}
+  >
     {children}
   </TableCell>
 );
