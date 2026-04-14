@@ -16,7 +16,6 @@ import {
   AttachMoney as MoneyIcon,
   AccountBalanceWallet as WalletIcon,
   Payment as PaymentIcon,
-  Settings as SettingsIcon,
   Logout as LogoutIcon,
   Close as CloseIcon,
   Event as EventIcon,
@@ -37,7 +36,6 @@ import {
   Business as BusinessIcon,
   SwitchAccount as SwitchAccountIcon,
   AddBusiness as AddBusinessIcon,
-  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -181,13 +179,6 @@ function SidebarContent({ onNavigate, onClose }) {
     setClockLoading(false);
   };
 
-  // Popover menu style helper
-  const popoverRow = (onClick) => ({
-    display: 'flex', alignItems: 'center', gap: 1.5,
-    px: 2, py: 1.1, cursor: 'pointer',
-    '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' },
-    onClick,
-  });
 
   useEffect(() => {
     if (!user) return;
