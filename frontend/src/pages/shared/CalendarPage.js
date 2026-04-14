@@ -669,6 +669,10 @@ export default function CalendarPage() {
             <IconButton size="small" onClick={prev} sx={{ color: 'text.secondary' }}>
               <ChevronLeftIcon fontSize="small" />
             </IconButton>
+            <Button size="small" onClick={() => setDate(new Date())}
+              sx={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'none', color: 'text.secondary', px: 1.5, py: 0.5, borderRadius: '8px', minWidth: 0, '&:hover': { bgcolor: 'action.hover' } }}>
+              Today
+            </Button>
             <IconButton size="small" onClick={next} sx={{ color: 'text.secondary' }}>
               <ChevronRightIcon fontSize="small" />
             </IconButton>
