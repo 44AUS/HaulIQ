@@ -443,7 +443,7 @@ export default function LoadManager() {
                     cursor: 'pointer',
                     height: 64,
                     '& td': { py: 0, borderBottom: 0 },
-                    '& td:not(:nth-of-type(1)):not(:nth-of-type(2))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
+                    '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
                     animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined,
                     '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
                   };
