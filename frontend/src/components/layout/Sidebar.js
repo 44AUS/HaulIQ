@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
   Typography, Avatar, Divider, IconButton, Badge, Tooltip, useMediaQuery, useTheme,
-  Button, alpha,
+  Button, alpha, Popover,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -32,10 +32,16 @@ import {
   Folder as FolderIcon,
   LocalShipping as TruckIcon,
   Badge as BadgeIcon,
+  ChevronRight as ChevronRightIcon,
+  ManageAccounts as ManageAccountsIcon,
+  Business as BusinessIcon,
+  SwitchAccount as SwitchAccountIcon,
+  AddBusiness as AddBusinessIcon,
+  Person as PersonIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
-import { messagesApi, bookingsApi, networkApi } from '../../services/api';
+import { messagesApi, bookingsApi, networkApi, authApi } from '../../services/api';
 
 export const DRAWER_WIDTH = 280;
 export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
@@ -128,7 +134,7 @@ function NavItem({ item, badgeCount, active, onClick }) {
 }
 
 function SidebarContent({ onNavigate, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
   const isDark = mode === 'dark';
   const sc = {
@@ -154,6 +160,34 @@ function SidebarContent({ onNavigate, onClose }) {
   const [unread, setUnread] = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
   const [pendingNetwork, setPendingNetwork] = useState(0);
+
+  // Popover anchors
+  const [bizAnchor,  setBizAnchor]  = useState(null);
+  const [userAnchor, setUserAnchor] = useState(null);
+  const bizOpen  = Boolean(bizAnchor);
+  const userOpen = Boolean(userAnchor);
+
+  // Clock in/out
+  const [clockedIn, setClockedIn] = useState(user?.clocked_in || false);
+  const [clockLoading, setClockLoading] = useState(false);
+
+  const handleClockToggle = async (action) => {
+    setClockLoading(true);
+    try {
+      const updated = action === 'in' ? await authApi.clockIn() : await authApi.clockOut();
+      setClockedIn(updated.clocked_in || false);
+      updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
+    } catch {}
+    setClockLoading(false);
+  };
+
+  // Popover menu style helper
+  const popoverRow = (onClick) => ({
+    display: 'flex', alignItems: 'center', gap: 1.5,
+    px: 2, py: 1.1, cursor: 'pointer',
+    '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' },
+    onClick,
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -193,7 +227,6 @@ function SidebarContent({ onNavigate, onClose }) {
     location.pathname === path || (path !== '/admin' && location.pathname.startsWith(path));
 
   const handleNav = (path) => { onNavigate?.(); navigate(path); };
-  const handleLogout = () => { onNavigate?.(); logout(); navigate('/'); };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -226,21 +259,147 @@ function SidebarContent({ onNavigate, onClose }) {
 
       <Divider sx={{ borderColor: sc.divider }} />
 
-      {/* User info */}
-      <Box sx={{ px: 2, py: 1.5, flexShrink: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      {/* ── Business row ── */}
+      <Box
+        onClick={e => setBizAnchor(e.currentTarget)}
+        sx={{
+          display: 'flex', alignItems: 'center', gap: 1.5,
+          px: 2, py: 1.25, cursor: 'pointer',
+          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
+        }}
+      >
+        <Avatar sx={{ width: 36, height: 36, bgcolor: isDark ? '#3a3a3a' : '#e0e0e0', fontSize: '0.85rem', fontWeight: 700, color: sc.nameColor }}>
+          {(user.company || user.name)?.charAt(0)?.toUpperCase()}
+        </Avatar>
+        <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+          <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, display: 'block', lineHeight: 1.2 }}>Business</Typography>
+          <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
+            {user.company || user.name}
+          </Typography>
+        </Box>
+        <ChevronRightIcon sx={{ fontSize: 16, color: sc.subtitleColor, flexShrink: 0 }} />
+      </Box>
+
+      {/* Business popover */}
+      <Popover
+        open={bizOpen}
+        anchorEl={bizAnchor}
+        onClose={() => setBizAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ sx: { borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.22)', mt: 0.5, minWidth: 220 } }}
+      >
+        {[
+          { icon: BusinessIcon,    label: 'Manage Business',  action: () => { navigate('/settings'); setBizAnchor(null); } },
+          { icon: SwitchAccountIcon, label: 'Switch Business', action: () => setBizAnchor(null) },
+          { icon: AddBusinessIcon, label: 'Add a business',   action: () => setBizAnchor(null) },
+        ].map(({ icon: Icon, label, action }, i, arr) => (
+          <Box key={label}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }} onClick={action}>
+              <Icon sx={{ fontSize: 18, color: 'text.secondary' }} />
+              <Typography variant="body2" fontWeight={500}>{label}</Typography>
+            </Box>
+            {i < arr.length - 1 && <Divider />}
+          </Box>
+        ))}
+      </Popover>
+
+      <Divider sx={{ borderColor: sc.divider }} />
+
+      {/* ── Employee/User row ── */}
+      <Box
+        onClick={e => setUserAnchor(e.currentTarget)}
+        sx={{
+          display: 'flex', alignItems: 'center', gap: 1.5,
+          px: 2, py: 1.25, cursor: 'pointer',
+          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' },
+        }}
+      >
+        <Box sx={{ position: 'relative', flexShrink: 0 }}>
           <Avatar src={user.avatar_url || undefined} sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.85rem', fontWeight: 700 }}>
             {!user.avatar_url && (user.avatar || user.name?.charAt(0))}
           </Avatar>
-          <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-            <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
-              {user.name}
-            </Typography>
-            <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, textTransform: 'capitalize' }}>
-              {user.role} · <Box component="span" sx={{ color: sc.planColor }}>{user.plan}</Box>
-            </Typography>
-          </Box>
+          {/* Online/clocked-in dot */}
+          <Box sx={{
+            position: 'absolute', bottom: 1, right: 1,
+            width: 9, height: 9, borderRadius: '50%',
+            bgcolor: clockedIn ? '#2dd36f' : '#eb445a',
+            border: `2px solid ${isDark ? '#1a1a1a' : '#fff'}`,
+          }} />
         </Box>
+        <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+          <Typography variant="caption" noWrap sx={{ color: sc.subtitleColor, display: 'block', lineHeight: 1.2, textTransform: 'capitalize' }}>
+            {user.role}
+          </Typography>
+          <Typography variant="body2" fontWeight={700} noWrap sx={{ color: sc.nameColor, lineHeight: 1.3 }}>
+            {user.name}
+          </Typography>
+        </Box>
+        <ChevronRightIcon sx={{ fontSize: 16, color: sc.subtitleColor, flexShrink: 0 }} />
+      </Box>
+
+      {/* User popover */}
+      <Popover
+        open={userOpen}
+        anchorEl={userAnchor}
+        onClose={() => setUserAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        PaperProps={{ sx: { borderRadius: '10px', boxShadow: '0 8px 32px rgba(0,0,0,0.22)', mt: 0.5, minWidth: 200 } }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' } }}
+          onClick={() => { navigate('/profile'); setUserAnchor(null); }}>
+          <ManageAccountsIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+          <Typography variant="body2" fontWeight={500}>Manage profile</Typography>
+        </Box>
+        <Divider />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.1, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
+          onClick={() => { setUserAnchor(null); logout(); navigate('/'); }}>
+          <LogoutIcon sx={{ fontSize: 18, color: 'error.main' }} />
+          <Typography variant="body2" fontWeight={500} color="error.main">Log out</Typography>
+        </Box>
+      </Popover>
+
+      {/* ── Clock In / Clock Out buttons ── */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, flexShrink: 0 }}>
+        <Button
+          disabled={clockedIn || clockLoading}
+          onClick={() => handleClockToggle('in')}
+          startIcon={<Box component="span" sx={{ fontSize: 10 }}>▶</Box>}
+          sx={{
+            borderRadius: 0,
+            py: 1.1,
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            bgcolor: clockedIn ? (isDark ? 'rgba(45,211,111,0.15)' : 'rgba(45,211,111,0.12)') : '#2dd36f',
+            color: clockedIn ? (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)') : '#fff',
+            '&:hover': { bgcolor: clockedIn ? undefined : '#27bc61' },
+            '&.Mui-disabled': { bgcolor: isDark ? 'rgba(45,211,111,0.15)' : 'rgba(45,211,111,0.12)', color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)' },
+            transition: 'background-color 0.2s',
+          }}
+        >
+          CLOCK-IN
+        </Button>
+        <Button
+          disabled={!clockedIn || clockLoading}
+          onClick={() => handleClockToggle('out')}
+          startIcon={<Box component="span" sx={{ fontSize: 11, lineHeight: 1 }}>□</Box>}
+          sx={{
+            borderRadius: 0,
+            py: 1.1,
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            bgcolor: !clockedIn ? (isDark ? 'rgba(235,68,90,0.15)' : 'rgba(235,68,90,0.1)') : '#eb445a',
+            color: !clockedIn ? (isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)') : '#fff',
+            '&:hover': { bgcolor: !clockedIn ? undefined : '#d03a4e' },
+            '&.Mui-disabled': { bgcolor: isDark ? 'rgba(235,68,90,0.15)' : 'rgba(235,68,90,0.1)', color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)' },
+            transition: 'background-color 0.2s',
+          }}
+        >
+          CLOCK-OUT
+        </Button>
       </Box>
 
       {/* Message Center button */}
@@ -291,35 +450,8 @@ function SidebarContent({ onNavigate, onClose }) {
         ))}
       </List>
 
-      {/* Bottom */}
+      {/* Bottom: theme toggle */}
       <Divider sx={{ borderColor: sc.divider }} />
-      <List dense disablePadding>
-        <Divider sx={{ borderColor: sc.dividerFaint }} />
-        <NavItem
-          item={{ icon: SettingsIcon, label: 'Settings', path: '/settings' }}
-          badgeCount={0}
-          active={location.pathname === '/settings'}
-          onClick={() => handleNav('/settings')}
-        />
-        <Divider sx={{ borderColor: sc.dividerFaint }} />
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={handleLogout}
-            sx={{
-              borderRadius: '0 !important',
-              px: 2.5,
-              py: 1.25,
-              color: sc.logoutColor,
-              '&:hover': { bgcolor: sc.logoutHoverBg, color: sc.logoutHoverColor },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-              <LogoutIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Sign out" primaryTypographyProps={{ fontSize: '0.875rem' }} />
-          </ListItemButton>
-        </ListItem>
-      </List>
     </Box>
   );
 }

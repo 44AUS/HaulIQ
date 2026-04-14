@@ -53,6 +53,8 @@ class User(Base):
     updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     stripe_connect_account_id = Column(String(255), nullable=True)
     brand_color               = Column(String(20), nullable=True)
+    clocked_in                = Column(Boolean, default=False, nullable=True)
+    clocked_in_at             = Column(DateTime, nullable=True)
 
     # Driver-specific fields
     carrier_id      = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)

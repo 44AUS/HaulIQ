@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from datetime import datetime
 from app.database import get_db
 from app.models.user import User, UserRole, UserPlan
 from app.schemas.user import UserCreate, UserLogin, UserOut, UserUpdate, Token
@@ -211,6 +212,32 @@ def update_me(
         if "mc_number" in data:
             bp.mc_number = current_user.mc_number
 
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+# ─── POST /api/auth/clock-in ──────────────────────────────────────────────────
+@router.post("/clock-in", response_model=UserOut, summary="Clock in current user")
+def clock_in(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.clocked_in    = True
+    current_user.clocked_in_at = datetime.utcnow()
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+# ─── POST /api/auth/clock-out ─────────────────────────────────────────────────
+@router.post("/clock-out", response_model=UserOut, summary="Clock out current user")
+def clock_out(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.clocked_in    = False
+    current_user.clocked_in_at = None
     db.commit()
     db.refresh(current_user)
     return current_user

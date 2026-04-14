@@ -69,6 +69,8 @@ class UserOut(BaseModel):
     carrier_id:        Optional[UUID] = None
     invite_accepted:   Optional[bool] = None
     license_number:    Optional[str] = None
+    clocked_in:        Optional[bool] = None
+    clocked_in_at:     Optional[datetime] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

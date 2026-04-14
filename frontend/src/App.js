@@ -65,6 +65,7 @@ import Documents from './pages/shared/Documents';
 import BrokerProfile from './pages/shared/BrokerProfile';
 import CarrierProfile from './pages/shared/CarrierProfile';
 import Settings from './pages/shared/Settings';
+import ManageProfile from './pages/shared/ManageProfile';
 import Preferences from './pages/shared/Preferences';
 import Billing from './pages/shared/Billing';
 import MapView from './pages/shared/MapView';
@@ -259,6 +260,11 @@ function AppRoutes() {
       <Route path="/settings" element={
         <ProtectedRoute>
           <DashboardLayout><Settings /></DashboardLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <DashboardLayout><ManageProfile /></DashboardLayout>
         </ProtectedRoute>
       } />
       <Route path="/preferences" element={
