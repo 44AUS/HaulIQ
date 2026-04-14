@@ -336,7 +336,7 @@ function SidebarContent({ onNavigate, onClose }) {
           {clockState === 'out' && (
             <Box component="button" onClick={() => handleClockToggle('in')}
               sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#2dd36f', color: '#fff',
+                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#2dd36f', color: '#fff',
                 fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
                 borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
                 '&:hover': { bgcolor: '#27bc61' }, transition: 'background-color 0.15s' }}>
@@ -346,7 +346,7 @@ function SidebarContent({ onNavigate, onClose }) {
           {clockState === 'in' && (
             <Box component="button" onClick={() => handleClockToggle('pause')}
               sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#ffce00', color: '#000',
+                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#ffce00', color: '#000',
                 fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
                 borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
                 '&:hover': { bgcolor: '#e6b800' }, transition: 'background-color 0.15s' }}>
@@ -356,7 +356,7 @@ function SidebarContent({ onNavigate, onClose }) {
           {clockState === 'paused' && (
             <Box component="button" onClick={() => handleClockToggle('continue')}
               sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#2a7fff', color: '#fff',
+                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#2a7fff', color: '#fff',
                 fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
                 borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
                 '&:hover': { bgcolor: '#1a6fe6' }, transition: 'background-color 0.15s' }}>
@@ -367,7 +367,7 @@ function SidebarContent({ onNavigate, onClose }) {
           <Box component="button"
             onClick={() => clockedIn && !clockLoading && handleClockToggle('out')}
             sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 0.6, py: 0.85, cursor: clockedIn ? 'pointer' : 'default',
+              gap: 0.6, py: 0.55, cursor: clockedIn ? 'pointer' : 'default',
               bgcolor: clockedIn ? '#eb445a' : (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.1)'),
               color: clockedIn ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'),
               fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
