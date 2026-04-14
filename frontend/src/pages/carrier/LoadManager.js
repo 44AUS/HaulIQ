@@ -380,7 +380,7 @@ export default function LoadManager() {
                             sx={{ p: 0.5 }}
                           />
                         ) : (
-                          <Typography sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', whiteSpace: 'nowrap' }}>
+                          <Typography sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', whiteSpace: 'nowrap' }}>
                             Date
                           </Typography>
                         )}
@@ -388,7 +388,7 @@ export default function LoadManager() {
                     );
                   })()}
                   {['Route', 'Equipment', 'Miles', 'Rate', 'Broker'].map(h => (
-                    <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
+                    <TableCell key={h} sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
                       {h}
                     </TableCell>
                   ))}
@@ -424,7 +424,7 @@ export default function LoadManager() {
                         </Button>
                       </TableCell>
                     ) : (
-                      <TableCell sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, width: 120, minWidth: 120 }}>
+                      <TableCell sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, width: 120, minWidth: 120 }}>
                         Status
                       </TableCell>
                     );
