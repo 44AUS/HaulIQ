@@ -179,9 +179,7 @@ function SidebarContent({ onNavigate, onClose }) {
       const h = Math.floor(secs / 3600);
       const m = Math.floor((secs % 3600) / 60);
       const s = secs % 60;
-      setElapsed(h > 0
-        ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-        : `${m}:${String(s).padStart(2,'0')}`);
+      setElapsed(`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -349,7 +347,7 @@ function SidebarContent({ onNavigate, onClose }) {
                 {user.name}
               </Typography>
               {elapsed && (
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: clockState === 'paused' ? '#ffce00' : '#2dd36f', flexShrink: 0, lineHeight: 1.3 }}>
+                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff', flexShrink: 0, lineHeight: 1.3 }}>
                   {elapsed}
                 </Typography>
               )}
