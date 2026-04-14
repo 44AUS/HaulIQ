@@ -467,9 +467,9 @@ export default function CalendarPage() {
   };
 
   return (
-    <Box>
+    <Box sx={{ p: '4px 6px' }}>
       {/* Page header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 2 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Calendar</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.25}>
@@ -479,7 +479,7 @@ export default function CalendarPage() {
       </Box>
 
       {/* Calendar card */}
-      <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <Paper elevation={0} sx={{ borderRadius: '6px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', border: 'none' }}>
         {/* Custom toolbar — always rendered */}
         <CalendarToolbar
           date={date}
