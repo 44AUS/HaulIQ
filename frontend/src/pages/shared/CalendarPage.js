@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
@@ -130,6 +130,47 @@ function CalendarToolbar({ date, view, onNavigate, onView }) {
   );
 }
 
+// ─── US Federal Holidays ──────────────────────────────────────────────────────
+function nthWeekday(year, month, weekday, n) {
+  let count = 0;
+  for (let d = 1; d <= 31; d++) {
+    const date = new Date(year, month, d);
+    if (date.getMonth() !== month) break;
+    if (date.getDay() === weekday && ++count === n) return date;
+  }
+}
+function lastWeekday(year, month, weekday) {
+  let last;
+  for (let d = 1; d <= 31; d++) {
+    const date = new Date(year, month, d);
+    if (date.getMonth() !== month) break;
+    if (date.getDay() === weekday) last = date;
+  }
+  return last;
+}
+function getHolidaysForYear(year) {
+  return [
+    { name: "New Year's Day",           date: new Date(year, 0, 1) },
+    { name: 'Martin Luther King Jr. Day', date: nthWeekday(year, 0, 1, 3) },
+    { name: "Presidents' Day",           date: nthWeekday(year, 1, 1, 3) },
+    { name: 'Memorial Day',              date: lastWeekday(year, 4, 1) },
+    { name: 'Juneteenth',                date: new Date(year, 5, 19) },
+    { name: 'Independence Day',          date: new Date(year, 6, 4) },
+    { name: 'Labor Day',                 date: nthWeekday(year, 8, 1, 1) },
+    { name: 'Columbus Day',              date: nthWeekday(year, 9, 1, 2) },
+    { name: 'Veterans Day',              date: new Date(year, 10, 11) },
+    { name: 'Thanksgiving Day',          date: nthWeekday(year, 10, 4, 4) },
+    { name: 'Christmas Day',             date: new Date(year, 11, 25) },
+  ].map(h => ({
+    id: `holiday-${year}-${h.name}`,
+    title: h.name,
+    start: h.date,
+    end: h.date,
+    allDay: true,
+    type: 'holiday',
+  }));
+}
+
 export default function CalendarPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -142,6 +183,13 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [mapMarker, setMapMarker] = useState(null);
+
+  const holidays = useMemo(() => {
+    const y = date.getFullYear();
+    return [y - 1, y, y + 1, y + 2].flatMap(getHolidaysForYear);
+  }, [date.getFullYear()]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const allEvents = useMemo(() => [...events, ...holidays], [events, holidays]);
 
   const { isLoaded: mapsLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
@@ -169,6 +217,21 @@ export default function CalendarPage() {
   useEffect(() => { loadEvents(); }, [loadEvents]);
 
   const eventPropGetter = useCallback((event) => {
+    if (event.type === 'holiday') {
+      return {
+        style: {
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText || '#fff',
+          border: 'none',
+          borderRadius: 6,
+          fontSize: '0.73rem',
+          fontWeight: 600,
+          padding: '2px 8px',
+          cursor: 'default',
+          opacity: 0.85,
+        },
+      };
+    }
     const c = STATUS_COLORS[event.status] || STATUS_COLORS.Pending;
     return {
       style: {
@@ -182,7 +245,7 @@ export default function CalendarPage() {
         cursor: 'pointer',
       },
     };
-  }, []);
+  }, [theme.palette.primary.main, theme.palette.primary.contrastText]);
 
   const legend = user?.role === 'broker'
     ? ['Unassigned', 'In Progress', 'Completed']
@@ -270,6 +333,13 @@ export default function CalendarPage() {
                 }} />
             );
           })}
+          <Chip label="Holiday" size="small"
+            sx={{
+              bgcolor: `${theme.palette.primary.main}22`,
+              color: theme.palette.primary.main,
+              fontWeight: 600, fontSize: '0.7rem',
+              border: `1px solid ${theme.palette.primary.main}40`, height: 24,
+            }} />
         </Box>
       </Box>
 
@@ -298,13 +368,13 @@ export default function CalendarPage() {
           <Box sx={calSx}>
             <Calendar
               localizer={localizer}
-              events={events}
+              events={allEvents}
               view={view}
               date={date}
               onNavigate={setDate}
               onView={setView}
               eventPropGetter={eventPropGetter}
-              onSelectEvent={setSelected}
+              onSelectEvent={event => { if (event.type !== 'holiday') setSelected(event); }}
               style={{ height: 650 }}
               popup
             />
