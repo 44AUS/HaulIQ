@@ -280,6 +280,7 @@ export default function LoadManager() {
   const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
   return (
+    <>
     <style>{`
       @keyframes rowSelectFlash {
         0%   { background-color: ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.09)'}; }
@@ -584,5 +585,6 @@ export default function LoadManager() {
 
     <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </Box>
+    </>
   );
 }
