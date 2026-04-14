@@ -192,14 +192,14 @@ def get_insights(
 
 
 # ─── POST /api/analytics/insights/refresh ─────────────────────────────────────
-@router.post("/insights/refresh", summary="Manually trigger Earnings Brain refresh")
+@router.post("/insights/refresh", response_model=list[InsightOut],
+             summary="Manually trigger Earnings Brain refresh")
 def refresh_insights(
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_plan("pro", "elite")),
 ):
-    background_tasks.add_task(run_brain, current_user.id, db)
-    return {"message": "Earnings Brain is running — check back in a few seconds."}
+    insights = run_brain(current_user.id, db)
+    return insights
 
 
 # ─── PATCH /api/analytics/insights/{id}/read ──────────────────────────────────

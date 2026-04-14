@@ -22,14 +22,14 @@ const TAG_COLOR_MAP = {
 function InsightCard({ insight, locked, onRead }) {
   return (
     <Card
-      onClick={() => !locked && onRead && onRead(insight.id)}
+      onClick={() => !locked && !insight.is_read && onRead && onRead(insight.id)}
       sx={{
         position: 'relative',
         overflow: 'hidden',
-        cursor: locked ? 'default' : 'pointer',
-        opacity: locked ? 0.7 : 1,
+        cursor: locked ? 'default' : insight.is_read ? 'default' : 'pointer',
+        opacity: locked ? 0.7 : insight.is_read ? 0.6 : 1,
         transition: 'all 0.2s',
-        ...(!locked && {
+        ...(!locked && !insight.is_read && {
           '&:hover': { boxShadow: 4, transform: 'translateY(-2px)' },
         }),
       }}
@@ -102,31 +102,49 @@ export default function EarningsBrain() {
   const isElite = user?.plan === 'elite';
 
   const [insights, setInsights] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [summary, setSummary]   = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchInsights = () => {
+  useEffect(() => {
     setLoading(true);
-    analyticsApi.insights()
-      .then(data => { setInsights(Array.isArray(data) ? data : []); setError(null); })
+    const insightsReq = analyticsApi.insights();
+    const summaryReq  = isPro ? analyticsApi.summary() : Promise.resolve(null);
+    Promise.all([insightsReq, summaryReq])
+      .then(([ins, sum]) => {
+        setInsights(Array.isArray(ins) ? ins : []);
+        setSummary(sum || null);
+        setError(null);
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { fetchInsights(); }, []);
+  }, [isPro]);
 
   const handleRefresh = () => {
     setRefreshing(true);
     analyticsApi.refresh()
-      .then(() => fetchInsights())
-      .catch(() => fetchInsights())
+      .then(fresh => {
+        setInsights(Array.isArray(fresh) ? fresh : []);
+        // Re-fetch summary after brain runs
+        if (isPro) analyticsApi.summary().then(s => setSummary(s || null)).catch(() => {});
+      })
+      .catch(() => {})
       .finally(() => setRefreshing(false));
   };
 
   const handleMarkRead = (insightId) => {
-    analyticsApi.markRead(insightId).catch(() => {});
+    analyticsApi.markRead(insightId)
+      .then(() => setInsights(prev => prev.map(i => i.id === insightId ? { ...i, is_read: true } : i)))
+      .catch(() => {});
   };
+
+  // Derived stats from summary
+  const brokersWarnedCount = insights.filter(i => i.tag === 'warning' && i.insight_type === 'broker').length;
+  const bestLane = summary?.best_lane || null;
+  const estimatedSavings = summary
+    ? Math.max(0, Math.round((summary.avg_deadhead_miles - 30) * 0.62 * summary.total_loads))
+    : null;
 
   const visibleInsights = isPro ? insights : insights.slice(0, 1);
   const lockedInsights  = isPro ? [] : insights.slice(1);
@@ -165,10 +183,26 @@ export default function EarningsBrain() {
       {/* Summary stats */}
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {[
-          { label: 'Insights Generated', value: insights.length || '—', sub: 'Available now' },
-          { label: 'Estimated Savings', value: '$—', sub: 'From avoided bad loads' },
-          { label: 'Brokers Flagged', value: '—', sub: 'Based on your history' },
-          { label: 'Best Lane Found', value: '—', sub: 'Run more loads to unlock' },
+          {
+            label: 'Insights Generated',
+            value: loading ? '—' : (insights.length || '0'),
+            sub: 'Available now',
+          },
+          {
+            label: 'Estimated Savings',
+            value: !isPro ? '—' : loading ? '—' : estimatedSavings != null ? `$${estimatedSavings.toLocaleString()}` : '$0',
+            sub: 'From reducing deadhead miles',
+          },
+          {
+            label: 'Brokers Flagged',
+            value: loading ? '—' : brokersWarnedCount || '0',
+            sub: 'Based on your history',
+          },
+          {
+            label: 'Best Lane Found',
+            value: !isPro ? '—' : loading ? '—' : (bestLane || '—'),
+            sub: bestLane ? 'Your top earning lane' : 'Run more loads to unlock',
+          },
         ].map(({ label, value, sub }) => (
           <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
             <Card sx={{ height: '100%' }}>

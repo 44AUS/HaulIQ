@@ -40,11 +40,9 @@ def run_brain(carrier_id: UUID, db: Session) -> list[DriverInsight]:
 
     df = _to_dataframe(history)
 
-    # Clean up stale insights
-    cutoff = datetime.utcnow() - timedelta(days=7)
+    # Wipe all existing insights before regenerating (prevents duplicates on refresh)
     db.query(DriverInsight).filter(
         DriverInsight.carrier_id == carrier_id,
-        DriverInsight.generated_at < cutoff,
     ).delete(synchronize_session=False)
 
     insights: list[DriverInsight] = []
@@ -320,6 +318,15 @@ def _refresh_lane_stats(df: pd.DataFrame, carrier_id: UUID, db: Session):
 
 def _default_insights(carrier_id: UUID, db: Session) -> list[DriverInsight]:
     """Onboarding insights shown when a carrier has no history yet."""
+    # Return existing defaults rather than duplicating them
+    existing = (
+        db.query(DriverInsight)
+        .filter(DriverInsight.carrier_id == carrier_id)
+        .all()
+    )
+    if existing:
+        return existing
+
     defaults = [
         DriverInsight(
             carrier_id=carrier_id,
