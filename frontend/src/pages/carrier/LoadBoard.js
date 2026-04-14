@@ -17,6 +17,7 @@ import StarIcon from '@mui/icons-material/Star';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 
@@ -54,9 +55,8 @@ const TABS = [
 ];
 
 // ─── Table header cell ─────────────────────────────────────────────────────────
-const TH = ({ children }) => (
-  <TableCell sx={{ fontWeight: 700, textTransform: 'uppercase', fontSize: '0.63rem',
-    letterSpacing: '0.06em', whiteSpace: 'nowrap', color: 'text.secondary', py: 1.25 }}>
+const TH = ({ children, sx }) => (
+  <TableCell sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, ...sx }}>
     {children}
   </TableCell>
 );
@@ -64,6 +64,8 @@ const TH = ({ children }) => (
 // ─── Table view ────────────────────────────────────────────────────────────────
 function TableView({ loads, equipmentTypes }) {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [savedIds, setSavedIds] = useState(() => new Set(loads.filter(l => l.saved).map(l => l.id)));
 
   const handleSave = (e, load) => {
@@ -74,35 +76,37 @@ function TableView({ loads, equipmentTypes }) {
     );
   };
 
-  // Build abbreviation lookup from equipment types API data
   const abbrMap = {};
   equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
 
+  const PROFIT_BAR = { green: '#2e7d32', yellow: '#ED6C02', red: '#d32f2f' };
+
   if (!loads.length) return null;
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: 'auto' }}>
+    <TableContainer sx={{ overflowX: 'auto' }}>
       <Table size="small" sx={{ minWidth: 900 }}>
         <TableHead>
-          <TableRow sx={{ bgcolor: 'action.hover' }}>
-            <TH>Age</TH>
-            <TH>Broker</TH>
-            <TH>Pickup</TH>
-            <TH>Rate</TH>
-            <TH>Trip</TH>
-            <TH>Lane</TH>
-            <TH>DH-O</TH>
-            <TH>Delivery</TH>
-            <TH>Equipment</TH>
-            <TH>Net Profit</TH>
-            <TH></TH>
+          <TableRow>
+            <TH sx={{ width: 80, minWidth: 80 }}>Age</TH>
+            <TH sx={{ minWidth: 100 }}>Broker</TH>
+            <TH sx={{ minWidth: 90 }}>Pickup</TH>
+            <TH sx={{ minWidth: 80 }}>Rate</TH>
+            <TH sx={{ minWidth: 70 }}>Trip</TH>
+            <TH sx={{ minWidth: 180 }}>Lane</TH>
+            <TH sx={{ minWidth: 70 }}>DH-O</TH>
+            <TH sx={{ minWidth: 90 }}>Delivery</TH>
+            <TH sx={{ minWidth: 90 }}>Equipment</TH>
+            <TH sx={{ minWidth: 90 }}>Net Profit</TH>
+            <TH sx={{ width: 60 }}></TH>
           </TableRow>
         </TableHead>
         <TableBody>
           {loads.map(load => {
-            const isSaved = savedIds.has(load.id);
+            const isSaved    = savedIds.has(load.id);
             const originCity = load.origin || '—';
             const destCity   = load.dest   || '—';
-            const abbr = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
+            const abbr       = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
+            const barColor   = PROFIT_BAR[load.profitScore] || '#9e9e9e';
             const equipParts = [
               abbr,
               load.weight || null,
@@ -111,19 +115,25 @@ function TableView({ loads, equipmentTypes }) {
             ].filter(Boolean);
 
             return (
-              <TableRow key={load.id} hover
+              <TableRow key={load.id}
                 onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })}
-                sx={{ cursor: 'pointer', '& td': { py: 1.25 } }}>
+                sx={{
+                  cursor: 'pointer',
+                  height: 64,
+                  '& td': { py: 0, borderBottom: 0 },
+                  '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
+                  '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
+                }}>
 
                 {/* Age */}
-                <TableCell>
+                <TableCell sx={{ width: 80, minWidth: 80 }}>
                   <Typography variant="caption" color="text.secondary" noWrap>{load.posted}</Typography>
                 </TableCell>
 
                 {/* Broker */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 100 }}>
                   {load.broker ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 100 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                       <Avatar sx={{ width: 24, height: 24, fontSize: '0.58rem', fontWeight: 700, bgcolor: 'primary.main', flexShrink: 0 }}>
                         {load.broker.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
                       </Avatar>
@@ -145,58 +155,53 @@ function TableView({ loads, equipmentTypes }) {
                 </TableCell>
 
                 {/* Pickup */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 90 }}>
                   <Typography variant="caption" fontWeight={600} noWrap>{load.pickup}</Typography>
                 </TableCell>
 
                 {/* Rate */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 80 }}>
                   <Typography variant="body2" fontWeight={700} noWrap>${load.rate?.toLocaleString()}</Typography>
                   <Typography variant="caption" color="text.secondary" noWrap display="block">
                     ${load.ratePerMile}/mi
                   </Typography>
                 </TableCell>
 
-                {/* Trip (miles) */}
-                <TableCell>
+                {/* Trip */}
+                <TableCell sx={{ minWidth: 70 }}>
                   <Typography variant="body2" fontWeight={600} noWrap>{load.miles} mi</Typography>
                 </TableCell>
 
-                {/* Lane */}
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'stretch', gap: 1 }}>
-                    {/* Icon track */}
+                {/* Lane — accent bar + icon track */}
+                <TableCell sx={{ pl: 0, position: 'relative', minWidth: 180 }}>
+                  <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
+                  <Box sx={{ pl: 2, display: 'flex', alignItems: 'stretch', gap: 1 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.25, pb: 0.25 }}>
                       <FiberManualRecordIcon sx={{ fontSize: 8, color: 'primary.main', flexShrink: 0 }} />
                       <Box sx={{ width: '1.5px', flex: 1, bgcolor: 'divider', my: '2px' }} />
                       <SquareIcon sx={{ fontSize: 8, color: 'text.secondary', flexShrink: 0 }} />
                     </Box>
-                    {/* Cities */}
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.6 }}>
-                        {originCity}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ lineHeight: 1.6 }}>
-                        {destCity}
-                      </Typography>
+                      <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.6 }}>{originCity}</Typography>
+                      <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ lineHeight: 1.6 }}>{destCity}</Typography>
                     </Box>
                   </Box>
                 </TableCell>
 
                 {/* DH-O */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 70 }}>
                   <Typography variant="caption" fontWeight={600} noWrap>
                     {load.deadhead > 0 ? `${load.deadhead} mi` : '—'}
                   </Typography>
                 </TableCell>
 
                 {/* Delivery */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 90 }}>
                   <Typography variant="caption" fontWeight={600} noWrap>{load.delivery}</Typography>
                 </TableCell>
 
                 {/* Equipment */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 90 }}>
                   <Typography variant="caption" fontWeight={700} noWrap display="block">{abbr}</Typography>
                   <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: '0.6rem' }}>
                     {equipParts.slice(1).join(' · ')}
@@ -204,23 +209,22 @@ function TableView({ loads, equipmentTypes }) {
                 </TableCell>
 
                 {/* Net Profit */}
-                <TableCell>
+                <TableCell sx={{ minWidth: 90 }}>
                   <Typography variant="body2" fontWeight={700} noWrap
-                    color={
-                      load.profitScore === 'green' ? 'success.main'
-                      : load.profitScore === 'red' ? 'error.main'
-                      : 'warning.main'
-                    }>
+                    color={load.profitScore === 'green' ? 'success.main' : load.profitScore === 'red' ? 'error.main' : 'warning.main'}>
                     ${load.netProfit?.toLocaleString()}
                   </Typography>
                 </TableCell>
 
-                {/* Bookmark */}
-                <TableCell sx={{ pr: 1 }}>
-                  <IconButton size="small" onClick={e => handleSave(e, load)}
-                    sx={{ color: isSaved ? 'primary.main' : 'text.disabled' }}>
-                    {isSaved ? <BookmarkIcon sx={{ fontSize: 15 }} /> : <BookmarkBorderIcon sx={{ fontSize: 15 }} />}
-                  </IconButton>
+                {/* Bookmark + Chevron */}
+                <TableCell sx={{ width: 60, pr: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <IconButton size="small" onClick={e => handleSave(e, load)}
+                      sx={{ color: isSaved ? 'primary.main' : 'text.disabled' }}>
+                      {isSaved ? <BookmarkIcon sx={{ fontSize: 15 }} /> : <BookmarkBorderIcon sx={{ fontSize: 15 }} />}
+                    </IconButton>
+                    <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                  </Box>
                 </TableCell>
               </TableRow>
             );
