@@ -23,6 +23,8 @@ function mapUser(apiUser) {
     brand_color: apiUser.brand_color || null,
     carrier_id:  apiUser.carrier_id  || null,
     license_number: apiUser.license_number || null,
+    clocked_in:    apiUser.clocked_in    ?? null,
+    clocked_in_at: apiUser.clocked_in_at ?? null,
   };
 }
 
