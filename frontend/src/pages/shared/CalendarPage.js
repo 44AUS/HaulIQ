@@ -332,6 +332,14 @@ export default function CalendarPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+
+  const handleEventClick = useCallback((event) => {
+    if (event.type === 'holiday') return;
+    const path = user?.role === 'carrier'
+      ? (event.booking_id ? `/carrier/active/${event.booking_id}` : `/carrier/loads/${event.load_id}`)
+      : `/broker/loads/${event.load_id}`;
+    navigate(path);
+  }, [user?.role, navigate]);
   const [mapMarker, setMapMarker] = useState(null);
 
   const holidays = useMemo(() => {
@@ -518,7 +526,7 @@ export default function CalendarPage() {
           <MonthGrid
             date={date}
             allEvents={allEvents}
-            onSelectEvent={event => { if (event.type !== 'holiday') setSelected(event); }}
+            onSelectEvent={handleEventClick}
           />
         ) : (
           <Box sx={calSx}>
@@ -530,7 +538,7 @@ export default function CalendarPage() {
               onNavigate={setDate}
               onView={setView}
               eventPropGetter={eventPropGetter}
-              onSelectEvent={event => { if (event.type !== 'holiday') setSelected(event); }}
+              onSelectEvent={handleEventClick}
               style={{ height: 650 }}
               popup
             />
