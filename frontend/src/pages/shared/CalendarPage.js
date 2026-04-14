@@ -297,11 +297,11 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
     });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 780 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 920 }}>
       {/* Day-of-week header */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
         {DAY_HEADERS.map(h => (
-          <Box key={h} sx={{ py: 1.25, textAlign: 'center', borderRight: 1, borderColor: 'divider', '&:last-child': { borderRight: 0 } }}>
+          <Box key={h} sx={{ py: 1.25, textAlign: 'center' }}>
             <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}>
               {h}
             </Typography>
@@ -419,13 +419,13 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
 
   if (!mapsLoaded) {
     return (
-      <Box sx={{ height: 780, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ height: 920, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography color="text.secondary">Loading map...</Typography>
       </Box>
     );
   }
   return (
-    <GoogleMap mapContainerStyle={{ width: '100%', height: 780 }}
+    <GoogleMap mapContainerStyle={{ width: '100%', height: 920 }}
       center={center} zoom={mapEvents.length > 0 ? 5 : 4}
       options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: true }}>
       {mapEvents.map(event => {
@@ -622,7 +622,7 @@ export default function CalendarPage() {
       <Paper elevation={0} sx={{ borderRadius: '6px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', border: 'none' }}>
 
         {/* ── Row 1: Month picker + View buttons ── */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5 }}>
           {/* Month picker button */}
           <Button
             onClick={e => setPickerAnchor(e.currentTarget)}
@@ -706,7 +706,7 @@ export default function CalendarPage() {
               onView={setView}
               eventPropGetter={eventPropGetter}
               onSelectEvent={handleEventClick}
-              style={{ height: 780 }}
+              style={{ height: 920 }}
               popup
             />
           </Box>
