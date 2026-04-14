@@ -260,6 +260,64 @@ function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onCle
 
 // ─── MUI Month Grid ───────────────────────────────────────────────────────────
 const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const EVT_H   = 20; // event bar height px
+const EVT_GAP = 3;  // gap between bars
+const DAY_NUM_H = 34; // space reserved for day number
+
+function processWeekSpans(week, allEvents) {
+  const weekStart = new Date(week[0]); weekStart.setHours(0, 0, 0, 0);
+  const weekEnd   = new Date(week[6]); weekEnd.setHours(23, 59, 59, 999);
+
+  const overlapping = allEvents
+    .filter(evt => {
+      const s = new Date(evt.start); s.setHours(0, 0, 0, 0);
+      const e = new Date(evt.end || evt.start); e.setHours(23, 59, 59, 999);
+      return s <= weekEnd && e >= weekStart;
+    })
+    .sort((a, b) => {
+      const diff = new Date(a.start) - new Date(b.start);
+      if (diff !== 0) return diff;
+      // longer events first within same start day
+      return (new Date(b.end || b.start) - new Date(b.start)) -
+             (new Date(a.end || a.start) - new Date(a.start));
+    });
+
+  const slotRanges = [];
+
+  return overlapping.map(evt => {
+    const s = new Date(evt.start); s.setHours(0, 0, 0, 0);
+    const e = new Date(evt.end || evt.start); e.setHours(23, 59, 59, 999);
+
+    const colStart = s < weekStart ? 0 : (() => {
+      const idx = week.findIndex(d => {
+        const wd = new Date(d); wd.setHours(0, 0, 0, 0);
+        return wd.getTime() === s.getTime();
+      });
+      return idx === -1 ? 0 : idx;
+    })();
+
+    const colEnd = e > weekEnd ? 6 : (() => {
+      let last = colStart;
+      for (let i = 0; i < 7; i++) {
+        const wd = new Date(week[i]); wd.setHours(0, 0, 0, 0);
+        if (wd <= e) last = i;
+      }
+      return last;
+    })();
+
+    // Assign lowest non-conflicting slot
+    let slot = 0;
+    while (true) {
+      const ranges = slotRanges[slot] || [];
+      if (!ranges.some(r => !(r.colEnd < colStart || r.colStart > colEnd))) break;
+      slot++;
+    }
+    if (!slotRanges[slot]) slotRanges[slot] = [];
+    slotRanges[slot].push({ colStart, colEnd });
+
+    return { evt, colStart, colEnd, slot, startsThisWeek: s >= weekStart, endsThisWeek: e <= weekEnd };
+  });
+}
 
 function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
   const theme = useTheme();
@@ -288,14 +346,6 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
     d.getMonth()    === today.getMonth()    &&
     d.getDate()     === today.getDate();
 
-  const eventsForDay = d =>
-    allEvents.filter(e => {
-      const s = new Date(e.start);
-      return s.getFullYear() === d.getFullYear() &&
-             s.getMonth()    === d.getMonth()    &&
-             s.getDate()     === d.getDate();
-    });
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: 920 }}>
       {/* Day-of-week header */}
@@ -311,84 +361,96 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
 
       {/* Week rows */}
       <Box sx={{ flex: 1, display: 'grid', gridTemplateRows: 'repeat(6, 1fr)' }}>
-        {weeks.map((week, wi) => (
-          <Box key={wi} sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: wi < 5 ? 1 : 0, borderColor: 'divider' }}>
-            {week.map((day, di) => {
-              const inMonth  = day.getMonth() === month;
-              const todayCell = isToday(day);
-              const dayEvts  = eventsForDay(day);
-              const visible  = dayEvts.slice(0, 3);
-              const overflow = dayEvts.length - 3;
+        {weeks.map((week, wi) => {
+          const spans = processWeekSpans(week, allEvents);
+          const maxSlot = spans.length > 0 ? Math.max(...spans.map(s => s.slot)) : -1;
+          const eventsAreaH = maxSlot >= 0 ? DAY_NUM_H + (maxSlot + 1) * (EVT_H + EVT_GAP) : DAY_NUM_H;
 
-              return (
-                <Box key={di} sx={{
-                  p: '6px 8px',
-                  borderRight: di < 6 ? 1 : 0,
-                  borderColor: 'divider',
-                  bgcolor: !inMonth ? (isDark ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.025)') : 'transparent',
-                  overflow: 'hidden',
-                }}>
-                  {/* Day number — clickable */}
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
-                    <Box
-                      onClick={() => onDayClick(day)}
-                      sx={{
+          return (
+            <Box key={wi} sx={{
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(7, 1fr)',
+              borderBottom: wi < 5 ? 1 : 0,
+              borderColor: 'divider',
+            }}>
+              {/* Day cells — just backgrounds, borders, and day numbers */}
+              {week.map((day, di) => {
+                const inMonth   = day.getMonth() === month;
+                const todayCell = isToday(day);
+                return (
+                  <Box key={di} sx={{
+                    pt: '6px', px: '8px',
+                    pb: `${Math.max(eventsAreaH - DAY_NUM_H + 8, 8)}px`,
+                    borderRight: di < 6 ? 1 : 0,
+                    borderColor: 'divider',
+                    bgcolor: !inMonth ? (isDark ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.025)') : 'transparent',
+                    minHeight: 100,
+                  }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <Box onClick={() => onDayClick(day)} sx={{
                         width: 26, height: 26,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        borderRadius: '50%',
-                        cursor: 'pointer',
+                        borderRadius: '50%', cursor: 'pointer',
                         bgcolor: todayCell ? theme.palette.primary.main : 'transparent',
                         '&:hover': { bgcolor: todayCell ? theme.palette.primary.dark : 'action.hover' },
                         transition: 'background-color 0.15s',
-                      }}
-                    >
-                      <Typography sx={{
-                        fontSize: '0.8rem',
-                        fontWeight: todayCell ? 800 : inMonth ? 500 : 400,
-                        color: todayCell ? (theme.palette.primary.contrastText || '#fff') : inMonth ? 'text.primary' : 'text.disabled',
-                        lineHeight: 1,
-                        userSelect: 'none',
                       }}>
-                        {day.getDate()}
-                      </Typography>
+                        <Typography sx={{
+                          fontSize: '0.8rem',
+                          fontWeight: todayCell ? 800 : inMonth ? 500 : 400,
+                          color: todayCell ? (theme.palette.primary.contrastText || '#fff') : inMonth ? 'text.primary' : 'text.disabled',
+                          lineHeight: 1, userSelect: 'none',
+                        }}>
+                          {day.getDate()}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
+                );
+              })}
 
-                  {/* Events */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                    {visible.map(evt => {
-                      const isHoliday = evt.type === 'holiday';
-                      const bg = isHoliday
-                        ? theme.palette.primary.main
-                        : (STATUS_COLORS[evt.status] || STATUS_COLORS.Pending).bg;
-                      return (
-                        <Box key={evt.id}
-                          onClick={() => !isHoliday && onSelectEvent(evt)}
-                          sx={{
-                            bgcolor: bg, color: '#fff',
-                            borderRadius: '4px', px: 0.75, py: '2px',
-                            fontSize: '0.68rem', fontWeight: 600,
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                            cursor: isHoliday ? 'default' : 'pointer',
-                            opacity: isHoliday ? 0.82 : 1,
-                            transition: 'filter 0.1s',
-                            '&:hover': !isHoliday ? { filter: 'brightness(0.88)' } : {},
-                          }}>
-                          {evt.title}
-                        </Box>
-                      );
-                    })}
-                    {overflow > 0 && (
-                      <Typography sx={{ fontSize: '0.68rem', color: 'primary.main', fontWeight: 600, pl: 0.5, lineHeight: 1.4 }}>
-                        +{overflow} more
-                      </Typography>
-                    )}
+              {/* Spanning event bars */}
+              {spans.map(({ evt, colStart, colEnd, slot, startsThisWeek, endsThisWeek }) => {
+                const isHoliday = evt.type === 'holiday';
+                const bg = isHoliday
+                  ? theme.palette.primary.main
+                  : (STATUS_COLORS[evt.status] || STATUS_COLORS.Pending).bg;
+                const top     = DAY_NUM_H + slot * (EVT_H + EVT_GAP);
+                const lPad    = startsThisWeek ? 3 : 0;
+                const rPad    = endsThisWeek   ? 3 : 0;
+                const rLeft   = startsThisWeek ? 4 : 0;
+                const rRight  = endsThisWeek   ? 4 : 0;
+
+                return (
+                  <Box key={`${evt.id}-w${wi}`}
+                    onClick={() => !isHoliday && onSelectEvent(evt)}
+                    sx={{
+                      position: 'absolute',
+                      top,
+                      left:  `calc(${colStart * (100 / 7)}% + ${lPad}px)`,
+                      width: `calc(${(colEnd - colStart + 1) * (100 / 7)}% - ${lPad + rPad}px)`,
+                      height: EVT_H,
+                      bgcolor: bg,
+                      color: '#fff',
+                      borderRadius: `${rLeft}px ${rRight}px ${rRight}px ${rLeft}px`,
+                      fontSize: '0.68rem', fontWeight: 600,
+                      px: 0.75,
+                      display: 'flex', alignItems: 'center',
+                      overflow: 'hidden', whiteSpace: 'nowrap',
+                      cursor: isHoliday ? 'default' : 'pointer',
+                      opacity: isHoliday ? 0.82 : 1,
+                      zIndex: 1,
+                      transition: 'filter 0.1s',
+                      '&:hover': !isHoliday ? { filter: 'brightness(0.88)' } : {},
+                    }}>
+                    {(startsThisWeek || colStart === 0) && evt.title}
                   </Box>
-                </Box>
-              );
-            })}
-          </Box>
-        ))}
+                );
+              })}
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );
