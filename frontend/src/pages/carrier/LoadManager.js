@@ -47,8 +47,8 @@ const STATUS_CHIP = {
 const STATUS_BAR_COLOR = {
   quoted:     '#9e9e9e', // gray   — booked/pending
   booked:     '#1565C0', // blue   — scheduled
-  in_transit: '#ED6C02', // yellow/orange — in progress
-  completed:  '#2e7d32', // green  — completed
+  in_transit: '#ffce00', // yellow — in progress
+  completed:  '#2dd36f', // green  — completed
   saved:      '#1565C0', // blue
   archived:   '#616161', // dark grey — archived
 };

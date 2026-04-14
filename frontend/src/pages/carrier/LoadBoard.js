@@ -90,7 +90,7 @@ function TableView({ loads, equipmentTypes }) {
   const abbrMap = {};
   equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
 
-  const PROFIT_BAR = { green: '#2dd36f', yellow: '#ED6C02', red: '#d32f2f' };
+  const PROFIT_BAR = { green: '#2dd36f', yellow: '#ffce00', red: '#eb445a' };
 
   if (!loads.length) return null;
   return (
