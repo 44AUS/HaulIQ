@@ -21,10 +21,11 @@ const locales = { 'en-US': enUS };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
 const STATUS_COLORS = {
-  Unassigned:    { bg: '#6366f1', light: '#e0e7ff', text: '#4338ca' },
-  Pending:       { bg: '#6366f1', light: '#e0e7ff', text: '#4338ca' },
-  'In Progress': { bg: '#f97316', light: '#ffedd5', text: '#c2410c' },
-  Completed:     { bg: '#22c55e', light: '#dcfce7', text: '#15803d' },
+  Unassigned:    { bg: '#9e9e9e', light: '#f5f5f5', text: '#616161' },
+  Pending:       { bg: '#9e9e9e', light: '#f5f5f5', text: '#616161' },
+  Scheduled:     { bg: '#2a7fff', light: '#e3f0ff', text: '#1558cc' },
+  'In Progress': { bg: '#ffce00', light: '#fff8e1', text: '#a38200' },
+  Completed:     { bg: '#2dd36f', light: '#e6faf0', text: '#1a8c47' },
 };
 
 const VIEW_OPTIONS = [
@@ -405,9 +406,6 @@ export default function CalendarPage() {
     };
   }, [theme.palette.primary.main, theme.palette.primary.contrastText]);
 
-  const legend = user?.role === 'broker'
-    ? ['Unassigned', 'In Progress', 'Completed']
-    : ['Pending', 'In Progress', 'Completed'];
 
   const calSx = {
     '& .rbc-calendar': { color: 'text.primary', fontFamily: 'inherit' },
@@ -477,27 +475,6 @@ export default function CalendarPage() {
           <Typography variant="body2" color="text.secondary" mt={0.25}>
             {user?.role === 'broker' ? 'All posted loads' : 'Your assigned loads'}
           </Typography>
-        </Box>
-        {/* Legend */}
-        <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
-          {legend.map(s => {
-            const c = STATUS_COLORS[s];
-            return (
-              <Chip key={s} label={s} size="small"
-                sx={{
-                  bgcolor: c.light, color: c.text,
-                  fontWeight: 600, fontSize: '0.7rem',
-                  border: `1px solid ${c.bg}40`, height: 24,
-                }} />
-            );
-          })}
-          <Chip label="Holiday" size="small"
-            sx={{
-              bgcolor: `${theme.palette.primary.main}22`,
-              color: theme.palette.primary.main,
-              fontWeight: 600, fontSize: '0.7rem',
-              border: `1px solid ${theme.palette.primary.main}40`, height: 24,
-            }} />
         </Box>
       </Box>
 
