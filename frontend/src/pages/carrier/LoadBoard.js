@@ -55,8 +55,8 @@ const TABS = [
 ];
 
 // ─── Table header cell ─────────────────────────────────────────────────────────
-const TH = ({ children, sx }) => (
-  <TableCell sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, ...sx }}>
+const TH = ({ children, sx: sxProp }) => (
+  <TableCell sx={{ fontSize: '0.78rem', fontWeight: '400 !important', textTransform: 'none !important', color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, ...sxProp }}>
     {children}
   </TableCell>
 );
