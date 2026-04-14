@@ -7,7 +7,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useJsApiLoader, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import {
   Box, Typography, Chip, Skeleton, Paper, Button, Popover,
-  IconButton, Drawer, Checkbox, Avatar,
+  IconButton, Drawer, Checkbox, Avatar, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -394,21 +394,6 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
   );
 }
 
-// ─── View Button ──────────────────────────────────────────────────────────────
-function ViewButton({ active, onClick, children }) {
-  return (
-    <Button size="small" onClick={onClick}
-      sx={{
-        minWidth: 0, px: 2, py: 0.6, fontSize: '0.78rem', fontWeight: 600,
-        textTransform: 'none', borderRadius: '8px',
-        color: active ? '#fff' : 'text.secondary',
-        bgcolor: active ? 'primary.main' : 'transparent',
-        '&:hover': { bgcolor: active ? 'primary.dark' : 'action.hover' },
-      }}>
-      {children}
-    </Button>
-  );
-}
 
 // ─── Map View ─────────────────────────────────────────────────────────────────
 function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
@@ -638,14 +623,43 @@ export default function CalendarPage() {
             onSelect={d => { setDate(d); setView('month'); }}
           />
 
-          {/* View buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+          {/* View toggle */}
+          <ToggleButtonGroup
+            value={view}
+            exclusive
+            onChange={(_, v) => v && setView(v)}
+            size="small"
+            sx={{
+              bgcolor: 'action.hover',
+              borderRadius: '10px',
+              p: '3px',
+              gap: '2px',
+              '& .MuiToggleButtonGroup-grouped': {
+                border: '0 !important',
+                borderRadius: '8px !important',
+                mx: 0,
+              },
+              '& .MuiToggleButton-root': {
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                textTransform: 'none',
+                px: 2,
+                py: 0.55,
+                color: 'text.secondary',
+                '&.Mui-selected': {
+                  bgcolor: 'background.paper',
+                  color: 'text.primary',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                  '&:hover': { bgcolor: 'background.paper' },
+                },
+                '&:hover': { bgcolor: 'transparent' },
+              },
+            }}
+          >
             {VIEW_OPTIONS.map(({ value, label }) => (
-              <ViewButton key={value} active={view === value} onClick={() => setView(value)}>
-                {label}
-              </ViewButton>
+              <ToggleButton key={value} value={value} disableRipple>{label}</ToggleButton>
             ))}
-          </Box>
+          </ToggleButtonGroup>
         </Box>
 
         {/* ── Row 2: Nav arrows + Assigned + Filter + Revenue ── */}
