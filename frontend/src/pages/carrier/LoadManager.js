@@ -387,8 +387,8 @@ export default function LoadManager() {
                       </TableCell>
                     );
                   })()}
-                  {['Route', 'Equipment', 'Miles', 'Rate', 'Broker'].map(h => (
-                    <TableCell key={h} sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
+                  {[['Route', 200], ['Equipment', 140], ['Miles', 80], ['Rate', 80], ['Broker', 120]].map(([h, min]) => (
+                    <TableCell key={h} sx={{ fontSize: '0.78rem', fontWeight: 400, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, minWidth: min }}>
                       {h}
                     </TableCell>
                   ))}
@@ -501,13 +501,13 @@ export default function LoadManager() {
                         )}
                       </TableCell>
                       {/* Route — accent bar with vertical spacing */}
-                      <TableCell sx={{ whiteSpace: 'nowrap', pl: 0, position: 'relative' }}>
+                      <TableCell sx={{ pl: 0, position: 'relative', minWidth: 200 }}>
                         <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
                         <Box sx={{ pl: 2 }}>
-                          <Typography variant="body2">{item.origin} → {item.dest}</Typography>
+                          <Typography variant="body2" sx={{ whiteSpace: 'nowrap' }}>{item.origin} → {item.dest}</Typography>
                         </Box>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ minWidth: 140 }}>
                         <Typography variant="body2" color="text.secondary">{item.equipment || '—'}</Typography>
                       </TableCell>
                       <TableCell>
@@ -523,8 +523,8 @@ export default function LoadManager() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
+                      <TableCell sx={{ minWidth: 120 }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ width: 120, minWidth: 120 }}>
                         <Chip label={chip.label} size="small" color={chip.color} sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px' }} />
