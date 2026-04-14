@@ -297,7 +297,7 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
     });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: 650 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 780 }}>
       {/* Day-of-week header */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
         {DAY_HEADERS.map(h => (
@@ -419,13 +419,13 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
 
   if (!mapsLoaded) {
     return (
-      <Box sx={{ height: 650, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box sx={{ height: 780, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Typography color="text.secondary">Loading map...</Typography>
       </Box>
     );
   }
   return (
-    <GoogleMap mapContainerStyle={{ width: '100%', height: 650 }}
+    <GoogleMap mapContainerStyle={{ width: '100%', height: 780 }}
       center={center} zoom={mapEvents.length > 0 ? 5 : 4}
       options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: true }}>
       {mapEvents.map(event => {
@@ -706,7 +706,7 @@ export default function CalendarPage() {
               onView={setView}
               eventPropGetter={eventPropGetter}
               onSelectEvent={handleEventClick}
-              style={{ height: 650 }}
+              style={{ height: 780 }}
               popup
             />
           </Box>
