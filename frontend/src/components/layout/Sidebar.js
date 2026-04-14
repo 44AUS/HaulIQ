@@ -168,6 +168,25 @@ function SidebarContent({ onNavigate, onClose }) {
   // Clock in/out  — states: 'out' | 'in' | 'paused'
   const [clockState, setClockState] = useState(user?.clocked_in ? 'in' : 'out');
   const [clockLoading, setClockLoading] = useState(false);
+  const [clockedInAt, setClockedInAt] = useState(user?.clocked_in_at ? new Date(user.clocked_in_at) : null);
+  const [elapsed, setElapsed] = useState('');
+
+  useEffect(() => {
+    if (clockState !== 'in' && clockState !== 'paused') { setElapsed(''); return; }
+    const tick = () => {
+      if (!clockedInAt) return;
+      const secs = Math.floor((Date.now() - clockedInAt.getTime()) / 1000);
+      const h = Math.floor(secs / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      const s = secs % 60;
+      setElapsed(h > 0
+        ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${m}:${String(s).padStart(2,'0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [clockState, clockedInAt]);
 
   const clockedIn = clockState !== 'out';
 
@@ -179,7 +198,9 @@ function SidebarContent({ onNavigate, onClose }) {
     setClockLoading(true);
     try {
       const updated = action === 'in' ? await authApi.clockIn() : await authApi.clockOut();
-      setClockState(updated.clocked_in ? 'in' : 'out');
+      const newState = updated.clocked_in ? 'in' : 'out';
+      setClockState(newState);
+      setClockedInAt(updated.clocked_in_at ? new Date(updated.clocked_in_at) : null);
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
     } catch {}
     setClockLoading(false);
@@ -255,7 +276,7 @@ function SidebarContent({ onNavigate, onClose }) {
       </Box>
 
       {/* ═══ User identity block ═══ */}
-      <Box sx={{ px: 2, pb: 1.5, pt: 1.5, flexShrink: 0 }}>
+      <Box sx={{ px: 1, pb: 1.5, pt: 1.5, flexShrink: 0 }}>
       <Box sx={{
         borderRadius: '10px',
         overflow: 'hidden',
@@ -323,9 +344,16 @@ function SidebarContent({ onNavigate, onClose }) {
             <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px', textTransform: 'capitalize' }}>
               {user.role}
             </Typography>
-            <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3 }} noWrap>
-              {user.name}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
+              <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3, minWidth: 0 }} noWrap>
+                {user.name}
+              </Typography>
+              {elapsed && (
+                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: clockState === 'paused' ? '#ffce00' : '#2dd36f', flexShrink: 0, lineHeight: 1.3 }}>
+                  {elapsed}
+                </Typography>
+              )}
+            </Box>
           </Box>
           <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
         </Box>
