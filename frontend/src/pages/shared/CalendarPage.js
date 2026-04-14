@@ -25,7 +25,7 @@ const STATUS_COLORS = {
   Unassigned:    { bg: '#9e9e9e', light: '#f5f5f5', text: '#616161' },
   Pending:       { bg: '#9e9e9e', light: '#f5f5f5', text: '#616161' },
   Scheduled:     { bg: '#2a7fff', light: '#e3f0ff', text: '#1558cc' },
-  'In Progress': { bg: '#ffce00', light: '#fff8e1', text: '#a38200' },
+  'In Progress': { bg: '#ffce00', light: '#fff8e1', text: '#000000' },
   Completed:     { bg: '#2dd36f', light: '#e6faf0', text: '#1a8c47' },
 };
 
@@ -413,9 +413,9 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
               {/* Spanning event bars */}
               {spans.map(({ evt, colStart, colEnd, slot, startsThisWeek, endsThisWeek }) => {
                 const isHoliday = evt.type === 'holiday';
-                const bg = isHoliday
-                  ? theme.palette.primary.main
-                  : (STATUS_COLORS[evt.status] || STATUS_COLORS.Pending).bg;
+                const statusColor = STATUS_COLORS[evt.status] || STATUS_COLORS.Pending;
+                const bg = isHoliday ? theme.palette.primary.main : statusColor.bg;
+                const textColor = isHoliday ? (theme.palette.primary.contrastText || '#fff') : statusColor.text;
                 const top     = DAY_NUM_H + slot * (EVT_H + EVT_GAP);
                 const lPad    = startsThisWeek ? 3 : 0;
                 const rPad    = endsThisWeek   ? 3 : 0;
@@ -432,7 +432,7 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
                       width: `calc(${(colEnd - colStart + 1) * (100 / 7)}% - ${lPad + rPad}px)`,
                       height: EVT_H,
                       bgcolor: bg,
-                      color: '#fff',
+                      color: textColor,
                       borderRadius: `${rLeft}px ${rRight}px ${rRight}px ${rLeft}px`,
                       fontSize: '0.68rem', fontWeight: 600,
                       px: 0.75,
