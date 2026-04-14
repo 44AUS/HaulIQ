@@ -14,6 +14,10 @@ const TOOLS_PATHS     = ['/carrier/tools'];
 const DRIVERS_PATHS   = ['/carrier/drivers'];
 const PREFERENCES_PATHS = ['/preferences'];
 
+const isLoadDetail = (path) =>
+  /^\/carrier\/loads\/[^/]+$/.test(path) ||
+  /^\/carrier\/active\/[^/]+$/.test(path);
+
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
   const location = useLocation();
@@ -28,6 +32,7 @@ export default function DashboardLayout({ children }) {
     : TOOLS_PATHS.includes(location.pathname)     ? 'tools'
     : DRIVERS_PATHS.includes(location.pathname)     ? 'drivers'
     : PREFERENCES_PATHS.includes(location.pathname) ? 'preferences'
+    : isLoadDetail(location.pathname) ? 'load_detail'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 

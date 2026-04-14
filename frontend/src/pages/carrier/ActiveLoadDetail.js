@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Chip,
   CircularProgress, Stack, Alert, TextField, Divider, Avatar,
   Stepper, Step, StepLabel, Grid, Paper,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import MessageIcon from '@mui/icons-material/Message';
@@ -158,9 +157,13 @@ function paymentStatusChip(status) {
 
 const CARD_SX = { elevation: 0, sx: { boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' } };
 
+import DocumentPanel from '../../components/documents/DocumentPanel';
+
 export default function ActiveLoadDetail() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'overview';
 
   const [booking, setBooking]               = useState(null);
   const [loading, setLoading]               = useState(true);
@@ -222,120 +225,64 @@ export default function ActiveLoadDetail() {
     </Box>
   );
 
-  return (
+  // ── Tab: Overview ────────────────────────────────────────────────────────
+  const OverviewTab = (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-
-      {/* ── Full-bleed map ── */}
       <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
         {load?.origin && load?.destination
           ? <LoadHeroMap origin={load.origin} dest={load.destination} />
           : <Box sx={{ height: 420, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LocalShippingIcon sx={{ fontSize: 48, color: 'text.disabled' }} /></Box>
         }
-
-        {/* Floating back button */}
-        <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/carrier/job-manager')}
-            sx={{ bgcolor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', color: 'text.primary', fontWeight: 600, fontSize: '0.8rem', px: 1.75, py: 0.75, borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.08)', '&:hover': { bgcolor: 'rgba(255,255,255,1)' } }}
-          >
-            Back to Loads
-          </Button>
-        </Box>
       </Box>
-
-      {/* ── Two-column layout ── */}
       <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
-
-        {/* ── LEFT: trip info + check calls ── */}
         <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: '0 0 550px', minWidth: 0 }}>
           <CardContent sx={{ pt: 2.5 }}>
             <BookingStepper status={booking.status} />
             <Divider sx={{ my: 2 }} />
-
-            {/* Headline */}
             <Box sx={{ mb: 2.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
                 <Typography variant="caption" color="text.secondary">Booking #{bookingId.slice(0, 8)}</Typography>
                 {load?.load_type && <Chip icon={<LocalShippingIcon />} label={load.load_type.replace('_', ' ')} size="small" color="primary" variant="outlined" />}
-                {booking.tms_status && (
-                  <Chip label={TMS_STEPS[tmsStep] || booking.tms_status} size="small" color={tmsStep >= 3 ? 'success' : 'info'} />
-                )}
+                {booking.tms_status && <Chip label={TMS_STEPS[tmsStep] || booking.tms_status} size="small" color={tmsStep >= 3 ? 'success' : 'info'} />}
               </Box>
               <Typography variant="h6" fontWeight={700}>{load?.origin} → {load?.destination}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                {load?.commodity}
-                {load?.weight_lbs ? ` · ${Number(load.weight_lbs).toLocaleString()} lbs` : ''}
-                {load?.miles ? ` · ${load.miles} loaded miles` : ''}
+                {load?.commodity}{load?.weight_lbs ? ` · ${Number(load.weight_lbs).toLocaleString()} lbs` : ''}{load?.miles ? ` · ${load.miles} loaded miles` : ''}
               </Typography>
             </Box>
-
-            {/* Stats grid */}
             <Grid container spacing={1.5} sx={{ mb: 2 }}>
-              {[
-                { label: 'Rate',      value: `$${(load?.rate || 0).toLocaleString()}` },
-                { label: 'Per Mile',  value: load?.rate && load?.miles ? `$${(load.rate / load.miles).toFixed(2)}` : '—' },
-                { label: 'Miles',     value: load?.miles ? `${load.miles} mi` : '—' },
-                { label: 'Weight',    value: load?.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : '—' },
-              ].map(({ label, value }) => (
-                <Grid item xs={6} key={label}>
-                  <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
-                    <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
-                  </Paper>
-                </Grid>
+              {[{ label: 'Rate', value: `$${(load?.rate || 0).toLocaleString()}` }, { label: 'Per Mile', value: load?.rate && load?.miles ? `$${(load.rate / load.miles).toFixed(2)}` : '—' }, { label: 'Miles', value: load?.miles ? `${load.miles} mi` : '—' }, { label: 'Weight', value: load?.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : '—' }].map(({ label, value }) => (
+                <Grid item xs={6} key={label}><Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}><Typography variant="caption" color="text.secondary" display="block">{label}</Typography><Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography></Paper></Grid>
               ))}
             </Grid>
-
-            {/* Pickup / Delivery */}
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              {[
-                { label: 'Pickup',   addr: load?.origin,      date: load?.pickup_date,   dot: '#22c55e' },
-                { label: 'Delivery', addr: load?.destination, date: load?.delivery_date, dot: '#ef4444' },
-              ].map(({ label, addr, date, dot }) => (
+              {[{ label: 'Pickup', addr: load?.origin, date: load?.pickup_date, dot: '#22c55e' }, { label: 'Delivery', addr: load?.destination, date: load?.delivery_date, dot: '#ef4444' }].map(({ label, addr, date, dot }) => (
                 <Grid item xs={12} key={label}>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
                     <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
                     <Box>
                       <Typography variant="caption" color="text.secondary">{label}</Typography>
                       <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr || '—'}</Typography>
-                      {date && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                          <CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
-                          <Typography variant="caption" color="text.disabled">{date}</Typography>
-                        </Box>
-                      )}
+                      {date && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}><CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} /><Typography variant="caption" color="text.disabled">{date}</Typography></Box>}
                     </Box>
                   </Box>
                 </Grid>
               ))}
             </Grid>
-
-            {/* TMS milestone stepper */}
             {booking.tms_status && (
               <Box sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider', mb: 2 }}>
                 <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Dispatch Milestones</Typography>
                 <Stepper activeStep={tmsStep} alternativeLabel>
-                  {TMS_STEPS.map(label => (
-                    <Step key={label}><StepLabel sx={{ '& .MuiStepLabel-label': { fontSize: 11 } }}>{label}</StepLabel></Step>
-                  ))}
+                  {TMS_STEPS.map(label => <Step key={label}><StepLabel sx={{ '& .MuiStepLabel-label': { fontSize: 11 } }}>{label}</StepLabel></Step>)}
                 </Stepper>
               </Box>
             )}
-
-            {/* Driver info */}
             {(booking.driver_name || booking.driver_phone) && (
               <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
                 <PersonIcon color="action" fontSize="small" />
-                <Box>
-                  <Typography variant="caption" color="text.secondary" display="block">Assigned Driver</Typography>
-                  <Typography variant="body2" fontWeight={600}>{booking.driver_name || '—'}</Typography>
-                  {booking.driver_phone && <Typography variant="caption" color="text.secondary">{booking.driver_phone}</Typography>}
-                </Box>
+                <Box><Typography variant="caption" color="text.secondary" display="block">Assigned Driver</Typography><Typography variant="body2" fontWeight={600}>{booking.driver_name || '—'}</Typography>{booking.driver_phone && <Typography variant="caption" color="text.secondary">{booking.driver_phone}</Typography>}</Box>
               </Box>
             )}
-
-            {/* Notes */}
             {(load?.notes || booking.carrier_visible_notes || booking.note || booking.broker_note) && (
               <Box sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>Notes</Typography>
@@ -349,116 +296,28 @@ export default function ActiveLoadDetail() {
             )}
           </CardContent>
         </Card>
-
-        {/* ── RIGHT: actions + profit + payment + broker + check calls ── */}
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-
-          {/* Action card */}
           <Card {...CARD_SX} sx={CARD_SX.sx}>
             <CardContent>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Load Status</Typography>
               <Stack spacing={1.5}>
-                {booking.status === 'pending' && (
-                  <Alert severity="warning" icon={<AccessTimeIcon />}>
-                    <Typography variant="body2" fontWeight={600}>Awaiting Broker Approval</Typography>
-                    <Typography variant="caption">The broker hasn't confirmed your booking yet.</Typography>
-                  </Alert>
-                )}
-                {booking.status === 'approved' && (
-                  <Button onClick={handlePickup} disabled={actionLoading} variant="contained" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <NavigationIcon />}>
-                    Confirm Pickup — Mark as In Transit
-                  </Button>
-                )}
-                {booking.status === 'in_transit' && (
-                  <Button onClick={handleDeliver} disabled={actionLoading} variant="contained" color="success" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <FlagIcon />}>
-                    Confirm Delivery — Mark as Delivered
-                  </Button>
-                )}
-                {booking.status === 'completed' && (
-                  <Alert severity="success" icon={<CheckCircleIcon />}>
-                    <Typography variant="body2" fontWeight={600}>Load Delivered</Typography>
-                    <Typography variant="caption">This load has been completed.</Typography>
-                  </Alert>
-                )}
-                {load?.broker_user_id && (
-                  <Button component={Link} to={`/carrier/messages?userId=${load.broker_user_id}`} variant="outlined" fullWidth startIcon={<MessageIcon />}>
-                    Message Broker
-                  </Button>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
-
-          {/* Profit breakdown */}
-          <Card {...CARD_SX} sx={CARD_SX.sx}>
-            <CardContent>
-              <Typography variant="subtitle2" fontWeight={600} gutterBottom>Profit Breakdown</Typography>
-              <Stack spacing={0}>
-                {[
-                  { label: 'Gross Rate', value: `+$${(load?.rate || 0).toLocaleString()}`, color: 'success.main' },
-                  { label: `Fuel (~${load?.miles || 0} mi)`, value: `-$${load?.fuel_cost_est || 0}`, color: 'error.main' },
-                  { label: `Deadhead (${load?.deadhead_miles || 0} mi)`, value: `-$${Math.round((load?.deadhead_miles || 0) * 0.62)}`, color: 'error.main' },
-                  { label: 'Misc / tolls', value: '-$120', color: 'error.main' },
-                ].map(({ label, value, color }) => (
-                  <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-                    <Typography variant="body2" color="text.secondary">{label}</Typography>
-                    <Typography variant="body2" fontWeight={600} sx={{ color }}>{value}</Typography>
+                {booking.status === 'pending' && <Alert severity="warning" icon={<AccessTimeIcon />}><Typography variant="body2" fontWeight={600}>Awaiting Broker Approval</Typography><Typography variant="caption">The broker hasn't confirmed your booking yet.</Typography></Alert>}
+                {booking.status === 'approved' && <Button onClick={handlePickup} disabled={actionLoading} variant="contained" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <NavigationIcon />}>Confirm Pickup — Mark as In Transit</Button>}
+                {booking.status === 'in_transit' && <Button onClick={handleDeliver} disabled={actionLoading} variant="contained" color="success" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <FlagIcon />}>Confirm Delivery — Mark as Delivered</Button>}
+                {booking.status === 'completed' && <Alert severity="success" icon={<CheckCircleIcon />}><Typography variant="body2" fontWeight={600}>Load Delivered</Typography><Typography variant="caption">This load has been completed.</Typography></Alert>}
+                {load?.broker_user_id && <Button component={Link} to={`/carrier/messages?userId=${load.broker_user_id}`} variant="outlined" fullWidth startIcon={<MessageIcon />}>Message Broker</Button>}
+                {load?.broker_name && (
+                  <Box sx={{ pt: 1 }}>
+                    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Broker</Typography>
+                    <Typography variant="body2" fontWeight={600}>{load.broker_name}</Typography>
+                    {load.broker_mc && <Typography variant="caption" color="text.secondary">MC# {load.broker_mc}</Typography>}
+                    {load.broker_email && <Button component="a" href={`mailto:${load.broker_email}`} variant="text" size="small" startIcon={<EmailIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_email}</Button>}
+                    {load.broker_phone && <Button component="a" href={`tel:${load.broker_phone}`} variant="text" size="small" startIcon={<PhoneIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_phone}</Button>}
                   </Box>
-                ))}
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2 }}>
-                  <Typography variant="body1" fontWeight={700}>Est. Net Profit</Typography>
-                  <Typography variant="h5" fontWeight={800} sx={{ color: netProfit > 0 ? 'success.main' : 'error.main' }}>
-                    {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}
-                  </Typography>
-                </Box>
+                )}
               </Stack>
-              {canDownloadRateCon && <Box sx={{ mt: 1.5 }}><RateConSignature bookingId={bookingId} role="carrier" /></Box>}
             </CardContent>
           </Card>
-
-          {/* Payment status */}
-          <Card {...CARD_SX} sx={CARD_SX.sx}>
-            <CardContent>
-              <Typography variant="subtitle2" fontWeight={600} gutterBottom>Payment Status</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: paymentStatus?.carrier_amount ? 1.5 : 0 }}>
-                {paymentStatusChip(paymentStatus?.status)}
-                {(!paymentStatus || paymentStatus.status === 'unpaid') && <Typography variant="caption" color="text.secondary">Awaiting broker payment</Typography>}
-                {paymentStatus?.status === 'escrowed' && <Typography variant="caption" color="info.main">Funds held in escrow</Typography>}
-                {paymentStatus?.status === 'released' && <Typography variant="caption" color="success.main">Payment released to you</Typography>}
-              </Box>
-              {paymentStatus?.carrier_amount && (
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">You receive</Typography>
-                  <Typography variant="caption" fontWeight={700} color="success.main">${paymentStatus.carrier_amount?.toLocaleString()}</Typography>
-                </Box>
-              )}
-              {paymentStatus?.released_at && <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>Released {new Date(paymentStatus.released_at).toLocaleDateString()}</Typography>}
-              {paymentStatus?.escrowed_at && paymentStatus?.status === 'escrowed' && <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>Escrowed {new Date(paymentStatus.escrowed_at).toLocaleDateString()}</Typography>}
-            </CardContent>
-          </Card>
-
-          {/* Broker info */}
-          {load?.broker_name && (
-            <Card {...CARD_SX} sx={CARD_SX.sx}>
-              <CardContent>
-                <Typography variant="subtitle2" fontWeight={600} gutterBottom>Broker</Typography>
-                <Typography variant="body2" fontWeight={600} gutterBottom>{load.broker_name}</Typography>
-                {load.broker_mc && <Typography variant="caption" color="text.secondary" display="block" gutterBottom>MC# {load.broker_mc}</Typography>}
-                {load.broker_email && (
-                  <Button component="a" href={`mailto:${load.broker_email}`} variant="text" size="small" startIcon={<EmailIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0, mt: 1 }}>
-                    {load.broker_email}
-                  </Button>
-                )}
-                {load.broker_phone && (
-                  <Button component="a" href={`tel:${load.broker_phone}`} variant="text" size="small" startIcon={<PhoneIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>
-                    {load.broker_phone}
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Check Call Log */}
           {booking.status !== 'pending' && (
             <Card {...CARD_SX} sx={CARD_SX.sx}>
               <CardContent>
@@ -467,21 +326,14 @@ export default function ActiveLoadDetail() {
                   <Typography variant="subtitle1" fontWeight={600}>Check Call Log</Typography>
                   {checkCalls.length > 0 && <Chip label={checkCalls.length} size="small" />}
                 </Box>
-                {checkCalls.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>No check calls yet. Add a note to log transit updates.</Typography>
-                ) : (
+                {checkCalls.length === 0 ? <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>No check calls yet.</Typography> : (
                   <Stack spacing={0} sx={{ mb: 2, maxHeight: 280, overflowY: 'auto' }}>
                     {checkCalls.map((call, idx) => (
                       <Box key={call.id}>
                         <Box sx={{ py: 1.5, display: 'flex', gap: 1.5 }}>
-                          <Avatar sx={{ width: 28, height: 28, fontSize: 12, bgcolor: call.author_role === 'broker' ? 'primary.main' : 'secondary.main' }}>
-                            {(call.author_name || '?')[0].toUpperCase()}
-                          </Avatar>
+                          <Avatar sx={{ width: 28, height: 28, fontSize: 12, bgcolor: call.author_role === 'broker' ? 'primary.main' : 'secondary.main' }}>{(call.author_name || '?')[0].toUpperCase()}</Avatar>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-                              <Typography variant="caption" fontWeight={600}>{call.author_name}</Typography>
-                              <Typography variant="caption" color="text.disabled">{new Date(call.created_at).toLocaleString()}</Typography>
-                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}><Typography variant="caption" fontWeight={600}>{call.author_name}</Typography><Typography variant="caption" color="text.disabled">{new Date(call.created_at).toLocaleString()}</Typography></Box>
                             <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>{call.note}</Typography>
                           </Box>
                         </Box>
@@ -493,16 +345,82 @@ export default function ActiveLoadDetail() {
                 )}
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField size="small" fullWidth placeholder="Add a check call note..." value={callNote} onChange={e => setCallNote(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddCall(); } }} multiline maxRows={3} />
-                  <Button variant="contained" onClick={handleAddCall} disabled={!callNote.trim() || addingCall} sx={{ minWidth: 80, alignSelf: 'flex-end' }}>
-                    {addingCall ? <CircularProgress size={16} color="inherit" /> : 'Add'}
-                  </Button>
+                  <Button variant="contained" onClick={handleAddCall} disabled={!callNote.trim() || addingCall} sx={{ minWidth: 80, alignSelf: 'flex-end' }}>{addingCall ? <CircularProgress size={16} color="inherit" /> : 'Add'}</Button>
                 </Box>
               </CardContent>
             </Card>
           )}
-
         </Box>
       </Box>
+    </Box>
+  );
+
+  // ── Tab: Payments ─────────────────────────────────────────────────────────
+  const PaymentsTab = (
+    <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
+      <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: 1 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom>Profit Breakdown</Typography>
+          <Stack spacing={0}>
+            {[{ label: 'Gross Rate', value: `+$${(load?.rate || 0).toLocaleString()}`, color: 'success.main' }, { label: `Fuel (~${load?.miles || 0} mi)`, value: `-$${load?.fuel_cost_est || 0}`, color: 'error.main' }, { label: `Deadhead (${load?.deadhead_miles || 0} mi)`, value: `-$${Math.round((load?.deadhead_miles || 0) * 0.62)}`, color: 'error.main' }, { label: 'Misc / tolls', value: '-$120', color: 'error.main' }].map(({ label, value, color }) => (
+              <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="body2" color="text.secondary">{label}</Typography>
+                <Typography variant="body2" fontWeight={600} sx={{ color }}>{value}</Typography>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 2 }}>
+              <Typography variant="body1" fontWeight={700}>Est. Net Profit</Typography>
+              <Typography variant="h5" fontWeight={800} sx={{ color: netProfit > 0 ? 'success.main' : 'error.main' }}>{netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}</Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
+      <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: '0 0 320px' }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom>Payment Status</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: paymentStatus?.carrier_amount ? 1.5 : 0 }}>
+            {paymentStatusChip(paymentStatus?.status)}
+            {(!paymentStatus || paymentStatus.status === 'unpaid') && <Typography variant="caption" color="text.secondary">Awaiting broker payment</Typography>}
+            {paymentStatus?.status === 'escrowed' && <Typography variant="caption" color="info.main">Funds held in escrow</Typography>}
+            {paymentStatus?.status === 'released' && <Typography variant="caption" color="success.main">Payment released to you</Typography>}
+          </Box>
+          {paymentStatus?.carrier_amount && <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography variant="caption" color="text.secondary">You receive</Typography><Typography variant="caption" fontWeight={700} color="success.main">${paymentStatus.carrier_amount?.toLocaleString()}</Typography></Box>}
+          {paymentStatus?.released_at && <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>Released {new Date(paymentStatus.released_at).toLocaleDateString()}</Typography>}
+          {paymentStatus?.escrowed_at && paymentStatus?.status === 'escrowed' && <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>Escrowed {new Date(paymentStatus.escrowed_at).toLocaleDateString()}</Typography>}
+        </CardContent>
+      </Card>
+    </Box>
+  );
+
+  // ── Tab: Documents ────────────────────────────────────────────────────────
+  const DocumentsTab = (
+    <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
+      <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: 1 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <AddCommentIcon color="primary" fontSize="small" />
+            <Typography variant="subtitle1" fontWeight={600}>Documents</Typography>
+          </Box>
+          <DocumentPanel loadId={load?.id} bookingId={bookingId} />
+        </CardContent>
+      </Card>
+      {canDownloadRateCon && (
+        <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: '0 0 360px' }}>
+          <CardContent>
+            <Typography variant="subtitle1" fontWeight={600} gutterBottom>Rate Confirmation</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Sign or download the rate confirmation for this load.</Typography>
+            <RateConSignature bookingId={bookingId} role="carrier" />
+          </CardContent>
+        </Card>
+      )}
+    </Box>
+  );
+
+  return (
+    <Box>
+      {activeTab === 'overview'  && OverviewTab}
+      {activeTab === 'payments'  && PaymentsTab}
+      {activeTab === 'documents' && DocumentsTab}
     </Box>
   );
 }

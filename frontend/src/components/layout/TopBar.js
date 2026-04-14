@@ -539,6 +539,15 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'support',       label: 'Support' },
         ],
       },
+      load_detail: {
+        title: 'Load Details',
+        tabs: [
+          { key: 'overview',   label: 'Overview' },
+          { key: 'payments',   label: 'Payments' },
+          { key: 'documents',  label: 'Documents' },
+        ],
+        messageMode: true,
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
     const hasTabs = config.tabs.length > 0;
@@ -576,17 +585,29 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
             <Box sx={{ flex: 1 }} />
 
             <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
-              <Tooltip title="Notifications" placement="bottom">
-                <IconButton
-                  onClick={() => setNotifOpen(true)}
-                  size="small"
-                  sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-                >
-                  <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                    <BellIcon sx={{ fontSize: 22 }} />
-                  </Badge>
-                </IconButton>
-              </Tooltip>
+              {config.messageMode ? (
+                <Tooltip title="Messages" placement="bottom">
+                  <IconButton
+                    onClick={() => navigate(`/${user.role}/messages`)}
+                    size="small"
+                    sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
+                  >
+                    <MsgIcon sx={{ fontSize: 22 }} />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Notifications" placement="bottom">
+                  <IconButton
+                    onClick={() => setNotifOpen(true)}
+                    size="small"
+                    sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
+                  >
+                    <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
+                      <BellIcon sx={{ fontSize: 22 }} />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
           </Box>
 
