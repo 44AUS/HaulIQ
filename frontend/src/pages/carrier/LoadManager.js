@@ -134,6 +134,7 @@ export default function LoadManager() {
   const [hoveredRow,    setHoveredRow]    = useState(null);
   const [hoveredHeader, setHoveredHeader] = useState(false);
   const [selected,      setSelected]      = useState(new Set());
+  const [flashingRows,  setFlashingRows]  = useState(new Set());
 
   const fetchAll = () => Promise.all([
     bookingsApi.inProgress().catch(() => []),
@@ -279,6 +280,12 @@ export default function LoadManager() {
   const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
   return (
+    <style>{`
+      @keyframes rowSelectFlash {
+        0%   { background-color: ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.09)'}; }
+        100% { background-color: transparent; }
+      }
+    `}</style>
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px' }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
@@ -430,13 +437,14 @@ export default function LoadManager() {
                   const rowKey   = item._key || idx;
                   const isHovered  = hoveredRow === rowKey;
                   const isSelected = selected.has(rowKey);
+                  const isFlashing = flashingRows.has(rowKey);
                   const rowSx = {
                     cursor: 'pointer',
                     height: 64,
                     '& td': { py: 0, borderBottom: 0 },
                     '& td:not(:nth-of-type(1)):not(:nth-of-type(2))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
-                    bgcolor: isSelected ? 'action.selected' : undefined,
-                    '&:hover': { bgcolor: isSelected ? 'action.selected' : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)') },
+                    animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined,
+                    '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
                   };
                   const toggleSelect = (e) => {
                     e.stopPropagation();
@@ -445,6 +453,18 @@ export default function LoadManager() {
                       next.has(rowKey) ? next.delete(rowKey) : next.add(rowKey);
                       return next;
                     });
+                    setFlashingRows(prev => {
+                      const next = new Set(prev);
+                      next.add(rowKey);
+                      return next;
+                    });
+                    setTimeout(() => {
+                      setFlashingRows(prev => {
+                        const next = new Set(prev);
+                        next.delete(rowKey);
+                        return next;
+                      });
+                    }, 450);
                   };
                   return (
                     <Fragment key={rowKey}>
