@@ -287,7 +287,7 @@ export default function LoadManager() {
         100% { background-color: transparent; }
       }
     `}</style>
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '6px' }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
       {/* ── Top bar ── */}
@@ -411,7 +411,7 @@ export default function LoadManager() {
                       refresh();
                     };
                     return deletableKeys.length > 0 ? (
-                      <TableCell sx={{ bgcolor: 'action.hover', py: 1.25 }}>
+                      <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 120, minWidth: 120 }}>
                         <Button
                           size="small"
                           variant="outlined"
@@ -424,7 +424,7 @@ export default function LoadManager() {
                         </Button>
                       </TableCell>
                     ) : (
-                      <TableCell sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25 }}>
+                      <TableCell sx={{ textTransform: 'uppercase', fontSize: '0.68rem', fontWeight: 700, letterSpacing: 0.5, color: 'text.disabled', bgcolor: 'action.hover', whiteSpace: 'nowrap', py: 1.25, width: 120, minWidth: 120 }}>
                         Status
                       </TableCell>
                     );
@@ -526,7 +526,7 @@ export default function LoadManager() {
                       <TableCell>
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
-                      <TableCell>
+                      <TableCell sx={{ width: 120, minWidth: 120 }}>
                         <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
                       </TableCell>
                     </TableRow>
