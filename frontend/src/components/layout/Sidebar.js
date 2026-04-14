@@ -41,7 +41,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, bookingsApi, networkApi, authApi } from '../../services/api';
 
-export const DRAWER_WIDTH = 280;
+export const DRAWER_WIDTH = 300;
 export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
 
 const DRIVER_LINKS = [
@@ -270,7 +270,7 @@ function SidebarContent({ onNavigate, onClose }) {
             width: 40, height: 40,
             bgcolor: isDark ? '#444' : '#d0d0d0',
             color: isDark ? '#fff' : '#333',
-            fontSize: '1rem', fontWeight: 700, flexShrink: 0,
+            fontSize: '1rem', flexShrink: 0,
           }}>
             {(user.company || user.name)?.charAt(0)?.toUpperCase()}
           </Avatar>
@@ -278,7 +278,7 @@ function SidebarContent({ onNavigate, onClose }) {
             <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px' }}>
               Business
             </Typography>
-            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: sc.nameColor, lineHeight: 1.3 }} noWrap>
+            <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3 }} noWrap>
               {user.company || user.name}
             </Typography>
           </Box>
@@ -301,7 +301,7 @@ function SidebarContent({ onNavigate, onClose }) {
                 width: 40, height: 40,
                 bgcolor: isDark ? '#444' : '#d0d0d0',
                 color: isDark ? '#fff' : '#333',
-                fontSize: '1rem', fontWeight: 700,
+                fontSize: '1rem',
               }}
             >
               {!user.avatar_url && (user.avatar || user.name?.charAt(0)?.toUpperCase())}
@@ -317,7 +317,7 @@ function SidebarContent({ onNavigate, onClose }) {
             <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px', textTransform: 'capitalize' }}>
               {user.role}
             </Typography>
-            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: sc.nameColor, lineHeight: 1.3 }} noWrap>
+            <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3 }} noWrap>
               {user.name}
             </Typography>
           </Box>
@@ -380,7 +380,7 @@ function SidebarContent({ onNavigate, onClose }) {
         {/* Header: business name */}
         <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
           <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px' }}>Business</Typography>
-          <Typography sx={{ fontSize: '0.95rem', fontWeight: 700, color: sc.nameColor }} noWrap>
+          <Typography sx={{ fontSize: '0.95rem', color: sc.nameColor }} noWrap>
             {user.company || user.name}
           </Typography>
         </Box>
@@ -396,7 +396,7 @@ function SidebarContent({ onNavigate, onClose }) {
                 '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
             >
               <Icon sx={{ fontSize: 20, color: 'text.secondary' }} />
-              <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: sc.nameColor }}>{label}</Typography>
+              <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>{label}</Typography>
             </Box>
             {i < arr.length - 1 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
           </Box>
@@ -421,7 +421,7 @@ function SidebarContent({ onNavigate, onClose }) {
         {/* Header: user name */}
         <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
           <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px', textTransform: 'capitalize' }}>{user.role}</Typography>
-          <Typography sx={{ fontSize: '0.95rem', fontWeight: 700, color: sc.nameColor }} noWrap>{user.name}</Typography>
+          <Typography sx={{ fontSize: '0.95rem', color: sc.nameColor }} noWrap>{user.name}</Typography>
         </Box>
         <Box
           onClick={() => { navigate('/profile'); setUserAnchor(null); }}
@@ -429,7 +429,7 @@ function SidebarContent({ onNavigate, onClose }) {
             '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
         >
           <ManageAccountsIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
-          <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: sc.nameColor }}>Manage profile</Typography>
+          <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>Manage profile</Typography>
         </Box>
         <Divider sx={{ borderColor: sc.dividerFaint }} />
         <Box
@@ -438,7 +438,7 @@ function SidebarContent({ onNavigate, onClose }) {
             '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
         >
           <LogoutIcon sx={{ fontSize: 20, color: 'error.main' }} />
-          <Typography sx={{ fontSize: '0.9rem', fontWeight: 500, color: 'error.main' }}>Log out</Typography>
+          <Typography sx={{ fontSize: '0.9rem', color: 'error.main' }}>Log out</Typography>
         </Box>
         <Box sx={{ height: 4 }} />
       </Popover>
