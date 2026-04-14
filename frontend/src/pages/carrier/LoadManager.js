@@ -12,6 +12,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 
@@ -429,6 +430,7 @@ export default function LoadManager() {
                       </TableCell>
                     );
                   })()}
+                  <TableCell sx={{ bgcolor: 'action.hover', width: 32, minWidth: 32, py: 1.25 }} />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -529,11 +531,14 @@ export default function LoadManager() {
                       <TableCell sx={{ width: 120, minWidth: 120 }}>
                         <Chip label={chip.label} size="small" color={chip.color} sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px' }} />
                       </TableCell>
+                      <TableCell sx={{ width: 32, minWidth: 32, pr: 1 }}>
+                        <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                      </TableCell>
                     </TableRow>
                     {/* Expand row — stepper shown when showProgress is on */}
                     {showProgress && (
                       <TableRow key={`${rowKey}-progress`} sx={{ '& td': { py: 0, borderBottom: 0 } }}>
-                        <TableCell colSpan={8} sx={{ p: 0 }}>
+                        <TableCell colSpan={9} sx={{ p: 0 }}>
                           <Collapse in={showProgress} unmountOnExit>
                             <Box sx={{ px: 3, py: 1.5, bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', borderBottom: 1, borderColor: 'divider' }}>
                               {item._tab === 'in_progress' ? (() => {

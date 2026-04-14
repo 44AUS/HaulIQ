@@ -212,14 +212,14 @@ export default function ActiveLoadDetail() {
       <Button
         startIcon={<ArrowBackIcon />}
         variant="text"
-        onClick={() => navigate('/carrier/active')}
+        onClick={() => navigate('/carrier/job-manager')}
         sx={{ alignSelf: 'flex-start' }}
       >
-        Back to Active Loads
+        Back to Loads
       </Button>
 
       {/* Header */}
-      <Card>
+      <Card elevation={0} sx={{ boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
             <Box>
@@ -558,7 +558,7 @@ export default function ActiveLoadDetail() {
             </Card>
 
             {/* Payment status */}
-            <Card variant="outlined">
+            <Card elevation={0} sx={{ boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
               <CardContent>
                 <Typography variant="subtitle2" fontWeight={600} gutterBottom>Payment Status</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: paymentStatus?.carrier_amount ? 1.5 : 0 }}>
