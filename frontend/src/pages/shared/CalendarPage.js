@@ -171,6 +171,156 @@ function getHolidaysForYear(year) {
   }));
 }
 
+// ─── MUI Month Grid ───────────────────────────────────────────────────────────
+const DAY_HEADERS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function MonthGrid({ date, allEvents, onSelectEvent }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const year  = date.getFullYear();
+  const month = date.getMonth();
+
+  // Build week rows starting from the Sunday before the 1st
+  const weeks = useMemo(() => {
+    const first = new Date(year, month, 1);
+    const cur = new Date(first);
+    cur.setDate(cur.getDate() - cur.getDay());
+    const rows = [];
+    while (cur.getMonth() <= month || cur.getFullYear() < year || rows.length < 1) {
+      const week = Array.from({ length: 7 }, () => {
+        const d = new Date(cur);
+        cur.setDate(cur.getDate() + 1);
+        return d;
+      });
+      rows.push(week);
+      if (cur.getMonth() > month || (cur.getFullYear() > year && rows.length >= 4)) break;
+    }
+    // Always show 6 rows so the grid height is stable
+    while (rows.length < 6) {
+      const week = Array.from({ length: 7 }, () => {
+        const d = new Date(cur);
+        cur.setDate(cur.getDate() + 1);
+        return d;
+      });
+      rows.push(week);
+    }
+    return rows.slice(0, 6);
+  }, [year, month]);
+
+  const today = new Date();
+  const isToday = d =>
+    d.getFullYear() === today.getFullYear() &&
+    d.getMonth()    === today.getMonth()    &&
+    d.getDate()     === today.getDate();
+
+  const eventsForDay = d =>
+    allEvents.filter(e => {
+      const s = new Date(e.start);
+      return s.getFullYear() === d.getFullYear() &&
+             s.getMonth()    === d.getMonth()    &&
+             s.getDate()     === d.getDate();
+    });
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: 650 }}>
+      {/* Day-of-week header */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: 1, borderColor: 'divider', flexShrink: 0 }}>
+        {DAY_HEADERS.map(h => (
+          <Box key={h} sx={{ py: 1.25, textAlign: 'center', borderRight: 1, borderColor: 'divider', '&:last-child': { borderRight: 0 } }}>
+            <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}>
+              {h}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Week rows */}
+      <Box sx={{ flex: 1, display: 'grid', gridTemplateRows: 'repeat(6, 1fr)' }}>
+        {weeks.map((week, wi) => (
+          <Box key={wi} sx={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: wi < 5 ? 1 : 0, borderColor: 'divider' }}>
+            {week.map((day, di) => {
+              const inMonth = day.getMonth() === month;
+              const todayCell = isToday(day);
+              const dayEvts = eventsForDay(day);
+              const visible = dayEvts.slice(0, 3);
+              const overflow = dayEvts.length - 3;
+
+              return (
+                <Box key={di} sx={{
+                  p: '6px 8px',
+                  borderRight: di < 6 ? 1 : 0,
+                  borderColor: 'divider',
+                  bgcolor: !inMonth
+                    ? (isDark ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.025)')
+                    : 'transparent',
+                  overflow: 'hidden',
+                }}>
+                  {/* Day number */}
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
+                    <Box sx={{
+                      width: 26, height: 26,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: '50%',
+                      bgcolor: todayCell ? '#f97316' : 'transparent',
+                    }}>
+                      <Typography sx={{
+                        fontSize: '0.8rem',
+                        fontWeight: todayCell ? 800 : inMonth ? 500 : 400,
+                        color: todayCell ? '#fff' : inMonth ? 'text.primary' : 'text.disabled',
+                        lineHeight: 1,
+                      }}>
+                        {day.getDate()}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Events */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {visible.map(evt => {
+                      const isHoliday = evt.type === 'holiday';
+                      const bg = isHoliday
+                        ? theme.palette.primary.main
+                        : (STATUS_COLORS[evt.status] || STATUS_COLORS.Pending).bg;
+                      return (
+                        <Box key={evt.id}
+                          onClick={() => !isHoliday && onSelectEvent(evt)}
+                          sx={{
+                            bgcolor: bg,
+                            color: '#fff',
+                            borderRadius: '4px',
+                            px: 0.75,
+                            py: '2px',
+                            fontSize: '0.68rem',
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            cursor: isHoliday ? 'default' : 'pointer',
+                            opacity: isHoliday ? 0.82 : 1,
+                            transition: 'filter 0.1s',
+                            '&:hover': !isHoliday ? { filter: 'brightness(0.88)' } : {},
+                          }}
+                        >
+                          {evt.title}
+                        </Box>
+                      );
+                    })}
+                    {overflow > 0 && (
+                      <Typography sx={{ fontSize: '0.68rem', color: 'primary.main', fontWeight: 600, pl: 0.5, lineHeight: 1.4 }}>
+                        +{overflow} more
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 export default function CalendarPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -355,7 +505,7 @@ export default function CalendarPage() {
 
         {loading ? (
           <Box sx={{ p: 3 }}>
-            <Skeleton variant="rectangular" height={600} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" height={650} sx={{ borderRadius: 1 }} />
           </Box>
         ) : view === 'map' ? (
           <MapView
@@ -363,6 +513,12 @@ export default function CalendarPage() {
             mapsLoaded={mapsLoaded}
             mapMarker={mapMarker}
             setMapMarker={setMapMarker}
+          />
+        ) : view === 'month' ? (
+          <MonthGrid
+            date={date}
+            allEvents={allEvents}
+            onSelectEvent={event => { if (event.type !== 'holiday') setSelected(event); }}
           />
         ) : (
           <Box sx={calSx}>
