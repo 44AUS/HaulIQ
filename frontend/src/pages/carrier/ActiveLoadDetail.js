@@ -21,6 +21,7 @@ import PlaceIcon from '@mui/icons-material/Place';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
+import DocumentPanel from '../../components/documents/DocumentPanel';
 
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = {
@@ -156,8 +157,6 @@ function paymentStatusChip(status) {
 }
 
 const CARD_SX = { elevation: 0, sx: { boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' } };
-
-import DocumentPanel from '../../components/documents/DocumentPanel';
 
 export default function ActiveLoadDetail() {
   const { bookingId } = useParams();

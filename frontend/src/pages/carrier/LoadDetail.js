@@ -27,6 +27,7 @@ import { adaptLoad } from '../../services/adapters';
 import ProfitBadge from '../../components/shared/ProfitBadge';
 import BrokerRating from '../../components/shared/BrokerRating';
 import DocumentPanel from '../../components/documents/DocumentPanel';
+import RateConSignature from '../../components/shared/RateConSignature';
 
 const LIBRARIES = ['places'];
 
@@ -238,8 +239,6 @@ function LoadStepper({ load, bookingStatus }) {
     </Box>
   );
 }
-
-import RateConSignature from '../../components/shared/RateConSignature';
 
 export default function LoadDetail() {
   const { id } = useParams();
