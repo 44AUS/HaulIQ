@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime
 from app.database import get_db
@@ -218,13 +219,20 @@ def update_me(
 
 
 # ─── POST /api/auth/clock-in ──────────────────────────────────────────────────
+class ClockInBody(BaseModel):
+    lat: float | None = None
+    lng: float | None = None
+
 @router.post("/clock-in", response_model=UserOut, summary="Clock in current user")
 def clock_in(
+    body: ClockInBody = Body(default=ClockInBody()),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     current_user.clocked_in    = True
     current_user.clocked_in_at = datetime.utcnow()
+    if body.lat is not None: current_user.clock_in_lat = body.lat
+    if body.lng is not None: current_user.clock_in_lng = body.lng
     db.commit()
     db.refresh(current_user)
     return current_user

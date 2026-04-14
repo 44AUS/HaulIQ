@@ -71,6 +71,8 @@ class UserOut(BaseModel):
     license_number:    Optional[str] = None
     clocked_in:        Optional[bool] = None
     clocked_in_at:     Optional[datetime] = None
+    clock_in_lat:      Optional[float] = None
+    clock_in_lng:      Optional[float] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

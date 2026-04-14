@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
@@ -166,14 +166,26 @@ function SidebarContent({ onNavigate, onClose }) {
   const userOpen = Boolean(userAnchor);
 
   // Clock in/out  — states: 'out' | 'in' | 'paused'
-  const [clockState, setClockState] = useState(user?.clocked_in ? 'in' : 'out');
-  const [clockLoading, setClockLoading] = useState(false);
   const parseUtc = (ts) => ts ? new Date(ts.endsWith('Z') ? ts : ts + 'Z') : null;
+  const [clockState,  setClockState]  = useState(user?.clocked_in ? 'in' : 'out');
+  const [clockLoading, setClockLoading] = useState(false);
   const [clockedInAt, setClockedInAt] = useState(parseUtc(user?.clocked_in_at));
   const [elapsed, setElapsed] = useState('');
+  const pausedMsRef = useRef(0); // ms elapsed at the moment of pause
+
+  // Sync clock state when user loads (e.g. after page refresh)
+  useEffect(() => {
+    if (!user) return;
+    setClockState(user.clocked_in ? 'in' : 'out');
+    setClockedInAt(parseUtc(user.clocked_in_at));
+    pausedMsRef.current = 0;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.clocked_in, user?.clocked_in_at]);
 
   useEffect(() => {
-    if (clockState !== 'in' && clockState !== 'paused') { setElapsed(''); return; }
+    if (clockState === 'out') { setElapsed(''); return; }
+    if (clockState === 'paused') return; // freeze — don't clear, don't tick
+    // clockState === 'in'
     const tick = () => {
       if (!clockedInAt) return;
       const secs = Math.floor((Date.now() - clockedInAt.getTime()) / 1000);
@@ -191,13 +203,36 @@ function SidebarContent({ onNavigate, onClose }) {
 
   const handleClockToggle = async (action) => {
     if (clockLoading) return;
-    // pause / continue are local UI state only (no API round-trip needed)
-    if (action === 'pause')    { setClockState('paused'); return; }
-    if (action === 'continue') { setClockState('in');     return; }
+    if (action === 'pause') {
+      // Store how many ms have elapsed so we can resume from this point
+      if (clockedInAt) pausedMsRef.current = Date.now() - clockedInAt.getTime();
+      setClockState('paused');
+      return;
+    }
+    if (action === 'continue') {
+      // Shift clockedInAt so elapsed resumes from the frozen value
+      setClockedInAt(new Date(Date.now() - pausedMsRef.current));
+      setClockState('in');
+      return;
+    }
     setClockLoading(true);
     try {
-      const updated = action === 'in' ? await authApi.clockIn() : await authApi.clockOut();
+      let updated;
+      if (action === 'in') {
+        const loc = await new Promise((resolve) => {
+          if (!navigator.geolocation) { resolve({}); return; }
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+            ()    => resolve({}),
+            { timeout: 5000 },
+          );
+        });
+        updated = await authApi.clockIn(loc);
+      } else {
+        updated = await authApi.clockOut();
+      }
       const newState = updated.clocked_in ? 'in' : 'out';
+      pausedMsRef.current = 0;
       setClockState(newState);
       setClockedInAt(newState === 'in' ? new Date() : null);
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });

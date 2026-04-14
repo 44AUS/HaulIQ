@@ -32,7 +32,7 @@ export const authApi = {
   me:        ()     => request('/api/auth/me'),
   update:    (data) => request('/api/auth/me', { method: 'PATCH', body: JSON.stringify(data) }),
   verifyMc:  (mc)   => request(`/api/auth/verify-mc/${encodeURIComponent(mc)}`),
-  clockIn:   ()     => request('/api/auth/clock-in',  { method: 'POST' }),
+  clockIn:   (loc)  => request('/api/auth/clock-in',  { method: 'POST', body: JSON.stringify(loc ?? {}) }),
   clockOut:  ()     => request('/api/auth/clock-out', { method: 'POST' }),
 };
 
