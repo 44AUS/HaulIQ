@@ -466,16 +466,23 @@ const MAP_LAYERS = [
   { key: 'traffic',   label: 'Live Traffic', Icon: TrafficIcon },
 ];
 
-function MapLayersPanel({ pending, onToggle, onApply }) {
+function MapLayersPanel({ pending, onToggle, onApply, isDark }) {
+  const bg       = isDark ? '#2a2a2a' : '#ffffff';
+  const divider  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const textCol  = isDark ? '#ffffff' : '#0D1B2A';
+  const iconCol  = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
+  const hoverBg  = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+  const chkColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+
   return (
     <Box sx={{
-      position: 'absolute', top: 44, left: 0, zIndex: 10,
-      width: 260, bgcolor: '#1a1a1a', borderRadius: '0 0 10px 10px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+      position: 'absolute', top: 'calc(44px + 10px)', left: 10, zIndex: 10,
+      width: 260, bgcolor: bg, borderRadius: '10px',
+      boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.55)' : '0 4px 24px rgba(0,0,0,0.18)',
     }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2, pb: 1.5 }}>
-        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>Layers</Typography>
+        <Typography sx={{ color: textCol, fontWeight: 700, fontSize: '1.1rem' }}>Layers</Typography>
         <Button variant="contained" size="small" onClick={onApply}
           sx={{ bgcolor: '#2dd36f', '&:hover': { bgcolor: '#27bc61' }, fontWeight: 700, fontSize: '0.78rem', px: 2, py: 0.5, borderRadius: '6px', letterSpacing: '0.04em' }}>
           APPLY
@@ -486,21 +493,21 @@ function MapLayersPanel({ pending, onToggle, onApply }) {
         <Box key={key} onClick={() => onToggle(key)}
           sx={{
             display: 'flex', alignItems: 'center', gap: 2, px: 2.5, py: 1.6,
-            borderTop: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-            cursor: 'pointer', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+            borderTop: i > 0 ? `1px solid ${divider}` : 'none',
+            cursor: 'pointer', '&:hover': { bgcolor: hoverBg },
           }}>
           <Checkbox
             checked={pending[key]}
             onChange={() => onToggle(key)}
             onClick={e => e.stopPropagation()}
             sx={{
-              p: 0, color: 'rgba(255,255,255,0.4)',
+              p: 0, color: chkColor,
               '&.Mui-checked': { color: '#2dd36f' },
-              '& .MuiSvgIcon-root': { fontSize: 22, borderRadius: 1 },
+              '& .MuiSvgIcon-root': { fontSize: 22 },
             }}
           />
-          <Typography sx={{ color: '#fff', fontWeight: 500, fontSize: '1rem', flex: 1 }}>{label}</Typography>
-          <Icon sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 22 }} />
+          <Typography sx={{ color: textCol, fontWeight: 500, fontSize: '1rem', flex: 1 }}>{label}</Typography>
+          <Icon sx={{ color: iconCol, fontSize: 22 }} />
         </Box>
       ))}
       <Box sx={{ height: 6 }} />
@@ -510,6 +517,8 @@ function MapLayersPanel({ pending, onToggle, onApply }) {
 
 // ─── Map View ─────────────────────────────────────────────────────────────────
 function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [layersOpen, setLayersOpen] = useState(false);
   const [pending, setPending]       = useState({ satellite: false, traffic: false });
   const [applied, setApplied]       = useState({ satellite: false, traffic: false });
@@ -531,23 +540,22 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
   }
   return (
     <Box sx={{ position: 'relative', width: '100%', height: 920 }}>
-      {/* ── Layers tab bar ── */}
-      <Box sx={{ position: 'absolute', top: 0, left: 0, zIndex: 10, display: 'flex' }}>
+      {/* ── Layers tab button ── */}
+      <Box sx={{ position: 'absolute', top: 10, left: 10, zIndex: 10 }}>
         <Box
           onClick={() => { setPending({ ...applied }); setLayersOpen(o => !o); }}
           sx={{
             display: 'flex', alignItems: 'center', gap: 0.75,
-            px: 2.25, height: 44,
-            bgcolor: layersOpen ? '#222' : '#111',
-            color: '#fff', cursor: 'pointer',
-            borderBottom: layersOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
-            borderRight: '1px solid rgba(255,255,255,0.1)',
-            '&:hover': { bgcolor: '#222' },
+            px: 2, height: 38, borderRadius: '8px',
+            bgcolor: isDark ? (layersOpen ? '#333' : '#2a2a2a') : (layersOpen ? '#f0f0f0' : '#ffffff'),
+            boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.5)' : '0 2px 10px rgba(0,0,0,0.16)',
+            cursor: 'pointer',
+            '&:hover': { bgcolor: isDark ? '#333' : '#f5f5f5' },
             transition: 'background-color 0.15s',
             userSelect: 'none',
           }}>
-          <LayersIcon sx={{ fontSize: 17, color: layersOpen ? '#2dd36f' : 'rgba(255,255,255,0.7)' }} />
-          <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: layersOpen ? '#2dd36f' : '#fff' }}>
+          <LayersIcon sx={{ fontSize: 17, color: layersOpen ? '#2dd36f' : (isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.55)') }} />
+          <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: layersOpen ? '#2dd36f' : (isDark ? '#fff' : '#0D1B2A') }}>
             Layers
           </Typography>
         </Box>
@@ -555,7 +563,7 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
 
       {/* ── Layers panel dropdown ── */}
       {layersOpen && (
-        <MapLayersPanel pending={pending} onToggle={handleToggle} onApply={handleApply} />
+        <MapLayersPanel pending={pending} onToggle={handleToggle} onApply={handleApply} isDark={isDark} />
       )}
 
       {/* ── Click-away to close ── */}
