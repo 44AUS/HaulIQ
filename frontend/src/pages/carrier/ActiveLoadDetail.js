@@ -6,7 +6,6 @@ import {
   Stepper, Step, StepLabel, Grid, Paper,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import MessageIcon from '@mui/icons-material/Message';
@@ -17,12 +16,10 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PersonIcon from '@mui/icons-material/Person';
 import AddCommentIcon from '@mui/icons-material/AddComment';
-import InventoryIcon from '@mui/icons-material/Inventory';
 import PlaceIcon from '@mui/icons-material/Place';
-import { bookingsApi, bidsApi, freightPaymentsApi } from '../../services/api';
+import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
 
 const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
