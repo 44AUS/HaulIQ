@@ -564,14 +564,14 @@ export default function LoadManager() {
         )}
       </Box>
 
-    </Box>
+      {/* ── ADD button ── */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2, flexShrink: 0 }}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/carrier/loads')}
+          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 3.5, py: 1.25, borderRadius: '8px', fontSize: '0.9rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+          ADD
+        </Button>
+      </Box>
 
-    {/* ── Floating ADD ── */}
-    <Box sx={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
-      <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/carrier/loads')}
-        sx={{ bgcolor: '#FF8C00', color: '#fff', '&:hover': { bgcolor: '#E07800' }, fontWeight: 700, px: 3.5, py: 1.25, borderRadius: 3, fontSize: '0.9rem', boxShadow: '0 4px 16px rgba(255,140,0,0.45)' }}>
-        ADD
-      </Button>
     </Box>
 
     <FilterDrawer
