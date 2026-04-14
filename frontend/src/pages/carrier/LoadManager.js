@@ -335,7 +335,7 @@ export default function LoadManager() {
       </Box>
 
       {/* ── Table ── */}
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
             <CircularProgress size={28} />
@@ -346,8 +346,8 @@ export default function LoadManager() {
             <Typography variant="body2" color="text.secondary">No loads in this category</Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table size="small">
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 700 }}>
               <TableHead>
                 <TableRow>
                   {/* Date header — hover shows select-all checkbox */}
