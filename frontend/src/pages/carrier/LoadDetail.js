@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid, Chip,
   CircularProgress, IconButton, TextField, Alert, Stack, Paper, Divider,
@@ -242,11 +242,9 @@ function LoadStepper({ load, bookingStatus }) {
 
 export default function LoadDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { state } = useLocation();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
-  const fromLabel = state?.from || 'Load Board';
 
   const [load, setLoad] = useState(null);
   const [loading, setLoading] = useState(true);
