@@ -248,13 +248,13 @@ function SidebarContent({ onNavigate, onClose }) {
         </Tooltip>
       </Box>
 
-      <Divider sx={{ borderColor: sc.divider }} />
-
       {/* ═══ User identity block ═══ */}
+      <Box sx={{ px: 2, pb: 1.5, pt: 1.5, flexShrink: 0 }}>
       <Box sx={{
-        flexShrink: 0,
+        borderRadius: '10px',
+        overflow: 'hidden',
         bgcolor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)',
-        borderBottom: `1px solid ${sc.divider}`,
+        border: `1px solid ${sc.divider}`,
       }}>
         {/* Business row */}
         <Box
@@ -360,6 +360,7 @@ function SidebarContent({ onNavigate, onClose }) {
             CLOCK-OUT
           </Box>
         </Box>
+      </Box>
       </Box>
 
       {/* Business popover */}
