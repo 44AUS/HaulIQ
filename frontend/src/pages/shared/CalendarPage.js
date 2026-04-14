@@ -4,7 +4,7 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useJsApiLoader, GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { useJsApiLoader, GoogleMap, Marker, InfoWindow, TrafficLayer } from '@react-google-maps/api';
 import {
   Box, Typography, Chip, Skeleton, Paper, Button, Popover,
   IconButton, Drawer, Checkbox, Avatar, ToggleButtonGroup, ToggleButton,
@@ -14,6 +14,9 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
+import TrafficIcon from '@mui/icons-material/Traffic';
+import LayersIcon from '@mui/icons-material/Layers';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
 
@@ -457,12 +460,67 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
 }
 
 
+// ─── Map Layers Panel ─────────────────────────────────────────────────────────
+const MAP_LAYERS = [
+  { key: 'satellite', label: 'Satellite', Icon: SatelliteAltIcon },
+  { key: 'traffic',   label: 'Live Traffic', Icon: TrafficIcon },
+];
+
+function MapLayersPanel({ pending, onToggle, onApply }) {
+  return (
+    <Box sx={{
+      position: 'absolute', top: 44, left: 0, zIndex: 10,
+      width: 260, bgcolor: '#1a1a1a', borderRadius: '0 0 10px 10px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2, pb: 1.5 }}>
+        <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem' }}>Layers</Typography>
+        <Button variant="contained" size="small" onClick={onApply}
+          sx={{ bgcolor: '#2dd36f', '&:hover': { bgcolor: '#27bc61' }, fontWeight: 700, fontSize: '0.78rem', px: 2, py: 0.5, borderRadius: '6px', letterSpacing: '0.04em' }}>
+          APPLY
+        </Button>
+      </Box>
+      {/* Layer rows */}
+      {MAP_LAYERS.map(({ key, label, Icon }, i) => (
+        <Box key={key} onClick={() => onToggle(key)}
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 2, px: 2.5, py: 1.6,
+            borderTop: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            cursor: 'pointer', '&:hover': { bgcolor: 'rgba(255,255,255,0.05)' },
+          }}>
+          <Checkbox
+            checked={pending[key]}
+            onChange={() => onToggle(key)}
+            onClick={e => e.stopPropagation()}
+            sx={{
+              p: 0, color: 'rgba(255,255,255,0.4)',
+              '&.Mui-checked': { color: '#2dd36f' },
+              '& .MuiSvgIcon-root': { fontSize: 22, borderRadius: 1 },
+            }}
+          />
+          <Typography sx={{ color: '#fff', fontWeight: 500, fontSize: '1rem', flex: 1 }}>{label}</Typography>
+          <Icon sx={{ color: 'rgba(255,255,255,0.45)', fontSize: 22 }} />
+        </Box>
+      ))}
+      <Box sx={{ height: 6 }} />
+    </Box>
+  );
+}
+
 // ─── Map View ─────────────────────────────────────────────────────────────────
 function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
+  const [layersOpen, setLayersOpen] = useState(false);
+  const [pending, setPending]       = useState({ satellite: false, traffic: false });
+  const [applied, setApplied]       = useState({ satellite: false, traffic: false });
+
   const mapEvents = events.filter(e => e.pickup_lat && e.pickup_lng);
   const center = mapEvents.length > 0
     ? { lat: mapEvents[0].pickup_lat, lng: mapEvents[0].pickup_lng }
     : { lat: 39.5, lng: -98.35 };
+
+  const handleToggle = (key) => setPending(p => ({ ...p, [key]: !p[key] }));
+  const handleApply  = () => { setApplied({ ...pending }); setLayersOpen(false); };
 
   if (!mapsLoaded) {
     return (
@@ -472,48 +530,86 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
     );
   }
   return (
-    <GoogleMap mapContainerStyle={{ width: '100%', height: 920 }}
-      center={center} zoom={mapEvents.length > 0 ? 5 : 4}
-      options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: true }}>
-      {mapEvents.map(event => {
-        const c = STATUS_COLORS[event.status] || STATUS_COLORS.Pending;
-        return [
-          <Marker key={`pickup-${event.id}`}
-            position={{ lat: event.pickup_lat, lng: event.pickup_lng }}
-            onClick={() => setMapMarker({ event, type: 'pickup' })}
-            icon={{ url: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='36' viewBox='0 0 28 36'><path d='M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.27 21.73 0 14 0z' fill='${encodeURIComponent(c.bg)}'/><circle cx='14' cy='14' r='6' fill='white'/></svg>`, scaledSize: { width: 28, height: 36 }, anchor: { x: 14, y: 36 } }}
-          />,
-          event.delivery_lat && event.delivery_lng ? (
-            <Marker key={`delivery-${event.id}`}
-              position={{ lat: event.delivery_lat, lng: event.delivery_lng }}
-              onClick={() => setMapMarker({ event, type: 'delivery' })}
-              icon={{ url: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='30' viewBox='0 0 28 36'><path d='M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.27 21.73 0 14 0z' fill='white' stroke='${encodeURIComponent(c.bg)}' stroke-width='3'/><circle cx='14' cy='14' r='5' fill='${encodeURIComponent(c.bg)}'/></svg>`, scaledSize: { width: 24, height: 30 }, anchor: { x: 12, y: 30 } }}
-            />
-          ) : null,
-        ];
-      })}
-      {mapMarker && (
-        <InfoWindow
-          position={mapMarker.type === 'pickup'
-            ? { lat: mapMarker.event.pickup_lat, lng: mapMarker.event.pickup_lng }
-            : { lat: mapMarker.event.delivery_lat, lng: mapMarker.event.delivery_lng }}
-          onCloseClick={() => setMapMarker(null)}>
-          <Box sx={{ minWidth: 180, p: 0.5 }}>
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>
-              {mapMarker.type === 'pickup' ? 'Pickup' : 'Delivery'}
-            </Typography>
-            <Typography variant="body2" fontWeight={600}>{mapMarker.event.origin} → {mapMarker.event.destination}</Typography>
-            <Typography variant="body2" fontWeight={700} color="success.main" sx={{ mt: 0.5 }}>
-              ${mapMarker.event.rate?.toLocaleString()}
-            </Typography>
-            <Box sx={{ mt: 0.75 }}>
-              <Chip label={mapMarker.event.status} size="small"
-                sx={{ bgcolor: (STATUS_COLORS[mapMarker.event.status] || STATUS_COLORS.Pending).bg, color: '#fff', fontWeight: 600, fontSize: '0.68rem', height: 20 }} />
-            </Box>
-          </Box>
-        </InfoWindow>
+    <Box sx={{ position: 'relative', width: '100%', height: 920 }}>
+      {/* ── Layers tab bar ── */}
+      <Box sx={{ position: 'absolute', top: 0, left: 0, zIndex: 10, display: 'flex' }}>
+        <Box
+          onClick={() => { setPending({ ...applied }); setLayersOpen(o => !o); }}
+          sx={{
+            display: 'flex', alignItems: 'center', gap: 0.75,
+            px: 2.25, height: 44,
+            bgcolor: layersOpen ? '#222' : '#111',
+            color: '#fff', cursor: 'pointer',
+            borderBottom: layersOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
+            borderRight: '1px solid rgba(255,255,255,0.1)',
+            '&:hover': { bgcolor: '#222' },
+            transition: 'background-color 0.15s',
+            userSelect: 'none',
+          }}>
+          <LayersIcon sx={{ fontSize: 17, color: layersOpen ? '#2dd36f' : 'rgba(255,255,255,0.7)' }} />
+          <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: layersOpen ? '#2dd36f' : '#fff' }}>
+            Layers
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* ── Layers panel dropdown ── */}
+      {layersOpen && (
+        <MapLayersPanel pending={pending} onToggle={handleToggle} onApply={handleApply} />
       )}
-    </GoogleMap>
+
+      {/* ── Click-away to close ── */}
+      {layersOpen && (
+        <Box sx={{ position: 'absolute', inset: 0, zIndex: 9 }} onClick={() => setLayersOpen(false)} />
+      )}
+
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: 920 }}
+        center={center}
+        zoom={mapEvents.length > 0 ? 5 : 4}
+        mapTypeId={applied.satellite ? 'hybrid' : 'roadmap'}
+        options={{ streetViewControl: false, mapTypeControl: false, fullscreenControl: true }}>
+        {applied.traffic && <TrafficLayer />}
+        {mapEvents.map(event => {
+          const c = STATUS_COLORS[event.status] || STATUS_COLORS.Pending;
+          return [
+            <Marker key={`pickup-${event.id}`}
+              position={{ lat: event.pickup_lat, lng: event.pickup_lng }}
+              onClick={() => setMapMarker({ event, type: 'pickup' })}
+              icon={{ url: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='36' viewBox='0 0 28 36'><path d='M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.27 21.73 0 14 0z' fill='${encodeURIComponent(c.bg)}'/><circle cx='14' cy='14' r='6' fill='white'/></svg>`, scaledSize: { width: 28, height: 36 }, anchor: { x: 14, y: 36 } }}
+            />,
+            event.delivery_lat && event.delivery_lng ? (
+              <Marker key={`delivery-${event.id}`}
+                position={{ lat: event.delivery_lat, lng: event.delivery_lng }}
+                onClick={() => setMapMarker({ event, type: 'delivery' })}
+                icon={{ url: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='30' viewBox='0 0 28 36'><path d='M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22S28 24.5 28 14C28 6.27 21.73 0 14 0z' fill='white' stroke='${encodeURIComponent(c.bg)}' stroke-width='3'/><circle cx='14' cy='14' r='5' fill='${encodeURIComponent(c.bg)}'/></svg>`, scaledSize: { width: 24, height: 30 }, anchor: { x: 12, y: 30 } }}
+              />
+            ) : null,
+          ];
+        })}
+        {mapMarker && (
+          <InfoWindow
+            position={mapMarker.type === 'pickup'
+              ? { lat: mapMarker.event.pickup_lat, lng: mapMarker.event.pickup_lng }
+              : { lat: mapMarker.event.delivery_lat, lng: mapMarker.event.delivery_lng }}
+            onCloseClick={() => setMapMarker(null)}>
+            <Box sx={{ minWidth: 180, p: 0.5 }}>
+              <Typography variant="subtitle2" fontWeight={700} gutterBottom>
+                {mapMarker.type === 'pickup' ? 'Pickup' : 'Delivery'}
+              </Typography>
+              <Typography variant="body2" fontWeight={600}>{mapMarker.event.origin} → {mapMarker.event.destination}</Typography>
+              <Typography variant="body2" fontWeight={700} color="success.main" sx={{ mt: 0.5 }}>
+                ${mapMarker.event.rate?.toLocaleString()}
+              </Typography>
+              <Box sx={{ mt: 0.75 }}>
+                <Chip label={mapMarker.event.status} size="small"
+                  sx={{ bgcolor: (STATUS_COLORS[mapMarker.event.status] || STATUS_COLORS.Pending).bg, color: '#fff', fontWeight: 600, fontSize: '0.68rem', height: 20 }} />
+              </Box>
+            </Box>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+    </Box>
   );
 }
 
