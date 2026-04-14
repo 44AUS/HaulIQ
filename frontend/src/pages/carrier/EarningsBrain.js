@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Button, Chip,
   Alert, Skeleton
@@ -11,6 +11,39 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { analyticsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
+// Map action_label → carrier route + optional state to pass to the page
+function resolveAction(insight) {
+  const label = insight.action_label || '';
+  const lc    = label.toLowerCase();
+
+  if (lc.includes('find loads') || lc.includes('alternative lanes') || lc.includes('optimize deadhead')) {
+    // Send to load board; pass equipment/deadhead filter hints via location state
+    return { path: '/carrier/loads', state: { fromBrain: true, insight_type: insight.insight_type } };
+  }
+  if (lc.startsWith('filter') && lc.includes('loads')) {
+    // "Filter Dry Van loads" → load board with equipment type pre-set
+    const equipType = label.replace(/filter\s+/i, '').replace(/\s+loads?$/i, '').trim();
+    return { path: '/carrier/loads', state: { fromBrain: true, equipmentType: equipType } };
+  }
+  if (lc.includes('flag this broker') || lc.includes('flag broker')) {
+    return { path: '/carrier/network', state: {} };
+  }
+  if (lc.includes('set rate alert') || lc.includes('lane watch')) {
+    return { path: '/carrier/lane-watches', state: {} };
+  }
+  if (lc.includes('calculator') || lc.includes('profit calc')) {
+    return { path: '/carrier/calculator', state: {} };
+  }
+  if (lc.includes('log a load') || lc.includes('log load')) {
+    return { path: '/carrier/history', state: {} };
+  }
+  if (lc.includes('upgrade')) {
+    return { path: '/carrier/billing', state: {} };
+  }
+  // Default: load board
+  return { path: '/carrier/loads', state: {} };
+}
+
 const TAG_COLOR_MAP = {
   'high-profit': 'success',
   'warning':     'error',
@@ -19,7 +52,7 @@ const TAG_COLOR_MAP = {
   'savings':     'success',
 };
 
-function InsightCard({ insight, locked, onRead }) {
+function InsightCard({ insight, locked, onRead, onAction }) {
   return (
     <Card
       onClick={() => !locked && !insight.is_read && onRead && onRead(insight.id)}
@@ -84,7 +117,8 @@ function InsightCard({ insight, locked, onRead }) {
                 variant="text"
                 size="small"
                 endIcon={<ChevronRightIcon />}
-                sx={{ mt: 1, px: 0, fontSize: '0.75rem' }}
+                onClick={e => { e.stopPropagation(); !locked && onAction && onAction(insight); }}
+                sx={{ mt: 1, px: 0, fontSize: '0.75rem', opacity: locked ? 0.4 : 1 }}
               >
                 {insight.action_label}
               </Button>
@@ -97,9 +131,15 @@ function InsightCard({ insight, locked, onRead }) {
 }
 
 export default function EarningsBrain() {
-  const { user } = useAuth();
-  const isPro = user?.plan === 'pro' || user?.plan === 'elite';
-  const isElite = user?.plan === 'elite';
+  const { user }   = useAuth();
+  const navigate   = useNavigate();
+  const isPro    = user?.plan === 'pro' || user?.plan === 'elite';
+  const isElite  = user?.plan === 'elite';
+
+  const handleAction = (insight) => {
+    const { path, state } = resolveAction(insight);
+    navigate(path, { state });
+  };
 
   const [insights, setInsights] = useState([]);
   const [summary, setSummary]   = useState(null);
@@ -250,12 +290,12 @@ export default function EarningsBrain() {
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {visibleInsights.map(i => (
               <Box key={i.id} sx={{ flex: '1 1 320px', minWidth: 0 }}>
-                <InsightCard insight={i} locked={false} onRead={handleMarkRead} />
+                <InsightCard insight={i} locked={false} onRead={handleMarkRead} onAction={handleAction} />
               </Box>
             ))}
             {lockedInsights.map(i => (
               <Box key={i.id} sx={{ flex: '1 1 320px', minWidth: 0 }}>
-                <InsightCard insight={i} locked={true} onRead={null} />
+                <InsightCard insight={i} locked={true} onRead={null} onAction={null} />
               </Box>
             ))}
           </Box>
