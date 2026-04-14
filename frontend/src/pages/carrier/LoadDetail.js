@@ -242,7 +242,6 @@ function LoadStepper({ load, bookingStatus }) {
 
 export default function LoadDetail() {
   const { id } = useParams();
-  const { state } = useLocation();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
 
