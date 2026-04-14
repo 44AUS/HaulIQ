@@ -34,7 +34,6 @@ import EarningsBrain from './pages/carrier/EarningsBrain';
 import SavedLoads from './pages/carrier/SavedLoads';
 import LoadHistory from './pages/carrier/LoadHistory';
 import CarrierAnalytics from './pages/carrier/Analytics';
-import CarrierLoadsInProgress from './pages/carrier/LoadsInProgress';
 import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
 import PlaceBid from './pages/carrier/PlaceBid';
 import CarrierPayments from './pages/carrier/Payments';
@@ -157,7 +156,6 @@ function CarrierRoutes() {
           <Route path="brain" element={<EarningsBrain />} />
           <Route path="saved" element={<SavedLoads />} />
           <Route path="history" element={<LoadHistory />} />
-          <Route path="active" element={<CarrierLoadsInProgress />} />
           <Route path="active/:bookingId" element={<ActiveLoadDetail />} />
           <Route path="loads/:id/bid" element={<PlaceBid />} />
           <Route path="payments" element={<CarrierPayments />} />
