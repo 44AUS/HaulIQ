@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Chip,
@@ -19,10 +19,80 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonIcon from '@mui/icons-material/Person';
 import AddCommentIcon from '@mui/icons-material/AddComment';
 import PlaceIcon from '@mui/icons-material/Place';
+import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
 
-const RouteMap = lazy(() => import('../../components/shared/RouteMap'));
+const LIBRARIES = ['places'];
+const MAP_OPTIONS = {
+  disableDefaultUI: true,
+  zoomControl: false,
+  scrollwheel: false,
+  styles: [
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+  ],
+};
+
+const A_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 24 16 24S32 26 32 16C32 7.163 24.837 0 16 0z" fill="#22c55e"/><circle cx="16" cy="16" r="8" fill="white"/><text x="16" y="20" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="#22c55e">A</text></svg>`;
+const B_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.163 0 0 7.163 0 16c0 10 16 24 16 24S32 26 32 16C32 7.163 24.837 0 16 0z" fill="#ef4444"/><circle cx="16" cy="16" r="8" fill="white"/><text x="16" y="20" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="#ef4444">B</text></svg>`;
+
+function LoadHeroMap({ origin, dest }) {
+  const { isLoaded } = useJsApiLoader({ googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '', libraries: LIBRARIES });
+  const [directions, setDirections] = useState(null);
+  const mapRef = useRef(null);
+  const onMapLoad = useCallback((map) => { mapRef.current = map; }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !origin || !dest) return;
+    new window.google.maps.DirectionsService().route(
+      { origin, destination: dest, travelMode: window.google.maps.TravelMode.DRIVING },
+      (result, status) => {
+        if (status === 'OK') {
+          setDirections(result);
+          setTimeout(() => {
+            const map = mapRef.current;
+            if (!map) return;
+            const bounds = new window.google.maps.LatLngBounds();
+            result.routes[0].legs[0].steps.forEach(step => bounds.extend(step.start_location));
+            bounds.extend(result.routes[0].legs[0].end_location);
+            map.fitBounds(bounds, { top: 40, right: 40, bottom: 40, left: 40 });
+          }, 100);
+        }
+      }
+    );
+  }, [isLoaded, origin, dest]);
+
+  const aIcon = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(A_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
+  const bIcon = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(B_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
+
+  if (!isLoaded) return <Box sx={{ height: 420, bgcolor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress size={28} /></Box>;
+
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <GoogleMap mapContainerStyle={{ height: 420, width: '100%' }} options={MAP_OPTIONS} zoom={6} onLoad={onMapLoad}>
+        {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true, polylineOptions: { strokeColor: '#22c55e', strokeWeight: 4, strokeOpacity: 0.9 } }} />}
+        {directions && <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} />}
+        {directions && <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} />}
+      </GoogleMap>
+      <Box sx={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
+        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{origin}</Typography>
+          </Box>
+        </Paper>
+        <Box sx={{ flex: 1, mx: 1, height: 1, bgcolor: 'rgba(34,197,94,0.3)' }} />
+        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#ef4444' }} />
+            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{dest}</Typography>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
+  );
+}
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
@@ -157,12 +227,10 @@ export default function ActiveLoadDetail() {
 
       {/* ── Full-bleed map ── */}
       <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
-        <Suspense fallback={<Box sx={{ height: 420, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress size={28} /></Box>}>
-          {load?.origin && load?.destination
-            ? <RouteMap origin={load.origin} dest={load.destination} miles={load.miles} />
-            : <Box sx={{ height: 300, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LocalShippingIcon sx={{ fontSize: 48, color: 'text.disabled' }} /></Box>
-          }
-        </Suspense>
+        {load?.origin && load?.destination
+          ? <LoadHeroMap origin={load.origin} dest={load.destination} />
+          : <Box sx={{ height: 420, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LocalShippingIcon sx={{ fontSize: 48, color: 'text.disabled' }} /></Box>
+        }
 
         {/* Floating back button */}
         <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
