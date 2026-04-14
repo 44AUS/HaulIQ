@@ -287,7 +287,7 @@ export default function LoadManager() {
         100% { background-color: transparent; }
       }
     `}</style>
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '6px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
     <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
       {/* ── Top bar ── */}
@@ -295,8 +295,8 @@ export default function LoadManager() {
         <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Loads</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Button size="small" startIcon={<span style={{ fontSize: 14 }}>≡</span>} onClick={() => setShowProgress(v => !v)}
-            sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: showProgress ? 'primary.main' : 'text.secondary', bgcolor: showProgress ? 'action.selected' : 'transparent', border: '1px solid', borderColor: showProgress ? 'primary.main' : tabBorder, borderRadius: 1, px: 1.5, py: 0.5, textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
-            Show Progress
+            sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: showProgress ? 'primary.main' : 'text.secondary', textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
+            {showProgress ? 'Hide Progress' : 'Show Progress'}
           </Button>
           <Button size="small" startIcon={<FilterListIcon sx={{ fontSize: 16 }} />} onClick={() => setFilterOpen(true)}
             sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: Object.values(applied).some(Boolean) ? 'primary.main' : 'text.secondary', border: '1px solid', borderColor: Object.values(applied).some(Boolean) ? 'primary.main' : tabBorder, borderRadius: 1, px: 1.5, py: 0.5, textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
@@ -414,11 +414,11 @@ export default function LoadManager() {
                       <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 120, minWidth: 120 }}>
                         <Button
                           size="small"
-                          variant="outlined"
+                          variant="text"
                           color="error"
                           startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
                           onClick={handleBulkDelete}
-                          sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 1, py: 0, minWidth: 0, textTransform: 'none' }}
+                          sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 0.5, py: 0, minWidth: 0, textTransform: 'none' }}
                         >
                           {deletableKeys.length > 1 ? `Delete (${deletableKeys.length})` : (tabItems.find((i, idx) => (i._key || idx) === deletableKeys[0])?.chipKey === 'archived' ? 'Delete' : 'Archive')}
                         </Button>
@@ -527,7 +527,7 @@ export default function LoadManager() {
                         <Typography variant="caption" color="text.secondary">{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ width: 120, minWidth: 120 }}>
-                        <Chip label={chip.label} size="small" color={chip.color} variant="outlined" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600 }} />
+                        <Chip label={chip.label} size="small" color={chip.color} sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px' }} />
                       </TableCell>
                     </TableRow>
                     {/* Expand row — stepper shown when showProgress is on */}
