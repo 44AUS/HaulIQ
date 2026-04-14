@@ -165,15 +165,21 @@ function SidebarContent({ onNavigate, onClose }) {
   const bizOpen  = Boolean(bizAnchor);
   const userOpen = Boolean(userAnchor);
 
-  // Clock in/out
-  const [clockedIn, setClockedIn] = useState(user?.clocked_in || false);
+  // Clock in/out  — states: 'out' | 'in' | 'paused'
+  const [clockState, setClockState] = useState(user?.clocked_in ? 'in' : 'out');
   const [clockLoading, setClockLoading] = useState(false);
 
+  const clockedIn = clockState !== 'out';
+
   const handleClockToggle = async (action) => {
+    if (clockLoading) return;
+    // pause / continue are local UI state only (no API round-trip needed)
+    if (action === 'pause')    { setClockState('paused'); return; }
+    if (action === 'continue') { setClockState('in');     return; }
     setClockLoading(true);
     try {
       const updated = action === 'in' ? await authApi.clockIn() : await authApi.clockOut();
-      setClockedIn(updated.clocked_in || false);
+      setClockState(updated.clocked_in ? 'in' : 'out');
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
     } catch {}
     setClockLoading(false);
@@ -309,7 +315,7 @@ function SidebarContent({ onNavigate, onClose }) {
             <Box sx={{
               position: 'absolute', bottom: 1, right: 1,
               width: 10, height: 10, borderRadius: '50%',
-              bgcolor: clockedIn ? '#2dd36f' : '#eb445a',
+              bgcolor: clockState === 'in' ? '#2dd36f' : clockState === 'paused' ? '#ffce00' : '#eb445a',
               border: `2px solid ${isDark ? '#111' : '#f5f5f5'}`,
             }} />
           </Box>
@@ -324,40 +330,50 @@ function SidebarContent({ onNavigate, onClose }) {
           <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
         </Box>
 
-        {/* Clock In / Clock Out */}
+        {/* Clock strip */}
         <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          <Box
-            component="button"
-            onClick={() => !clockedIn && !clockLoading && handleClockToggle('in')}
-            sx={{
-              all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 0.75, py: 1.25, cursor: clockedIn ? 'default' : 'pointer',
-              bgcolor: clockedIn ? (isDark ? 'rgba(45,211,111,0.12)' : 'rgba(45,211,111,0.15)') : '#2dd36f',
-              color: clockedIn ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)') : '#fff',
-              fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.07em',
-              borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'}`,
-              '&:hover': !clockedIn ? { bgcolor: '#27bc61' } : {},
-              transition: 'background-color 0.15s',
-            }}
-          >
-            <Box component="span" sx={{ fontSize: '0.6rem', lineHeight: 1 }}>▶</Box>
-            CLOCK-IN
-          </Box>
-          <Box
-            component="button"
+          {/* Left button: CLOCK-IN → PAUSE → CONTINUE */}
+          {clockState === 'out' && (
+            <Box component="button" onClick={() => handleClockToggle('in')}
+              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#2dd36f', color: '#fff',
+                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
+                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
+                '&:hover': { bgcolor: '#27bc61' }, transition: 'background-color 0.15s' }}>
+              <Box component="span" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>▶</Box>CLOCK-IN
+            </Box>
+          )}
+          {clockState === 'in' && (
+            <Box component="button" onClick={() => handleClockToggle('pause')}
+              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#ffce00', color: '#000',
+                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
+                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
+                '&:hover': { bgcolor: '#e6b800' }, transition: 'background-color 0.15s' }}>
+              <Box component="span" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>⏸</Box>PAUSE
+            </Box>
+          )}
+          {clockState === 'paused' && (
+            <Box component="button" onClick={() => handleClockToggle('continue')}
+              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                gap: 0.6, py: 0.85, cursor: 'pointer', bgcolor: '#2a7fff', color: '#fff',
+                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
+                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
+                '&:hover': { bgcolor: '#1a6fe6' }, transition: 'background-color 0.15s' }}>
+              <Box component="span" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>▶</Box>CONTINUE
+            </Box>
+          )}
+          {/* Right button: CLOCK-OUT */}
+          <Box component="button"
             onClick={() => clockedIn && !clockLoading && handleClockToggle('out')}
-            sx={{
-              all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 0.75, py: 1.25, cursor: !clockedIn ? 'default' : 'pointer',
-              bgcolor: !clockedIn ? (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.12)') : '#eb445a',
-              color: !clockedIn ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)') : '#fff',
-              fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.07em',
+            sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 0.6, py: 0.85, cursor: clockedIn ? 'pointer' : 'default',
+              bgcolor: clockedIn ? '#eb445a' : (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.1)'),
+              color: clockedIn ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'),
+              fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
               '&:hover': clockedIn ? { bgcolor: '#d03a4e' } : {},
-              transition: 'background-color 0.15s',
-            }}
-          >
-            <Box component="span" sx={{ fontSize: '0.8rem', lineHeight: 1, fontWeight: 400 }}>□</Box>
-            CLOCK-OUT
+              transition: 'background-color 0.15s' }}>
+            <Box component="span" sx={{ fontSize: '0.75rem', lineHeight: 1, fontWeight: 400 }}>□</Box>CLOCK-OUT
           </Box>
         </Box>
       </Box>
