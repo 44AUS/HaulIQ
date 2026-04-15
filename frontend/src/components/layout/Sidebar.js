@@ -167,18 +167,44 @@ function SidebarContent({ onNavigate, onClose }) {
 
   // Clock in/out  — states: 'out' | 'in' | 'paused'
   const parseUtc = (ts) => ts ? new Date(ts.endsWith('Z') ? ts : ts + 'Z') : null;
-  const [clockState,  setClockState]  = useState(user?.clocked_in ? 'in' : 'out');
-  const [clockLoading, setClockLoading] = useState(false);
-  const [clockedInAt, setClockedInAt] = useState(parseUtc(user?.clocked_in_at));
-  const [elapsed, setElapsed] = useState('');
-  const pausedMsRef = useRef(0); // ms elapsed at the moment of pause
+  const PAUSE_KEY = 'hauliq_clock_pause'; // localStorage key
 
-  // Sync clock state when user loads (e.g. after page refresh)
+  // Derive initial state — check localStorage for a persisted pause
+  const _savedPause = (() => { try { return JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch { return null; } })();
+  const _initialState = user?.clocked_in
+    ? (_savedPause ? 'paused' : 'in')
+    : 'out';
+  const _initialAt = _savedPause
+    ? new Date(Date.now() - _savedPause.elapsedMs) // virtual clockedInAt that preserves paused offset
+    : parseUtc(user?.clocked_in_at);
+
+  const [clockState,   setClockState]   = useState(_initialState);
+  const [clockLoading, setClockLoading] = useState(false);
+  const [clockedInAt,  setClockedInAt]  = useState(_initialAt);
+  const [elapsed, setElapsed] = useState('');
+  const pausedMsRef = useRef(_savedPause?.elapsedMs ?? 0);
+
+  // Sync clock state when user object first loads after refresh
   useEffect(() => {
     if (!user) return;
-    setClockState(user.clocked_in ? 'in' : 'out');
-    setClockedInAt(parseUtc(user.clocked_in_at));
-    pausedMsRef.current = 0;
+    const saved = (() => { try { return JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch { return null; } })();
+    if (!user.clocked_in) {
+      // clocked out — clear everything
+      localStorage.removeItem(PAUSE_KEY);
+      pausedMsRef.current = 0;
+      setClockState('out');
+      setClockedInAt(null);
+      return;
+    }
+    if (saved) {
+      pausedMsRef.current = saved.elapsedMs;
+      setClockedInAt(new Date(Date.now() - saved.elapsedMs));
+      setClockState('paused');
+    } else {
+      pausedMsRef.current = 0;
+      setClockedInAt(parseUtc(user.clocked_in_at));
+      setClockState('in');
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.clocked_in, user?.clocked_in_at]);
 
@@ -204,13 +230,14 @@ function SidebarContent({ onNavigate, onClose }) {
   const handleClockToggle = async (action) => {
     if (clockLoading) return;
     if (action === 'pause') {
-      // Store how many ms have elapsed so we can resume from this point
-      if (clockedInAt) pausedMsRef.current = Date.now() - clockedInAt.getTime();
+      const elapsedMs = clockedInAt ? Date.now() - clockedInAt.getTime() : 0;
+      pausedMsRef.current = elapsedMs;
+      localStorage.setItem(PAUSE_KEY, JSON.stringify({ elapsedMs }));
       setClockState('paused');
       return;
     }
     if (action === 'continue') {
-      // Shift clockedInAt so elapsed resumes from the frozen value
+      localStorage.removeItem(PAUSE_KEY);
       setClockedInAt(new Date(Date.now() - pausedMsRef.current));
       setClockState('in');
       return;
@@ -233,6 +260,7 @@ function SidebarContent({ onNavigate, onClose }) {
       }
       const newState = updated.clocked_in ? 'in' : 'out';
       pausedMsRef.current = 0;
+      localStorage.removeItem(PAUSE_KEY);
       setClockState(newState);
       setClockedInAt(newState === 'in' ? new Date() : null);
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
