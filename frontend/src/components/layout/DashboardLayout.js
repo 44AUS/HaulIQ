@@ -13,7 +13,11 @@ const ANALYTICS_PATHS = ['/carrier/analytics',  '/broker/analytics'];
 const TOOLS_PATHS     = ['/carrier/tools'];
 const DRIVERS_PATHS   = ['/carrier/drivers'];
 const PREFERENCES_PATHS = ['/preferences'];
-const COMPACT_PADDING_PATHS = ['/carrier/calendar', '/broker/calendar', '/carrier/loads', '/broker/loads', '/driver/loads'];
+const COMPACT_PADDING_PATHS = [
+  '/carrier/calendar', '/broker/calendar',
+  '/carrier/loads', '/broker/loads', '/driver/loads',
+  '/broker/active', '/carrier/job-manager',
+];
 
 const isLoadDetail = (path) =>
   /^\/carrier\/loads\/[^/]+$/.test(path) ||
