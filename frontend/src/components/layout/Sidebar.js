@@ -36,6 +36,7 @@ import {
   Business as BusinessIcon,
   SwitchAccount as SwitchAccountIcon,
   AddBusiness as AddBusinessIcon,
+  Extension as IntegrationsIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -59,6 +60,7 @@ const CARRIER_LINKS = [
   { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },
   { icon: FolderIcon,    label: 'Documents',         path: '/carrier/documents' },
   { icon: CreditCardIcon,label: 'Billing',           path: '/carrier/billing' },
+  { icon: IntegrationsIcon,label: 'Integrations',   path: '/integrations' },
   { icon: PreferencesIcon,label: 'Preferences',      path: '/preferences' },
 ];
 
@@ -75,6 +77,7 @@ const BROKER_LINKS = [
   { icon: ZapIcon,       label: 'Instant Book',      path: '/broker/instant-book' },
   { icon: PaymentIcon,   label: 'Payments',          path: '/broker/payments' },
   { icon: CreditCardIcon,label: 'Billing',           path: '/broker/billing' },
+  { icon: IntegrationsIcon,label: 'Integrations',   path: '/integrations' },
   { icon: PreferencesIcon,label: 'Preferences',      path: '/preferences' },
 ];
 

@@ -70,6 +70,7 @@ import Preferences from './pages/shared/Preferences';
 import Billing from './pages/shared/Billing';
 import MapView from './pages/shared/MapView';
 import CalendarPage from './pages/shared/CalendarPage';
+import Integrations from './pages/shared/Integrations';
 
 // Pages — Admin
 import AdminOverview from './pages/admin/AdminOverview';
@@ -273,6 +274,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       <Route path="/preferences/branding" element={<Navigate to="/preferences?tab=branding" replace />} />
+      <Route path="/integrations" element={<ProtectedRoute><DashboardLayout><Integrations /></DashboardLayout></ProtectedRoute>} />
       <Route path="/map/:lat/:lng/:city/:name" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
       <Route path="/map/:lat/:lng/:city" element={<ProtectedRoute><DashboardLayout><MapView /></DashboardLayout></ProtectedRoute>} />
       <Route path="/invite/driver" element={<DriverInvite />} />
