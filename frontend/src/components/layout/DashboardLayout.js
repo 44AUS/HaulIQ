@@ -13,6 +13,7 @@ const ANALYTICS_PATHS = ['/carrier/analytics',  '/broker/analytics'];
 const TOOLS_PATHS     = ['/carrier/tools'];
 const DRIVERS_PATHS   = ['/carrier/drivers'];
 const PREFERENCES_PATHS = ['/preferences'];
+const COMPACT_PADDING_PATHS = ['/carrier/calendar', '/broker/calendar', '/carrier/loads', '/broker/loads', '/driver/loads'];
 
 const isLoadDetail = (path) =>
   /^\/carrier\/loads\/[^/]+$/.test(path) ||
@@ -24,6 +25,8 @@ export default function DashboardLayout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const compactPadding = COMPACT_PADDING_PATHS.includes(location.pathname);
 
   const immersiveMode = NETWORK_PATHS.includes(location.pathname)   ? 'network'
     : BILLING_PATHS.includes(location.pathname)   ? 'billing'
@@ -64,7 +67,7 @@ export default function DashboardLayout({ children }) {
           immersiveMode={immersiveMode}
         />
         {/* Scroll container */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
+        <Box sx={{ flex: 1, overflowY: 'auto', p: compactPadding ? '10px' : { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
           {children}
         </Box>
       </Box>
