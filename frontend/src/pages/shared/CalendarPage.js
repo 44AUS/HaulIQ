@@ -864,7 +864,7 @@ export default function CalendarPage() {
               }}>
               Filter
             </Button>
-            <Box sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)', borderRadius: '8px', px: 1.5, py: 0.6, textAlign: 'center' }}>
+            <Box sx={{ textAlign: 'right' }}>
               <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
                 {MONTH_FULL[date.getMonth()]}
               </Typography>
