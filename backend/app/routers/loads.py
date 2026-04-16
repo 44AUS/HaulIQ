@@ -99,7 +99,7 @@ def list_loads(
     max_length:         Optional[int]        = Query(None),
     pickup_date_from:   Optional[date]       = Query(None),
     pickup_date_to:     Optional[date]       = Query(None),
-    sort_by:       str                  = Query("profit"),
+    sort_by:       str                  = Query("recent"),
     page:          int                  = Query(1, ge=1),
     per_page:      int                  = Query(20, ge=1, le=100),
     db:            Session              = Depends(get_db),
@@ -147,7 +147,7 @@ def list_loads(
         "recent":       desc(Load.posted_at),
         "miles":        desc(Load.miles),
     }
-    q = q.order_by(sort_map.get(sort_by, desc(Load.net_profit_est)))
+    q = q.order_by(sort_map.get(sort_by, desc(Load.posted_at)))
 
     # Apply daily view limit for Basic plan
     limit = PLAN_DAILY_LIMITS.get(current_user.plan, 20)

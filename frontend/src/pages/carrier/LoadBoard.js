@@ -44,7 +44,7 @@ const INIT = {
   minLength: '', maxLength: '',
   maxWeight: '',
   dateFrom: '', dateTo: '',
-  sort: 'profit',
+  sort: 'recent',
 };
 const TABS = [
   { key: 'all',         label: 'ALL' },
@@ -456,7 +456,7 @@ export default function LoadBoard() {
     if (f.maxLength)         p.max_length          = f.maxLength;
     if (f.dateFrom)          p.pickup_date_from    = f.dateFrom;
     if (f.dateTo)            p.pickup_date_to      = f.dateTo;
-    p.sort_by = { profit: 'profit', rate: 'rate_per_mile', recent: 'recent', miles: 'miles' }[f.sort] || 'profit';
+    p.sort_by = { profit: 'profit', rate: 'rate_per_mile', recent: 'recent', miles: 'miles' }[f.sort] || 'recent';
     return p;
   };
 

@@ -177,7 +177,9 @@ export default function LoadManager() {
 
     const fmtDateTime = (iso) => {
       if (!iso) return null;
-      const d = new Date(iso);
+      // Ensure UTC is interpreted correctly — backend returns naive UTC without Z
+      const utc = typeof iso === 'string' && !iso.endsWith('Z') && !iso.includes('+') ? iso + 'Z' : iso;
+      const d = new Date(utc);
       if (isNaN(d)) return null;
       const date = d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
       const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase().replace(' ', '');
