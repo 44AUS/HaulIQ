@@ -77,6 +77,7 @@ class Booking(Base):
     updated_at  = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     carrier     = relationship("User", foreign_keys=[carrier_id])
+    load        = relationship("Load", foreign_keys=[load_id], lazy="select")
 
     # TMS dispatch fields
     driver_name           = Column(String(255), nullable=True)

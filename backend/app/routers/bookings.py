@@ -128,22 +128,32 @@ def my_bookings(
 ):
     bookings = (
         db.query(Booking)
-        .options(joinedload(Booking.load).joinedload(Load.broker_user))
+        .options(
+            joinedload(Booking.load).joinedload(Load.broker_user)
+        )
         .filter(Booking.carrier_id == current_user.id)
         .order_by(Booking.created_at.desc())
         .all()
     )
     result = []
     for b in bookings:
-        out = BookingOut.model_validate(b)
-        if b.load:
-            out.origin      = b.load.origin
-            out.destination = b.load.destination
-            out.load_type   = b.load.load_type.value if b.load.load_type else None
-            out.miles       = b.load.miles
-            out.rate        = b.load.rate
-            if b.load.broker_user:
-                out.broker_name = b.load.broker_user.company or b.load.broker_user.name
+        ld = b.load
+        out = BookingOut(
+            id=b.id,
+            load_id=b.load_id,
+            carrier_id=b.carrier_id,
+            status=b.status,
+            is_instant=b.is_instant,
+            note=b.note,
+            broker_note=b.broker_note,
+            created_at=b.created_at,
+            origin=ld.origin if ld else None,
+            destination=ld.destination if ld else None,
+            load_type=ld.load_type.value if ld and ld.load_type else None,
+            miles=ld.miles if ld else None,
+            rate=ld.rate if ld else None,
+            broker_name=(ld.broker_user.company or ld.broker_user.name) if ld and ld.broker_user else None,
+        )
         result.append(out)
     return result
 

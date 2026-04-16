@@ -459,9 +459,9 @@ def get_saved_loads(
             continue
         enriched = _enrich_load(s.load)
         enriched.is_saved = True
-        out = LoadOut.model_validate(enriched)
-        out.saved_at = s.saved_at
-        result.append(out)
+        data = LoadOut.model_validate(enriched).model_dump()
+        data['saved_at'] = s.saved_at
+        result.append(LoadOut(**data))
     return result
 
 
