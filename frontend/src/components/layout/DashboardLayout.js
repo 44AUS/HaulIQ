@@ -18,6 +18,7 @@ const COMPACT_PADDING_PATHS = [
   '/carrier/loads', '/broker/loads', '/driver/loads',
   '/broker/active', '/carrier/job-manager',
   '/carrier/payments', '/broker/payments',
+  '/broker/trucks',
 ];
 
 const isLoadDetail = (path) =>
