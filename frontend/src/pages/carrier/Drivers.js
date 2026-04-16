@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Button, CircularProgress, Avatar, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, Alert, IconButton, Tooltip,
-  Stack, MenuItem, Select, FormControl, InputLabel,
+  Stack, MenuItem, Select, FormControl, InputLabel, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -102,25 +102,41 @@ export default function Drivers() {
       {/* ── Filter row ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0 }}>
         <Typography variant="h6" fontWeight={700}>Employees</Typography>
-        <Box sx={{ display: 'flex', border: 1, borderColor: 'divider', borderRadius: '6px', overflow: 'hidden' }}>
-          {['enabled', 'disabled'].map(f => (
-            <Box
-              key={f}
-              onClick={() => setFilter(f)}
-              sx={{
-                px: 2.5, py: 0.75, cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600,
-                bgcolor: filter === f ? 'action.selected' : 'transparent',
-                color: filter === f ? 'text.primary' : 'text.secondary',
-                textTransform: 'capitalize',
-                '&:hover': { bgcolor: 'action.hover' },
-                transition: 'background 0.15s',
-                borderRight: f === 'enabled' ? 1 : 0, borderColor: 'divider',
-              }}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </Box>
-          ))}
-        </Box>
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          onChange={(_, v) => v && setFilter(v)}
+          size="small"
+          sx={{
+            bgcolor: 'action.hover',
+            borderRadius: '10px',
+            p: '3px',
+            gap: '2px',
+            '& .MuiToggleButtonGroup-grouped': {
+              border: '0 !important',
+              borderRadius: '8px !important',
+              mx: 0,
+            },
+            '& .MuiToggleButton-root': {
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              px: 2,
+              py: 0.55,
+              color: 'text.secondary',
+              '&.Mui-selected': {
+                bgcolor: 'background.paper',
+                color: 'text.primary',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                '&:hover': { bgcolor: 'background.paper' },
+              },
+              '&:hover': { bgcolor: 'transparent' },
+            },
+          }}
+        >
+          <ToggleButton value="enabled" disableRipple>Enabled</ToggleButton>
+          <ToggleButton value="disabled" disableRipple>Disabled</ToggleButton>
+        </ToggleButtonGroup>
       </Box>
 
       {/* ── List ── */}
