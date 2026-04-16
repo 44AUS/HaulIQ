@@ -1,182 +1,236 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import {
-  Box, Typography, Card, CardContent, Chip, CircularProgress,
-  Alert, Table, TableHead, TableBody, TableRow, TableCell, Button, Skeleton,
+  Box, Typography, Chip, CircularProgress, IconButton, Tooltip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  useTheme,
 } from '@mui/material';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { freightPaymentsApi } from '../../services/api';
 
-const STATUS_COLOR = {
-  pending:  'warning',
-  escrowed: 'info',
-  released: 'success',
-  refunded: 'default',
-  failed:   'error',
+// ── Tab definitions ───────────────────────────────────────────────────────────
+const TABS = [
+  { key: 'all',      label: 'ALL' },
+  { key: 'pending',  label: 'PENDING' },
+  { key: 'paid',     label: 'PAID' },
+  { key: 'past_due', label: 'PAST DUE' },
+  { key: 'voided',   label: 'VOIDED' },
+];
+
+// Map backend status → tab key
+const STATUS_TAB = {
+  pending:  'pending',
+  escrowed: 'pending',
+  released: 'paid',
+  failed:   'past_due',
+  refunded: 'voided',
 };
 
-const STATUS_LABEL = {
-  pending:  'Pending',
-  escrowed: 'In Escrow',
-  released: 'Paid Out',
-  refunded: 'Refunded',
-  failed:   'Failed',
+// Badge colors matching app palette
+const TAB_CHIP = {
+  pending:  { label: 'Pending',   bg: '#ffce00', text: '#000' },
+  escrowed: { label: 'In Escrow', bg: '#2a7fff', text: '#fff' },
+  released: { label: 'Paid',      bg: '#2dd36f', text: '#fff' },
+  failed:   { label: 'Past Due',  bg: '#eb445a', text: '#fff' },
+  refunded: { label: 'Voided',    bg: '#757575', text: '#fff' },
 };
 
-const fmt = (n) => n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
-const fmtDate = (s) => s ? new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+// Left accent bar color per status
+const STATUS_BAR = {
+  pending:  '#ffce00',
+  escrowed: '#2a7fff',
+  released: '#2dd36f',
+  failed:   '#eb445a',
+  refunded: '#616161',
+};
+
+const fmt = (n) =>
+  n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
+
+const fmtDate = (s) => {
+  if (!s) return '—';
+  const utc = typeof s === 'string' && !s.endsWith('Z') && !s.includes('+') ? s + 'Z' : s;
+  const d = new Date(utc);
+  if (isNaN(d)) return '—';
+  return d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: '2-digit' });
+};
 
 export default function CarrierPayments() {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await freightPaymentsApi.list();
-      setPayments(data);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+  const [payments,  setPayments]  = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [spinning,  setSpinning]  = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+
+  const fetchData = (showSpinner = false) => {
+    if (showSpinner) setSpinning(true); else setLoading(true);
+    freightPaymentsApi.list()
+      .then(d => setPayments(Array.isArray(d) ? d : []))
+      .catch(() => {})
+      .finally(() => { setLoading(false); setSpinning(false); });
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
-  const inEscrow   = payments.filter(p => p.status === 'escrowed').reduce((s, p) => s + p.carrier_amount, 0);
-  const totalPaid  = payments.filter(p => p.status === 'released').reduce((s, p) => s + p.carrier_amount, 0);
-  const pending    = payments.filter(p => p.status === 'pending').reduce((s, p) => s + p.carrier_amount, 0);
+  const tabItems = useMemo(() => {
+    if (activeTab === 'all') return payments;
+    return payments.filter(p => STATUS_TAB[p.status] === activeTab);
+  }, [payments, activeTab]);
+
+  const tabCounts = useMemo(() => {
+    const c = { all: payments.length };
+    TABS.slice(1).forEach(t => {
+      c[t.key] = payments.filter(p => STATUS_TAB[p.status] === t.key).length;
+    });
+    return c;
+  }, [payments]);
+
+  // Summary stats
+  const pending   = payments.filter(p => p.status === 'pending' || p.status === 'escrowed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+  const paid      = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+  const pastDue   = payments.filter(p => p.status === 'failed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+
+  const tabBorder  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+  const activeFg   = isDark ? '#fff' : '#000';
+  const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+
+      {/* ── Top bar ── */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
         <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <AccountBalanceWalletIcon color="primary" />
-            <Typography variant="h5" fontWeight={700}>Payments</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">Freight payments for your completed loads</Typography>
+          <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Payments</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+            Freight payments for your completed loads
+          </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
-          onClick={load}
-          disabled={loading}
-          size="small"
-        >
-          Refresh
-        </Button>
+        {/* Summary pills */}
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+          {[
+            { label: 'Awaiting', value: fmt(pending),  color: '#ffce00', text: '#000' },
+            { label: 'Paid Out', value: fmt(paid),     color: '#2dd36f', text: '#fff' },
+            { label: 'Past Due', value: fmt(pastDue),  color: '#eb445a', text: '#fff' },
+          ].map(({ label, value, color, text }) => (
+            <Box key={label} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', borderRadius: '8px', px: 2, py: 0.75, minWidth: 80 }}>
+              <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, color }}>{value}</Typography>
+              <Typography sx={{ fontSize: '0.62rem', color: 'text.disabled', fontWeight: 600, letterSpacing: '0.04em' }}>{label.toUpperCase()}</Typography>
+            </Box>
+          ))}
+        </Box>
       </Box>
 
-      {/* Stats */}
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        {[
-          { label: 'Awaiting Payment', value: fmt(pending),   color: 'warning.main' },
-          { label: 'In Escrow',        value: fmt(inEscrow),  color: 'info.main' },
-          { label: 'Paid Out',         value: fmt(totalPaid), color: 'success.main' },
-        ].map(({ label, value, color }) => (
-          <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h5" fontWeight={800} color={color}>{value}</Typography>
-                <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
-              </CardContent>
-            </Card>
-          </Box>
-        ))}
+      {/* ── Tab bar ── */}
+      <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, overflowX: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.key;
+          const count    = tabCounts[tab.key] ?? 0;
+          return (
+            <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 2.75, cursor: 'pointer', flexShrink: 0,
+                borderBottom: isActive ? '2px solid' : '2px solid transparent',
+                borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent',
+                color: isActive ? activeFg : inactiveFg,
+                opacity: isActive ? 1 : 0.6,
+                '&:hover': { opacity: 1, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
+                transition: 'opacity 0.15s, background-color 0.15s',
+              }}>
+              <Typography sx={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
+              <Box sx={{ bgcolor: 'background.default', borderRadius: '4px', px: 0.6, py: 0.15, minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</Typography>
+              </Box>
+            </Box>
+          );
+        })}
+        <Box sx={{ flex: 1 }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
+          <Tooltip title="Refresh">
+            <IconButton size="small" onClick={() => fetchData(true)} sx={{ color: 'text.secondary' }}>
+              <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
-      {/* Table */}
-      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+      {/* ── Table ── */}
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
         {loading ? (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  {[...Array(7)].map((_, i) => (
-                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {[...Array(8)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[140, 80, 100, 80, 80, 80, 40].map((w, j) => (
-                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+            <CircularProgress size={28} />
           </Box>
-        ) : error ? (
-          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
-        ) : payments.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="body2" color="text.secondary">No payments yet. Complete a load to get paid.</Typography>
+        ) : tabItems.length === 0 ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">No payments in this category</Typography>
           </Box>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
+          <TableContainer>
+            <Table size="small" sx={{ minWidth: 700 }}>
               <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['Route', 'Load Rate', 'Your Earnings', 'Status', 'Escrowed', 'Paid Out', ''].map((h, i) => (
-                    <TableCell key={i} sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                      {h}
-                    </TableCell>
-                  ))}
+                <TableRow sx={{ '& .MuiTableCell-root': { fontWeight: '400 !important', color: `${isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important` } }}>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 200 }}>Route</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 110 }}>Load Rate</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 120 }}>Your Earnings</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 90  }}>Escrowed</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 90  }}>Paid Out</TableCell>
+                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, width: 120, minWidth: 120 }}>Status</TableCell>
+                  <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 32, minWidth: 32 }} />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {payments.map(p => (
-                  <TableRow key={p.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600} noWrap>
-                        {p.load_origin || '—'} → {p.load_destination || '—'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary">{fmt(p.amount)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={700} color="success.main">{fmt(p.carrier_amount)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={STATUS_LABEL[p.status] || p.status}
-                        size="small"
-                        color={STATUS_COLOR[p.status] || 'default'}
-                        sx={{ fontSize: 11 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>{fmtDate(p.escrowed_at)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>{fmtDate(p.released_at)}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Typography
-                        variant="caption"
-                        component={Link}
-                        to={`/carrier/active`}
-                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
-                      >
-                        View
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {tabItems.map((p) => {
+                  const chip     = TAB_CHIP[p.status] || { label: p.status, bg: '#9e9e9e', text: '#fff' };
+                  const barColor = STATUS_BAR[p.status] || '#9e9e9e';
+                  return (
+                    <TableRow
+                      key={p.id}
+                      sx={{
+                        height: 64,
+                        '& td': { py: 0, borderBottom: 0 },
+                        '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
+                        '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
+                      }}
+                    >
+                      {/* Route — with accent bar */}
+                      <TableCell sx={{ pl: 0, position: 'relative', minWidth: 200 }}>
+                        <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
+                        <Box sx={{ pl: 2 }}>
+                          <Typography variant="body2" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>
+                            {p.load_origin || '—'} → {p.load_destination || '—'}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">{fmt(p.amount)}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={700} color="success.main">{fmt(p.carrier_amount)}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</Typography>
+                      </TableCell>
+                      <TableCell sx={{ width: 120, minWidth: 120 }}>
+                        <Chip label={chip.label} size="small" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text }} />
+                      </TableCell>
+                      <TableCell sx={{ width: 32, minWidth: 32, pr: 1 }}>
+                        <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
-          </Box>
+          </TableContainer>
         )}
-      </Card>
+      </Box>
+
+    </Box>
+    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </Box>
   );
 }
