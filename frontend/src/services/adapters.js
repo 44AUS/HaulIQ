@@ -75,6 +75,7 @@ export function adaptLoad(l) {
     delivery:     fmtDate(l.delivery_date || l.delivery),
     hot:          l.is_hot         || false,
     saved:        l.is_saved       || false,
+    savedAt:      l.saved_at       || null,
     posted:       timeAgo(l.posted_at),
     status:       l.status         || 'available',
     instantBook:  l.instant_book   || false,

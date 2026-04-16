@@ -453,10 +453,16 @@ def get_saved_loads(
         .filter(SavedLoad.carrier_id == current_user.id)
         .all()
     )
-    enriched = [_enrich_load(s.load) for s in saved if s.load and s.load.status == LoadStatus.active]
-    for l in enriched:
-        l.is_saved = True
-    return enriched
+    result = []
+    for s in saved:
+        if not s.load or s.load.status != LoadStatus.active:
+            continue
+        enriched = _enrich_load(s.load)
+        enriched.is_saved = True
+        out = LoadOut.model_validate(enriched)
+        out.saved_at = s.saved_at
+        result.append(out)
+    return result
 
 
 # ─── POST /api/loads/calculate ─────────────────────────────────────────────────

@@ -34,13 +34,14 @@ const STATUS_TAB = {
   in_transit: 'in_progress',
 };
 
+// Custom hex colors matching app palette
 const STATUS_CHIP = {
-  quoted:     { label: 'Pending',     color: 'default' },
-  booked:     { label: 'Scheduled',   color: 'info' },
-  in_transit: { label: 'In Progress', color: 'warning' },
-  completed:  { label: 'Completed',   color: 'success' },
-  saved:      { label: 'Saved',       color: 'primary' },
-  archived:   { label: 'Archived',    color: 'default' },
+  quoted:     { label: 'Pending',     bg: '#9e9e9e',  text: '#fff' },
+  booked:     { label: 'Scheduled',   bg: '#2a7fff',  text: '#fff' },
+  in_transit: { label: 'In Progress', bg: '#ffce00',  text: '#000' },
+  completed:  { label: 'Completed',   bg: '#2dd36f',  text: '#fff' },
+  saved:      { label: 'Saved',       bg: '#757575',  text: '#fff' },
+  archived:   { label: 'Archived',    bg: '#616161',  text: '#fff' },
 };
 
 // Left accent bar color per status
@@ -219,13 +220,13 @@ export default function LoadManager() {
       _key:       l.id,
       _tab:       'saved',
       _nav:       () => navigate(`/carrier/loads/${l.id}`),
-      date:       null,
+      date:       l.savedAt ? fmtDateTime(l.savedAt) : null,
       origin:     l.origin,
-      dest:       l.destination,
-      equipment:  l.load_type,
+      dest:       l.dest,
+      equipment:  l.type,
       miles:      l.miles,
       rate:       l.rate,
-      broker:     null,
+      broker:     l.broker?.name || null,
       status:     'saved',
       chipKey:    'saved',
       tmsStatus:  null,
@@ -435,7 +436,7 @@ export default function LoadManager() {
               </TableHead>
               <TableBody>
                 {tabItems.map((item, idx) => {
-                  const chip     = STATUS_CHIP[item.chipKey] || { label: item.status, color: 'default' };
+                  const chip     = STATUS_CHIP[item.chipKey] || { label: item.status, bg: '#9e9e9e', text: '#fff' };
                   const barColor = STATUS_BAR_COLOR[item.chipKey] || '#9e9e9e';
                   const rowKey   = item._key || idx;
                   const isHovered  = hoveredRow === rowKey;
@@ -529,10 +530,26 @@ export default function LoadManager() {
                         <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{item.broker || '—'}</Typography>
                       </TableCell>
                       <TableCell sx={{ width: 120, minWidth: 120 }}>
-                        <Chip label={chip.label} size="small" color={chip.color} sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px' }} />
+                        <Chip label={chip.label} size="small" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text }} />
                       </TableCell>
-                      <TableCell sx={{ width: 32, minWidth: 32, pr: 1 }}>
-                        <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                      <TableCell sx={{ width: 48, minWidth: 48, pr: 1 }} onClick={e => e.stopPropagation()}>
+                        {item.chipKey === 'archived' ? (
+                          <Tooltip title="Delete permanently">
+                            <IconButton
+                              size="small"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                try { await bookingsApi.destroy(item._key); } catch (_) {}
+                                refresh();
+                              }}
+                              sx={{ color: 'error.main', p: 0.5 }}
+                            >
+                              <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                        )}
                       </TableCell>
                     </TableRow>
                     {/* Expand row — stepper shown when showProgress is on */}

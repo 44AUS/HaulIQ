@@ -111,6 +111,7 @@ class LoadOut(BaseModel):
     pickup_lng: Optional[float] = None
     delivery_lat: Optional[float] = None
     delivery_lng: Optional[float] = None
+    saved_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from uuid import UUID
 from pydantic import BaseModel
 from typing import Optional
@@ -52,6 +52,13 @@ class BookingOut(BaseModel):
     note: Optional[str]
     broker_note: Optional[str]
     created_at: datetime
+    # Denormalised load fields (populated by /my endpoint)
+    origin: Optional[str] = None
+    destination: Optional[str] = None
+    load_type: Optional[str] = None
+    miles: Optional[int] = None
+    rate: Optional[float] = None
+    broker_name: Optional[str] = None
     model_config = {"from_attributes": True}
 
 
@@ -119,7 +126,26 @@ def my_bookings(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_carrier),
 ):
-    return db.query(Booking).filter(Booking.carrier_id == current_user.id).order_by(Booking.created_at.desc()).all()
+    bookings = (
+        db.query(Booking)
+        .options(joinedload(Booking.load).joinedload(Load.broker_user))
+        .filter(Booking.carrier_id == current_user.id)
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
+    result = []
+    for b in bookings:
+        out = BookingOut.model_validate(b)
+        if b.load:
+            out.origin      = b.load.origin
+            out.destination = b.load.destination
+            out.load_type   = b.load.load_type.value if b.load.load_type else None
+            out.miles       = b.load.miles
+            out.rate        = b.load.rate
+            if b.load.broker_user:
+                out.broker_name = b.load.broker_user.company or b.load.broker_user.name
+        result.append(out)
+    return result
 
 
 @router.get("/pending", response_model=list[BookingOut])
