@@ -864,9 +864,14 @@ export default function CalendarPage() {
               }}>
               Filter
             </Button>
-            <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#2dd36f', lineHeight: 1.2 }}>
-              {MONTH_FULL[date.getMonth()].slice(0, 3)} · ${monthRevenue.toLocaleString()}
-            </Typography>
+            <Box sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)', borderRadius: '8px', px: 1.5, py: 0.6, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
+                {MONTH_FULL[date.getMonth()]}
+              </Typography>
+              <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: '#2dd36f', lineHeight: 1.2 }}>
+                ${monthRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
