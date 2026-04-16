@@ -92,7 +92,6 @@ export default function CarrierPayments() {
   const paid      = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.carrier_amount || 0), 0);
   const pastDue   = payments.filter(p => p.status === 'failed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
 
-  const tabBorder  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
   const activeFg   = isDark ? '#fff' : '#000';
   const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
 
