@@ -357,7 +357,7 @@ export default function Equipment() {
       {/* ── Post Truck button ── */}
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
         <Button variant="contained" startIcon={<AddIcon sx={{ fontSize: 17 }} />} onClick={openCreate}
-          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
           Post Truck
         </Button>
       </Box>
