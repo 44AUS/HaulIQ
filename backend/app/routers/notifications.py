@@ -73,6 +73,17 @@ def mark_read(
     return _out(notif)
 
 
+# ── DELETE /api/notifications (delete all) ────────────────────────────────────
+@router.delete("", summary="Delete all notifications for current user")
+def delete_all_notifications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    db.query(Notification).filter(Notification.user_id == current_user.id).delete()
+    db.commit()
+    return {"ok": True}
+
+
 # ── DELETE /api/notifications/{id} ────────────────────────────────────────────
 @router.delete("/{notif_id}", summary="Delete a notification")
 def delete_notification(

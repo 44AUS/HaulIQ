@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
-  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper,
+  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -24,6 +24,9 @@ import {
   CheckCircleOutline as CheckIcon,
   PendingActions as PendingIcon,
   MoreVert as MoreVertIcon,
+  FilterList as FilterListIcon,
+  Delete as DeleteIcon,
+  ArrowBack as ArrowBackIcon,
   Layers as LayersIcon,
   LocalShipping as TruckIcon,
   Category as CategoryIcon,
@@ -151,12 +154,220 @@ function notifPath(notif, role) {
   return `/${role}/dashboard`;
 }
 
+// ── Notification preference categories ────────────────────────────────────────
+const NOTIF_PREF_CATEGORIES = [
+  {
+    key: 'loads',
+    label: 'Loads',
+    desc: 'Notified when a bid is placed or accepted on a load',
+    items: [
+      { key: 'new_bid',      label: 'New Bids' },
+      { key: 'bid_accepted', label: 'Bid Accepted' },
+    ],
+  },
+  {
+    key: 'bookings',
+    label: 'Bookings',
+    desc: 'Notified when a booking is requested, approved, or denied',
+    items: [
+      { key: 'new_booking_request', label: 'Booking Requests' },
+      { key: 'booking_approved',    label: 'Booking Approved' },
+      { key: 'booking_denied',      label: 'Booking Denied' },
+    ],
+  },
+  {
+    key: 'lane_watch',
+    label: 'Lane Watch',
+    desc: 'Notified when a lane watch match is found',
+    items: [{ key: 'lane_watch_match', label: 'Lane Watch Matches' }],
+  },
+  {
+    key: 'system',
+    label: 'System',
+    desc: 'TMS updates and platform notifications',
+    items: [{ key: 'tms_update', label: 'TMS Updates' }],
+  },
+];
+
+const PREF_STORAGE_KEY = 'hauliq_notif_prefs';
+
+function loadPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREF_STORAGE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function savePrefs(prefs) {
+  localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(prefs));
+}
+
+// ── Swipeable notification row ─────────────────────────────────────────────────
+function SwipeableNotifRow({ notif, onDelete, onClick, formatTime }) {
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const ref     = useRef(null);
+  const startX  = useRef(null);
+  const dragX   = useRef(0);
+  const [offset, setOffset] = useState(0);
+  const [swiped, setSwiped] = useState(false);
+
+  const onPointerDown = (e) => {
+    startX.current = e.clientX;
+    dragX.current  = 0;
+  };
+  const onPointerMove = (e) => {
+    if (startX.current === null) return;
+    const delta = e.clientX - startX.current;
+    if (delta > 0) return; // only left swipe
+    dragX.current = delta;
+    setOffset(Math.max(delta, -80));
+  };
+  const onPointerUp = () => {
+    if (dragX.current < -50) {
+      setOffset(-80);
+      setSwiped(true);
+    } else {
+      setOffset(0);
+      setSwiped(false);
+    }
+    startX.current = null;
+  };
+
+  return (
+    <Box ref={ref} sx={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Red delete background */}
+      <Box sx={{
+        position: 'absolute', right: 0, top: 0, bottom: 0, width: 80,
+        bgcolor: '#eb445a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <IconButton size="small" onClick={() => onDelete(notif.id)} sx={{ color: '#fff' }}>
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      {/* Notification content */}
+      <Box
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerUp}
+        onClick={() => { if (!swiped) onClick(notif); }}
+        sx={{
+          transform: `translateX(${offset}px)`,
+          transition: startX.current !== null ? 'none' : 'transform 0.2s ease',
+          cursor: 'pointer',
+          px: 2.5, py: 1.5,
+          display: 'flex', alignItems: 'flex-start', gap: 1.5,
+          bgcolor: notif.read ? 'background.paper' : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
+          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
+          userSelect: 'none',
+        }}
+      >
+        <Box sx={{ mt: 0.25, flexShrink: 0 }}>
+          <NotifIcon type={notif.type} />
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Typography variant="body2" fontWeight={notif.read ? 500 : 700} sx={{ flex: 1, mr: 1 }}>
+              {notif.title}
+            </Typography>
+            <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, mt: 0.1 }}>
+              {formatTime(notif.created_at)}
+            </Typography>
+          </Box>
+          {notif.body && (
+            <Typography variant="caption" color="text.secondary">{notif.body}</Typography>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Preferences sub-panel ──────────────────────────────────────────────────────
+function PreferencesPanel({ onBack, onClose }) {
+  const [prefs, setPrefs] = useState(loadPrefs);
+
+  const isEnabled = (key) => prefs[key] !== false;
+
+  const toggle = (key) => {
+    setPrefs(prev => {
+      const next = { ...prev, [key]: !isEnabled(key) };
+      savePrefs(next);
+      return next;
+    });
+  };
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
+      <Box sx={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        px: 1.5, py: 1.5, flexShrink: 0,
+        boxShadow: '0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)',
+        zIndex: 1,
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton size="small" onClick={onBack} sx={{ mr: 0.5 }}>
+            <ArrowBackIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
+        </Box>
+        <IconButton size="small" onClick={onClose}>
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      {/* Body */}
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Typography variant="caption" color="text.disabled" sx={{ px: 2.5, pt: 2, pb: 0.5, display: 'block', fontWeight: 600, letterSpacing: '0.06em' }}>
+          Preferences
+        </Typography>
+        {NOTIF_PREF_CATEGORIES.map((cat, ci) => (
+          <Box key={cat.key}>
+            {ci > 0 && <Divider />}
+            {cat.items.length === 1 ? (
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', px: 2.5, py: 1.5, gap: 2 }}>
+                <Box>
+                  <Typography variant="body2" fontWeight={700}>{cat.label}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25 }}>{cat.desc}</Typography>
+                </Box>
+                <Switch
+                  size="small"
+                  checked={isEnabled(cat.items[0].key)}
+                  onChange={() => toggle(cat.items[0].key)}
+                  sx={{ flexShrink: 0 }}
+                />
+              </Box>
+            ) : (
+              <Box sx={{ px: 2.5, py: 1.5 }}>
+                <Typography variant="body2" fontWeight={700} sx={{ mb: 0.25 }}>{cat.label}</Typography>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>{cat.desc}</Typography>
+                {cat.items.map(item => (
+                  <Box key={item.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}>
+                    <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                    <Switch
+                      size="small"
+                      checked={isEnabled(item.key)}
+                      onChange={() => toggle(item.key)}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
 // ── Notifications panel content ───────────────────────────────────────────────
 function NotificationsPanel({ onClose, onCountChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [notifs, setNotifs] = useState([]);
+  const [notifs,  setNotifs]  = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showPrefs, setShowPrefs] = useState(false);
+  const [prefs, setPrefs] = useState(loadPrefs);
 
   const load = () => {
     if (!user) return;
@@ -172,6 +383,14 @@ function NotificationsPanel({ onClose, onCountChange }) {
 
   useEffect(() => { load(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Sync prefs from localStorage whenever panel opens
+  useEffect(() => { setPrefs(loadPrefs()); }, []);
+
+  const visibleNotifs = notifs.filter(n => {
+    const stored = prefs[n.type];
+    return stored !== false;
+  });
+
   const handleMarkAllRead = () => {
     notificationsApi.markAllRead()
       .then(() => {
@@ -179,6 +398,24 @@ function NotificationsPanel({ onClose, onCountChange }) {
         if (onCountChange) onCountChange(0);
       })
       .catch(() => {});
+  };
+
+  const handleDeleteAll = () => {
+    notificationsApi.deleteAll()
+      .then(() => {
+        setNotifs([]);
+        if (onCountChange) onCountChange(0);
+      })
+      .catch(() => {});
+  };
+
+  const handleDelete = (id) => {
+    notificationsApi.delete(id).catch(() => {});
+    setNotifs(prev => {
+      const next = prev.filter(n => n.id !== id);
+      if (onCountChange) onCountChange(next.filter(n => !n.read).length);
+      return next;
+    });
   };
 
   const handleClick = (notif) => {
@@ -203,25 +440,36 @@ function NotificationsPanel({ onClose, onCountChange }) {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
+  if (showPrefs) {
+    return (
+      <PreferencesPanel
+        onBack={() => { setShowPrefs(false); setPrefs(loadPrefs()); }}
+        onClose={onClose}
+      />
+    );
+  }
+
   return (
     <Box sx={{ width: NOTIF_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <BellIcon fontSize="small" color="primary" />
+      <Box sx={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        px: 1.5, py: 1.5, flexShrink: 0,
+        boxShadow: '0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)',
+        zIndex: 1,
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pl: 1 }}>
           <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
           {unreadCount > 0 && (
             <Chip label={unreadCount} size="small" color="error" sx={{ height: 18, fontSize: '0.7rem' }} />
           )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {unreadCount > 0 && (
-            <Tooltip title="Mark all read">
-              <IconButton size="small" onClick={handleMarkAllRead} sx={{ color: 'text.secondary' }}>
-                <CheckIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
+          <Tooltip title="Notification preferences">
+            <IconButton size="small" onClick={() => setShowPrefs(true)} sx={{ color: 'text.secondary' }}>
+              <FilterListIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
           <IconButton size="small" onClick={onClose}>
             <CloseIcon fontSize="small" />
           </IconButton>
@@ -242,7 +490,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
               </Box>
             ))}
           </Box>
-        ) : notifs.length === 0 ? (
+        ) : visibleNotifs.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
             <CheckIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
             <Typography variant="body1" fontWeight={600}>All caught up!</Typography>
@@ -250,43 +498,46 @@ function NotificationsPanel({ onClose, onCountChange }) {
           </Box>
         ) : (
           <List disablePadding>
-            {notifs.map((notif, i) => (
+            {visibleNotifs.map((notif, i) => (
               <Box key={notif.id}>
                 {i > 0 && <Divider />}
-                <ListItem
-                  button
-                  onClick={() => handleClick(notif)}
-                  sx={{
-                    px: 2.5, py: 1.5,
-                    bgcolor: notif.read ? 'transparent' : 'action.hover',
-                    '&:hover': { bgcolor: 'action.selected' },
-                    alignItems: 'flex-start',
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36, mt: 0.25 }}>
-                    <NotifIcon type={notif.type} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <Typography variant="body2" fontWeight={notif.read ? 500 : 700} sx={{ flex: 1, mr: 1 }}>
-                          {notif.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, mt: 0.1 }}>
-                          {formatTime(notif.created_at)}
-                        </Typography>
-                      </Box>
-                    }
-                    secondary={notif.body ? (
-                      <Typography variant="caption" color="text.secondary">{notif.body}</Typography>
-                    ) : null}
-                  />
-                </ListItem>
+                <SwipeableNotifRow
+                  notif={notif}
+                  onDelete={handleDelete}
+                  onClick={handleClick}
+                  formatTime={formatTime}
+                />
               </Box>
             ))}
           </List>
         )}
       </Box>
+
+      {/* Bottom action buttons */}
+      {!loading && notifs.length > 0 && (
+        <Box sx={{ display: 'flex', gap: 1, p: 1.5, borderTop: 1, borderColor: 'divider', flexShrink: 0 }}>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            startIcon={<CheckIcon sx={{ fontSize: 16 }} />}
+            onClick={handleMarkAllRead}
+            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', borderColor: 'divider', color: 'text.primary', py: 1 }}
+          >
+            Mark as Read
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            size="small"
+            startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
+            onClick={handleDeleteAll}
+            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#eb445a', '&:hover': { bgcolor: '#c9374b' }, py: 1 }}
+          >
+            Delete All
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }

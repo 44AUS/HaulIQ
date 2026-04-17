@@ -293,6 +293,7 @@ export const notificationsApi = {
   markRead:   (id)  => request(`/api/notifications/${id}/read`, { method: 'PATCH' }),
   markAllRead:()    => request('/api/notifications/read-all', { method: 'PATCH' }),
   delete:     (id)  => request(`/api/notifications/${id}`, { method: 'DELETE' }),
+  deleteAll:  ()    => request('/api/notifications', { method: 'DELETE' }),
 };
 
 // ─── Lane Watches ─────────────────────────────────────────────────────────────
