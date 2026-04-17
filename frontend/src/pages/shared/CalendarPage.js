@@ -812,14 +812,14 @@ export default function CalendarPage() {
                   textTransform: 'none',
                   px: 2,
                   py: 0.55,
-                  color: 'text.secondary',
+                  color: 'rgba(255,255,255,0.55)',
                   '&.Mui-selected': {
                     bgcolor: 'background.paper',
-                    color: 'text.primary',
+                    color: '#fff',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
                     '&:hover': { bgcolor: 'background.paper' },
                   },
-                  '&:hover': { bgcolor: 'transparent' },
+                  '&:hover': { bgcolor: 'transparent', color: '#fff' },
                 },
               }}
             >
@@ -834,10 +834,10 @@ export default function CalendarPage() {
             onClick={() => setFilterOpen(true)}
             sx={{
               fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-              color: hasFilter ? 'primary.main' : 'text.secondary',
-              border: '1px solid', borderColor: hasFilter ? 'primary.main' : tabBorder,
-              borderRadius: 1, px: 1.5, py: 0.4, textTransform: 'uppercase',
-              '&:hover': { bgcolor: 'action.hover' },
+              bgcolor: hasFilter ? 'primary.main' : 'background.default',
+              color: '#fff',
+              borderRadius: '8px', px: 1.5, py: 0.55, textTransform: 'uppercase',
+              '&:hover': { bgcolor: hasFilter ? 'primary.dark' : 'background.paper', color: hasFilter ? '#fff' : 'text.primary' },
             }}>
             Filter
           </Button>
