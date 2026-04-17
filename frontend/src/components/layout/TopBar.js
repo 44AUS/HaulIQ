@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
   Divider, Badge, Tooltip, List,
-  Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
+  useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -460,11 +460,8 @@ function NotificationsPanel({ onClose, onCountChange }) {
         boxShadow: '0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)',
         zIndex: 1,
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pl: 1 }}>
+        <Box sx={{ pl: 1 }}>
           <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
-          {unreadCount > 0 && (
-            <Chip label={unreadCount} size="small" color="error" sx={{ height: 18, fontSize: '0.7rem' }} />
-          )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Notification preferences">
