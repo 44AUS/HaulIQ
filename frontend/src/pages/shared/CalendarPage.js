@@ -797,7 +797,7 @@ export default function CalendarPage() {
               onChange={(_, v) => v && setView(v)}
               size="small"
               sx={{
-                bgcolor: 'action.hover',
+                bgcolor: 'background.default',
                 borderRadius: '10px',
                 p: '3px',
                 gap: '2px',
