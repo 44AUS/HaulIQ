@@ -773,63 +773,77 @@ export default function CalendarPage() {
     <Box sx={{ p: '4px 6px', position: 'relative' }}>
       <Paper elevation={0} sx={{ borderRadius: '6px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', border: 'none' }}>
 
-        {/* ── Row 1: Month picker + View buttons ── */}
+        {/* ── Row 1: Month picker + View toggle (left) | Filter (right) ── */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5 }}>
-          {/* Month picker button */}
-          <Button
-            onClick={e => setPickerAnchor(e.currentTarget)}
-            endIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
-            sx={{ fontWeight: 700, fontSize: '1rem', textTransform: 'none', color: 'text.primary', px: 1, py: 0.5, borderRadius: '8px', '&:hover': { bgcolor: 'action.hover' } }}>
-            {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
-          </Button>
-          <MonthPickerPopover
-            anchorEl={pickerAnchor}
-            open={pickerOpen}
-            onClose={() => setPickerAnchor(null)}
-            date={date}
-            onSelect={d => { setDate(d); setView('month'); }}
-          />
+          {/* Left: month picker + view toggle side by side */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Button
+              onClick={e => setPickerAnchor(e.currentTarget)}
+              endIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
+              sx={{ fontWeight: 700, fontSize: '1rem', textTransform: 'none', color: 'text.primary', px: 1, py: 0.5, borderRadius: '8px', '&:hover': { bgcolor: 'action.hover' } }}>
+              {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
+            </Button>
+            <MonthPickerPopover
+              anchorEl={pickerAnchor}
+              open={pickerOpen}
+              onClose={() => setPickerAnchor(null)}
+              date={date}
+              onSelect={d => { setDate(d); setView('month'); }}
+            />
 
-          {/* View toggle */}
-          <ToggleButtonGroup
-            value={view}
-            exclusive
-            onChange={(_, v) => v && setView(v)}
-            size="small"
-            sx={{
-              bgcolor: 'action.hover',
-              borderRadius: '10px',
-              p: '3px',
-              gap: '2px',
-              '& .MuiToggleButtonGroup-grouped': {
-                border: '0 !important',
-                borderRadius: '8px !important',
-                mx: 0,
-              },
-              '& .MuiToggleButton-root': {
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                textTransform: 'none',
-                px: 2,
-                py: 0.55,
-                color: 'text.secondary',
-                '&.Mui-selected': {
-                  bgcolor: 'background.paper',
-                  color: 'text.primary',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
-                  '&:hover': { bgcolor: 'background.paper' },
+            <ToggleButtonGroup
+              value={view}
+              exclusive
+              onChange={(_, v) => v && setView(v)}
+              size="small"
+              sx={{
+                bgcolor: 'action.hover',
+                borderRadius: '10px',
+                p: '3px',
+                gap: '2px',
+                '& .MuiToggleButtonGroup-grouped': {
+                  border: '0 !important',
+                  borderRadius: '8px !important',
+                  mx: 0,
                 },
-                '&:hover': { bgcolor: 'transparent' },
-              },
-            }}
-          >
-            {VIEW_OPTIONS.map(({ value, label }) => (
-              <ToggleButton key={value} value={value} disableRipple>{label}</ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+                '& .MuiToggleButton-root': {
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  px: 2,
+                  py: 0.55,
+                  color: 'text.secondary',
+                  '&.Mui-selected': {
+                    bgcolor: 'background.paper',
+                    color: 'text.primary',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+                    '&:hover': { bgcolor: 'background.paper' },
+                  },
+                  '&:hover': { bgcolor: 'transparent' },
+                },
+              }}
+            >
+              {VIEW_OPTIONS.map(({ value, label }) => (
+                <ToggleButton key={value} value={value} disableRipple>{label}</ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Box>
+
+          {/* Right: filter button */}
+          <Button size="small" startIcon={<FilterListIcon sx={{ fontSize: 15 }} />}
+            onClick={() => setFilterOpen(true)}
+            sx={{
+              fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
+              color: hasFilter ? 'primary.main' : 'text.secondary',
+              border: '1px solid', borderColor: hasFilter ? 'primary.main' : tabBorder,
+              borderRadius: 1, px: 1.5, py: 0.4, textTransform: 'uppercase',
+              '&:hover': { bgcolor: 'action.hover' },
+            }}>
+            Filter
+          </Button>
         </Box>
 
-        {/* ── Row 2: Nav arrows + Assigned + Filter + Revenue ── */}
+        {/* ── Row 2: Nav arrows + Assigned + Revenue ── */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
           {/* Left: arrows + assigned */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -852,27 +866,14 @@ export default function CalendarPage() {
             )}
           </Box>
 
-          {/* Right: filter + revenue */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-            <Button size="small" startIcon={<FilterListIcon sx={{ fontSize: 15 }} />}
-              onClick={() => setFilterOpen(true)}
-              sx={{
-                fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-                color: hasFilter ? 'primary.main' : 'text.secondary',
-                border: '1px solid', borderColor: hasFilter ? 'primary.main' : tabBorder,
-                borderRadius: 1, px: 1.5, py: 0.4, textTransform: 'uppercase',
-                '&:hover': { bgcolor: 'action.hover' },
-              }}>
-              Filter
-            </Button>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
-                {MONTH_FULL[date.getMonth()]}
-              </Typography>
-              <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: '#2dd36f', lineHeight: 1.2 }}>
-                ${monthRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </Typography>
-            </Box>
+          {/* Right: revenue */}
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>
+              {MONTH_FULL[date.getMonth()]}
+            </Typography>
+            <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: '#2dd36f', lineHeight: 1.2 }}>
+              ${monthRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </Typography>
           </Box>
         </Box>
 
