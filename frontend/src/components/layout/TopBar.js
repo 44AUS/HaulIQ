@@ -810,6 +810,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
       },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
+    const displayTitle = immersiveMode === 'profile' && user?.name ? user.name : config.title;
     const hasTabs = config.tabs.length > 0;
     const defaultTab = hasTabs ? config.tabs[0].key : null;
     const activeTab = searchParams.get('tab') || defaultTab;
@@ -839,7 +840,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
               <ChevronLeftIcon sx={{ fontSize: 26 }} />
             </IconButton>
             <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap', ml: 1, color: '#fff' }}>
-              {config.title}
+              {displayTitle}
             </Typography>
 
             <Box sx={{ flex: 1 }} />
