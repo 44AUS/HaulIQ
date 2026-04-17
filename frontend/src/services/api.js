@@ -343,5 +343,12 @@ export const driverApi = {
   earnings:     ()            => request('/api/driver/earnings'),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi, driversApi, driverApi };
+// ─── Profile Documents ────────────────────────────────────────────────────────
+export const profileDocumentsApi = {
+  list:   ()         => request('/api/profile-documents'),
+  upload: (data)     => request('/api/profile-documents', { method: 'POST', body: JSON.stringify(data) }),
+  delete: (id)       => request(`/api/profile-documents/${id}`, { method: 'DELETE' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi, driversApi, driverApi, profileDocumentsApi };
 export default api;

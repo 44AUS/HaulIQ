@@ -13,6 +13,7 @@ const ANALYTICS_PATHS = ['/carrier/analytics',  '/broker/analytics'];
 const TOOLS_PATHS     = ['/carrier/tools'];
 const DRIVERS_PATHS   = ['/carrier/drivers'];
 const PREFERENCES_PATHS = ['/preferences'];
+const PROFILE_PATHS     = ['/profile'];
 const COMPACT_PADDING_PATHS = [
   '/carrier/calendar', '/broker/calendar',
   '/carrier/loads', '/broker/loads', '/driver/loads',
@@ -41,6 +42,7 @@ export default function DashboardLayout({ children }) {
     : TOOLS_PATHS.includes(location.pathname)     ? 'tools'
     : DRIVERS_PATHS.includes(location.pathname)     ? 'drivers'
     : PREFERENCES_PATHS.includes(location.pathname) ? 'preferences'
+    : PROFILE_PATHS.includes(location.pathname) ? 'profile'
     : isLoadDetail(location.pathname) ? 'load_detail'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);

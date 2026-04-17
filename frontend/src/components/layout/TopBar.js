@@ -788,6 +788,17 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'support',       label: 'Support' },
         ],
       },
+      profile: {
+        title: 'Manage Profile',
+        tabs: [
+          { key: 'overview',   label: 'Overview' },
+          { key: 'earnings',   label: 'Earnings' },
+          { key: 'documents',  label: 'Documents' },
+          { key: 'businesses', label: 'Businesses' },
+          { key: 'time_off',   label: 'Time Off' },
+          { key: 'metadata',   label: 'Metadata' },
+        ],
+      },
       load_detail: {
         title: 'Load Details',
         tabs: [

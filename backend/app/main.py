@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact, rate_confirmation, notifications, lane_watches, load_templates, drivers, driver_invite, driver_loads
+from app.routers import auth, loads, brokers, subscriptions, analytics, admin, payments, messages, bids, bookings, instant_book, carrier_reviews, network, waitlist, locations, blocks, documents, my_documents, freight_payments, search, calendar, truck_posts, equipment_types, equipment_classes, contact, rate_confirmation, notifications, lane_watches, load_templates, drivers, driver_invite, driver_loads, profile_documents
 from app.models import carrier_review as _carrier_review_model  # noqa: ensure table is registered
 from app.models import truck_post as _truck_post_model  # noqa: ensure table is registered
 from app.models import network as _network_model  # noqa: ensure table is registered
@@ -22,6 +22,7 @@ from app.models import notification as _notification_model  # noqa: ensure table
 from app.models import lane_watch as _lane_watch_model  # noqa: ensure table is registered
 from app.models import load_template as _load_template_model  # noqa: ensure table is registered
 from app.models import driver_location as _driver_location_model  # noqa: ensure table is registered
+from app.models import profile_document as _profile_document_model  # noqa: ensure table is registered
 
 settings = get_settings()
 
@@ -154,6 +155,7 @@ app.include_router(load_templates.router,    prefix="/api/load-templates",     t
 app.include_router(drivers.router,           prefix="/api/drivers",             tags=["Drivers"])
 app.include_router(driver_invite.router,     prefix="/api/driver-invite",       tags=["Driver Invite"])
 app.include_router(driver_loads.router,      prefix="/api/driver",              tags=["Driver"])
+app.include_router(profile_documents.router, prefix="/api/profile-documents",   tags=["Profile Documents"])
 
 
 # ─── Health check ─────────────────────────────────────────────────────────────
