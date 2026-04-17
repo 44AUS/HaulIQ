@@ -160,11 +160,12 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
       <Button size="small" endIcon={<ExpandMoreIcon sx={{ fontSize: 15 }} />}
         onClick={handleOpen}
         sx={{
-          fontSize: '0.78rem', fontWeight: 600, textTransform: 'none',
-          color: selectedDrivers.length > 0 ? 'primary.main' : 'text.secondary',
-          border: '1px solid', borderColor: selectedDrivers.length > 0 ? 'primary.main' : 'divider',
-          borderRadius: '8px', px: 1.5, py: 0.5,
-          '&:hover': { bgcolor: 'action.hover' },
+          fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+          bgcolor: selectedDrivers.length > 0 ? 'primary.main' : 'background.default',
+          color: '#fff',
+          borderRadius: '8px', px: 1.5, py: 0.55,
+          boxShadow: '0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12)',
+          '&:hover': { bgcolor: selectedDrivers.length > 0 ? 'primary.dark' : 'background.paper', color: selectedDrivers.length > 0 ? '#fff' : 'text.primary' },
         }}>
         {label}
       </Button>
@@ -836,6 +837,7 @@ export default function CalendarPage() {
               bgcolor: hasFilter ? 'primary.main' : 'background.default',
               color: '#fff',
               borderRadius: '8px', px: 1.5, py: 0.55, textTransform: 'uppercase',
+              boxShadow: '0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12)',
               '&:hover': { bgcolor: hasFilter ? 'primary.dark' : 'background.paper', color: hasFilter ? '#fff' : 'text.primary' },
             }}>
             Filter
