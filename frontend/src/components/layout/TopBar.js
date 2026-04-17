@@ -233,15 +233,17 @@ function SwipeableNotifRow({ notif, onDelete, onClick, formatTime }) {
 
   return (
     <Box ref={ref} sx={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Red delete background */}
-      <Box sx={{
-        position: 'absolute', right: 0, top: 0, bottom: 0, width: 80,
-        bgcolor: '#eb445a', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <IconButton size="small" onClick={() => onDelete(notif.id)} sx={{ color: '#fff' }}>
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Box>
+      {/* Red delete background — only visible when swiped */}
+      {offset < 0 && (
+        <Box sx={{
+          position: 'absolute', right: 0, top: 0, bottom: 0, width: 80,
+          bgcolor: '#eb445a', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <IconButton size="small" onClick={() => onDelete(notif.id)} sx={{ color: '#fff' }}>
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      )}
 
       {/* Notification content */}
       <Box
@@ -518,11 +520,11 @@ function NotificationsPanel({ onClose, onCountChange }) {
         <Box sx={{ display: 'flex', gap: 1, p: 1.5, borderTop: 1, borderColor: 'divider', flexShrink: 0 }}>
           <Button
             fullWidth
-            variant="outlined"
+            variant="contained"
             size="small"
             startIcon={<CheckIcon sx={{ fontSize: 16 }} />}
             onClick={handleMarkAllRead}
-            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', borderColor: 'divider', color: 'text.primary', py: 1 }}
+            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#fff', color: '#000', '&:hover': { bgcolor: '#f0f0f0' }, py: 1, boxShadow: 'none' }}
           >
             Mark as Read
           </Button>
@@ -532,7 +534,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
             size="small"
             startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
             onClick={handleDeleteAll}
-            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#eb445a', '&:hover': { bgcolor: '#c9374b' }, py: 1 }}
+            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#eb445a', '&:hover': { bgcolor: '#c9374b' }, py: 1, boxShadow: 'none' }}
           >
             Delete All
           </Button>
