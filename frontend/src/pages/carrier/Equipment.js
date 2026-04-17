@@ -200,10 +200,6 @@ export default function Equipment() {
             Post your available trucks so brokers can find and contact you.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}
-          sx={{ fontWeight: 700, borderRadius: '8px', px: 2.5 }}>
-          Post Truck
-        </Button>
       </Box>
 
       {/* ── Tab bar ── */}
@@ -356,6 +352,14 @@ export default function Equipment() {
             </Table>
           </TableContainer>
         )}
+      </Box>
+
+      {/* ── Post Truck button ── */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
+        <Button variant="contained" startIcon={<AddIcon sx={{ fontSize: 17 }} />} onClick={openCreate}
+          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+          Post Truck
+        </Button>
       </Box>
 
     </Box>

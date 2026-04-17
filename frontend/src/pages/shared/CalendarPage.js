@@ -17,6 +17,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
 import TrafficIcon from '@mui/icons-material/Traffic';
 import LayersIcon from '@mui/icons-material/Layers';
+import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
 
@@ -910,6 +911,16 @@ export default function CalendarPage() {
         onApply={() => { setAppliedFilters({ ...filters }); setFilterOpen(false); }}
         onClear={() => { setFilters({ status: 'All' }); setAppliedFilters({ status: 'All' }); setFilterOpen(false); }}
       />
+
+      {/* ── Find Loads button (carrier only) ── */}
+      {user?.role === 'carrier' && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
+          <Button variant="contained" startIcon={<SearchIcon sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
+            sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+            Find Loads
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }

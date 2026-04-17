@@ -9,7 +9,7 @@ import {
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -588,11 +588,11 @@ export default function LoadManager() {
         )}
       </Box>
 
-      {/* ── ADD button ── */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2, flexShrink: 0 }}>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/carrier/loads')}
-          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 3.5, py: 1.25, borderRadius: '8px', fontSize: '0.9rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
-          ADD
+      {/* ── Find Loads button ── */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
+        <Button variant="contained" startIcon={<SearchIcon sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
+          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+          Find Loads
         </Button>
       </Box>
 
