@@ -429,7 +429,6 @@ function NotificationsPanel({ onClose, onCountChange }) {
     onClose();
   };
 
-  const unreadCount = notifs.filter(n => !n.read).length;
 
   const formatTime = (iso) => {
     if (!iso) return '';
