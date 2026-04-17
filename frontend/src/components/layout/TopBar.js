@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
-  Divider, Badge, Tooltip, List, ListItem, ListItemIcon, ListItemText,
+  Divider, Badge, Tooltip, List,
   Chip, useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
 } from '@mui/material';
 import {
