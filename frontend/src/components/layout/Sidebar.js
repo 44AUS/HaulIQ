@@ -494,7 +494,7 @@ function SidebarContent({ onNavigate, onClose }) {
           </Typography>
         </Box>
         {[
-          { icon: BusinessIcon,      label: 'Manage Business', action: () => { navigate('/settings'); setBizAnchor(null); } },
+          { icon: BusinessIcon,      label: 'Manage Business', action: () => { navigate('/business'); setBizAnchor(null); } },
           { icon: SwitchAccountIcon, label: 'Switch Business', action: () => setBizAnchor(null) },
           { icon: AddBusinessIcon,   label: 'Add a business',  action: () => setBizAnchor(null) },
         ].map(({ icon: Icon, label, action }, i, arr) => (

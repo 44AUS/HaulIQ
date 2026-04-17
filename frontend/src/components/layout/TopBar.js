@@ -788,6 +788,13 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
           { key: 'support',       label: 'Support' },
         ],
       },
+      business: {
+        title: 'Manage Business',
+        tabs: [
+          { key: 'overview',  label: 'Overview' },
+          { key: 'metadata',  label: 'Metadata' },
+        ],
+      },
       profile: {
         title: 'Manage Profile',
         tabs: [
@@ -810,7 +817,11 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
       },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
-    const displayTitle = immersiveMode === 'profile' && user?.name ? user.name : config.title;
+    const displayTitle = immersiveMode === 'profile' && user?.name
+      ? user.name
+      : immersiveMode === 'business' && user?.company
+      ? user.company
+      : config.title;
     const hasTabs = config.tabs.length > 0;
     const defaultTab = hasTabs ? config.tabs[0].key : null;
     const activeTab = searchParams.get('tab') || defaultTab;
