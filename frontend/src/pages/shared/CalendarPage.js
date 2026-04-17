@@ -770,7 +770,7 @@ export default function CalendarPage() {
   const hasFilter = appliedFilters.status !== 'All';
 
   return (
-    <Box sx={{ p: '4px 6px' }}>
+    <Box sx={{ p: '4px 6px', position: 'relative' }}>
       <Paper elevation={0} sx={{ borderRadius: '6px', overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', border: 'none' }}>
 
         {/* ── Row 1: Month picker + View buttons ── */}
@@ -912,11 +912,11 @@ export default function CalendarPage() {
         onClear={() => { setFilters({ status: 'All' }); setAppliedFilters({ status: 'All' }); setFilterOpen(false); }}
       />
 
-      {/* ── Find Loads button (carrier only) ── */}
+      {/* ── Find Loads FAB (carrier only) ── */}
       {user?.role === 'carrier' && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
+        <Box sx={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
           <Button variant="contained" startIcon={<SearchIcon sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
-            sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+            sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 6px 20px rgba(0,0,0,0.3)' }}>
             Find Loads
           </Button>
         </Box>
