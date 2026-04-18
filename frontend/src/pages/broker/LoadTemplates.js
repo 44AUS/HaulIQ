@@ -5,11 +5,9 @@ import {
   CircularProgress, Divider, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField,
 } from '@mui/material';
-import LayersIcon from '@mui/icons-material/Layers';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReplayIcon from '@mui/icons-material/Replay';
-import EditIcon from '@mui/icons-material/Edit';
 import { loadTemplatesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 export default function LoadTemplates() {
   const navigate = useNavigate();
@@ -55,7 +53,7 @@ export default function LoadTemplates() {
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box>
           <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LayersIcon color="primary" /> Load Templates
+            <IonIcon name="layers-outline" color="primary" /> Load Templates
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Re-post recurring lanes in seconds — no re-entry needed.
@@ -74,7 +72,7 @@ export default function LoadTemplates() {
         </Box>
       ) : templates.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-          <LayersIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+          <IonIcon name="layers-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
           <Typography variant="h6" fontWeight={600} gutterBottom>No templates yet</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             When posting a load, click "Save as Template" to add it here.
@@ -106,7 +104,7 @@ export default function LoadTemplates() {
                   <Button
                     size="small"
                     variant="contained"
-                    startIcon={<ReplayIcon />}
+                    startIcon={<IonIcon name="reload-outline" />}
                     onClick={() => handleUseTemplate(t)}
                   >
                     Re-post
@@ -117,14 +115,14 @@ export default function LoadTemplates() {
                     title="Rename"
                     sx={{ color: 'text.secondary' }}
                   >
-                    <EditIcon fontSize="small" />
+                    <IonIcon name="create-outline" fontSize="small" />
                   </IconButton>
                   <IconButton
                     size="small"
                     onClick={() => handleDelete(t.id)}
                     sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}
                   >
-                    <DeleteIcon fontSize="small" />
+                    <IonIcon name="trash-outline" fontSize="small" />
                   </IconButton>
                 </Box>
               </Box>

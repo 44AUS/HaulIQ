@@ -5,31 +5,15 @@ import {
   Box, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
   Avatar, IconButton, TextField, CircularProgress, Button, Paper,
 } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DoneIcon from '@mui/icons-material/Done';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import Tooltip from '@mui/material/Tooltip';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import BlockIcon from '@mui/icons-material/Block';
-import GppBadIcon from '@mui/icons-material/GppBad';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
-import DescriptionIcon from '@mui/icons-material/Description';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Chip from '@mui/material/Chip';
+import IonIcon from '../../components/IonIcon';
+
 
 function parseSpecial(body) {
   try {
@@ -68,14 +52,14 @@ function LocationRequestCard({ data, isMe, onShare }) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <NavigationIcon sx={{ fontSize: 14, color: 'primary.light' }} />
+        <IonIcon name="navigate-outline" sx={{ fontSize: 14, color: 'primary.light' }} />
         <Typography variant="body2" fontWeight={600} color="text.primary">Location Requested</Typography>
       </Box>
       <Typography variant="caption" display="block" sx={{ mb: 1.5, color: isMe ? 'rgba(255,255,255,0.75)' : 'text.secondary' }}>
         {isMe ? 'You asked the carrier to share their location.' : 'The broker is asking for your current location.'}
       </Typography>
       {!isMe && (
-        <Button variant="contained" size="small" fullWidth startIcon={<LocationOnIcon />} onClick={() => onShare(data.booking_id)} sx={{ fontSize: 11 }}>
+        <Button variant="contained" size="small" fullWidth startIcon={<IonIcon name="location-outline" />} onClick={() => onShare(data.booking_id)} sx={{ fontSize: 11 }}>
           Share My Location
         </Button>
       )}
@@ -96,7 +80,7 @@ function LocationShareCard({ data, isMe }) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <LocationOnIcon sx={{ fontSize: 14, color: 'success.main' }} />
+        <IonIcon name="location-outline" sx={{ fontSize: 14, color: 'success.main' }} />
         <Typography variant="body2" fontWeight={600} color="text.primary">Location Shared</Typography>
       </Box>
       <Typography variant="body2" sx={{ mb: 1.5 }}>
@@ -107,7 +91,7 @@ function LocationShareCard({ data, isMe }) {
         <Button
           component={Link}
           to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
-          variant="contained" size="small" fullWidth startIcon={<LocationOnIcon />} color="success" sx={{ fontSize: 11 }}
+          variant="contained" size="small" fullWidth startIcon={<IonIcon name="location-outline" />} color="success" sx={{ fontSize: 11 }}
         >
           View Map
         </Button>
@@ -131,7 +115,7 @@ function DocUploadCard({ data, isMe, onView, isDeleted }) {
       opacity: isDeleted ? 0.75 : 1,
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-        <DescriptionIcon sx={{ fontSize: 14, color: isDeleted ? 'error.main' : 'primary.light' }} />
+        <IonIcon name="document-text-outline" sx={{ fontSize: 14, color: isDeleted ? 'error.main' : 'primary.light' }} />
         <Typography variant="body2" fontWeight={600} color={isDeleted ? 'error.main' : 'text.primary'}>
           {isDeleted ? 'Document Deleted' : 'Document Uploaded'}
         </Typography>
@@ -145,7 +129,7 @@ function DocUploadCard({ data, isMe, onView, isDeleted }) {
         {data.uploader_name} · {data.uploader_role}
       </Typography>
       {!isDeleted && (
-        <Button variant="contained" size="small" fullWidth startIcon={<DescriptionIcon />} onClick={onView} sx={{ fontSize: 11 }}>
+        <Button variant="contained" size="small" fullWidth startIcon={<IonIcon name="document-text-outline" />} onClick={onView} sx={{ fontSize: 11 }}>
           View Document
         </Button>
       )}
@@ -165,7 +149,7 @@ function DocViewer({ doc, onClose }) {
         {doc.page_count > 1 && (
           <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>{page + 1} / {doc.page_count}</Typography>
         )}
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
       <DialogContent sx={{ p: 0 }}>
         <Box sx={{ position: 'relative', bgcolor: '#111' }}>
@@ -175,11 +159,11 @@ function DocViewer({ doc, onClose }) {
             <Box sx={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 1 }}>
               <IconButton size="small" disabled={page === 0} onClick={() => setPage(p => p - 1)}
                 sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                <NavigateBeforeIcon />
+                <IonIcon name="chevron-back-outline" />
               </IconButton>
               <IconButton size="small" disabled={page >= doc.page_count - 1} onClick={() => setPage(p => p + 1)}
                 sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                <NavigateNextIcon />
+                <IonIcon name="chevron-forward-outline" />
               </IconButton>
             </Box>
           )}
@@ -210,14 +194,14 @@ function LoadDocsModal({ loadId, onClose, onView }) {
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.5 }}>
-        <FolderOpenIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+        <IonIcon name="folder-open-outline" sx={{ fontSize: 18, color: 'primary.main' }} />
         <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
           Load Documents
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
           Load #{String(loadId).slice(0, 8)}
         </Typography>
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
       <DialogContent sx={{ pb: 2 }}>
         {loadingDocs ? (
@@ -226,7 +210,7 @@ function LoadDocsModal({ loadId, onClose, onView }) {
           </Box>
         ) : docs.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 4 }}>
-            <DescriptionIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+            <IonIcon name="document-text-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
             <Typography variant="body2" color="text.secondary">No documents uploaded for this load yet.</Typography>
           </Box>
         ) : (
@@ -235,7 +219,7 @@ function LoadDocsModal({ loadId, onClose, onView }) {
               const label = (doc.doc_type || 'other').replace('_', ' ').toUpperCase();
               return (
                 <Box key={doc.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: 1, borderColor: 'divider' }}>
-                  <DescriptionIcon sx={{ fontSize: 22, color: 'primary.light', flexShrink: 0 }} />
+                  <IonIcon name="document-text-outline" sx={{ fontSize: 22, color: 'primary.light', flexShrink: 0 }} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={600} noWrap>{doc.file_name}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
@@ -554,7 +538,7 @@ export default function Messages() {
       >
         {/* Header */}
         <Box sx={{ px: 2, py: 1.75, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ChatBubbleOutlineIcon sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
+          <IonIcon name="chatbubble-outline" sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
           <Typography variant="subtitle1" fontWeight={700} sx={{ flex: 1 }}>Message Center</Typography>
         </Box>
 
@@ -562,7 +546,7 @@ export default function Messages() {
         {user?.role !== 'driver' && (
           <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
             <Button
-              fullWidth variant="contained" size="small" startIcon={<EditNoteIcon />}
+              fullWidth variant="contained" size="small" startIcon={<IonIcon name="create-outline" />}
               onClick={() => setComposing(v => !v)}
               sx={{ fontWeight: 700, letterSpacing: 0.5, fontSize: '0.78rem' }}
             >
@@ -577,13 +561,13 @@ export default function Messages() {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <Typography variant="caption" fontWeight={600} sx={{ flex: 1 }}>New Message</Typography>
               <IconButton size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
-                <CloseIcon sx={{ fontSize: 14 }} />
+                <IonIcon name="close-outline" sx={{ fontSize: 14 }} />
               </IconButton>
             </Box>
             <TextField
               size="small" fullWidth placeholder="Search your network..." value={networkQuery}
               onChange={e => setNetworkQuery(e.target.value)} autoFocus
-              InputProps={{ startAdornment: <SearchIcon sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
+              InputProps={{ startAdornment: <IonIcon name="search-outline" sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
               sx={{ mb: 1, '& .MuiInputBase-input': { fontSize: 12 } }}
             />
             {filteredNetwork.length === 0 ? (
@@ -614,7 +598,7 @@ export default function Messages() {
             </Box>
           ) : conversations.length === 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
-              <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
               {user?.role === 'driver' && user?.carrier_id ? (
                 <Button
@@ -667,7 +651,7 @@ export default function Messages() {
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
-                          {c.is_blocked_by_me && <BlockIcon sx={{ fontSize: 10, color: 'error.main' }} />}
+                          {c.is_blocked_by_me && <IonIcon name="ban-outline" sx={{ fontSize: 10, color: 'error.main' }} />}
                           {c.load_id
                             ? <Typography variant="body2" fontWeight={unread ? 700 : 600} noWrap color="text.primary">LOAD #{c.load_id.slice(0, 8).toUpperCase()}</Typography>
                             : <Typography variant="body2" fontWeight={unread ? 700 : 500} noWrap color="text.primary">{label}</Typography>
@@ -720,7 +704,7 @@ export default function Messages() {
           {/* Chat header */}
           <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <IconButton size="small" onClick={() => setActiveConvoId(null)} sx={{ display: { md: 'none' } }}>
-              <ArrowBackIcon fontSize="small" />
+              <IonIcon name="arrow-back-outline" fontSize="small" />
             </IconButton>
             {otherParty && (
               <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0, position: 'relative' }}>
@@ -749,7 +733,7 @@ export default function Messages() {
             </Box>
             {user?.role === 'broker' && activeConvo.active_booking_id && (
               <Button component={Link} to={`/broker/track/${activeConvo.active_booking_id}`}
-                variant="outlined" size="small" color="success" startIcon={<NavigationIcon />} sx={{ fontSize: 11, flexShrink: 0 }}>
+                variant="outlined" size="small" color="success" startIcon={<IonIcon name="navigate-outline" />} sx={{ fontSize: 11, flexShrink: 0 }}>
                 Locate Load
               </Button>
             )}
@@ -762,7 +746,7 @@ export default function Messages() {
                   sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
                   onClick={e => e.stopPropagation()}
                 >
-                  <LocalShippingIcon sx={{ fontSize: 18 }} />
+                  <IonIcon name="car-sport-outline" sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
             )}
@@ -773,7 +757,7 @@ export default function Messages() {
                   sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
                   onClick={() => setDocsModalLoadId(activeConvo.load_id)}
                 >
-                  <FolderOpenIcon sx={{ fontSize: 18 }} />
+                  <IonIcon name="folder-open-outline" sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
             )}
@@ -783,13 +767,13 @@ export default function Messages() {
               sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'error.main' } }}
               onClick={(e) => handleDeleteConvo(e, activeConvoId)}
             >
-              <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+              <IonIcon name="trash-outline" sx={{ fontSize: 18 }} />
             </IconButton>
             {otherParty && (
               <IconButton size="small" onClick={() => handleToggleBlock(otherParty.id)} disabled={blockLoading}
                 title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
                 sx={{ flexShrink: 0, color: activeConvo.is_blocked_by_me ? 'error.main' : 'text.disabled', '&:hover': { color: 'error.main' } }}>
-                {blockLoading ? <CircularProgress size={14} color="inherit" /> : activeConvo.is_blocked_by_me ? <GppBadIcon sx={{ fontSize: 18 }} /> : <BlockIcon sx={{ fontSize: 18 }} />}
+                {blockLoading ? <CircularProgress size={14} color="inherit" /> : activeConvo.is_blocked_by_me ? <IonIcon name="shield-outline" sx={{ fontSize: 18 }} /> : <IonIcon name="ban-outline" sx={{ fontSize: 18 }} />}
               </IconButton>
             )}
           </Box>
@@ -797,7 +781,7 @@ export default function Messages() {
           {/* Blocked notice */}
           {activeConvo.is_blocked_by_me && (
             <Box sx={{ mx: 2, mt: 1.5, px: 2, py: 1, borderRadius: 2, bgcolor: 'error.dark', border: 1, borderColor: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-              <BlockIcon sx={{ fontSize: 14, color: 'error.light' }} />
+              <IonIcon name="ban-outline" sx={{ fontSize: 14, color: 'error.light' }} />
               <Typography variant="caption" color="error.light">You have blocked this user. They can no longer message you.</Typography>
             </Box>
           )}
@@ -849,7 +833,7 @@ export default function Messages() {
                       <Typography variant="caption" sx={{ fontSize: 10, color: isMe ? 'rgba(255,255,255,0.6)' : 'text.disabled' }}>
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </Typography>
-                      {isMe && (msg.is_read ? <DoneAllIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }} /> : <DoneIcon sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />)}
+                      {isMe && (msg.is_read ? <IonIcon name="checkmark-done-outline" sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }} /> : <IonIcon name="checkmark-outline" sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />)}
                     </Box>
                   </Box>
                   {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
@@ -870,14 +854,14 @@ export default function Messages() {
             />
             <IconButton color="primary" onClick={handleSend} disabled={!input.trim() || activeConvo.is_blocked_by_me}
               sx={{ bgcolor: 'primary.main', color: '#fff', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' }, '&:disabled': { bgcolor: 'action.disabledBackground' } }}>
-              <SendIcon fontSize="small" />
+              <IonIcon name="send-outline" fontSize="small" />
             </IconButton>
           </Box>
         </Box>
       ) : (
         <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Box sx={{ textAlign: 'center' }}>
-            <ChatBubbleOutlineIcon sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
+            <IonIcon name="chatbubble-outline" sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
             <Typography variant="body2" color="text.secondary">Select a conversation</Typography>
             <Typography variant="caption" color="text.disabled">or use New Message to start one</Typography>
           </Box>

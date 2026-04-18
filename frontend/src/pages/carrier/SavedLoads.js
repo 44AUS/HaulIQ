@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Grid, Card, CardContent, Alert, Skeleton
 } from '@mui/material';
-import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
+import IonIcon from '../../components/IonIcon';
+
 
 export default function SavedLoads() {
   const [loads, setLoads] = useState([]);
@@ -24,7 +25,7 @@ export default function SavedLoads() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <BookmarkAddedIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+          <IonIcon name="bookmark-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
           <Typography variant="h5" fontWeight={700}>Saved Loads</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -51,7 +52,7 @@ export default function SavedLoads() {
       ) : loads.length === 0 ? (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 10 }}>
-            <BookmarkAddedIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+            <IonIcon name="bookmark-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
             <Typography variant="body1" color="text.secondary" gutterBottom>
               No saved loads yet.
             </Typography>

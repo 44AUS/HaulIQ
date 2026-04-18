@@ -6,13 +6,10 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, Divider,
   TextField, InputAdornment, IconButton, Alert, Tooltip, Skeleton, Grid,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import RemoveIcon from '@mui/icons-material/Remove';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
+import IonIcon from '../../components/IonIcon';
+
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -167,8 +164,8 @@ const FEATURE_TABLE = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function FeatureValue({ val }) {
-  if (val === true)  return <CheckIcon sx={{ fontSize: 16, color: 'success.main' }} />;
-  if (val === false) return <RemoveIcon sx={{ fontSize: 16, color: 'text.disabled' }} />;
+  if (val === true)  return <IonIcon name="checkmark-outline" sx={{ fontSize: 16, color: 'success.main' }} />;
+  if (val === false) return <IonIcon name="remove-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />;
   return <Typography variant="body2" fontWeight={600}>{val}</Typography>;
 }
 
@@ -229,7 +226,7 @@ function PlanCard({ plan, billing, currentKey, onActivate, activating }) {
         </Typography>
         {plan.features.map(f => (
           <Box key={f} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-            <CheckIcon sx={{ fontSize: 15, color: 'text.secondary', mt: '2px', flexShrink: 0 }} />
+            <IonIcon name="checkmark-outline" sx={{ fontSize: 15, color: 'text.secondary', mt: '2px', flexShrink: 0 }} />
             <Typography variant="body2" color="text.secondary">{f}</Typography>
           </Box>
         ))}
@@ -289,7 +286,7 @@ function ReferralsTab({ user, currentSub }) {
           <Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
               <Typography variant="caption" fontWeight={600} color="text.secondary">Referral Link</Typography>
-              <InfoOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+              <IonIcon name="information-circle-outline" sx={{ fontSize: 14, color: 'text.disabled' }} />
             </Box>
 
             {hasActivePlan ? (
@@ -305,7 +302,7 @@ function ReferralsTab({ user, currentSub }) {
                       <InputAdornment position="end">
                         <Tooltip title={copied ? 'Copied!' : 'Copy link'}>
                           <IconButton onClick={copy} size="small" color={copied ? 'success' : 'default'}>
-                            <ContentCopyIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="copy-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         </Tooltip>
                       </InputAdornment>
@@ -524,7 +521,7 @@ export default function Billing() {
                         {user?.company || user?.name}
                       </Typography>
                     </Box>
-                    <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
+                    <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
                   </Box>
                 </Paper>
               </Box>

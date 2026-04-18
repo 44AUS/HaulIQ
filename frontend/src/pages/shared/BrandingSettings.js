@@ -3,12 +3,10 @@ import {
   Box, Typography, Card, CardContent, IconButton, Button,
   Divider, Paper, Tooltip,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import PaletteIcon from '@mui/icons-material/Palette';
 import { useThemeMode } from '../../context/ThemeContext';
 import { authApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const PRESET_COLORS = [
   '#0D1B2A', '#1565C0', '#1B5E20', '#4A148C',
@@ -37,7 +35,7 @@ export default function BrandingSettings({ embedded = false }) {
       {!embedded && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
           <IconButton size="small" onClick={() => navigate('/preferences')}>
-            <ArrowBackIcon fontSize="small" />
+            <IonIcon name="arrow-back-outline" fontSize="small" />
           </IconButton>
           <Typography variant="h5" fontWeight={700}>Branding</Typography>
         </Box>
@@ -51,12 +49,12 @@ export default function BrandingSettings({ embedded = false }) {
         {/* Logo/Icon row (mock) */}
         <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '14px !important', cursor: 'default' }}>
           <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <PaletteIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+            <IonIcon name="color-palette-outline" sx={{ fontSize: 18, color: 'text.disabled' }} />
           </Box>
           <Typography variant="body2" fontWeight={600} sx={{ flex: 1 }}>Logo / Icon</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="caption" color="text.disabled">Coming soon</Typography>
-            <ChevronRightIcon sx={{ color: 'text.disabled', fontSize: 18 }} />
+            <IonIcon name="chevron-forward-outline" sx={{ color: 'text.disabled', fontSize: 18 }} />
           </Box>
         </CardContent>
 
@@ -169,7 +167,7 @@ export default function BrandingSettings({ embedded = false }) {
       {/* Reset */}
       <Button
         variant="outlined"
-        startIcon={<RestartAltIcon />}
+        startIcon={<IonIcon name="reload-outline" />}
         onClick={handleReset}
         color="inherit"
       >

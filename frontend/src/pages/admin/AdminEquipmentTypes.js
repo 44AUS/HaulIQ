@@ -4,11 +4,9 @@ import {
   DialogContent, DialogActions, TextField, Alert, Skeleton, Paper, Tooltip, Chip,
   FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { equipmentTypesApi, equipmentClassesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 function TypeDialog({ open, type, onClose, onSaved }) {
   const editing = Boolean(type?.id);
@@ -148,7 +146,7 @@ export default function AdminEquipmentTypes() {
             Manage equipment types used across truck postings and load postings
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleNew}>
+        <Button variant="contained" startIcon={<IonIcon name="add-outline" />} onClick={handleNew}>
           Add Type
         </Button>
       </Box>
@@ -162,9 +160,9 @@ export default function AdminEquipmentTypes() {
           </Box>
         ) : types.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
-            <LocalShippingIcon sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
+            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
             <Typography>No equipment types yet.</Typography>
-            <Button onClick={handleNew} startIcon={<AddIcon />} sx={{ mt: 2 }}>Add First Type</Button>
+            <Button onClick={handleNew} startIcon={<IonIcon name="add-outline" />} sx={{ mt: 2 }}>Add First Type</Button>
           </Box>
         ) : (
           <Box>
@@ -187,7 +185,7 @@ export default function AdminEquipmentTypes() {
                 }}
               >
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <LocalShippingIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                  <IonIcon name="car-sport-outline" sx={{ fontSize: 16, color: 'text.secondary' }} />
                   <Typography variant="body2" fontWeight={600}>{type.name}</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ width: 60 }}>{type.abbreviation || '—'}</Typography>
@@ -209,10 +207,10 @@ export default function AdminEquipmentTypes() {
                     <Switch size="small" checked={type.is_active} onChange={() => handleToggle(type)} />
                   </Tooltip>
                   <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => handleEdit(type)}><EditIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleEdit(type)}><IonIcon name="create-outline" fontSize="small" /></IconButton>
                   </Tooltip>
                   <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => handleDelete(type)}><DeleteIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" color="error" onClick={() => handleDelete(type)}><IonIcon name="trash-outline" fontSize="small" /></IconButton>
                   </Tooltip>
                 </Box>
               </Box>

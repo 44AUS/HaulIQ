@@ -10,16 +10,10 @@ import {
   IconButton, Drawer, Checkbox, Avatar, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt';
-import TrafficIcon from '@mui/icons-material/Traffic';
-import LayersIcon from '@mui/icons-material/Layers';
-import SearchIcon from '@mui/icons-material/Search';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const GMAPS_LIBS = ['places'];
 const locales = { 'en-US': enUS };
@@ -104,11 +98,11 @@ function MonthPickerPopover({ anchorEl, open, onClose, date, onSelect }) {
         {/* Year navigation */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
           <IconButton size="small" onClick={() => setPickerYear(y => y - 1)}>
-            <ChevronLeftIcon fontSize="small" />
+            <IonIcon name="chevron-back-outline" fontSize="small" />
           </IconButton>
           <Typography fontWeight={700} fontSize="0.95rem">{pickerYear}</Typography>
           <IconButton size="small" onClick={() => setPickerYear(y => y + 1)}>
-            <ChevronRightIcon fontSize="small" />
+            <IonIcon name="chevron-forward-outline" fontSize="small" />
           </IconButton>
         </Box>
         {/* Month grid */}
@@ -157,7 +151,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
 
   return (
     <>
-      <Button size="small" endIcon={<ExpandMoreIcon sx={{ fontSize: 15 }} />}
+      <Button size="small" endIcon={<IonIcon name="chevron-down-outline" sx={{ fontSize: 15 }} />}
         onClick={handleOpen}
         sx={{
           fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
@@ -556,7 +550,7 @@ function MapView({ events, mapsLoaded, mapMarker, setMapMarker }) {
             transition: 'background-color 0.15s',
             userSelect: 'none',
           }}>
-          <LayersIcon sx={{ fontSize: 17, color: layersOpen ? '#2dd36f' : (isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.55)') }} />
+          <IonIcon name="layers-outline" sx={{ fontSize: 17, color: layersOpen ? '#2dd36f' : (isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.55)') }} />
           <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: layersOpen ? '#2dd36f' : (isDark ? '#fff' : '#0D1B2A') }}>
             Layers
           </Typography>
@@ -779,7 +773,7 @@ export default function CalendarPage() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Button
               onClick={e => setPickerAnchor(e.currentTarget)}
-              endIcon={<ExpandMoreIcon sx={{ fontSize: 16 }} />}
+              endIcon={<IonIcon name="chevron-down-outline" sx={{ fontSize: 16 }} />}
               sx={{ fontWeight: 700, fontSize: '1rem', textTransform: 'none', color: 'text.primary', px: 1, py: 0.5, borderRadius: '8px', '&:hover': { bgcolor: 'action.hover' } }}>
               {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
             </Button>
@@ -830,7 +824,7 @@ export default function CalendarPage() {
           </Box>
 
           {/* Right: filter button */}
-          <Button size="small" startIcon={<FilterListIcon sx={{ fontSize: 15 }} />}
+          <Button size="small" startIcon={<IonIcon name="funnel-outline" sx={{ fontSize: 15 }} />}
             onClick={() => setFilterOpen(true)}
             sx={{
               fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
@@ -849,14 +843,14 @@ export default function CalendarPage() {
           {/* Left: arrows + assigned */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton size="small" onClick={prev} sx={{ color: '#fff' }}>
-              <ChevronLeftIcon fontSize="small" />
+              <IonIcon name="chevron-back-outline" fontSize="small" />
             </IconButton>
             <Button size="small" onClick={() => setDate(new Date())}
               sx={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'none', color: '#fff', px: 1.5, py: 0.5, borderRadius: '8px', minWidth: 0, '&:hover': { bgcolor: 'action.hover' } }}>
               Today
             </Button>
             <IconButton size="small" onClick={next} sx={{ color: '#fff' }}>
-              <ChevronRightIcon fontSize="small" />
+              <IonIcon name="chevron-forward-outline" fontSize="small" />
             </IconButton>
             {user?.role === 'carrier' && (
               <AssignedDropdown
@@ -917,7 +911,7 @@ export default function CalendarPage() {
       {/* ── Find Loads FAB (carrier only) ── */}
       {user?.role === 'carrier' && (
         <Box sx={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
-          <Button variant="contained" startIcon={<SearchIcon sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
+          <Button variant="contained" startIcon={<IonIcon name="search-outline" sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
             sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 6px 20px rgba(0,0,0,0.3)' }}>
             Find Loads
           </Button>

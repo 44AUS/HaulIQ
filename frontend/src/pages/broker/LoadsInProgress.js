@@ -5,25 +5,12 @@ import DispatcherTable from '../../components/broker/DispatcherTable';
 import DispatchModal from '../../components/broker/DispatchModal';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Card, CardContent, Grid, Chip, CircularProgress, Paper,
   Button, ToggleButtonGroup, ToggleButton, Table, TableHead, TableRow,
   TableCell, TableBody, Skeleton,
 } from '@mui/material';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import ListIcon from '@mui/icons-material/List';
-import MapIcon from '@mui/icons-material/Map';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import PlaceIcon from '@mui/icons-material/Place';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon from '@mui/icons-material/Person';
-import AlertCircleIcon from '@mui/icons-material/ErrorOutline';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ScaleIcon from '@mui/icons-material/Scale';
-import ActivityIcon from '@mui/icons-material/Timeline';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const LIBRARIES = ['places'];
 
@@ -69,7 +56,7 @@ function StatusTimeline({ status }) {
                 borderColor: 'success.light',
                 outline: active ? '2px solid rgba(46,125,50,0.25)' : 'none',
               }}>
-                {done && <CheckCircleIcon sx={{ fontSize: 14, color: 'white' }} />}
+                {done && <IonIcon name="checkmark-circle" sx={{ fontSize: 14, color: 'white' }} />}
                 {active && <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'white' }} />}
               </Box>
               <Typography variant="caption" sx={{
@@ -127,17 +114,17 @@ function BrokerLoadCard({ load }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <PlaceIcon sx={{ fontSize: 11 }} /> Origin
+              <IonIcon name="location-outline" sx={{ fontSize: 11 }} /> Origin
             </Typography>
             <Typography variant="body2" fontWeight={600} noWrap>{load.origin}</Typography>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ArrowForwardIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            <IonIcon name="arrow-forward-outline" sx={{ fontSize: 18, color: 'text.secondary' }} />
             <Typography variant="caption" color="text.secondary">{load.miles}mi</Typography>
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
-              <PlaceIcon sx={{ fontSize: 11 }} /> Dest
+              <IonIcon name="location-outline" sx={{ fontSize: 11 }} /> Dest
             </Typography>
             <Typography variant="body2" fontWeight={600} noWrap>{load.destination}</Typography>
           </Box>
@@ -145,13 +132,13 @@ function BrokerLoadCard({ load }) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarTodayIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <IonIcon name="calendar-outline" sx={{ fontSize: 12, color: 'text.secondary' }} />
             <Typography variant="caption" color="text.secondary">
               Pickup: <span style={{ fontWeight: 500 }}>{load.pickup_date}</span>
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarTodayIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            <IonIcon name="calendar-outline" sx={{ fontSize: 12, color: 'text.secondary' }} />
             <Typography variant="caption" color="text.secondary">
               Drop: <span style={{ fontWeight: 500 }}>{load.delivery_date}</span>
             </Typography>
@@ -176,7 +163,7 @@ function BrokerLoadCard({ load }) {
         <Paper variant="outlined" sx={{ px: 1.5, py: 1, mb: 1.5 }}>
           {load.carrier_id ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PersonIcon sx={{ fontSize: 15, color: 'text.secondary', flexShrink: 0 }} />
+              <IonIcon name="person-outline" sx={{ fontSize: 15, color: 'text.secondary', flexShrink: 0 }} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography
                   component={Link}
@@ -197,7 +184,7 @@ function BrokerLoadCard({ load }) {
                 to={`/broker/messages?userId=${load.carrier_id}`}
                 variant="text"
                 size="small"
-                startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 13 }} />}
+                startIcon={<IonIcon name="chatbubble-outline" sx={{ fontSize: 13 }} />}
                 sx={{ fontSize: '0.7rem', flexShrink: 0 }}
               >
                 Message
@@ -205,7 +192,7 @@ function BrokerLoadCard({ load }) {
             </Box>
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AlertCircleIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+              <IonIcon name="alert-circle-outline" sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
               <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
                 Awaiting carrier assignment
               </Typography>
@@ -216,12 +203,12 @@ function BrokerLoadCard({ load }) {
         {load.commodity && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <InventoryIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+              <IonIcon name="cube-outline" sx={{ fontSize: 12, color: 'text.secondary' }} />
               <Typography variant="caption" color="text.secondary">{load.commodity}</Typography>
             </Box>
             {load.weight_lbs && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <ScaleIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                <IonIcon name="scale-outline" sx={{ fontSize: 12, color: 'text.secondary' }} />
                 <Typography variant="caption" color="text.secondary">{Number(load.weight_lbs).toLocaleString()} lbs</Typography>
               </Box>
             )}
@@ -245,7 +232,7 @@ function BrokerLoadCard({ load }) {
             variant={load.status === 'in_transit' ? 'contained' : 'outlined'}
             color={load.status === 'in_transit' ? 'success' : 'inherit'}
             fullWidth
-            startIcon={<NavigationIcon />}
+            startIcon={<IonIcon name="navigate-outline" />}
             sx={{ mt: 2 }}
           >
             {load.status === 'in_transit' ? 'Track Live Location' : 'View Tracking'}
@@ -324,7 +311,7 @@ function TableView({ loads }) {
                           to={`/broker/track/${load.booking_id}`}
                           variant="outlined"
                           size="small"
-                          startIcon={<NavigationIcon sx={{ fontSize: 13 }} />}
+                          startIcon={<IonIcon name="navigate-outline" sx={{ fontSize: 13 }} />}
                           color={load.status === 'in_transit' ? 'success' : 'inherit'}
                           sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap' }}
                         >
@@ -582,7 +569,7 @@ export default function BrokerLoadsInProgress() {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <ActivityIcon color="primary" />
+          <IonIcon name="analytics-outline" color="primary" />
           <Typography variant="h5" fontWeight={700}>Loads in Progress</Typography>
           <Chip label={loads.length} size="small" color="primary" />
         </Box>
@@ -594,16 +581,16 @@ export default function BrokerLoadsInProgress() {
           size="small"
         >
           <ToggleButton value="cards" title="Card view">
-            <ViewModuleIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="grid-outline" sx={{ fontSize: 18 }} />
           </ToggleButton>
           <ToggleButton value="table" title="List view">
-            <ListIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="list-outline" sx={{ fontSize: 18 }} />
           </ToggleButton>
           <ToggleButton value="map" title="Map view">
-            <MapIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="map-outline" sx={{ fontSize: 18 }} />
           </ToggleButton>
           <ToggleButton value="dispatcher" title="Dispatcher board">
-            <AssignmentIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="clipboard-outline" sx={{ fontSize: 18 }} />
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -645,7 +632,7 @@ export default function BrokerLoadsInProgress() {
         </Grid>
       ) : loads.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 6, textAlign: 'center' }}>
-          <ActivityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+          <IonIcon name="analytics-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>No active loads</Typography>
           <Typography variant="body2" color="text.secondary">Post a load to see it tracked here.</Typography>
         </Paper>

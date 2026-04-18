@@ -4,22 +4,11 @@ import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress,
 } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PeopleIcon from '@mui/icons-material/People';
-import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
-import CheckIcon from '@mui/icons-material/Check';
-import PhoneIcon from '@mui/icons-material/Phone';
-import BlockIcon from '@mui/icons-material/Block';
-import GppBadIcon from '@mui/icons-material/GppBad';
 import { useAuth } from '../../context/AuthContext';
 import { carrierReviewsApi, networkApi, blocksApi } from '../../services/api';
 import { adaptReview } from '../../services/adapters';
+import IonIcon from '../../components/IonIcon';
+
 
 function formatPhone(raw) {
   if (!raw) return '';
@@ -44,8 +33,8 @@ function StarInput({ value, onChange, size = 22 }) {
           sx={{ p: 0.25 }}
         >
           {(hover || value) >= i
-            ? <StarIcon sx={{ fontSize: size, color: '#FFC107' }} />
-            : <StarBorderIcon sx={{ fontSize: size, color: 'text.disabled' }} />
+            ? <IonIcon name="star" sx={{ fontSize: size, color: '#FFC107' }} />
+            : <IonIcon name="star-outline" sx={{ fontSize: size, color: 'text.disabled' }} />
           }
         </IconButton>
       ))}
@@ -186,7 +175,7 @@ export default function CarrierProfile() {
 
   return (
     <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Button component={Link} to={-1} variant="text" startIcon={<ArrowBackIcon />} sx={{ alignSelf: 'flex-start' }}>
+      <Button component={Link} to={-1} variant="text" startIcon={<IonIcon name="arrow-back-outline" />} sx={{ alignSelf: 'flex-start' }}>
         Back
       </Button>
 
@@ -209,13 +198,13 @@ export default function CarrierProfile() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5, flexWrap: 'wrap' }}>
                   {stats?.mc_number && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <LocalShippingIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <IonIcon name="car-sport-outline" sx={{ fontSize: 13, color: 'text.disabled' }} />
                       <Typography variant="caption" color="text.secondary">{stats.mc_number}</Typography>
                     </Box>
                   )}
                   {stats?.phone && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <PhoneIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <IonIcon name="call-outline" sx={{ fontSize: 13, color: 'text.disabled' }} />
                       <Typography variant="caption" component="a" href={`tel:${stats.phone.replace(/\D/g,'')}`} color="text.secondary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>{formatPhone(stats.phone)}</Typography>
                     </Box>
                   )}
@@ -239,7 +228,7 @@ export default function CarrierProfile() {
             </Box>
             <Box sx={{ textAlign: 'right' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: 'flex-end', mb: 0.5 }}>
-                <StarIcon sx={{ color: '#FFC107', fontSize: 20 }} />
+                <IonIcon name="star" sx={{ color: '#FFC107', fontSize: 20 }} />
                 <Typography variant="h5" fontWeight={700}>{avgOverall}</Typography>
               </Box>
               <Typography variant="caption" color="text.secondary" display="block">{reviews.length} broker reviews</Typography>
@@ -247,14 +236,14 @@ export default function CarrierProfile() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end', mt: 1.5, flexWrap: 'wrap' }}>
                   {!networkState.loading && (
                     networkState.status === 'accepted' ? (
-                      <Chip icon={<CheckIcon />} label="In Network" size="small" color="primary" variant="outlined" />
+                      <Chip icon={<IonIcon name="checkmark-outline" />} label="In Network" size="small" color="primary" variant="outlined" />
                     ) : networkState.status === 'pending' ? (
                       <Chip label="Request Sent" size="small" color="warning" variant="outlined" />
                     ) : (
                       <Button
                         variant="outlined"
                         size="small"
-                        startIcon={<NetworkCheckIcon />}
+                        startIcon={<IonIcon name="wifi-outline" />}
                         onClick={handleAddToNetwork}
                       >
                         Add to Network
@@ -262,12 +251,12 @@ export default function CarrierProfile() {
                     )
                   )}
                   {submitted || canReviewReason === 'already_reviewed' ? (
-                    <Chip icon={<CheckCircleIcon />} label="Reviewed" color="success" size="small" />
+                    <Chip icon={<IonIcon name="checkmark-circle" />} label="Reviewed" color="success" size="small" />
                   ) : canReview ? (
                     <Button
                       variant="contained"
                       size="small"
-                      startIcon={<StarIcon />}
+                      startIcon={<IonIcon name="star" />}
                       onClick={() => setShowForm(!showForm)}
                     >
                       Review
@@ -284,7 +273,7 @@ export default function CarrierProfile() {
                     variant="outlined"
                     color={isBlocked ? 'error' : 'inherit'}
                     size="small"
-                    startIcon={blockLoading ? <CircularProgress size={12} color="inherit" /> : isBlocked ? <GppBadIcon /> : <BlockIcon />}
+                    startIcon={blockLoading ? <CircularProgress size={12} color="inherit" /> : isBlocked ? <IonIcon name="shield-outline" /> : <IonIcon name="ban-outline" />}
                     onClick={handleToggleBlock}
                     disabled={blockLoading}
                     title={isBlocked ? 'Unblock user' : 'Block user'}
@@ -316,7 +305,7 @@ export default function CarrierProfile() {
           {wwaPct !== null && (
             <Box sx={{ mt: 2 }}>
               <Chip
-                icon={<ThumbUpIcon />}
+                icon={<IonIcon name="thumbs-up-outline" />}
                 label={`${wwaPct}% of brokers would book again`}
                 size="small"
                 color={wwaPct >= 80 ? 'success' : wwaPct >= 60 ? 'warning' : 'error'}
@@ -356,7 +345,7 @@ export default function CarrierProfile() {
                   <Button
                     variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'}
                     size="small"
-                    startIcon={<ThumbUpIcon />}
+                    startIcon={<IonIcon name="thumbs-up-outline" />}
                     onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}
                   >
                     Yes
@@ -365,7 +354,7 @@ export default function CarrierProfile() {
                     variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
                     color={form.wouldWorkAgain === false ? 'error' : 'inherit'}
                     size="small"
-                    startIcon={<ThumbDownIcon />}
+                    startIcon={<IonIcon name="thumbs-down-outline" />}
                     onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}
                   >
                     No
@@ -403,7 +392,7 @@ export default function CarrierProfile() {
         ) : reviews.length === 0 ? (
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <PeopleIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="people-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No reviews yet for this carrier.</Typography>
             </CardContent>
           </Card>
@@ -444,8 +433,8 @@ export default function CarrierProfile() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {[1, 2, 3, 4, 5].map(i => (
                           i <= review.rating
-                            ? <StarIcon key={i} sx={{ fontSize: 13, color: '#FFC107' }} />
-                            : <StarBorderIcon key={i} sx={{ fontSize: 13, color: 'text.disabled' }} />
+                            ? <IonIcon name="star" key={i} sx={{ fontSize: 13, color: '#FFC107' }} />
+                            : <IonIcon name="star-outline" key={i} sx={{ fontSize: 13, color: 'text.disabled' }} />
                         ))}
                         <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
                         <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>

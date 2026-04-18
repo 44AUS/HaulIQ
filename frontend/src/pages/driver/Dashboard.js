@@ -4,9 +4,9 @@ import {
   Box, Typography, Card, CardContent, Button, Chip,
   CircularProgress, Stack, Stepper, Step, StepLabel, Alert,
 } from '@mui/material';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { driverApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered'];
@@ -65,7 +65,7 @@ export default function DriverDashboard() {
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <LocalShippingIcon color="primary" />
+              <IonIcon name="car-sport-outline" color="primary" />
               <Typography variant="subtitle1" fontWeight={700}>Active Load</Typography>
               <Chip
                 label={(activeLoad.tms_status || 'assigned').replace('_', ' ')}
@@ -123,7 +123,7 @@ export default function DriverDashboard() {
       ) : (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <CheckCircleIcon sx={{ fontSize: 40, color: 'success.main', mb: 1.5 }} />
+            <IonIcon name="checkmark-circle" sx={{ fontSize: 40, color: 'success.main', mb: 1.5 }} />
             <Typography variant="h6" fontWeight={700} gutterBottom>No active loads</Typography>
             <Typography variant="body2" color="text.secondary">
               You'll see your next assigned load here when your carrier dispatches one.

@@ -6,17 +6,10 @@ import {
   TextField, InputAdornment,
   Card, CardContent, Paper, Autocomplete, Skeleton,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import SearchIcon from '@mui/icons-material/Search';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
@@ -75,13 +68,13 @@ function ConnectionRow({ conn, onRemove, userRole }) {
             to={`/${userRole}/messages?userId=${conn.user_id}`}
             variant="outlined"
             size="small"
-            startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 14 }} />}
+            startIcon={<IonIcon name="chatbubble-outline" sx={{ fontSize: 14 }} />}
             sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 4, px: 1.5, fontSize: '0.75rem' }}
           >
             Message
           </Button>
           <IconButton size="small" onClick={e => setAnchor(e.currentTarget)}>
-            <MoreHorizIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="ellipsis-horizontal-outline" sx={{ fontSize: 18 }} />
           </IconButton>
           <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
             <MenuItem component={Link} to={profilePath(conn)} onClick={() => setAnchor(null)} sx={{ fontSize: '0.875rem' }}>
@@ -132,7 +125,7 @@ function PendingRow({ req, onRespond, responding }) {
           <Button
             variant="outlined"
             size="small"
-            startIcon={<CheckIcon sx={{ fontSize: 14 }} />}
+            startIcon={<IonIcon name="checkmark-outline" sx={{ fontSize: 14 }} />}
             onClick={() => onRespond(req.id, true)}
             disabled={responding === req.id + '_accept'}
             sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 4, px: 1.5, fontSize: '0.75rem' }}
@@ -142,7 +135,7 @@ function PendingRow({ req, onRespond, responding }) {
           <Button
             variant="text"
             size="small"
-            startIcon={<CloseIcon sx={{ fontSize: 14 }} />}
+            startIcon={<IonIcon name="close-outline" sx={{ fontSize: 14 }} />}
             onClick={() => onRespond(req.id, false)}
             disabled={responding === req.id + '_decline'}
             color="inherit"
@@ -196,7 +189,7 @@ function SuggestCard({ user, onConnect, connecting }) {
               <Chip label="Connected" size="small" color="success" variant="outlined" sx={{ fontSize: '0.7rem' }} />
             ) : status === 'pending' ? (
               <Chip
-                icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
+                icon={<IonIcon name="time-outline" sx={{ fontSize: '13px !important' }} />}
                 label="Pending"
                 size="small"
                 color="warning"
@@ -207,7 +200,7 @@ function SuggestCard({ user, onConnect, connecting }) {
               <Button
                 variant="outlined"
                 size="small"
-                startIcon={<PersonAddIcon sx={{ fontSize: 14 }} />}
+                startIcon={<IonIcon name="person-add-outline" sx={{ fontSize: 14 }} />}
                 onClick={() => onConnect(user)}
                 disabled={connecting === user.user_id}
                 sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 4, fontSize: '0.75rem', px: 1.5, whiteSpace: 'nowrap' }}
@@ -339,7 +332,7 @@ export default function Network() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                <IonIcon name="search-outline" sx={{ fontSize: 18, color: 'text.disabled' }} />
               </InputAdornment>
             ),
             endAdornment: searching ? (
@@ -383,7 +376,7 @@ export default function Network() {
           {pending.length > 0 && (
             <Box sx={{ mb: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <AccessTimeIcon sx={{ color: 'warning.main', fontSize: 18 }} />
+                <IonIcon name="time-outline" sx={{ color: 'warning.main', fontSize: 18 }} />
                 <Typography variant="subtitle1" fontWeight={700}>Pending Requests</Typography>
                 <Chip label={pending.length} size="small" color="warning" />
               </Box>
@@ -412,7 +405,7 @@ export default function Network() {
           <Divider />
           {filteredConnections.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
-              <PeopleIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="people-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary" fontWeight={600}>
                 {isSearchActive ? 'No connections match your search' : 'No connections yet'}
               </Typography>
@@ -446,7 +439,7 @@ export default function Network() {
             </Box>
           ) : rightColumnItems.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 8 }}>
-              <PersonSearchIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="search-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary" fontWeight={600}>
                 {isSearchActive ? 'No results found' : 'No suggestions right now'}
               </Typography>

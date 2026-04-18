@@ -6,15 +6,10 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, Checkbox, Collapse, Stepper, Step, StepLabel,
 } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
+import IonIcon from '../../components/IonIcon';
+
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS = [
@@ -302,11 +297,11 @@ export default function LoadManager() {
             sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: showProgress ? 'primary.main' : 'text.secondary', textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
             {showProgress ? 'Hide Progress' : 'Show Progress'}
           </Button>
-          <Button size="small" startIcon={<FilterListIcon sx={{ fontSize: 16 }} />} onClick={() => setFilterOpen(true)}
+          <Button size="small" startIcon={<IonIcon name="funnel-outline" sx={{ fontSize: 16 }} />} onClick={() => setFilterOpen(true)}
             sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: Object.values(applied).some(Boolean) ? 'primary.main' : 'text.secondary', border: '1px solid', borderColor: Object.values(applied).some(Boolean) ? 'primary.main' : tabBorder, borderRadius: 1, px: 1.5, py: 0.5, textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
             Filter
           </Button>
-          <Button size="small" startIcon={<FileDownloadIcon sx={{ fontSize: 16 }} />} onClick={handleExport}
+          <Button size="small" startIcon={<IonIcon name="download-outline" sx={{ fontSize: 16 }} />} onClick={handleExport}
             sx={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', color: 'text.secondary', border: '1px solid', borderColor: tabBorder, borderRadius: 1, px: 1.5, py: 0.5, textTransform: 'uppercase', '&:hover': { bgcolor: 'action.hover' } }}>
             Export
           </Button>
@@ -332,7 +327,7 @@ export default function LoadManager() {
         <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
           <Tooltip title="Refresh">
             <IconButton size="small" onClick={refresh} sx={{ color: 'text.secondary' }}>
-              <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -346,7 +341,7 @@ export default function LoadManager() {
           </Box>
         ) : tabItems.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-            <LocalShippingIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
             <Typography variant="body2" color="text.secondary">No loads in this category</Typography>
           </Box>
         ) : (
@@ -420,7 +415,7 @@ export default function LoadManager() {
                           size="small"
                           variant="text"
                           color="error"
-                          startIcon={<DeleteOutlineIcon sx={{ fontSize: 14 }} />}
+                          startIcon={<IonIcon name="trash-outline" sx={{ fontSize: 14 }} />}
                           onClick={handleBulkDelete}
                           sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, px: 0.5, py: 0, minWidth: 0, textTransform: 'none' }}
                         >
@@ -546,11 +541,11 @@ export default function LoadManager() {
                               }}
                               sx={{ color: 'error.main', p: 0.5 }}
                             >
-                              <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                              <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                             </IconButton>
                           </Tooltip>
                         ) : (
-                          <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
                         )}
                       </TableCell>
                     </TableRow>
@@ -590,7 +585,7 @@ export default function LoadManager() {
 
       {/* ── Find Loads button ── */}
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
-        <Button variant="contained" startIcon={<SearchIcon sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
+        <Button variant="contained" startIcon={<IonIcon name="search-outline" sx={{ fontSize: 17 }} />} onClick={() => navigate('/carrier/loads')}
           sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
           Find Loads
         </Button>

@@ -5,12 +5,9 @@ import {
   IconButton, CircularProgress, Alert, Skeleton, Dialog,
   DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import MailIcon from '@mui/icons-material/Mail';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CloseIcon from '@mui/icons-material/Close';
 import { contactApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 function MessageDialog({ msg, onClose, onMarkRead, onDelete }) {
   const [deleting, setDeleting] = useState(false);
@@ -28,7 +25,7 @@ function MessageDialog({ msg, onClose, onMarkRead, onDelete }) {
           <Typography variant="subtitle1" fontWeight={700}>{msg.subject}</Typography>
           <Typography variant="caption" color="text.secondary">{msg.name} · {msg.email}</Typography>
         </Box>
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
       <DialogContent>
         <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 2 }}>
@@ -38,11 +35,11 @@ function MessageDialog({ msg, onClose, onMarkRead, onDelete }) {
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
         {!msg.read && (
-          <Button variant="outlined" startIcon={<MarkEmailReadIcon />} onClick={() => { onMarkRead(msg.id); onClose(); }}>
+          <Button variant="outlined" startIcon={<IonIcon name="mail-open-outline" />} onClick={() => { onMarkRead(msg.id); onClose(); }}>
             Mark as Read
           </Button>
         )}
-        <Button variant="outlined" color="error" startIcon={<DeleteOutlineIcon />} onClick={handleDelete} disabled={deleting}>
+        <Button variant="outlined" color="error" startIcon={<IonIcon name="trash-outline" />} onClick={handleDelete} disabled={deleting}>
           {deleting ? 'Deleting…' : 'Delete'}
         </Button>
         <Button variant="contained" onClick={onClose}>Close</Button>
@@ -102,7 +99,7 @@ export default function AdminContacts() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <MailIcon color="primary" />
+            <IonIcon name="mail-outline" color="primary" />
             <Typography variant="h5" fontWeight={700}>Contact Messages</Typography>
             {unread > 0 && (
               <Chip label={`${unread} unread`} size="small" color="primary" sx={{ fontSize: 11 }} />
@@ -113,7 +110,7 @@ export default function AdminContacts() {
         <Button
           variant="outlined"
           size="small"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
+          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="refresh-outline" />}
           onClick={load}
           disabled={loading}
         >
@@ -214,7 +211,7 @@ export default function AdminContacts() {
                         {!m.read && (
                           <IconButton size="small" title="Mark as read" onClick={() => handleMarkRead(m.id)}
                             sx={{ '&:hover': { color: 'primary.main' } }}>
-                            <MarkEmailReadIcon sx={{ fontSize: 15 }} />
+                            <IonIcon name="mail-open-outline" sx={{ fontSize: 15 }} />
                           </IconButton>
                         )}
                         <IconButton size="small" title="Delete" onClick={() => handleDelete(m.id)}
@@ -222,7 +219,7 @@ export default function AdminContacts() {
                           sx={{ '&:hover': { color: 'error.main' } }}>
                           {deleting === m.id
                             ? <CircularProgress size={14} color="inherit" />
-                            : <DeleteOutlineIcon sx={{ fontSize: 15 }} />}
+                            : <IonIcon name="trash-outline" sx={{ fontSize: 15 }} />}
                         </IconButton>
                       </Box>
                     </TableCell>

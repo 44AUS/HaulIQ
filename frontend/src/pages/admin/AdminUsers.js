@@ -5,14 +5,9 @@ import {
   IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
   Divider, CircularProgress, Select, MenuItem, FormControl, InputLabel, Skeleton,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import SearchIcon from '@mui/icons-material/Search';
-import PersonOffIcon from '@mui/icons-material/PersonOff';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { adminApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const PLANS = ['basic', 'pro', 'elite', 'admin'];
 
@@ -39,7 +34,7 @@ function PlanDialog({ user, onClose, onSaved }) {
     <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Change Plan — {user.name}
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
       <DialogContent>
         <FormControl fullWidth size="small" sx={{ mt: 1 }}>
@@ -99,7 +94,7 @@ function UserDetailDialog({ user, onClose, onUpdate, onDeleted }) {
       <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           User Details
-          <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+          <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pb: 2, mb: 2, borderBottom: 1, borderColor: 'divider' }}>
@@ -146,7 +141,7 @@ function UserDetailDialog({ user, onClose, onUpdate, onDeleted }) {
             variant="outlined"
             color="error"
             fullWidth
-            startIcon={<DeleteOutlineIcon />}
+            startIcon={<IonIcon name="trash-outline" />}
             onClick={() => setConfirmDelete(true)}
           >
             Delete User
@@ -253,7 +248,7 @@ export default function AdminUsers() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <PeopleIcon color="primary" />
+            <IonIcon name="people-outline" color="primary" />
             <Typography variant="h5" fontWeight={700}>User Management</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">{total} total users</Typography>
@@ -267,7 +262,7 @@ export default function AdminUsers() {
           placeholder="Search by name, email, company…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18 }} /></InputAdornment> }}
+          InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 18 }} /></InputAdornment> }}
           sx={{ flex: 1, minWidth: 200 }}
         />
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -402,15 +397,15 @@ export default function AdminUsers() {
                           <CircularProgress size={16} sx={{ mx: 0.5 }} />
                         ) : !u.is_active ? (
                           <IconButton size="small" title="Reactivate" onClick={() => quickActivate(u)} sx={{ '&:hover': { color: 'success.main' } }}>
-                            <HowToRegIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         ) : (
                           <IconButton size="small" title="Suspend" onClick={() => quickSuspend(u)} sx={{ '&:hover': { color: 'error.main' } }}>
-                            <PersonOffIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="person-remove-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         )}
                         <IconButton size="small" onClick={() => setSelectedUser(u)}>
-                          <MoreHorizIcon sx={{ fontSize: 16 }} />
+                          <IonIcon name="ellipsis-horizontal-outline" sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
                     </TableCell>

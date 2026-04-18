@@ -4,19 +4,15 @@ import {
   Table, TableHead, TableBody, TableRow, TableCell,
   IconButton, CircularProgress, Alert, Skeleton,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import WorkIcon from '@mui/icons-material/Work';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
 import { waitlistApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 function RoleBadge({ role }) {
   if (role === 'carrier') {
     return (
       <Chip
-        icon={<LocalShippingIcon sx={{ fontSize: 13 }} />}
+        icon={<IonIcon name="car-sport-outline" sx={{ fontSize: 13 }} />}
         label="Carrier"
         size="small"
         color="primary"
@@ -27,7 +23,7 @@ function RoleBadge({ role }) {
   }
   return (
     <Chip
-      icon={<WorkIcon sx={{ fontSize: 13 }} />}
+      icon={<IonIcon name="briefcase-outline" sx={{ fontSize: 13 }} />}
       label="Broker"
       size="small"
       color="info"
@@ -96,14 +92,14 @@ export default function AdminWaitlist() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <PeopleIcon color="primary" />
+            <IonIcon name="people-outline" color="primary" />
             <Typography variant="h5" fontWeight={700}>Waitlist</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">People waiting for early access to Urload</Typography>
         </Box>
         <Button
           variant="outlined"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
+          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="refresh-outline" />}
           onClick={load}
           disabled={loading}
         >
@@ -245,7 +241,7 @@ export default function AdminWaitlist() {
                           >
                             {activating === entry.id
                               ? <CircularProgress size={14} color="inherit" />
-                              : <HowToRegIcon sx={{ fontSize: 16 }} />
+                              : <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 16 }} />
                             }
                           </IconButton>
                         )}
@@ -258,7 +254,7 @@ export default function AdminWaitlist() {
                         >
                           {deleting === entry.id
                             ? <CircularProgress size={14} color="inherit" />
-                            : <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                            : <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                           }
                         </IconButton>
                       </Box>

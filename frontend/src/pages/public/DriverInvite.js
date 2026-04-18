@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Card, CardContent, Typography, TextField, Button,
   CircularProgress, Alert, InputAdornment, IconButton,
 } from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -78,7 +76,7 @@ export default function DriverInvite() {
               bgcolor: 'primary.main',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <LocalShippingIcon sx={{ fontSize: 30, color: '#fff' }} />
+              <IonIcon name="car-sport-outline" sx={{ fontSize: 30, color: '#fff' }} />
             </Box>
           </Box>
 
@@ -124,7 +122,7 @@ export default function DriverInvite() {
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton size="small" onClick={() => setShowPw(v => !v)}>
-                          {showPw ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                          {showPw ? <IonIcon name="eye-off-outline" fontSize="small" /> : <IonIcon name="eye-outline" fontSize="small" />}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -157,7 +155,7 @@ export default function DriverInvite() {
 
           {done && (
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              <CheckCircleIcon sx={{ fontSize: 48, color: 'success.main', mb: 1.5 }} />
+              <IonIcon name="checkmark-circle" sx={{ fontSize: 48, color: 'success.main', mb: 1.5 }} />
               <Typography variant="h6" fontWeight={700}>Account activated!</Typography>
               <Typography variant="body2" color="text.secondary">Redirecting to your dashboard…</Typography>
             </Box>

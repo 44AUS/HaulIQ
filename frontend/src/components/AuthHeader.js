@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, IconButton, Select, MenuItem } from '@mui/material';
-import NightlightIcon from '@mui/icons-material/Nightlight';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import IonIcon from './IonIcon';
+
 
 export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
   return (
@@ -46,8 +46,8 @@ export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
           }}
         >
           {mode === 'dark'
-            ? <NightlightIcon sx={{ fontSize: 16 }} />
-            : <WbSunnyIcon sx={{ fontSize: 16 }} />
+            ? <IonIcon name="moon-outline" sx={{ fontSize: 16 }} />
+            : <IonIcon name="sunny-outline" sx={{ fontSize: 16 }} />
           }
         </IconButton>
       </Box>

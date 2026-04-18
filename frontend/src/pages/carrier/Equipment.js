@@ -5,15 +5,10 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, MenuItem, Select, FormControl, InputLabel, Alert, useTheme,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ReplayIcon from '@mui/icons-material/Replay';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentTypesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS = [
@@ -228,7 +223,7 @@ export default function Equipment() {
         <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
           <Tooltip title="Refresh">
             <IconButton size="small" onClick={() => fetchPosts(true)} sx={{ color: 'text.secondary' }}>
-              <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -242,10 +237,10 @@ export default function Equipment() {
           </Box>
         ) : tabItems.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1.5 }}>
-            <LocalShippingIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
             <Typography variant="body2" color="text.secondary">No trucks in this category.</Typography>
             {activeTab === 'all' && (
-              <Button variant="outlined" startIcon={<AddIcon />} onClick={openCreate} size="small">
+              <Button variant="outlined" startIcon={<IonIcon name="add-outline" />} onClick={openCreate} size="small">
                 Post Your First Truck
               </Button>
             )}
@@ -329,20 +324,20 @@ export default function Equipment() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                           <Tooltip title="Repost with new dates">
                             <IconButton size="small" onClick={() => openRepost(post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                              <ReplayIcon sx={{ fontSize: 15 }} />
+                              <IonIcon name="reload-outline" sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Edit">
                             <IconButton size="small" onClick={() => openEdit(post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                              <EditIcon sx={{ fontSize: 15 }} />
+                              <IonIcon name="create-outline" sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Delete">
                             <IconButton size="small" onClick={() => setDeleteId(post.id)} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' }, p: 0.5 }}>
-                              <DeleteOutlineIcon sx={{ fontSize: 15 }} />
+                              <IonIcon name="trash-outline" sx={{ fontSize: 15 }} />
                             </IconButton>
                           </Tooltip>
-                          <ChevronRightIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -356,7 +351,7 @@ export default function Equipment() {
 
       {/* ── Post Truck button ── */}
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
-        <Button variant="contained" startIcon={<AddIcon sx={{ fontSize: 17 }} />} onClick={openCreate}
+        <Button variant="contained" startIcon={<IonIcon name="add-outline" sx={{ fontSize: 17 }} />} onClick={openCreate}
           sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
           Post Truck
         </Button>

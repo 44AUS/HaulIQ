@@ -4,12 +4,9 @@ import {
   DialogActions, TextField, Select, MenuItem, FormControl, InputLabel, Switch,
   FormControlLabel, Skeleton, Alert, Tooltip, Paper,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { plansApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const COLOR_OPTIONS = [
   { value: 'default', label: 'Default (grey)' },
@@ -168,8 +165,8 @@ function PlanCard({ plan, onEdit, onDelete, onToggle }) {
         </Box>
         <Box sx={{ display: 'flex', gap: 0.5 }}>
           <Tooltip title={plan.is_active ? 'Deactivate' : 'Activate'}><Switch size="small" checked={plan.is_active} onChange={() => onToggle(plan)} /></Tooltip>
-          <Tooltip title="Edit"><IconButton size="small" onClick={() => onEdit(plan)}><EditIcon fontSize="small" /></IconButton></Tooltip>
-          <Tooltip title="Delete"><IconButton size="small" color="error" onClick={() => onDelete(plan)}><DeleteIcon fontSize="small" /></IconButton></Tooltip>
+          <Tooltip title="Edit"><IconButton size="small" onClick={() => onEdit(plan)}><IonIcon name="create-outline" fontSize="small" /></IconButton></Tooltip>
+          <Tooltip title="Delete"><IconButton size="small" color="error" onClick={() => onDelete(plan)}><IonIcon name="trash-outline" fontSize="small" /></IconButton></Tooltip>
         </Box>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mb: 1.5 }}>
@@ -184,7 +181,7 @@ function PlanCard({ plan, onEdit, onDelete, onToggle }) {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
         {(plan.features || []).slice(0, 4).map(f => (
           <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 13, color: 'success.main', flexShrink: 0 }} />
+            <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 13, color: 'success.main', flexShrink: 0 }} />
             <Typography variant="caption" noWrap>{f}</Typography>
           </Box>
         ))}
@@ -193,7 +190,7 @@ function PlanCard({ plan, onEdit, onDelete, onToggle }) {
         )}
         {missing.slice(0, 2).map(f => (
           <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1, opacity: 0.45 }}>
-            <DragIndicatorIcon sx={{ fontSize: 13, color: 'text.disabled', flexShrink: 0 }} />
+            <IonIcon name="reorder-three-outline" sx={{ fontSize: 13, color: 'text.disabled', flexShrink: 0 }} />
             <Typography variant="caption" noWrap sx={{ textDecoration: 'line-through' }}>{f}</Typography>
           </Box>
         ))}
@@ -251,7 +248,7 @@ export default function AdminPlans() {
           <Typography variant="h5" fontWeight={700}>Pricing Plans</Typography>
           <Typography variant="body2" color="text.secondary">Manage what appears on the landing page pricing section</Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleNew}>New Plan</Button>
+        <Button variant="contained" startIcon={<IonIcon name="add-outline" />} onClick={handleNew}>New Plan</Button>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -271,7 +268,7 @@ export default function AdminPlans() {
       ) : filtered.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
           <Typography>No {tab} plans yet.</Typography>
-          <Button onClick={handleNew} startIcon={<AddIcon />} sx={{ mt: 2 }}>Create First Plan</Button>
+          <Button onClick={handleNew} startIcon={<IonIcon name="add-outline" />} sx={{ mt: 2 }}>Create First Plan</Button>
         </Box>
       ) : (
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 2 }}>

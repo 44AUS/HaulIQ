@@ -4,12 +4,10 @@ import {
   Box, Typography, Card, CardContent, Button, Chip,
   Alert, Skeleton
 } from '@mui/material';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import LockIcon from '@mui/icons-material/Lock';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import { analyticsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import IonIcon from '../../components/IonIcon';
+
 
 // Map action_label → carrier route + optional state to pass to the page
 function resolveAction(insight) {
@@ -80,7 +78,7 @@ function InsightCard({ insight, locked, onRead, onAction }) {
           borderRadius: 'inherit',
         }}>
           <Box sx={{ textAlign: 'center' }}>
-            <LockIcon sx={{ color: 'text.secondary', mb: 1 }} />
+            <IonIcon name="lock-closed-outline" sx={{ color: 'text.secondary', mb: 1 }} />
             <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
               Pro or Elite required
             </Typography>
@@ -116,7 +114,7 @@ function InsightCard({ insight, locked, onRead, onAction }) {
               <Button
                 variant="text"
                 size="small"
-                endIcon={<ChevronRightIcon />}
+                endIcon={<IonIcon name="chevron-forward-outline" />}
                 onClick={e => { e.stopPropagation(); !locked && onAction && onAction(insight); }}
                 sx={{ mt: 1, px: 0, fontSize: '0.75rem', opacity: locked ? 0.4 : 1 }}
               >
@@ -195,7 +193,7 @@ export default function EarningsBrain() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <PsychologyIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+            <IonIcon name="bulb-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
             <Typography variant="h5" fontWeight={700}>Driver Earnings Brain</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -208,7 +206,7 @@ export default function EarningsBrain() {
             disabled={refreshing}
             variant="outlined"
             size="small"
-            startIcon={<RefreshIcon sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none', '@keyframes spin': { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } } }} />}
+            startIcon={<IonIcon name="refresh-outline" sx={{ animation: refreshing ? 'spin 1s linear infinite' : 'none', '@keyframes spin': { from: { transform: 'rotate(0deg)' }, to: { transform: 'rotate(360deg)' } } }} />}
           >
             Refresh
           </Button>
@@ -280,7 +278,7 @@ export default function EarningsBrain() {
         ) : insights.length === 0 ? (
           <Card>
             <CardContent sx={{ textAlign: 'center', py: 8 }}>
-              <PsychologyIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="bulb-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body1" color="text.secondary">
                 No insights yet. Complete more loads to generate personalized insights.
               </Typography>

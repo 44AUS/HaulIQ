@@ -3,22 +3,12 @@ import { Link } from 'react-router-dom';
 import { bookingsApi, loadsApi, bidsApi, freightPaymentsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Card, CardContent, Chip, CircularProgress, Alert,
   Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Tabs, Tab, InputAdornment, Divider, Skeleton, Grid,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import SyncAltIcon from '@mui/icons-material/SyncAlt';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PersonIcon from '@mui/icons-material/Person';
-import LockIcon from '@mui/icons-material/Lock';
-import SendIcon from '@mui/icons-material/Send';
 
 // Lazy-load Stripe — will fail gracefully if @stripe/react-stripe-js not installed
 let loadStripe, Elements, PaymentElement, useStripe, useElements;
@@ -105,7 +95,7 @@ function StripePaymentForm({ chargeData, onPaid, onClose }) {
           variant="contained"
           color="primary"
           disabled={paying || !stripe}
-          startIcon={paying ? <CircularProgress size={14} color="inherit" /> : <SendIcon />}
+          startIcon={paying ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="send-outline" />}
         >
           {paying ? 'Processing…' : `Pay $${chargeData.amount?.toLocaleString()}`}
         </Button>
@@ -135,7 +125,7 @@ function PaymentDialog({ bookingId, onClose, onPaid }) {
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <LockIcon fontSize="small" color="primary" />
+        <IonIcon name="lock-closed-outline" fontSize="small" color="primary" />
         Pay Load into Escrow
       </DialogTitle>
       <DialogContent>
@@ -192,7 +182,7 @@ function paymentChip(payStatus) {
   const cfg = map[payStatus] || { label: payStatus, color: 'default' };
   return (
     <Chip
-      icon={<AttachMoneyIcon sx={{ fontSize: '14px !important' }} />}
+      icon={<IonIcon name="cash-outline" sx={{ fontSize: '14px !important' }} />}
       label={cfg.label}
       color={cfg.color}
       size="small"
@@ -376,7 +366,7 @@ export default function BookingRequests() {
             <Alert severity="error">{error}</Alert>
           ) : pendingBookings.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-              <AccessTimeIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="time-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No pending booking requests</Typography>
             </Paper>
           ) : pendingBookings.map(booking => {
@@ -398,7 +388,7 @@ export default function BookingRequests() {
                         state={{ carrierId: booking.carrier_id }}
                         variant="text"
                         size="small"
-                        endIcon={<OpenInNewIcon sx={{ fontSize: 12 }} />}
+                        endIcon={<IonIcon name="open-outline" sx={{ fontSize: 12 }} />}
                         sx={{ fontSize: '0.7rem', minHeight: 0, py: 0 }}
                       >
                         View profile
@@ -450,7 +440,7 @@ export default function BookingRequests() {
             </Grid>
           ) : activeBids.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-              <AttachMoneyIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="cash-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No bids yet</Typography>
             </Paper>
           ) : activeBids.map(bid => {
@@ -480,7 +470,7 @@ export default function BookingRequests() {
                     {bid.load_origin && bid.load_dest ? (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <Typography variant="body2" fontWeight={600} color="text.primary">{bid.load_origin}</Typography>
-                        <ArrowForwardIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                        <IonIcon name="arrow-forward-outline" sx={{ fontSize: 14, color: 'text.disabled' }} />
                         <Typography variant="body2" fontWeight={600} color="text.primary">{bid.load_dest}</Typography>
                       </Box>
                     ) : (
@@ -489,7 +479,7 @@ export default function BookingRequests() {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {statusChip(bid.status)}
-                    <OpenInNewIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                    <IonIcon name="open-outline" sx={{ fontSize: 14, color: 'text.disabled' }} />
                   </Box>
                 </Box>
 
@@ -516,7 +506,7 @@ export default function BookingRequests() {
                         {diff !== null && (
                           <Chip
                             size="small"
-                            icon={isAbove ? <TrendingUpIcon /> : <TrendingDownIcon />}
+                            icon={isAbove ? <IonIcon name="trending-up-outline" /> : <IonIcon name="trending-down-outline" />}
                             label={`${isAbove ? '+' : ''}${diff.toFixed(1)}%`}
                             color={isAbove ? 'success' : 'warning'}
                             variant="outlined"
@@ -527,7 +517,7 @@ export default function BookingRequests() {
 
                       {/* Carrier */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: bid.note || bid.counter_amount ? 0.75 : 0 }}>
-                        <PersonIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                        <IonIcon name="person-outline" sx={{ fontSize: 14, color: 'text.disabled' }} />
                         <Typography
                           component={bid.carrier_id ? Link : 'span'}
                           to={bid.carrier_id ? `/c/${bid.carrier_id?.slice(0, 8)}` : undefined}
@@ -553,7 +543,7 @@ export default function BookingRequests() {
 
                       {bid.counter_amount && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.75 }}>
-                          <SyncAltIcon sx={{ fontSize: 13, color: 'info.main' }} />
+                          <IonIcon name="swap-horizontal-outline" sx={{ fontSize: 13, color: 'info.main' }} />
                           <Typography variant="caption" color="info.main">
                             Your counter: <strong>${bid.counter_amount.toLocaleString()}</strong>
                             {bid.counter_note && ` — ${bid.counter_note}`}
@@ -566,21 +556,21 @@ export default function BookingRequests() {
                       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flexShrink: 0, minWidth: 100 }}>
                         <Button
                           fullWidth size="small" variant="contained" color="success"
-                          startIcon={<CheckIcon />}
+                          startIcon={<IonIcon name="checkmark-outline" />}
                           onClick={() => setBidModal({ bid, mode: 'accept' })}
                         >
                           Accept
                         </Button>
                         <Button
                           fullWidth size="small" variant="outlined" color="info"
-                          startIcon={<SyncAltIcon />}
+                          startIcon={<IonIcon name="swap-horizontal-outline" />}
                           onClick={() => { setBidModal({ bid, mode: 'counter' }); setCounterAmount(String(bid.load_rate || '')); }}
                         >
                           Counter
                         </Button>
                         <Button
                           fullWidth size="small" variant="outlined" color="error"
-                          startIcon={<CloseIcon />}
+                          startIcon={<IonIcon name="close-outline" />}
                           onClick={() => setBidModal({ bid, mode: 'reject' })}
                         >
                           Reject
@@ -600,7 +590,7 @@ export default function BookingRequests() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {bookedLoads.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-              <AttachMoneyIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="cash-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No active or completed loads</Typography>
             </Paper>
           ) : bookedLoads.map(load => {
@@ -646,7 +636,7 @@ export default function BookingRequests() {
                         variant="contained"
                         size="small"
                         color="primary"
-                        startIcon={<LockIcon />}
+                        startIcon={<IonIcon name="lock-closed-outline" />}
                         onClick={() => setPaymentDialog(bookingId)}
                       >
                         Pay Escrow
@@ -659,14 +649,14 @@ export default function BookingRequests() {
                         size="small"
                         color="success"
                         disabled={releasing[bookingId]}
-                        startIcon={releasing[bookingId] ? <CircularProgress size={14} color="inherit" /> : <CheckIcon />}
+                        startIcon={releasing[bookingId] ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="checkmark-outline" />}
                         onClick={() => handleRelease(bookingId)}
                       >
                         {releasing[bookingId] ? 'Releasing…' : 'Release Payment'}
                       </Button>
                     )}
                     {payStatus === 'released' && (
-                      <Chip label="Paid Out" color="success" size="small" icon={<CheckIcon />} />
+                      <Chip label="Paid Out" color="success" size="small" icon={<IonIcon name="checkmark-outline" />} />
                     )}
                   </Box>
                 </CardContent>
@@ -691,7 +681,7 @@ export default function BookingRequests() {
                 state={{ carrierId: reviewModal.item.carrier_id }}
                 variant="text"
                 size="small"
-                endIcon={<OpenInNewIcon sx={{ fontSize: 12 }} />}
+                endIcon={<IonIcon name="open-outline" sx={{ fontSize: 12 }} />}
                 onClick={() => setReviewModal(null)}
                 sx={{ fontSize: '0.7rem' }}
               >
@@ -712,10 +702,10 @@ export default function BookingRequests() {
           </DialogContent>
           <DialogActions sx={{ p: 2, gap: 1 }}>
             <Button variant="text" onClick={() => setReviewModal(null)}>Cancel</Button>
-            <Button variant="outlined" color="error" startIcon={<CloseIcon />} onClick={() => handleReviewBooking(false)}>
+            <Button variant="outlined" color="error" startIcon={<IonIcon name="close-outline" />} onClick={() => handleReviewBooking(false)}>
               Deny
             </Button>
-            <Button variant="contained" color="success" startIcon={<CheckIcon />} onClick={() => handleReviewBooking(true)}>
+            <Button variant="contained" color="success" startIcon={<IonIcon name="checkmark-outline" />} onClick={() => handleReviewBooking(true)}>
               Approve
             </Button>
           </DialogActions>
@@ -777,7 +767,7 @@ export default function BookingRequests() {
                   color={bidModal.mode === 'accept' ? 'success' : 'error'}
                   disabled={bidActing}
                   onClick={handleBidAction}
-                  startIcon={bidActing ? <CircularProgress size={14} color="inherit" /> : bidModal.mode === 'accept' ? <CheckIcon /> : <CloseIcon />}
+                  startIcon={bidActing ? <CircularProgress size={14} color="inherit" /> : bidModal.mode === 'accept' ? <IonIcon name="checkmark-outline" /> : <IonIcon name="close-outline" />}
                 >
                   {bidActing ? 'Processing…' : bidModal.mode === 'accept' ? 'Accept' : 'Reject'}
                 </Button>

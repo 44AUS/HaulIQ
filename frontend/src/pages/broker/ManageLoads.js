@@ -5,19 +5,13 @@ import { adaptLoadList } from '../../services/adapters';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Card, Table, TableHead, TableRow, TableCell, TableBody,
   Chip, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, FormControl, InputLabel, Select, MenuItem, Grid, Alert,
   Skeleton, CircularProgress, ToggleButtonGroup, ToggleButton, InputAdornment,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import GroupIcon from '@mui/icons-material/Group';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
 
 const STATUS_OPTS = ['all', 'active', 'filled', 'expired'];
 const EQUIPMENT = ['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Lowboy', 'Tanker', 'Box Truck'];
@@ -128,7 +122,7 @@ function EditModal({ load, onClose, onSaved }) {
     <Dialog open onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Edit Load
-        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} size="small"><IonIcon name="close-outline" /></IconButton>
       </DialogTitle>
       <Box component="form" onSubmit={handleSave}>
         <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
@@ -216,7 +210,7 @@ function EditModal({ load, onClose, onSaved }) {
         </DialogContent>
         <DialogActions sx={{ p: 2, gap: 1 }}>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}>
+          <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="save-outline" />}>
             {saving ? 'Saving…' : 'Save Changes'}
           </Button>
         </DialogActions>
@@ -268,13 +262,13 @@ export default function ManageLoads() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <InventoryIcon color="primary" /> Manage Loads
+            <IonIcon name="cube-outline" color="primary" /> Manage Loads
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {loads.filter(l => l.status === 'active').length} active loads
           </Typography>
         </Box>
-        <Button component={Link} to="/broker/post" variant="contained" startIcon={<AddCircleOutlineIcon />}>
+        <Button component={Link} to="/broker/post" variant="contained" startIcon={<IonIcon name="add-circle-outline" />}>
           Post New Load
         </Button>
       </Box>
@@ -357,13 +351,13 @@ export default function ManageLoads() {
                     <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.pickup}</TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <VisibilityIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                        <IonIcon name="eye-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
                         <Typography variant="body2">{load.viewCount || 0}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <GroupIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                        <IonIcon name="people-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
                         <Typography variant="body2">—</Typography>
                       </Box>
                     </TableCell>
@@ -372,11 +366,11 @@ export default function ManageLoads() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         {load.status === 'active' && (
                           <IconButton size="small" onClick={() => setEditingLoad(load)} title="Edit load">
-                            <EditIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="create-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         )}
                         <IconButton size="small" onClick={() => setDeleteTarget(load)} color="error">
-                          <DeleteIcon sx={{ fontSize: 16 }} />
+                          <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                         </IconButton>
                       </Box>
                     </TableCell>

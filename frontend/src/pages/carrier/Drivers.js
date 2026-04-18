@@ -5,12 +5,9 @@ import {
   DialogContent, DialogActions, TextField, Alert, IconButton, Tooltip,
   Stack, MenuItem, Select, FormControl, InputLabel, ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChatIcon from '@mui/icons-material/ChatBubbleOutline';
 import { driversApi, messagesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const BASE_URL = window.location.origin;
 
@@ -190,18 +187,18 @@ export default function Drivers() {
                           {driver.invite_accepted && (
                             <Tooltip title="Message">
                               <IconButton size="small" onClick={() => handleMessage(driver)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>
-                                <ChatIcon sx={{ fontSize: 17 }} />
+                                <IonIcon name="chatbubble-outline" sx={{ fontSize: 17 }} />
                               </IconButton>
                             </Tooltip>
                           )}
                           <Tooltip title="Remove">
                             <IconButton size="small" onClick={() => setDeleteTarget(driver)} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}>
-                              <DeleteOutlineIcon sx={{ fontSize: 17 }} />
+                              <IonIcon name="trash-outline" sx={{ fontSize: 17 }} />
                             </IconButton>
                           </Tooltip>
                         </Box>
 
-                        <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
+                        <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
                       </Box>
                     );
                   })
@@ -218,7 +215,7 @@ export default function Drivers() {
       <Box sx={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
         <Button
           variant="contained"
-          startIcon={<AddIcon />}
+          startIcon={<IonIcon name="add-outline" />}
           onClick={() => { setInviteOpen(true); setNewInvite(null); setInviteError(null); }}
           sx={{ bgcolor: '#FF8C00', color: '#fff', '&:hover': { bgcolor: '#E07800' }, fontWeight: 700, px: 3.5, py: 1.25, borderRadius: 3, fontSize: '0.9rem', boxShadow: '0 4px 16px rgba(255,140,0,0.45)' }}
         >
@@ -244,7 +241,7 @@ export default function Drivers() {
                   </Typography>
                   <Tooltip title={copiedToken === newInvite.invite_token ? 'Copied!' : 'Copy link'}>
                     <IconButton size="small" onClick={() => copyInviteLink(newInvite.invite_token)}>
-                      <ContentCopyIcon sx={{ fontSize: 15, color: copiedToken === newInvite.invite_token ? 'success.main' : 'text.secondary' }} />
+                      <IonIcon name="copy-outline" sx={{ fontSize: 15, color: copiedToken === newInvite.invite_token ? 'success.main' : 'text.secondary' }} />
                     </IconButton>
                   </Tooltip>
                 </Box>

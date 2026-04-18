@@ -3,8 +3,9 @@ import {
   Box, Typography, Card, CardContent, Chip,
   CircularProgress, Stack, Divider,
 } from '@mui/material';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { driverApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const PAY_COLOR = { paid: 'success', pending: 'warning', unpaid: 'default' };
 
@@ -53,7 +54,7 @@ export default function DriverEarnings() {
       <Card>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <AttachMoneyIcon fontSize="small" color="action" />
+            <IonIcon name="cash-outline" fontSize="small" color="action" />
             <Typography variant="subtitle1" fontWeight={600}>Load Breakdown</Typography>
           </Box>
 

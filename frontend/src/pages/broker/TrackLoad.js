@@ -2,15 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bookingsApi, locationsApi } from '../../services/api';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Card, CardContent, CircularProgress, Alert,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PlaceIcon from '@mui/icons-material/Place';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 // Ensure ISO string is treated as UTC even if it lacks a Z suffix
 function toUtc(iso) {
@@ -101,7 +96,7 @@ export default function TrackLoad() {
 
   if (error && !booking) return (
     <Box sx={{ textAlign: 'center', py: 8 }}>
-      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{error}</Typography>
       <Button variant="text" onClick={() => navigate(-1)}>Go back</Button>
     </Box>
@@ -112,7 +107,7 @@ export default function TrackLoad() {
   return (
     <Box sx={{ maxWidth: 520, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2.5 }}>
       <Button
-        startIcon={<ArrowBackIcon />}
+        startIcon={<IonIcon name="arrow-back-outline" />}
         variant="text"
         onClick={() => navigate('/broker/active')}
         sx={{ alignSelf: 'flex-start' }}
@@ -124,7 +119,7 @@ export default function TrackLoad() {
       <Card variant="outlined">
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <NavigationIcon color="primary" sx={{ fontSize: 18 }} />
+            <IonIcon name="navigate-outline" color="primary" sx={{ fontSize: 18 }} />
             <Typography variant="subtitle1" fontWeight={700}>Locate Load</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">{load?.origin} → {load?.destination}</Typography>
@@ -145,7 +140,7 @@ export default function TrackLoad() {
                 borderColor: 'success.main',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <PlaceIcon sx={{ color: 'success.main' }} />
+                <IonIcon name="location-outline" sx={{ color: 'success.main' }} />
               </Box>
               <Box sx={{ flex: 1 }}>
                 <Typography variant="caption" color="text.secondary">Last known location</Typography>
@@ -157,7 +152,7 @@ export default function TrackLoad() {
                 </Typography>
                 {location.updated_at && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                    <AccessTimeIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
+                    <IonIcon name="time-outline" sx={{ fontSize: 12, color: 'text.disabled' }} />
                     <Typography variant="caption" color="text.disabled">
                       Shared {timeAgo(location.updated_at)}
                     </Typography>
@@ -172,7 +167,7 @@ export default function TrackLoad() {
                 variant="contained"
                 color="success"
                 fullWidth
-                startIcon={<PlaceIcon />}
+                startIcon={<IonIcon name="location-outline" />}
               >
                 View Map
               </Button>
@@ -186,14 +181,14 @@ export default function TrackLoad() {
         <CardContent sx={{ textAlign: 'center' }}>
           {!isInTransit ? (
             <Box>
-              <NavigationIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+              <IonIcon name="navigate-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
               <Typography variant="body2" color="text.secondary">
                 Location requests can only be sent once the load is in transit.
               </Typography>
             </Box>
           ) : requested ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
-              <CheckCircleIcon sx={{ fontSize: 44, color: 'success.main' }} />
+              <IonIcon name="checkmark-circle" sx={{ fontSize: 44, color: 'success.main' }} />
               <Box>
                 <Typography variant="subtitle1" fontWeight={700}>Request Sent!</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -204,7 +199,7 @@ export default function TrackLoad() {
                 component={Link}
                 to="/broker/messages"
                 variant="text"
-                startIcon={<ChatBubbleOutlineIcon />}
+                startIcon={<IonIcon name="chatbubble-outline" />}
                 color="primary"
               >
                 View in Messages
@@ -213,7 +208,7 @@ export default function TrackLoad() {
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <Box>
-                <NavigationIcon sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
+                <IonIcon name="navigate-outline" sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
                 <Typography variant="subtitle1" fontWeight={700}>Request Carrier Location</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                   Sends a message to {booking?.carrier_name || 'the carrier'} asking them to share their current location.
@@ -221,7 +216,7 @@ export default function TrackLoad() {
                 </Typography>
               </Box>
               {error && (
-                <Alert severity="error" icon={<WarningAmberIcon />} sx={{ width: '100%' }}>
+                <Alert severity="error" icon={<IonIcon name="warning-outline" />} sx={{ width: '100%' }}>
                   {error}
                 </Alert>
               )}
@@ -231,7 +226,7 @@ export default function TrackLoad() {
                 fullWidth
                 onClick={handleLocate}
                 disabled={requesting}
-                startIcon={requesting ? <CircularProgress size={16} color="inherit" /> : <NavigationIcon />}
+                startIcon={requesting ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="navigate-outline" />}
                 sx={{ py: 1.5 }}
               >
                 {requesting ? 'Sending…' : 'Locate Load'}
@@ -248,7 +243,7 @@ export default function TrackLoad() {
           to="/broker/messages"
           variant="outlined"
           color="inherit"
-          startIcon={<ChatBubbleOutlineIcon />}
+          startIcon={<IonIcon name="chatbubble-outline" />}
           fullWidth
         >
           View Messages with Carrier

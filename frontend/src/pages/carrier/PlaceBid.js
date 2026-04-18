@@ -4,13 +4,10 @@ import {
   Box, Typography, Button, Card, CardContent, Grid, CircularProgress,
   TextField, Alert, Stack, InputAdornment
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { loadsApi, bidsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
+import IonIcon from '../../components/IonIcon';
+
 
 export default function PlaceBid() {
   const { id } = useParams();
@@ -67,7 +64,7 @@ export default function PlaceBid() {
 
   if (!load) return (
     <Box sx={{ textAlign: 'center', py: 10 }}>
-      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
       <Typography color="text.secondary" gutterBottom>Load not found.</Typography>
       <Button component={Link} to="/carrier/loads" variant="text">Back to Load Board</Button>
     </Box>
@@ -77,7 +74,7 @@ export default function PlaceBid() {
     <Box sx={{ maxWidth: 640, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Back */}
       <Button
-        startIcon={<ArrowBackIcon />}
+        startIcon={<IonIcon name="arrow-back-outline" />}
         variant="text"
         onClick={() => navigate(`/carrier/loads/${id}`)}
         sx={{ alignSelf: 'flex-start' }}
@@ -94,7 +91,7 @@ export default function PlaceBid() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                <LocationOnIcon sx={{ fontSize: 12 }} color="action" />
+                <IonIcon name="location-outline" sx={{ fontSize: 12 }} color="action" />
                 <Typography variant="caption" color="text.secondary">Origin</Typography>
               </Box>
               <Typography variant="body1" fontWeight={600}>{load.origin}</Typography>
@@ -102,7 +99,7 @@ export default function PlaceBid() {
             <Typography color="text.secondary">→</Typography>
             <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, mb: 0.5 }}>
-                <LocationOnIcon sx={{ fontSize: 12 }} color="action" />
+                <IonIcon name="location-outline" sx={{ fontSize: 12 }} color="action" />
                 <Typography variant="caption" color="text.secondary">Destination</Typography>
               </Box>
               <Typography variant="body1" fontWeight={600}>{load.dest}</Typography>
@@ -133,7 +130,7 @@ export default function PlaceBid() {
             existingBid.status === 'countered' ? 'info' :
             'warning'
           }
-          icon={<WarningAmberIcon />}
+          icon={<IonIcon name="warning-outline" />}
         >
           <Typography variant="body2" fontWeight={600}>You already have a bid on this load</Typography>
           <Typography variant="body2">
@@ -149,7 +146,7 @@ export default function PlaceBid() {
       {submitted ? (
         <Card sx={{ border: '1px solid', borderColor: 'primary.main' }}>
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
-            <CheckCircleIcon sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
+            <IonIcon name="checkmark-circle" sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
             <Typography variant="h5" fontWeight={700} gutterBottom>Bid Submitted!</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
               Your bid of <strong>${parsed.toLocaleString()}</strong> has been sent to the broker.
@@ -191,7 +188,7 @@ export default function PlaceBid() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <AttachMoneyIcon fontSize="small" />
+                        <IonIcon name="cash-outline" fontSize="small" />
                       </InputAdornment>
                     ),
                   }}
@@ -229,7 +226,7 @@ export default function PlaceBid() {
               </Box>
 
               {error && (
-                <Alert severity="error" icon={<WarningAmberIcon />}>
+                <Alert severity="error" icon={<IonIcon name="warning-outline" />}>
                   {error}
                 </Alert>
               )}

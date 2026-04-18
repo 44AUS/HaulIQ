@@ -5,11 +5,9 @@ import {
   Paper, Chip, Typography, Box, Button, IconButton, Tooltip, Stack,
   CircularProgress
 } from '@mui/material';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PersonIcon from '@mui/icons-material/Person';
 import { rateConfirmationApi } from '../../services/api';
+import IonIcon from '../IonIcon';
+
 
 const TMS_LABEL = {
   dispatched:   { label: 'Dispatched',   color: 'info' },
@@ -55,7 +53,7 @@ export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }
   if (!rows.length) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
-        <LocalShippingIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+        <IonIcon name="car-sport-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
         <Typography color="text.secondary">No active shipments to dispatch.</Typography>
       </Box>
     );
@@ -95,7 +93,7 @@ export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }
                 <TableCell>
                   {row.driver_name ? (
                     <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <PersonIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                      <IonIcon name="person-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
                       <Box>
                         <Typography variant="body2" noWrap sx={{ maxWidth: 110 }}>{row.driver_name}</Typography>
                         {row.driver_phone && (
@@ -164,7 +162,7 @@ export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }
                       >
                         {pdfLoading === row.booking_id
                           ? <CircularProgress size={14} />
-                          : <PictureAsPdfIcon fontSize="small" />
+                          : <IonIcon name="document-outline" fontSize="small" />
                         }
                       </IconButton>
                     </Tooltip>
@@ -173,7 +171,7 @@ export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }
                         size="small"
                         onClick={() => navigate(`/broker/dispatch/${row.booking_id}`)}
                       >
-                        <OpenInNewIcon fontSize="small" />
+                        <IonIcon name="open-outline" fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Stack>

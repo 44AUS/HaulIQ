@@ -4,27 +4,11 @@ import {
   Box, Typography, Card, CardContent, Avatar, Button, IconButton, Chip,
   Tabs, Tab, TextField, Grid, CircularProgress, LinearProgress, Paper,
 } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import ShieldIcon from '@mui/icons-material/Shield';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import BoltIcon from '@mui/icons-material/Bolt';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PhoneIcon from '@mui/icons-material/Phone';
-import BlockIcon from '@mui/icons-material/Block';
-import GppBadIcon from '@mui/icons-material/GppBad';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import CheckIcon from '@mui/icons-material/Check';
 import { useAuth } from '../../context/AuthContext';
 import { brokersApi, blocksApi, authApi, networkApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
+import IonIcon from '../../components/IonIcon';
+
 
 function formatPhone(raw) {
   if (!raw) return '';
@@ -49,8 +33,8 @@ function StarInput({ value, onChange, size = 24 }) {
           sx={{ p: 0.25 }}
         >
           {(hover || value) >= i
-            ? <StarIcon sx={{ fontSize: size, color: '#FFC107' }} />
-            : <StarBorderIcon sx={{ fontSize: size, color: 'text.disabled' }} />
+            ? <IonIcon name="star" sx={{ fontSize: size, color: '#FFC107' }} />
+            : <IonIcon name="star-outline" sx={{ fontSize: size, color: 'text.disabled' }} />
           }
         </IconButton>
       ))}
@@ -126,7 +110,7 @@ function BrokerLogoCircle({ logo, name, size = 64, isOwner = false, onUpload }) 
           >
             {uploading
               ? <CircularProgress size={18} sx={{ color: '#fff' }} />
-              : <CameraAltIcon sx={{ color: '#fff', fontSize: 20 }} />
+              : <IonIcon name="camera-outline" sx={{ color: '#fff', fontSize: 20 }} />
             }
           </Box>
           <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
@@ -282,7 +266,7 @@ export default function BrokerProfile() {
 
   return (
     <Box sx={{ maxWidth: 720, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Button component={Link} to={-1} variant="text" startIcon={<ArrowBackIcon />} sx={{ alignSelf: 'flex-start' }}>
+      <Button component={Link} to={-1} variant="text" startIcon={<IonIcon name="arrow-back-outline" />} sx={{ alignSelf: 'flex-start' }}>
         Back
       </Button>
 
@@ -295,7 +279,7 @@ export default function BrokerProfile() {
               <Box>
                 {isOwner && !logo && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-                    <CameraAltIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+                    <IonIcon name="camera-outline" sx={{ fontSize: 11, color: 'text.disabled' }} />
                     <Typography variant="caption" color="text.disabled">Click the circle to upload your company logo</Typography>
                   </Box>
                 )}
@@ -314,13 +298,13 @@ export default function BrokerProfile() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, flexWrap: 'wrap' }}>
                   {broker.mc && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <LocalShippingIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <IonIcon name="car-sport-outline" sx={{ fontSize: 13, color: 'text.disabled' }} />
                       <Typography variant="caption" color="text.secondary">{broker.mc}</Typography>
                     </Box>
                   )}
                   {broker.phone && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <PhoneIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
+                      <IonIcon name="call-outline" sx={{ fontSize: 13, color: 'text.disabled' }} />
                       <Typography variant="caption" component="a" href={`tel:${broker.phone.replace(/\D/g,'')}`} color="text.secondary" sx={{ textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>{formatPhone(broker.phone)}</Typography>
                     </Box>
                   )}
@@ -338,8 +322,8 @@ export default function BrokerProfile() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                   {[1, 2, 3, 4, 5].map(i => (
                     i <= Math.round(broker.rating || 0)
-                      ? <StarIcon key={i} sx={{ fontSize: 18, color: '#FFC107' }} />
-                      : <StarBorderIcon key={i} sx={{ fontSize: 18, color: 'text.disabled' }} />
+                      ? <IonIcon name="star" key={i} sx={{ fontSize: 18, color: '#FFC107' }} />
+                      : <IonIcon name="star-outline" key={i} sx={{ fontSize: 18, color: 'text.disabled' }} />
                   ))}
                   <Typography variant="body2" fontWeight={700}>{broker.rating || '—'}</Typography>
                   <Typography variant="body2" color="text.secondary">({reviews.length} reviews)</Typography>
@@ -362,14 +346,14 @@ export default function BrokerProfile() {
               {/* Connect button — carriers connecting to this broker */}
               {user?.role === 'carrier' && !isOwner && !networkState.loading && (
                 networkState.status === 'accepted' ? (
-                  <Chip icon={<CheckIcon />} label="Connected" size="small" color="primary" variant="outlined" />
+                  <Chip icon={<IonIcon name="checkmark-outline" />} label="Connected" size="small" color="primary" variant="outlined" />
                 ) : networkState.status === 'pending' ? (
                   <Chip label="Request Sent" size="small" color="warning" variant="outlined" />
                 ) : (
                   <Button
                     variant="outlined"
                     size="small"
-                    startIcon={networkConnecting ? <CircularProgress size={14} color="inherit" /> : <PersonAddIcon />}
+                    startIcon={networkConnecting ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="person-add-outline" />}
                     onClick={handleConnect}
                     disabled={networkConnecting}
                   >
@@ -382,7 +366,7 @@ export default function BrokerProfile() {
                   variant="outlined"
                   color={isBlocked ? 'error' : 'inherit'}
                   size="small"
-                  startIcon={blockLoading ? <CircularProgress size={14} color="inherit" /> : isBlocked ? <GppBadIcon /> : <BlockIcon />}
+                  startIcon={blockLoading ? <CircularProgress size={14} color="inherit" /> : isBlocked ? <IonIcon name="shield-outline" /> : <IonIcon name="ban-outline" />}
                   onClick={handleToggleBlock}
                   disabled={blockLoading}
                 >
@@ -390,7 +374,7 @@ export default function BrokerProfile() {
                 </Button>
               )}
               {user?.role === 'carrier' && !submitted && canReview?.can_review && (
-                <Button variant="contained" size="small" startIcon={<StarIcon />} onClick={() => setShowForm(!showForm)}>
+                <Button variant="contained" size="small" startIcon={<IonIcon name="star" />} onClick={() => setShowForm(!showForm)}>
                   Write a Review
                 </Button>
               )}
@@ -399,7 +383,7 @@ export default function BrokerProfile() {
                   title={canReview.reason} />
               )}
               {submitted && (
-                <Chip icon={<CheckCircleIcon />} label="Review submitted" color="success" size="small" />
+                <Chip icon={<IonIcon name="checkmark-circle" />} label="Review submitted" color="success" size="small" />
               )}
             </Box>
           </Box>
@@ -410,7 +394,7 @@ export default function BrokerProfile() {
       <Card variant="outlined" sx={{ bgcolor: paySpeedVerified ? 'rgba(21,101,192,0.05)' : 'background.paper', borderColor: paySpeedVerified ? 'primary.main' : 'divider' }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-            <AccessTimeIcon sx={{ color: paySpeedVerified ? 'primary.main' : 'text.secondary', mt: 0.25 }} />
+            <IonIcon name="time-outline" sx={{ color: paySpeedVerified ? 'primary.main' : 'text.secondary', mt: 0.25 }} />
             <Box sx={{ flex: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5, flexWrap: 'wrap' }}>
                 <Typography variant="body2" fontWeight={700}>Pay Speed</Typography>
@@ -490,7 +474,7 @@ export default function BrokerProfile() {
                     <Button
                       variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'}
                       size="small"
-                      startIcon={<ThumbUpIcon />}
+                      startIcon={<IonIcon name="thumbs-up-outline" />}
                       onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}
                     >
                       Yes
@@ -499,7 +483,7 @@ export default function BrokerProfile() {
                       variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
                       color={form.wouldWorkAgain === false ? 'error' : 'inherit'}
                       size="small"
-                      startIcon={<ThumbDownIcon />}
+                      startIcon={<IonIcon name="thumbs-down-outline" />}
                       onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}
                     >
                       No
@@ -545,7 +529,7 @@ export default function BrokerProfile() {
             ) : reviews.length === 0 ? (
               <Card variant="outlined">
                 <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                  <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+                  <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
                   <Typography variant="body2" color="text.secondary">No reviews yet. Be the first to review this broker.</Typography>
                 </CardContent>
               </Card>
@@ -571,8 +555,8 @@ export default function BrokerProfile() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {[1, 2, 3, 4, 5].map(i => (
                           i <= review.rating
-                            ? <StarIcon key={i} sx={{ fontSize: 13, color: '#FFC107' }} />
-                            : <StarBorderIcon key={i} sx={{ fontSize: 13, color: 'text.disabled' }} />
+                            ? <IonIcon name="star" key={i} sx={{ fontSize: 13, color: '#FFC107' }} />
+                            : <IonIcon name="star-outline" key={i} sx={{ fontSize: 13, color: 'text.disabled' }} />
                         ))}
                         <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
                         <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>
@@ -640,8 +624,8 @@ export default function BrokerProfile() {
                       <Box sx={{ display: 'flex', gap: 0.25, width: 64 }}>
                         {[1, 2, 3, 4, 5].map(i => (
                           i <= star
-                            ? <StarIcon key={i} sx={{ fontSize: 11, color: '#FFC107' }} />
-                            : <StarBorderIcon key={i} sx={{ fontSize: 11, color: 'text.disabled' }} />
+                            ? <IonIcon name="star" key={i} sx={{ fontSize: 11, color: '#FFC107' }} />
+                            : <IonIcon name="star-outline" key={i} sx={{ fontSize: 11, color: 'text.disabled' }} />
                         ))}
                       </Box>
                       <LinearProgress variant="determinate" value={pct} sx={{ flex: 1, height: 8, borderRadius: 4 }} />

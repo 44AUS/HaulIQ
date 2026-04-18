@@ -4,12 +4,9 @@ import {
   InputLabel, Select, MenuItem, Switch, FormControlLabel, Chip,
   IconButton, Alert, CircularProgress, Divider, InputAdornment,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/AddCircleOutline';
-import DeleteIcon from '@mui/icons-material/Delete';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
@@ -91,13 +88,13 @@ export default function LaneWatches() {
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
         <Box>
           <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BookmarkIcon color="primary" /> Lane Watchlist
+            <IonIcon name="bookmark" color="primary" /> Lane Watchlist
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Get notified instantly when matching loads are posted.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setShowForm(v => !v)} size="small">
+        <Button variant="contained" startIcon={<IonIcon name="add-outline" />} onClick={() => setShowForm(v => !v)} size="small">
           Add Watch
         </Button>
       </Box>
@@ -209,7 +206,7 @@ export default function LaneWatches() {
         </Box>
       ) : watches.length === 0 ? (
         <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-          <NotificationsActiveIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+          <IonIcon name="notifications-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
           <Typography variant="h6" fontWeight={600} gutterBottom>No lane watches yet</Typography>
           <Typography variant="body2" color="text.secondary">
             Add a watch above and we'll notify you the moment a matching load is posted.
@@ -251,8 +248,8 @@ export default function LaneWatches() {
                   label={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       {w.active
-                        ? <NotificationsActiveIcon fontSize="small" color="success" />
-                        : <NotificationsOffIcon fontSize="small" color="disabled" />}
+                        ? <IonIcon name="notifications-outline" fontSize="small" color="success" />
+                        : <IonIcon name="notifications-off-outline" fontSize="small" color="disabled" />}
                       <Typography variant="caption" color={w.active ? 'success.main' : 'text.disabled'}>
                         {w.active ? 'Active' : 'Paused'}
                       </Typography>
@@ -266,7 +263,7 @@ export default function LaneWatches() {
                   onClick={() => handleDelete(w.id)}
                   sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}
                 >
-                  <DeleteIcon fontSize="small" />
+                  <IonIcon name="trash-outline" fontSize="small" />
                 </IconButton>
               </Box>
             </Box>

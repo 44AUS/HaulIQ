@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Card, CardContent, Chip, Button, Avatar,
   useTheme, Divider, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import ExtensionIcon from '@mui/icons-material/Extension';
 
 // ─── Integration definitions ─────────────────────────────────────────────────
 const INTEGRATIONS = [
@@ -192,7 +191,7 @@ function IntegrationCard({ integration, onLearnMore }) {
           </Box>
 
           {integration.connected && (
-            <CheckCircleIcon sx={{ fontSize: 18, color: '#2dd36f', flexShrink: 0, mt: 0.25 }} />
+            <IonIcon name="checkmark-circle" sx={{ fontSize: 18, color: '#2dd36f', flexShrink: 0, mt: 0.25 }} />
           )}
         </Box>
 
@@ -206,7 +205,7 @@ function IntegrationCard({ integration, onLearnMore }) {
         {/* Footer */}
         {integration.managed ? (
           <Chip
-            icon={<CheckCircleIcon sx={{ fontSize: '14px !important' }} />}
+            icon={<IonIcon name="checkmark-circle" sx={{ fontSize: '14px !important' }} />}
             label="Managed by HaulIQ"
             size="small"
             sx={{
@@ -222,7 +221,7 @@ function IntegrationCard({ integration, onLearnMore }) {
             variant="outlined"
             size="small"
             fullWidth
-            endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />}
+            endIcon={<IonIcon name="open-outline" sx={{ fontSize: '14px !important' }} />}
             onClick={() => onLearnMore(integration)}
             sx={{ borderRadius: 1.5, textTransform: 'none', fontSize: '0.78rem', fontWeight: 600 }}
           >
@@ -261,7 +260,7 @@ export default function Integrations() {
       {/* Page header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-          <ExtensionIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+          <IonIcon name="extension-puzzle-outline" sx={{ fontSize: 28, color: 'primary.main' }} />
           <Typography variant="h5" fontWeight={700}>Integrations</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">

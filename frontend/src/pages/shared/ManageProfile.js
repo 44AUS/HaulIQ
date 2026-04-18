@@ -6,25 +6,11 @@ import {
   IconButton, Tooltip, LinearProgress, MenuItem, Select, FormControl, InputLabel,
   Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import LockIcon from '@mui/icons-material/Lock';
-import BusinessIcon from '@mui/icons-material/Business';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import EmailIcon from '@mui/icons-material/Email';
-import SecurityIcon from '@mui/icons-material/Security';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAuth } from '../../context/AuthContext';
 import { authApi, freightPaymentsApi, profileDocumentsApi } from '../../services/api';
 import { useTheme } from '@mui/material/styles';
+import IonIcon from '../../components/IonIcon';
+
 
 function resizeToDataUrl(file, size = 256) {
   return new Promise((resolve) => {
@@ -204,14 +190,14 @@ function OverviewTab({ setSnackbar }) {
         {showEmail && value && (
           <Tooltip title="Send email">
             <IconButton size="small" onClick={() => window.location.href = `mailto:${value}`} sx={{ color: 'warning.main', p: 0.5 }}>
-              <EmailIcon sx={{ fontSize: 16 }} />
+              <IonIcon name="mail-outline" sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         )}
         {copyKey && value && (
           <Tooltip title={copied === copyKey ? 'Copied!' : 'Copy'}>
             <IconButton size="small" onClick={() => copy(value, copyKey)} sx={{ color: copied === copyKey ? 'success.main' : 'text.disabled', p: 0.5 }}>
-              <ContentCopyIcon sx={{ fontSize: 16 }} />
+              <IonIcon name="copy-outline" sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         )}
@@ -255,13 +241,13 @@ function OverviewTab({ setSnackbar }) {
             </Typography>
           )}
           <Box className="cam-overlay" sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
-            {avatarUploading ? <CircularProgress size={28} sx={{ color: '#fff' }} /> : <CameraAltIcon sx={{ color: '#fff', fontSize: 28 }} />}
+            {avatarUploading ? <CircularProgress size={28} sx={{ color: '#fff' }} /> : <IonIcon name="camera-outline" sx={{ color: '#fff', fontSize: 28 }} />}
           </Box>
         </Box>
         {/* "..." menu button */}
         <Box sx={{ position: 'absolute', top: 8, right: 8, bgcolor: isDark ? 'rgba(30,30,30,0.85)' : 'rgba(255,255,255,0.85)', borderRadius: '6px', backdropFilter: 'blur(4px)' }}>
           <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
-            <MoreVertIcon sx={{ fontSize: 18 }} />
+            <IonIcon name="ellipsis-vertical-outline" sx={{ fontSize: 18 }} />
           </IconButton>
         </Box>
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
@@ -274,7 +260,7 @@ function OverviewTab({ setSnackbar }) {
         <Box sx={cardSx}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75 }}>
             <Typography variant="subtitle1" fontWeight={700}>Employee Info</Typography>
-            <Button size="small" startIcon={<EditIcon sx={{ fontSize: 14 }} />} onClick={() => { setProfile({ name: user?.name || '', phone: user?.phone || '', company: user?.company || '', mc: user?.mc || '', dot: user?.dot || '' }); setStatus(null); setEditOpen(true); }}
+            <Button size="small" startIcon={<IonIcon name="create-outline" sx={{ fontSize: 14 }} />} onClick={() => { setProfile({ name: user?.name || '', phone: user?.phone || '', company: user?.company || '', mc: user?.mc || '', dot: user?.dot || '' }); setStatus(null); setEditOpen(true); }}
               sx={{ fontWeight: 700, fontSize: '0.72rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Edit
             </Button>
@@ -325,7 +311,7 @@ function OverviewTab({ setSnackbar }) {
         <Box sx={cardSx}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75 }}>
             <Typography variant="subtitle1" fontWeight={700}>Notes</Typography>
-            <Button size="small" startIcon={<EditIcon sx={{ fontSize: 14 }} />} onClick={() => setNotesOpen(true)}
+            <Button size="small" startIcon={<IonIcon name="create-outline" sx={{ fontSize: 14 }} />} onClick={() => setNotesOpen(true)}
               sx={{ fontWeight: 700, fontSize: '0.72rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Edit
             </Button>
@@ -402,7 +388,7 @@ function EarningsTab() {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <AccessTimeIcon color="primary" />
+            <IonIcon name="time-outline" color="primary" />
             <Typography variant="subtitle1" fontWeight={700}>Clock-In Status</Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -419,7 +405,7 @@ function EarningsTab() {
             {(lat || lng) && (
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <LocationOnIcon sx={{ fontSize: 14 }} /> Location
+                  <IonIcon name="location-outline" sx={{ fontSize: 14 }} /> Location
                 </Typography>
                 <Typography variant="body2" fontWeight={600}>
                   {lat?.toFixed(5)}, {lng?.toFixed(5)}
@@ -432,7 +418,7 @@ function EarningsTab() {
 
       <Card variant="outlined">
         <CardContent sx={{ p: 3, textAlign: 'center' }}>
-          <AccessTimeIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+          <IonIcon name="time-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
           <Typography variant="body1" fontWeight={600} color="text.secondary">Clock-In History Coming Soon</Typography>
           <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>
             Detailed earnings and shift history will appear here.
@@ -499,7 +485,7 @@ function DocumentsTab() {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-            <UploadFileIcon color="primary" />
+            <IonIcon name="cloud-upload-outline" color="primary" />
             <Typography variant="subtitle1" fontWeight={700}>Upload Document</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
@@ -516,7 +502,7 @@ function DocumentsTab() {
             </FormControl>
             <Button
               variant="contained"
-              startIcon={uploading ? <CircularProgress size={14} color="inherit" /> : <AddIcon />}
+              startIcon={uploading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="add-outline" />}
               disabled={uploading}
               onClick={() => fileRef.current.click()}
               sx={{ fontWeight: 700 }}
@@ -541,7 +527,7 @@ function DocumentsTab() {
           </Box>
         ) : docs.length === 0 ? (
           <Box sx={{ p: 5, textAlign: 'center' }}>
-            <InsertDriveFileIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+            <IonIcon name="document-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
             <Typography variant="body2" color="text.secondary">No documents uploaded yet.</Typography>
           </Box>
         ) : (
@@ -550,7 +536,7 @@ function DocumentsTab() {
               <Box key={doc.id}>
                 {i > 0 && <Divider />}
                 <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.75, gap: 2, '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' } }}>
-                  <InsertDriveFileIcon sx={{ fontSize: 32, color: 'primary.main', flexShrink: 0 }} />
+                  <IonIcon name="document-outline" sx={{ fontSize: 32, color: 'primary.main', flexShrink: 0 }} />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={600} noWrap>{doc.file_name}</Typography>
                     <Box sx={{ display: 'flex', gap: 1, mt: 0.5, flexWrap: 'wrap' }}>
@@ -563,7 +549,7 @@ function DocumentsTab() {
                   </Box>
                   <Tooltip title="Delete">
                     <IconButton size="small" onClick={() => handleDelete(doc.id)} sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}>
-                      <DeleteOutlineIcon fontSize="small" />
+                      <IonIcon name="trash-outline" fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -595,7 +581,7 @@ function BusinessesTab() {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <BusinessIcon color="primary" />
+            <IonIcon name="business-outline" color="primary" />
             <Typography variant="subtitle1" fontWeight={700}>Business Information</Typography>
           </Box>
           {fields.length === 0 ? (
@@ -618,7 +604,7 @@ function BusinessesTab() {
 
       <Card variant="outlined">
         <CardContent sx={{ p: 3, textAlign: 'center' }}>
-          <BusinessIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+          <IonIcon name="business-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
           <Typography variant="body1" fontWeight={600} color="text.secondary">Multiple Businesses Coming Soon</Typography>
           <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>
             You'll be able to manage multiple business entities from this tab.
@@ -636,7 +622,7 @@ function TimeOffTab() {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <BeachAccessIcon color="primary" />
+            <IonIcon name="umbrella-outline" color="primary" />
             <Typography variant="subtitle1" fontWeight={700}>Time Off</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -647,7 +633,7 @@ function TimeOffTab() {
 
       <Card variant="outlined">
         <CardContent sx={{ p: 3, textAlign: 'center' }}>
-          <BeachAccessIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
+          <IonIcon name="umbrella-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
           <Typography variant="body1" fontWeight={600} color="text.secondary">Time Off Scheduling Coming Soon</Typography>
           <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>
             Set vacation periods, block dates, and manage availability from here.

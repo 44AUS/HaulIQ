@@ -5,11 +5,9 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, InputAdornment, useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { truckPostsApi, equipmentTypesApi, messagesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const TABS = [
   { key: 'all',       label: 'ALL' },
@@ -132,7 +130,7 @@ export default function TruckBoard() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ fontSize: 16, color: 'text.disabled' }} />
+                  <IonIcon name="search-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />
                 </InputAdornment>
               ),
               sx: { fontSize: '0.82rem' },
@@ -188,7 +186,7 @@ export default function TruckBoard() {
         <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
           <Tooltip title="Refresh">
             <IconButton size="small" onClick={() => fetchPosts(equipmentFilter, locationSearch, true)} sx={{ color: 'text.secondary' }}>
-              <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -202,7 +200,7 @@ export default function TruckBoard() {
           </Box>
         ) : tabItems.length === 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-            <LocalShippingIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
             <Typography variant="body2" color="text.secondary">
               {equipmentFilter || locationSearch ? 'No trucks match your filters.' : 'No trucks in this category.'}
             </Typography>
@@ -290,7 +288,7 @@ export default function TruckBoard() {
                       <TableCell sx={{ width: 48, minWidth: 48, pr: 1 }} onClick={e => e.stopPropagation()}>
                         <Tooltip title="Contact carrier">
                           <IconButton size="small" onClick={e => handleContact(e, post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                            <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="chatbubble-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         </Tooltip>
                       </TableCell>

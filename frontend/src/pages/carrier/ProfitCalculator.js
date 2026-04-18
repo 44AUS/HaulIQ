@@ -1,13 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Card, CardContent, Grid, Button, TextField,
   InputAdornment, Stack
 } from '@mui/material';
-import CalculateIcon from '@mui/icons-material/Calculate';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import RemoveIcon from '@mui/icons-material/Remove';
-import RefreshIcon from '@mui/icons-material/Refresh';
 
 export default function ProfitCalculator() {
   const [form, setForm] = useState({
@@ -91,7 +88,7 @@ export default function ProfitCalculator() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <CalculateIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+          <IonIcon name="calculator-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
           <Typography variant="h5" fontWeight={700}>Profit Calculator</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -129,7 +126,7 @@ export default function ProfitCalculator() {
               <Button
                 onClick={() => setForm({ rate: '', loadedMiles: '', deadheadMiles: '', fuelPrice: '3.85', mpg: '7.2', driverPay: '', tolls: '', misc: '' })}
                 variant="outlined"
-                startIcon={<RefreshIcon />}
+                startIcon={<IonIcon name="refresh-outline" />}
                 fullWidth
                 sx={{ mt: 2 }}
               >

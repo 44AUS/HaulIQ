@@ -4,8 +4,9 @@ import {
   Box, Typography, Card, CardContent, Chip, CircularProgress,
   Stack, TextField, InputAdornment,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import { driverApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const STATUS_COLORS = {
   dispatched:   'default',
@@ -48,7 +49,7 @@ export default function DriverLoads() {
         placeholder="Search by origin, destination, or commodity…"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
+        InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" fontSize="small" /></InputAdornment> }}
         sx={{ maxWidth: 400 }}
       />
 

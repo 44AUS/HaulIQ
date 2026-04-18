@@ -4,10 +4,9 @@ import {
   Box, Typography, Button, Card, CardContent, Chip,
   CircularProgress, Stack, Alert, Stepper, Step, StepLabel,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { driverApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered'];
@@ -55,7 +54,7 @@ export default function DriverLoadDetail() {
   );
   if (error || !booking) return (
     <Box sx={{ textAlign: 'center', py: 10 }}>
-      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
       <Typography color="text.secondary">{error || 'Load not found.'}</Typography>
       <Button variant="text" onClick={() => navigate(-1)}>Go back</Button>
     </Box>
@@ -68,7 +67,7 @@ export default function DriverLoadDetail() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Button startIcon={<ArrowBackIcon />} variant="text" onClick={() => navigate('/driver/loads')} sx={{ alignSelf: 'flex-start' }}>
+      <Button startIcon={<IonIcon name="arrow-back-outline" />} variant="text" onClick={() => navigate('/driver/loads')} sx={{ alignSelf: 'flex-start' }}>
         Back to Loads
       </Button>
 
@@ -91,7 +90,7 @@ export default function DriverLoadDetail() {
           </Stepper>
 
           {isDelivered ? (
-            <Alert severity="success" icon={<CheckCircleIcon />}>
+            <Alert severity="success" icon={<IonIcon name="checkmark-circle" />}>
               <Typography variant="body2" fontWeight={600}>Load delivered</Typography>
               {booking.tms_status === 'pod_received' && (
                 <Typography variant="caption">POD confirmed by carrier.</Typography>

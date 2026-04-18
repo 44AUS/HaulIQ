@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Box, Typography, IconButton, Button } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import IonIcon from './IonIcon';
+
 
 const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
@@ -61,7 +62,7 @@ export default function UpdateNotifier() {
       }}
     >
       <IconButton size="small" onClick={() => setVisible(false)} sx={{ color: 'text.secondary', flexShrink: 0 }}>
-        <CloseIcon fontSize="small" />
+        <IonIcon name="close-outline" fontSize="small" />
       </IconButton>
       <Typography variant="body2" sx={{ flex: 1, fontWeight: 500, color: 'text.primary' }}>
         New version available!

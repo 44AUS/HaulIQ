@@ -5,11 +5,9 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Grid, Chip,
   List, ListItem, ListItemIcon, ListItemText, IconButton,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CloseIcon from '@mui/icons-material/Close';
 import { useAuth } from '../../context/AuthContext';
+import IonIcon from '../../components/IonIcon';
+
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -86,7 +84,7 @@ export default function ManageSubscription() {
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       {currentSub?.status === 'past_due' && (
-        <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 3 }}>
+        <Alert severity="warning" icon={<IonIcon name="warning-outline" />} sx={{ mb: 3 }}>
           Your payment is past due. Update your payment method to keep access.
         </Alert>
       )}
@@ -126,7 +124,7 @@ export default function ManageSubscription() {
                     {(plan.features || []).map((f, i) => (
                       <ListItem key={i} disablePadding sx={{ py: 0.25 }}>
                         <ListItemIcon sx={{ minWidth: 28 }}>
-                          <CheckIcon sx={{ fontSize: 15, color: 'primary.main' }} />
+                          <IonIcon name="checkmark-outline" sx={{ fontSize: 15, color: 'primary.main' }} />
                         </ListItemIcon>
                         <ListItemText primary={<Typography variant="body2" color="text.secondary">{f}</Typography>} />
                       </ListItem>
@@ -139,7 +137,7 @@ export default function ManageSubscription() {
                       variant={isUpgrade ? 'contained' : 'outlined'}
                       fullWidth
                       onClick={() => handleSelectPlan(plan)}
-                      startIcon={plan.price > 0 ? <CreditCardIcon /> : null}
+                      startIcon={plan.price > 0 ? <IonIcon name="card-outline" /> : null}
                     >
                       {isUpgrade ? `Upgrade to ${plan.name}` : `Switch to ${plan.name}`}
                     </Button>
@@ -173,7 +171,7 @@ export default function ManageSubscription() {
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           Cancel Subscription?
           <IconButton size="small" onClick={() => setShowCancelModal(false)}>
-            <CloseIcon fontSize="small" />
+            <IonIcon name="close-outline" fontSize="small" />
           </IconButton>
         </DialogTitle>
         <DialogContent>

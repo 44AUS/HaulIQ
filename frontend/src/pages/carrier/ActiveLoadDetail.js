@@ -5,23 +5,12 @@ import {
   CircularProgress, Stack, Alert, TextField, Divider, Avatar,
   Stepper, Step, StepLabel, Grid, Paper,
 } from '@mui/material';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import MessageIcon from '@mui/icons-material/Message';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import FlagIcon from '@mui/icons-material/Flag';
-import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
-import AddCommentIcon from '@mui/icons-material/AddComment';
-import PlaceIcon from '@mui/icons-material/Place';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
 import DocumentPanel from '../../components/documents/DocumentPanel';
+import IonIcon from '../../components/IonIcon';
+
 
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = {
@@ -99,10 +88,10 @@ const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_r
 
 // ── Progress stepper (matches LoadDetail style) ───────────────────────────────
 const BOOKING_STEPS = [
-  { key: 'quoted',     label: 'Quoted',     icon: <PlaceIcon sx={{ fontSize: 16 }} /> },
-  { key: 'booked',     label: 'Booked',     icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> },
-  { key: 'in_transit', label: 'In Transit', icon: <NavigationIcon sx={{ fontSize: 16 }} /> },
-  { key: 'delivered',  label: 'Delivered',  icon: <LocalShippingIcon sx={{ fontSize: 16 }} /> },
+  { key: 'quoted',     label: 'Quoted',     icon: <IonIcon name="location-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'booked',     label: 'Booked',     icon: <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} /> },
+  { key: 'in_transit', label: 'In Transit', icon: <IonIcon name="navigate-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'delivered',  label: 'Delivered',  icon: <IonIcon name="car-sport-outline" sx={{ fontSize: 16 }} /> },
 ];
 
 function stepIndex(status) {
@@ -126,7 +115,7 @@ function BookingStepper({ status }) {
           return (
             <Box key={step.key} sx={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
               <Box sx={{ width: CIRCLE, height: CIRCLE, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: done || current ? 'primary.main' : 'background.paper', border: '2.5px solid', borderColor: done || current ? 'primary.main' : 'action.disabled', color: done || current ? '#fff' : 'text.disabled', transition: 'all 0.3s ease', boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none' }}>
-                {done ? <CheckCircleIcon sx={{ fontSize: 16 }} /> : current ? step.icon : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />}
+                {done ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} /> : current ? step.icon : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />}
               </Box>
             </Box>
           );
@@ -218,7 +207,7 @@ export default function ActiveLoadDetail() {
 
   if (error || !booking) return (
     <Box sx={{ textAlign: 'center', py: 10 }}>
-      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
       <Typography color="text.secondary" gutterBottom>{error || 'Booking not found.'}</Typography>
       <Button variant="text" onClick={() => navigate('/carrier/job-manager')}>Go back</Button>
     </Box>
@@ -230,7 +219,7 @@ export default function ActiveLoadDetail() {
       <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
         {load?.origin && load?.destination
           ? <LoadHeroMap origin={load.origin} dest={load.destination} />
-          : <Box sx={{ height: 420, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><LocalShippingIcon sx={{ fontSize: 48, color: 'text.disabled' }} /></Box>
+          : <Box sx={{ height: 420, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" sx={{ fontSize: 48, color: 'text.disabled' }} /></Box>
         }
       </Box>
       <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
@@ -241,7 +230,7 @@ export default function ActiveLoadDetail() {
             <Box sx={{ mb: 2.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
                 <Typography variant="caption" color="text.secondary">Booking #{bookingId.slice(0, 8)}</Typography>
-                {load?.load_type && <Chip icon={<LocalShippingIcon />} label={load.load_type.replace('_', ' ')} size="small" color="primary" variant="outlined" />}
+                {load?.load_type && <Chip icon={<IonIcon name="car-sport-outline" />} label={load.load_type.replace('_', ' ')} size="small" color="primary" variant="outlined" />}
                 {booking.tms_status && <Chip label={TMS_STEPS[tmsStep] || booking.tms_status} size="small" color={tmsStep >= 3 ? 'success' : 'info'} />}
               </Box>
               <Typography variant="h6" fontWeight={700}>{load?.origin} → {load?.destination}</Typography>
@@ -262,7 +251,7 @@ export default function ActiveLoadDetail() {
                     <Box>
                       <Typography variant="caption" color="text.secondary">{label}</Typography>
                       <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr || '—'}</Typography>
-                      {date && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}><CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} /><Typography variant="caption" color="text.disabled">{date}</Typography></Box>}
+                      {date && <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}><IonIcon name="calendar-outline" sx={{ fontSize: 11, color: 'text.disabled' }} /><Typography variant="caption" color="text.disabled">{date}</Typography></Box>}
                     </Box>
                   </Box>
                 </Grid>
@@ -278,7 +267,7 @@ export default function ActiveLoadDetail() {
             )}
             {(booking.driver_name || booking.driver_phone) && (
               <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <PersonIcon color="action" fontSize="small" />
+                <IonIcon name="person-outline" color="action" fontSize="small" />
                 <Box><Typography variant="caption" color="text.secondary" display="block">Assigned Driver</Typography><Typography variant="body2" fontWeight={600}>{booking.driver_name || '—'}</Typography>{booking.driver_phone && <Typography variant="caption" color="text.secondary">{booking.driver_phone}</Typography>}</Box>
               </Box>
             )}
@@ -300,18 +289,18 @@ export default function ActiveLoadDetail() {
             <CardContent>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Load Status</Typography>
               <Stack spacing={1.5}>
-                {booking.status === 'pending' && <Alert severity="warning" icon={<AccessTimeIcon />}><Typography variant="body2" fontWeight={600}>Awaiting Broker Approval</Typography><Typography variant="caption">The broker hasn't confirmed your booking yet.</Typography></Alert>}
-                {booking.status === 'approved' && <Button onClick={handlePickup} disabled={actionLoading} variant="contained" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <NavigationIcon />}>Confirm Pickup — Mark as In Transit</Button>}
-                {booking.status === 'in_transit' && <Button onClick={handleDeliver} disabled={actionLoading} variant="contained" color="success" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <FlagIcon />}>Confirm Delivery — Mark as Delivered</Button>}
-                {booking.status === 'completed' && <Alert severity="success" icon={<CheckCircleIcon />}><Typography variant="body2" fontWeight={600}>Load Delivered</Typography><Typography variant="caption">This load has been completed.</Typography></Alert>}
-                {load?.broker_user_id && <Button component={Link} to={`/carrier/messages?userId=${load.broker_user_id}`} variant="outlined" fullWidth startIcon={<MessageIcon />}>Message Broker</Button>}
+                {booking.status === 'pending' && <Alert severity="warning" icon={<IonIcon name="time-outline" />}><Typography variant="body2" fontWeight={600}>Awaiting Broker Approval</Typography><Typography variant="caption">The broker hasn't confirmed your booking yet.</Typography></Alert>}
+                {booking.status === 'approved' && <Button onClick={handlePickup} disabled={actionLoading} variant="contained" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="navigate-outline" />}>Confirm Pickup — Mark as In Transit</Button>}
+                {booking.status === 'in_transit' && <Button onClick={handleDeliver} disabled={actionLoading} variant="contained" color="success" fullWidth size="large" startIcon={actionLoading ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="flag-outline" />}>Confirm Delivery — Mark as Delivered</Button>}
+                {booking.status === 'completed' && <Alert severity="success" icon={<IonIcon name="checkmark-circle" />}><Typography variant="body2" fontWeight={600}>Load Delivered</Typography><Typography variant="caption">This load has been completed.</Typography></Alert>}
+                {load?.broker_user_id && <Button component={Link} to={`/carrier/messages?userId=${load.broker_user_id}`} variant="outlined" fullWidth startIcon={<IonIcon name="chatbubble-outline" />}>Message Broker</Button>}
                 {load?.broker_name && (
                   <Box sx={{ pt: 1 }}>
                     <Typography variant="caption" color="text.secondary" display="block" gutterBottom>Broker</Typography>
                     <Typography variant="body2" fontWeight={600}>{load.broker_name}</Typography>
                     {load.broker_mc && <Typography variant="caption" color="text.secondary">MC# {load.broker_mc}</Typography>}
-                    {load.broker_email && <Button component="a" href={`mailto:${load.broker_email}`} variant="text" size="small" startIcon={<EmailIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_email}</Button>}
-                    {load.broker_phone && <Button component="a" href={`tel:${load.broker_phone}`} variant="text" size="small" startIcon={<PhoneIcon fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_phone}</Button>}
+                    {load.broker_email && <Button component="a" href={`mailto:${load.broker_email}`} variant="text" size="small" startIcon={<IonIcon name="mail-outline" fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_email}</Button>}
+                    {load.broker_phone && <Button component="a" href={`tel:${load.broker_phone}`} variant="text" size="small" startIcon={<IonIcon name="call-outline" fontSize="small" />} sx={{ display: 'flex', justifyContent: 'flex-start', px: 0 }}>{load.broker_phone}</Button>}
                   </Box>
                 )}
               </Stack>
@@ -321,7 +310,7 @@ export default function ActiveLoadDetail() {
             <Card {...CARD_SX} sx={CARD_SX.sx}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <AddCommentIcon fontSize="small" color="action" />
+                  <IonIcon name="chatbox-outline" fontSize="small" color="action" />
                   <Typography variant="subtitle1" fontWeight={600}>Check Call Log</Typography>
                   {checkCalls.length > 0 && <Chip label={checkCalls.length} size="small" />}
                 </Box>
@@ -397,7 +386,7 @@ export default function ActiveLoadDetail() {
       <Card {...CARD_SX} sx={{ ...CARD_SX.sx, flex: 1 }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <AddCommentIcon color="primary" fontSize="small" />
+            <IonIcon name="chatbox-outline" color="primary" fontSize="small" />
             <Typography variant="subtitle1" fontWeight={600}>Documents</Typography>
           </Box>
           <DocumentPanel loadId={load?.id} bookingId={bookingId} />

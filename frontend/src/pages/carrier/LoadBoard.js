@@ -7,19 +7,10 @@ import {
   TableHead, TableRow, Avatar, OutlinedInput, Checkbox, ListItemText,
   useTheme, Drawer, Tooltip, CircularProgress,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import SquareIcon from '@mui/icons-material/Square';
-import StarIcon from '@mui/icons-material/Star';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
+import IonIcon from '../../components/IonIcon';
+
 
 const SORT_OPTIONS = [
   { value: 'profit', label: 'Highest Net Profit' },
@@ -154,7 +145,7 @@ function TableView({ loads, equipmentTypes }) {
                         </Typography>
                         {load.broker.rating > 0 && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                            <StarIcon sx={{ fontSize: 9, color: 'warning.main' }} />
+                            <IonIcon name="star" sx={{ fontSize: 9, color: 'warning.main' }} />
                             <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
                               {load.broker.rating?.toFixed(1)}
                             </Typography>
@@ -188,9 +179,9 @@ function TableView({ loads, equipmentTypes }) {
                   <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
                   <Box sx={{ pl: 2, display: 'flex', alignItems: 'stretch', gap: 1 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.25, pb: 0.25 }}>
-                      <FiberManualRecordIcon sx={{ fontSize: 8, color: 'primary.main', flexShrink: 0 }} />
+                      <IonIcon name="ellipse" sx={{ fontSize: 8, color: 'primary.main', flexShrink: 0 }} />
                       <Box sx={{ width: '1.5px', flex: 1, bgcolor: 'divider', my: '2px' }} />
-                      <SquareIcon sx={{ fontSize: 8, color: 'text.secondary', flexShrink: 0 }} />
+                      <IonIcon name="square-outline" sx={{ fontSize: 8, color: 'text.secondary', flexShrink: 0 }} />
                     </Box>
                     <Box sx={{ minWidth: 0 }}>
                       <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.6 }}>{originCity}</Typography>
@@ -232,9 +223,9 @@ function TableView({ loads, equipmentTypes }) {
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton size="small" onClick={e => handleSave(e, load)}
                       sx={{ color: isSaved ? 'primary.main' : 'text.disabled' }}>
-                      {isSaved ? <BookmarkIcon sx={{ fontSize: 15 }} /> : <BookmarkBorderIcon sx={{ fontSize: 15 }} />}
+                      {isSaved ? <IonIcon name="bookmark" sx={{ fontSize: 15 }} /> : <IonIcon name="bookmark-outline" sx={{ fontSize: 15 }} />}
                     </IconButton>
-                    <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
+                    <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled' }} />
                   </Box>
                 </TableCell>
               </TableRow>
@@ -279,10 +270,10 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
               onChange={e => setPF('origin', e.target.value)}
               sx={{ mb: 1 }}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
                 endAdornment: pf.origin ? (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setPF('origin', '')}><ClearIcon sx={{ fontSize: 12 }} /></IconButton>
+                    <IconButton size="small" onClick={() => setPF('origin', '')}><IonIcon name="close-outline" sx={{ fontSize: 12 }} /></IconButton>
                   </InputAdornment>
                 ) : null,
               }}
@@ -304,10 +295,10 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
               onChange={e => setPF('dest', e.target.value)}
               sx={{ mb: 1 }}
               InputProps={{
-                startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
+                startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
                 endAdornment: pf.dest ? (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setPF('dest', '')}><ClearIcon sx={{ fontSize: 12 }} /></IconButton>
+                    <IconButton size="small" onClick={() => setPF('dest', '')}><IonIcon name="close-outline" sx={{ fontSize: 12 }} /></IconButton>
                   </InputAdornment>
                 ) : null,
               }}
@@ -521,7 +512,7 @@ export default function LoadBoard() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Button
               size="small"
-              startIcon={<FilterListIcon sx={{ fontSize: 16 }} />}
+              startIcon={<IonIcon name="funnel-outline" sx={{ fontSize: 16 }} />}
               onClick={() => setFilterOpen(true)}
               sx={{
                 fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
@@ -555,7 +546,7 @@ export default function LoadBoard() {
           <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
             <Tooltip title="Refresh">
               <IconButton size="small" onClick={refresh} sx={{ color: 'text.secondary' }}>
-                <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+                <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
               </IconButton>
             </Tooltip>
           </Box>
@@ -574,7 +565,7 @@ export default function LoadBoard() {
             </Box>
           ) : tabLoads.length === 0 ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-              <LocalShippingIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+              <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
               <Typography variant="body2" color="text.secondary">No loads match your filters</Typography>
               {hasActive && (
                 <Button variant="text" size="small" onClick={() => { setPF_state(INIT); fetchLoads(INIT); }}>

@@ -4,21 +4,13 @@ import {
   Box, Typography, Button, TextField, CircularProgress,
   InputAdornment, IconButton,
 } from '@mui/material';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CheckIcon from '@mui/icons-material/Check';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useLoadScript, Autocomplete } from '@react-google-maps/api';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
 import AuthHeader from '../components/AuthHeader';
 import WaveBg from '../components/WaveBg';
+import IonIcon from '../components/IonIcon';
+
 
 const GOOGLE_LIBRARIES = ['places'];
 
@@ -191,8 +183,8 @@ export default function Signup() {
 
                 <Box sx={{ px: { xs: 3, sm: 4 }, pb: 1 }}>
                   {[
-                    { r: 'carrier', title: t.carrier, desc: t.carrierDesc, icon: <LocalShippingIcon sx={{ fontSize: 26 }} /> },
-                    { r: 'broker',  title: t.broker,  desc: t.brokerDesc,  icon: <BusinessCenterIcon sx={{ fontSize: 26 }} /> },
+                    { r: 'carrier', title: t.carrier, desc: t.carrierDesc, icon: <IonIcon name="car-sport-outline" sx={{ fontSize: 26 }} /> },
+                    { r: 'broker',  title: t.broker,  desc: t.brokerDesc,  icon: <IonIcon name="briefcase-outline" sx={{ fontSize: 26 }} /> },
                   ].map(opt => {
                     const selected = role === opt.r;
                     return (
@@ -205,7 +197,7 @@ export default function Signup() {
                         '&:hover': { borderColor: selected ? BRAND_LIGHT : rowHoverBorder, bgcolor: selected ? 'rgba(66,165,245,0.08)' : rowHoverBg },
                       }}>
                         <Box sx={{ width: 20, height: 20, borderRadius: '4px', flexShrink: 0, border: '2px solid', borderColor: selected ? BRAND_LIGHT : checkUnsel, bgcolor: selected ? BRAND_LIGHT : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}>
-                          {selected && <CheckIcon sx={{ fontSize: 13, color: '#fff' }} />}
+                          {selected && <IonIcon name="checkmark-outline" sx={{ fontSize: 13, color: '#fff' }} />}
                         </Box>
                         <Box sx={{ flex: 1 }}>
                           <Typography variant="body1" fontWeight={700} sx={{ color: textPri, lineHeight: 1.3 }}>{opt.title}</Typography>
@@ -218,8 +210,8 @@ export default function Signup() {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 3, sm: 4 }, py: 2.5, borderTop: `1px solid ${borderC}`, mt: 1 }}>
-                  <Button component={Link} to="/login" startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>{t.login}</Button>
-                  <Button variant="contained" endIcon={<ChevronRightIcon />} disabled={!role} onClick={() => setStep(1)} sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em', px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem', boxShadow: 'none' }}>Step 2</Button>
+                  <Button component={Link} to="/login" startIcon={<IonIcon name="chevron-back-outline" sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>{t.login}</Button>
+                  <Button variant="contained" endIcon={<IonIcon name="chevron-forward-outline" />} disabled={!role} onClick={() => setStep(1)} sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em', px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem', boxShadow: 'none' }}>Step 2</Button>
                 </Box>
               </Box>
             )}
@@ -244,8 +236,8 @@ export default function Signup() {
                       sx={{ ...fieldSx, '& .MuiOutlinedInput-root fieldset': { borderColor: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.16)') } }}
                       InputProps={{
                         endAdornment: mcState === 'checking' ? <InputAdornment position="end"><CircularProgress size={14} sx={{ color: textSec }} /></InputAdornment>
-                          : mcState?.valid ? <InputAdornment position="end"><CheckIcon sx={{ fontSize: 16, color: '#4ade80' }} /></InputAdornment>
-                          : mcState?.error ? <InputAdornment position="end"><ErrorOutlineIcon sx={{ fontSize: 16, color: '#f87171' }} /></InputAdornment> : null,
+                          : mcState?.valid ? <InputAdornment position="end"><IonIcon name="checkmark-outline" sx={{ fontSize: 16, color: '#4ade80' }} /></InputAdornment>
+                          : mcState?.error ? <InputAdornment position="end"><IonIcon name="alert-circle-outline" sx={{ fontSize: 16, color: '#f87171' }} /></InputAdornment> : null,
                       }}
                     />
                   )}
@@ -263,7 +255,7 @@ export default function Signup() {
                         placeholder="Start typing your address…"
                         defaultValue={form.businessAddress ? `${form.businessAddress}, ${form.businessCity}, ${form.businessState} ${form.businessZip}`.trim().replace(/^,\s*/, '') : ''}
                         fullWidth size="small" sx={fieldSx}
-                        InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
+                        InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="location-outline" sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
                       />
                     </Autocomplete>
                   ) : (
@@ -272,7 +264,7 @@ export default function Signup() {
                       value={form.businessAddress}
                       onChange={e => set('businessAddress', e.target.value)}
                       fullWidth size="small" sx={fieldSx}
-                      InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
+                      InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="location-outline" sx={{ fontSize: 16, color: textSec }} /></InputAdornment> }}
                     />
                   )}
                   {form.businessCity && (
@@ -283,8 +275,8 @@ export default function Signup() {
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: { xs: 3, sm: 4 }, py: 2.5, borderTop: `1px solid ${borderC}`, mt: 1 }}>
-                  <Button onClick={() => setStep(0)} startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>Step 1</Button>
-                  <Button variant="contained" endIcon={<ChevronRightIcon />} disabled={!step2Valid || mcBlocking || mcState === 'checking'} onClick={() => setStep(2)} sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em', px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem', boxShadow: 'none' }}>Step 3</Button>
+                  <Button onClick={() => setStep(0)} startIcon={<IonIcon name="chevron-back-outline" sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>Step 1</Button>
+                  <Button variant="contained" endIcon={<IonIcon name="chevron-forward-outline" />} disabled={!step2Valid || mcBlocking || mcState === 'checking'} onClick={() => setStep(2)} sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.07em', px: 3.5, py: 1, borderRadius: '6px', fontSize: '0.82rem', boxShadow: 'none' }}>Step 3</Button>
                 </Box>
               </Box>
             )}
@@ -300,7 +292,7 @@ export default function Signup() {
 
                 {error && (
                   <Box sx={{ mx: { xs: 3, sm: 4 }, mb: 1, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: '6px', px: 2, py: 1.25 }}>
-                    <ErrorOutlineIcon sx={{ fontSize: 15, color: '#f87171', flexShrink: 0 }} />
+                    <IonIcon name="alert-circle-outline" sx={{ fontSize: 15, color: '#f87171', flexShrink: 0 }} />
                     <Typography variant="body2" sx={{ color: '#f87171', fontSize: '0.82rem' }}>{error}</Typography>
                   </Box>
                 )}
@@ -309,7 +301,7 @@ export default function Signup() {
                   <TextField label={t.name} value={form.name} onChange={e => set('name', e.target.value)} fullWidth size="small" sx={fieldSx} />
                   <TextField label={t.email} type="email" value={form.email} onChange={e => set('email', e.target.value)} fullWidth size="small" sx={fieldSx} />
                   <TextField label={t.password} type={showPw ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)} fullWidth size="small" sx={fieldSx}
-                    InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: textSec }}>{showPw ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}</IconButton></InputAdornment> }}
+                    InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: textSec }}>{showPw ? <IonIcon name="eye-off-outline" sx={{ fontSize: 16 }} /> : <IonIcon name="eye-outline" sx={{ fontSize: 16 }} />}</IconButton></InputAdornment> }}
                   />
                   <TextField
                     label={t.confirm} type={showConfirm ? 'text' : 'password'} value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)} fullWidth size="small"
@@ -317,7 +309,7 @@ export default function Signup() {
                     helperText={form.confirmPassword && form.password !== form.confirmPassword ? t.mismatch : ''}
                     FormHelperTextProps={{ sx: { color: '#f87171' } }}
                     sx={{ ...fieldSx, '& .MuiOutlinedInput-root fieldset': { borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.16)') } }}
-                    InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirm(v => !v)} edge="end" size="small" sx={{ color: textSec }}>{showConfirm ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}</IconButton></InputAdornment> }}
+                    InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirm(v => !v)} edge="end" size="small" sx={{ color: textSec }}>{showConfirm ? <IonIcon name="eye-off-outline" sx={{ fontSize: 16 }} /> : <IonIcon name="eye-outline" sx={{ fontSize: 16 }} />}</IconButton></InputAdornment> }}
                   />
 
                   <Typography variant="caption" sx={{ color: isDark ? '#4b5563' : '#9ca3af', lineHeight: 1.6, mt: -0.5 }}>
@@ -332,7 +324,7 @@ export default function Signup() {
                 </Box>
 
                 <Box sx={{ px: { xs: 3, sm: 4 }, py: 2, borderTop: `1px solid ${borderC}` }}>
-                  <Button onClick={() => setStep(1)} startIcon={<ChevronLeftIcon sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>Step 2</Button>
+                  <Button onClick={() => setStep(1)} startIcon={<IonIcon name="chevron-back-outline" sx={{ fontSize: '1rem !important' }} />} sx={navBtnSx}>Step 2</Button>
                 </Box>
               </Box>
             )}
@@ -341,11 +333,11 @@ export default function Signup() {
             {step === 3 && (
               <Box sx={{ ...cardSx, p: { xs: 4, sm: 5 }, textAlign: 'center' }}>
                 <Box sx={{ width: 64, height: 64, borderRadius: '50%', mx: 'auto', mb: 3, bgcolor: 'rgba(66,165,245,0.12)', border: `1.5px solid ${BRAND_LIGHT}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CheckCircleIcon sx={{ fontSize: 32, color: BRAND_LIGHT }} />
+                  <IonIcon name="checkmark-circle" sx={{ fontSize: 32, color: BRAND_LIGHT }} />
                 </Box>
                 <Typography variant="h5" fontWeight={800} sx={{ color: textPri, mb: 1 }}>{t.welcome}</Typography>
                 <Typography variant="body2" sx={{ color: textSec, mb: 4 }}>{t.welcomeSub}</Typography>
-                <Button variant="contained" endIcon={<ChevronRightIcon />} onClick={() => navigate(role === 'broker' ? '/broker/dashboard' : '/carrier/dashboard')}
+                <Button variant="contained" endIcon={<IonIcon name="chevron-forward-outline" />} onClick={() => navigate(role === 'broker' ? '/broker/dashboard' : '/carrier/dashboard')}
                   sx={{ bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND }, textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em', px: 4, py: 1.25, borderRadius: '6px', boxShadow: 'none' }}>
                   {t.dashboard}
                 </Button>

@@ -4,14 +4,10 @@ import {
   Box, Typography, Card, CardContent, Alert, Skeleton,
   Table, TableHead, TableRow, TableCell, TableBody, TableContainer,
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import GroupIcon from '@mui/icons-material/Group';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { analyticsApi } from '../../services/api';
 import {
+import IonIcon from '../../components/IonIcon';
+
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend, PieChart, Pie, Cell,
 } from 'recharts';

@@ -4,9 +4,9 @@ import {
   Alert, Table, TableHead, TableBody, TableRow, TableCell, Button,
   TextField, MenuItem, Skeleton,
 } from '@mui/material';
-import PaymentIcon from '@mui/icons-material/Payment';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import { freightPaymentsApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const STATUS_COLOR = {
   pending:  'warning',
@@ -61,14 +61,14 @@ export default function AdminPayments() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <PaymentIcon color="primary" />
+            <IonIcon name="card-outline" color="primary" />
             <Typography variant="h5" fontWeight={700}>Freight Payments</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">All escrow payments across the platform</Typography>
         </Box>
         <Button
           variant="outlined"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
+          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="refresh-outline" />}
           onClick={load}
           disabled={loading}
           size="small"

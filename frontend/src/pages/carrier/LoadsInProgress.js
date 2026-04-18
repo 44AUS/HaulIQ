@@ -3,14 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, Grid, Chip, Skeleton,
 } from '@mui/material';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ScaleIcon from '@mui/icons-material/Scale';
-import ActivityIcon from '@mui/icons-material/Timeline';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { bookingsApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const STATUS_CONFIG = {
   quoted:     { label: 'Awaiting Response', color: 'warning' },
@@ -99,7 +94,7 @@ function LoadProgressCard({ load, onClick }) {
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Chip label={cfg.label} size="small" color={cfg.color} />
-            <ChevronRightIcon fontSize="small" color="action" />
+            <IonIcon name="chevron-forward-outline" fontSize="small" color="action" />
           </Box>
         </Box>
 
@@ -107,18 +102,18 @@ function LoadProgressCard({ load, onClick }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-              <LocationOnIcon sx={{ fontSize: 10 }} color="action" />
+              <IonIcon name="location-outline" sx={{ fontSize: 10 }} color="action" />
               <Typography variant="caption" color="text.secondary">Origin</Typography>
             </Box>
             <Typography variant="body2" fontWeight={600} noWrap>{load.origin}</Typography>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <ArrowForwardIcon fontSize="small" color="action" />
+            <IonIcon name="arrow-forward-outline" fontSize="small" color="action" />
             <Typography variant="caption" color="text.secondary">{load.miles}mi</Typography>
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5, mb: 0.5 }}>
-              <LocationOnIcon sx={{ fontSize: 10 }} color="action" />
+              <IonIcon name="location-outline" sx={{ fontSize: 10 }} color="action" />
               <Typography variant="caption" color="text.secondary">Dest</Typography>
             </Box>
             <Typography variant="body2" fontWeight={600} noWrap>{load.destination}</Typography>
@@ -128,13 +123,13 @@ function LoadProgressCard({ load, onClick }) {
         {/* Dates */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarTodayIcon sx={{ fontSize: 10 }} color="action" />
+            <IonIcon name="calendar-outline" sx={{ fontSize: 10 }} color="action" />
             <Typography variant="caption" color="text.secondary">
               Pickup: <Box component="span" sx={{ color: 'text.primary' }}>{load.pickup_date}</Box>
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <CalendarTodayIcon sx={{ fontSize: 10 }} color="action" />
+            <IonIcon name="calendar-outline" sx={{ fontSize: 10 }} color="action" />
             <Typography variant="caption" color="text.secondary">
               Drop: <Box component="span" sx={{ color: 'text.primary' }}>{load.delivery_date}</Box>
             </Typography>
@@ -161,13 +156,13 @@ function LoadProgressCard({ load, onClick }) {
         <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap' }}>
           {load.commodity && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <InventoryIcon sx={{ fontSize: 10 }} color="action" />
+              <IonIcon name="cube-outline" sx={{ fontSize: 10 }} color="action" />
               <Typography variant="caption" color="text.secondary">{load.commodity}</Typography>
             </Box>
           )}
           {load.weight_lbs && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <ScaleIcon sx={{ fontSize: 10 }} color="action" />
+              <IonIcon name="scale-outline" sx={{ fontSize: 10 }} color="action" />
               <Typography variant="caption" color="text.secondary">{Number(load.weight_lbs).toLocaleString()} lbs</Typography>
             </Box>
           )}
@@ -206,7 +201,7 @@ export default function CarrierLoadsInProgress() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <ActivityIcon sx={{ color: 'primary.main', fontSize: 26 }} />
+        <IonIcon name="analytics-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
         <Typography variant="h5" fontWeight={700}>Loads in Progress</Typography>
         <Chip label={loads.length} size="small" color="primary" variant="outlined" />
       </Box>
@@ -246,7 +241,7 @@ export default function CarrierLoadsInProgress() {
       ) : loads.length === 0 ? (
         <Card>
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
-            <ActivityIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+            <IonIcon name="analytics-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
             <Typography variant="body1" fontWeight={600} gutterBottom>No active loads</Typography>
             <Typography variant="body2" color="text.secondary">
               Book a load from the Load Board to see it here.

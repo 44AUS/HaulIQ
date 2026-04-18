@@ -7,19 +7,9 @@ import {
   Paper, Alert, Divider, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
 } from '@mui/material';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
-import DescriptionIcon from '@mui/icons-material/Description';
 import DocumentPanel from '../../components/documents/DocumentPanel';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import GroupIcon from '@mui/icons-material/Group';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import NavigationIcon from '@mui/icons-material/Navigation';
-import PlaceIcon from '@mui/icons-material/Place';
-import LayersIcon from '@mui/icons-material/Layers';
+import IonIcon from '../../components/IonIcon';
+
 
 const LIBRARIES = ['places'];
 
@@ -200,10 +190,10 @@ function LoadHeroMap({ load, carrierLocation }) {
 
 // ─── Stepper ───────────────────────────────────────────────────────────────────
 const STEPS = [
-  { key: 'posted',     label: 'Posted',     icon: <PlaceIcon sx={{ fontSize: 16 }} /> },
-  { key: 'booked',     label: 'Booked',     icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> },
-  { key: 'in_transit', label: 'In Transit', icon: <NavigationIcon sx={{ fontSize: 16 }} /> },
-  { key: 'delivered',  label: 'Delivered',  icon: <LocalShippingIcon sx={{ fontSize: 16 }} /> },
+  { key: 'posted',     label: 'Posted',     icon: <IonIcon name="location-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'booked',     label: 'Booked',     icon: <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} /> },
+  { key: 'in_transit', label: 'In Transit', icon: <IonIcon name="navigate-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'delivered',  label: 'Delivered',  icon: <IonIcon name="car-sport-outline" sx={{ fontSize: 16 }} /> },
 ];
 
 function stepIndex(loadStatus, bookingStatus) {
@@ -259,7 +249,7 @@ function LoadStepper({ load, bookingStatus }) {
                 boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none',
               }}>
                 {done
-                  ? <CheckCircleIcon sx={{ fontSize: 16 }} />
+                  ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} />
                   : current
                     ? step.icon
                     : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />
@@ -416,7 +406,7 @@ export default function BrokerLoadDetail() {
         {/* Floating back button over the map */}
         <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
           <Button
-            startIcon={<ArrowBackIcon />}
+            startIcon={<IonIcon name="arrow-back-outline" />}
             onClick={() => navigate(-1)}
             sx={{
               bgcolor: 'rgba(255,255,255,0.92)',
@@ -462,7 +452,7 @@ export default function BrokerLoadDetail() {
                 {load.status === 'expired' && <Chip label="Expired" color="error" size="small" />}
                 {bookingStatus === 'in_transit' && (
                   <Chip
-                    icon={<FiberManualRecordIcon sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />}
+                    icon={<IonIcon name="ellipse" sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />}
                     label="In Transit" size="small"
                     sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
                   />
@@ -471,7 +461,7 @@ export default function BrokerLoadDetail() {
                 <Button
                   size="small"
                   variant="outlined"
-                  startIcon={<LayersIcon sx={{ fontSize: 14 }} />}
+                  startIcon={<IonIcon name="layers-outline" sx={{ fontSize: 14 }} />}
                   onClick={() => { setTemplateDialog(true); setTemplateName(`${load.origin} → ${load.dest}`); setTemplateSaved(false); }}
                   sx={{ fontSize: '0.72rem', py: 0.35 }}
                 >
@@ -517,7 +507,7 @@ export default function BrokerLoadDetail() {
                       <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr}</Typography>
                       {city && <Typography variant="caption" color="text.secondary" display="block">{city}</Typography>}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                        <CalendarTodayIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+                        <IonIcon name="calendar-outline" sx={{ fontSize: 11, color: 'text.disabled' }} />
                         <Typography variant="caption" color="text.disabled">{date}</Typography>
                       </Box>
                     </Box>
@@ -537,7 +527,7 @@ export default function BrokerLoadDetail() {
                   </Box>
                   {booking && (
                     <Button component={Link} to={`/broker/track/${booking.id}`} variant="text" size="small"
-                      startIcon={<NavigationIcon sx={{ fontSize: 14 }} />} sx={{ py: 0 }}>
+                      startIcon={<IonIcon name="navigate-outline" sx={{ fontSize: 14 }} />} sx={{ py: 0 }}>
                       Full Tracking
                     </Button>
                   )}
@@ -561,7 +551,7 @@ export default function BrokerLoadDetail() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-                <GroupIcon color="primary" />
+                <IonIcon name="people-outline" color="primary" />
                 <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
                 {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
               </Box>
@@ -595,16 +585,16 @@ export default function BrokerLoadDetail() {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                           <Button component={Link} to="/broker/messages" variant="text" size="small" sx={{ minWidth: 0, px: 1 }} title="Message carrier">
-                            <ChatBubbleOutlineIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="chatbubble-outline" sx={{ fontSize: 16 }} />
                           </Button>
                           {bid.status === 'pending' && load.status === 'active' && (
                             <>
                               <Button size="small" variant="outlined" color="success" onClick={() => handleAcceptBid(bid.id)} disabled={!!actionLoading}
-                                startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <CheckCircleIcon />}>
+                                startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <IonIcon name="checkmark-circle" />}>
                                 Accept
                               </Button>
                               <Button size="small" variant="outlined" color="error" onClick={() => handleRejectBid(bid.id)} disabled={!!actionLoading}
-                                startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <CancelIcon />}>
+                                startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <IonIcon name="close-circle-outline" />}>
                                 Reject
                               </Button>
                             </>
@@ -622,7 +612,7 @@ export default function BrokerLoadDetail() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                <DescriptionIcon color="primary" fontSize="small" />
+                <IonIcon name="document-text-outline" color="primary" fontSize="small" />
                 <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
               </Box>
               <DocumentPanel loadId={id} />
@@ -635,7 +625,7 @@ export default function BrokerLoadDetail() {
       {/* Save as Template dialog */}
       <Dialog open={templateDialog} onClose={() => setTemplateDialog(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <LayersIcon color="primary" fontSize="small" /> Save as Template
+          <IonIcon name="layers-outline" color="primary" fontSize="small" /> Save as Template
         </DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

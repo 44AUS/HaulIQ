@@ -5,12 +5,9 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, IconButton, Skeleton,
 } from '@mui/material';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import CircleIcon from '@mui/icons-material/Circle';
 import { adminApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 function EditModal({ plan, onClose, onSaved }) {
   const [price, setPrice] = useState(String(plan.price));
@@ -41,7 +38,7 @@ function EditModal({ plan, onClose, onSaved }) {
     <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         Edit Plan: {plan.name}
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
@@ -68,7 +65,7 @@ function EditModal({ plan, onClose, onSaved }) {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
                 {plan.features.map((f, i) => (
                   <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CheckIcon sx={{ fontSize: 13, color: 'primary.main', flexShrink: 0 }} />
+                    <IonIcon name="checkmark-outline" sx={{ fontSize: 13, color: 'primary.main', flexShrink: 0 }} />
                     <Typography variant="body2">{f}</Typography>
                   </Box>
                 ))}
@@ -108,7 +105,7 @@ function PlanCard({ plan, onEdit }) {
             <Typography variant="caption" color="text.secondary">{plan.description || '—'}</Typography>
           </Box>
           <IconButton size="small" onClick={() => onEdit(plan)}>
-            <EditIcon sx={{ fontSize: 16 }} />
+            <IonIcon name="create-outline" sx={{ fontSize: 16 }} />
           </IconButton>
         </Box>
         <Typography variant="h4" fontWeight={800} mb={2}>
@@ -119,7 +116,7 @@ function PlanCard({ plan, onEdit }) {
             {plan.features.slice(0, 4).map(f => (
               <ListItem key={f} disablePadding sx={{ py: 0.25 }}>
                 <ListItemIcon sx={{ minWidth: 24 }}>
-                  <CheckIcon sx={{ fontSize: 13, color: 'primary.main' }} />
+                  <IonIcon name="checkmark-outline" sx={{ fontSize: 13, color: 'primary.main' }} />
                 </ListItemIcon>
                 <ListItemText primary={<Typography variant="caption">{f}</Typography>} />
               </ListItem>
@@ -132,7 +129,7 @@ function PlanCard({ plan, onEdit }) {
           </List>
         )}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <CircleIcon sx={{ fontSize: 8, color: plan.is_active ? 'success.main' : 'error.main' }} />
+          <IonIcon name="ellipse" sx={{ fontSize: 8, color: plan.is_active ? 'success.main' : 'error.main' }} />
           <Typography variant="caption" color={plan.is_active ? 'success.main' : 'error.main'} fontWeight={600}>
             {plan.is_active ? 'Active' : 'Inactive'}
           </Typography>
@@ -169,7 +166,7 @@ export default function AdminSubscriptions() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <CreditCardIcon color="primary" />
+          <IonIcon name="card-outline" color="primary" />
           <Typography variant="h5" fontWeight={700}>Subscription Plans</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">Manage pricing and features for all subscription tiers</Typography>

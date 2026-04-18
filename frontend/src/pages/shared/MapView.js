@@ -1,9 +1,9 @@
 import { useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = {
@@ -63,7 +63,7 @@ export default function MapView() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Button
         variant="text"
-        startIcon={<ArrowBackIcon />}
+        startIcon={<IonIcon name="arrow-back-outline" />}
         onClick={() => navigate(-1)}
         sx={{ alignSelf: 'flex-start' }}
       >
@@ -76,7 +76,7 @@ export default function MapView() {
           bgcolor: 'rgba(46,125,50,0.12)', border: 1, borderColor: 'success.main',
           display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
         }}>
-          <LocationOnIcon sx={{ fontSize: 18, color: 'success.main' }} />
+          <IonIcon name="location-outline" sx={{ fontSize: 18, color: 'success.main' }} />
         </Box>
         <Box>
           <Typography variant="body2" fontWeight={700}>{decodedName}</Typography>

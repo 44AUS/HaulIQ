@@ -5,17 +5,11 @@ import { loadsApi, bookingsApi, analyticsApi, brokersApi } from '../../services/
 import { adaptLoadList } from '../../services/adapters';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Card, CardContent, Table, TableHead,
   TableRow, TableCell, TableBody, Chip, Paper, Divider,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import GroupIcon from '@mui/icons-material/Group';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import InventoryIcon from '@mui/icons-material/Inventory';
 
 function statusChip(status) {
   if (status === 'active')  return <Chip label="Active"  size="small" color="success" />;
@@ -57,25 +51,25 @@ export default function BrokerDashboard() {
 
   const stats = [
     {
-      icon: <LocalShippingIcon sx={{ color: 'primary.main' }} />,
+      icon: <IonIcon name="car-sport-outline" sx={{ color: 'primary.main' }} />,
       label: 'Active Loads',
       value: loads.filter(l => l.status === 'active').length,
       bg: 'primary.main',
     },
     {
-      icon: <VisibilityIcon sx={{ color: 'info.main' }} />,
+      icon: <IonIcon name="eye-outline" sx={{ color: 'info.main' }} />,
       label: 'Total Views',
       value: brokerAnalytics ? brokerAnalytics.total_views : loads.reduce((s, l) => s + (l.viewCount || 0), 0),
       bg: 'info.main',
     },
     {
-      icon: <GroupIcon sx={{ color: 'warning.main' }} />,
+      icon: <IonIcon name="people-outline" sx={{ color: 'warning.main' }} />,
       label: 'Pending Bookings',
       value: pendingCount,
       bg: 'warning.main',
     },
     {
-      icon: <TrendingUpIcon sx={{ color: 'success.main' }} />,
+      icon: <IonIcon name="trending-up-outline" sx={{ color: 'success.main' }} />,
       label: 'Fill Rate',
       value: loads.length ? `${Math.round((loads.filter(l => l.status === 'filled').length / loads.length) * 100)}%` : '—',
       bg: 'success.main',
@@ -98,7 +92,7 @@ export default function BrokerDashboard() {
           component={Link}
           to="/broker/post"
           variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
+          startIcon={<IonIcon name="add-circle-outline" />}
         >
           Post a Load
         </Button>
@@ -160,7 +154,7 @@ export default function BrokerDashboard() {
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, my: 1 }}>
                 {[1,2,3,4,5].map(i => (
-                  <StarBorderIcon key={i} sx={{ fontSize: 18, color: brokerProfile?.avg_rating >= i ? 'warning.main' : 'text.disabled' }} />
+                  <IonIcon name="star-outline" key={i} sx={{ fontSize: 18, color: brokerProfile?.avg_rating >= i ? 'warning.main' : 'text.disabled' }} />
                 ))}
               </Box>
               <Typography variant="caption" color="text.secondary">
@@ -188,14 +182,14 @@ export default function BrokerDashboard() {
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="subtitle1" fontWeight={600}>My Recent Loads</Typography>
-          <Button component={Link} to="/broker/loads" variant="text" endIcon={<ArrowForwardIcon />} size="small">
+          <Button component={Link} to="/broker/loads" variant="text" endIcon={<IonIcon name="arrow-forward-outline" />} size="small">
             Manage all
           </Button>
         </Box>
 
         {loads.length === 0 ? (
           <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-            <InventoryIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+            <IonIcon name="cube-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>No loads posted yet.</Typography>
             <Button component={Link} to="/broker/post" variant="text" size="small">Post your first load</Button>
           </Paper>
@@ -235,13 +229,13 @@ export default function BrokerDashboard() {
                       <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.pickup}</TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <VisibilityIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                          <IonIcon name="eye-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
                           <Typography variant="body2">{load.viewCount || 0}</Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <GroupIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                          <IonIcon name="people-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
                           <Typography variant="body2">—</Typography>
                         </Box>
                       </TableCell>

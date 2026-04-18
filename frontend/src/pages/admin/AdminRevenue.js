@@ -4,8 +4,9 @@ import {
   Table, TableHead, TableBody, TableRow, TableCell,
   LinearProgress, Skeleton,
 } from '@mui/material';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { adminApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 export default function AdminRevenue() {
   const [data, setData] = useState(null);
@@ -40,7 +41,7 @@ export default function AdminRevenue() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <AttachMoneyIcon color="primary" />
+          <IonIcon name="cash-outline" color="primary" />
           <Typography variant="h5" fontWeight={700}>Revenue Analytics</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">Subscription revenue breakdown by plan</Typography>

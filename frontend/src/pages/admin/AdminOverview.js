@@ -2,15 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   Box, Typography, Card, CardContent, Chip, Skeleton, LinearProgress,
 } from '@mui/material';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PeopleIcon from '@mui/icons-material/People';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ShieldIcon from '@mui/icons-material/Shield';
-import FiberNewIcon from '@mui/icons-material/FiberNew';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import WorkIcon from '@mui/icons-material/Work';
 import { adminApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const PLAN_COLORS = { basic: '#455a64', pro: '#1565C0', elite: '#6a1b9a', admin: '#b71c1c' };
 
@@ -87,7 +81,7 @@ export default function AdminOverview() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <ShieldIcon color="primary" />
+            <IonIcon name="shield-outline" color="primary" />
             <Typography variant="h5" fontWeight={700}>Admin Dashboard</Typography>
           </Box>
           <Typography variant="body2" color="text.secondary">Platform overview — HaulIQ Operations</Typography>

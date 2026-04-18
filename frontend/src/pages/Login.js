@@ -4,13 +4,11 @@ import {
   Box, Typography, Button, TextField,
   InputAdornment, IconButton,
 } from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import WaveBg from '../components/WaveBg';
+import IonIcon from '../components/IonIcon';
+
 
 const BRAND     = '#1565C0';
 const BRAND_MED = '#1976d2';
@@ -111,7 +109,7 @@ export default function Login() {
 
               {error && (
                 <Box sx={{ mx: { xs: 3, sm: 4 }, mb: 2, display: 'flex', alignItems: 'center', gap: 1, bgcolor: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: '6px', px: 2, py: 1.25 }}>
-                  <ErrorOutlineIcon sx={{ fontSize: 15, color: '#f87171', flexShrink: 0 }} />
+                  <IonIcon name="alert-circle-outline" sx={{ fontSize: 15, color: '#f87171', flexShrink: 0 }} />
                   <Typography variant="body2" sx={{ color: '#f87171', fontSize: '0.82rem' }}>{error}</Typography>
                 </Box>
               )}
@@ -137,7 +135,7 @@ export default function Login() {
                       endAdornment: (
                         <InputAdornment position="end">
                           <IconButton onClick={() => setShowPw(v => !v)} edge="end" size="small" sx={{ color: textSec }}>
-                            {showPw ? <VisibilityOff sx={{ fontSize: 16 }} /> : <Visibility sx={{ fontSize: 16 }} />}
+                            {showPw ? <IonIcon name="eye-off-outline" sx={{ fontSize: 16 }} /> : <IonIcon name="eye-outline" sx={{ fontSize: 16 }} />}
                           </IconButton>
                         </InputAdornment>
                       ),
@@ -147,7 +145,7 @@ export default function Login() {
                     type="submit"
                     fullWidth variant="contained"
                     disabled={loading || !email || !password}
-                    endIcon={!loading && <ChevronRightIcon />}
+                    endIcon={!loading && <IonIcon name="chevron-forward-outline" />}
                     sx={{
                       bgcolor: BRAND_MED, '&:hover': { bgcolor: BRAND },
                       textTransform: 'uppercase', fontWeight: 700, letterSpacing: '0.08em',

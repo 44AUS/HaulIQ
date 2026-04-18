@@ -4,15 +4,12 @@ import { loadsApi, equipmentTypesApi, equipmentClassesApi, rateIntelApi, loadTem
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Paper, Grid, TextField, FormControl,
   InputLabel, Select, MenuItem, InputAdornment, CircularProgress, Alert,
   FormControlLabel, Switch,
 } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import BoltIcon from '@mui/icons-material/Bolt';
-import LayersIcon from '@mui/icons-material/Layers';
 
 const DIMS = ['48x102', '53x102', '40x96', '28x102'];
 
@@ -172,7 +169,7 @@ export default function PostLoad() {
 
   if (posted) return (
     <Box sx={{ maxWidth: 480, mx: 'auto', textAlign: 'center', py: 10 }}>
-      <CheckCircleOutlineIcon sx={{ fontSize: 56, color: 'success.main', mb: 2 }} />
+      <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 56, color: 'success.main', mb: 2 }} />
       <Typography variant="h5" fontWeight={700} sx={{ mb: 1 }}>Load Posted!</Typography>
       <Typography variant="body2" color="text.secondary">
         Your load is now live on the board. Carriers will see it immediately.
@@ -204,7 +201,7 @@ export default function PostLoad() {
     <Box sx={{ maxWidth: 680, mx: 'auto' }}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <AddCircleOutlineIcon color="primary" /> {tpl ? `Re-post: ${tpl.name}` : 'Post a Load'}
+          <IonIcon name="add-circle-outline" color="primary" /> {tpl ? `Re-post: ${tpl.name}` : 'Post a Load'}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           {tpl ? 'Lane details pre-filled from template — just set the dates.' : 'Fill out the details and your load will be live instantly'}
@@ -390,7 +387,7 @@ export default function PostLoad() {
               control={<Switch checked={form.instantBook} onChange={e => set('instantBook', e.target.checked)} color="success" />}
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <BoltIcon fontSize="small" sx={{ color: form.instantBook ? 'success.main' : 'text.disabled' }} />
+                  <IonIcon name="flash-outline" fontSize="small" sx={{ color: form.instantBook ? 'success.main' : 'text.disabled' }} />
                   <Typography variant="body2" fontWeight={600}>Enable Instant Book</Typography>
                 </Box>
               }
@@ -411,7 +408,7 @@ export default function PostLoad() {
               control={<Switch checked={saveAsTemplate} onChange={e => setSaveAsTemplate(e.target.checked)} color="primary" />}
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <LayersIcon fontSize="small" sx={{ color: saveAsTemplate ? 'primary.main' : 'text.disabled' }} />
+                  <IonIcon name="layers-outline" fontSize="small" sx={{ color: saveAsTemplate ? 'primary.main' : 'text.disabled' }} />
                   <Typography variant="body2" fontWeight={600}>Save as Template</Typography>
                 </Box>
               }
@@ -436,7 +433,7 @@ export default function PostLoad() {
             variant="contained"
             size="large"
             disabled={submitting}
-            endIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardIcon />}
+            endIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="arrow-forward-outline" />}
             sx={{ py: 1.5 }}
           >
             {submitting ? 'Posting...' : 'Post Load Live'}

@@ -2,11 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box, Typography, Button, Paper, Chip, CircularProgress, Alert, Divider,
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/HourglassEmpty';
-import DrawIcon from '@mui/icons-material/Draw';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { rateConfirmationApi } from '../../services/api';
+import IonIcon from '../IonIcon';
+
 
 // ─── Signature canvas ─────────────────────────────────────────────────────────
 function SignatureCanvas({ onReady }) {
@@ -94,7 +92,7 @@ function SignatureCanvas({ onReady }) {
             pointerEvents: 'none',
           }}>
             <Typography variant="body2" color="text.disabled" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <DrawIcon fontSize="small" /> Draw your signature here
+              <IonIcon name="pencil-outline" fontSize="small" /> Draw your signature here
             </Typography>
           </Box>
         )}
@@ -158,12 +156,12 @@ export default function RateConSignature({ bookingId, role }) {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
         <Typography variant="subtitle2" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <DrawIcon fontSize="small" color="primary" /> Rate Confirmation Signatures
+          <IonIcon name="pencil-outline" fontSize="small" color="primary" /> Rate Confirmation Signatures
         </Typography>
         <Button
           size="small"
           variant="outlined"
-          startIcon={pdfLoading ? <CircularProgress size={13} /> : <PictureAsPdfIcon />}
+          startIcon={pdfLoading ? <CircularProgress size={13} /> : <IonIcon name="document-outline" />}
           onClick={handleDownload}
           disabled={pdfLoading}
         >
@@ -177,7 +175,7 @@ export default function RateConSignature({ bookingId, role }) {
         <SignBadge label="Carrier" signed={carrierSigned} name={status?.carrier_signed_name} at={status?.carrier_signed_at} />
         {fullySigned && (
           <Chip
-            icon={<CheckCircleIcon />}
+            icon={<IonIcon name="checkmark-circle" />}
             label="Fully Executed"
             color="success"
             size="small"
@@ -193,7 +191,7 @@ export default function RateConSignature({ bookingId, role }) {
         <Button
           variant="contained"
           size="small"
-          startIcon={<DrawIcon />}
+          startIcon={<IonIcon name="pencil-outline" />}
           onClick={() => setShowPad(true)}
         >
           Sign Rate Confirmation
@@ -224,7 +222,7 @@ export default function RateConSignature({ bookingId, role }) {
 
       {alreadySigned && (
         <Typography variant="caption" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <CheckCircleIcon sx={{ fontSize: 14 }} /> You have signed this rate confirmation.
+          <IonIcon name="checkmark-circle" sx={{ fontSize: 14 }} /> You have signed this rate confirmation.
         </Typography>
       )}
     </Paper>
@@ -239,8 +237,8 @@ function SignBadge({ label, signed, name, at }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
       {signed
-        ? <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
-        : <PendingIcon sx={{ fontSize: 16, color: 'text.disabled' }} />}
+        ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16, color: 'success.main' }} />
+        : <IonIcon name="hourglass-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />}
       <Box>
         <Typography variant="caption" fontWeight={600} color={signed ? 'success.main' : 'text.disabled'}>
           {label}

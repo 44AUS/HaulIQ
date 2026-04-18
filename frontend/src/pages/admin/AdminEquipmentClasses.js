@@ -3,12 +3,9 @@ import {
   Box, Typography, Button, IconButton, Switch, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, Alert, Skeleton, Paper, Tooltip, Chip,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CategoryIcon from '@mui/icons-material/Category';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { equipmentClassesApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 function ClassDialog({ open, cls, onClose, onSaved }) {
   const editing = Boolean(cls?.id);
@@ -117,7 +114,7 @@ export default function AdminEquipmentClasses() {
             Group equipment types into searchable classes (e.g. Flatbed, Refrigerated)
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleNew}>
+        <Button variant="contained" startIcon={<IonIcon name="add-outline" />} onClick={handleNew}>
           Add Class
         </Button>
       </Box>
@@ -131,9 +128,9 @@ export default function AdminEquipmentClasses() {
           </Box>
         ) : classes.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
-            <CategoryIcon sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
+            <IonIcon name="grid-outline" sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
             <Typography>No equipment classes yet.</Typography>
-            <Button onClick={handleNew} startIcon={<AddIcon />} sx={{ mt: 2 }}>Add First Class</Button>
+            <Button onClick={handleNew} startIcon={<IonIcon name="add-outline" />} sx={{ mt: 2 }}>Add First Class</Button>
           </Box>
         ) : (
           <Box>
@@ -156,7 +153,7 @@ export default function AdminEquipmentClasses() {
                 }}
               >
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <CategoryIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                  <IonIcon name="grid-outline" sx={{ fontSize: 16, color: 'primary.main' }} />
                   <Typography variant="body2" fontWeight={700}>{cls.name}</Typography>
                 </Box>
 
@@ -165,7 +162,7 @@ export default function AdminEquipmentClasses() {
                     cls.equipment_types.slice(0, 3).map(t => (
                       <Chip
                         key={t.id}
-                        icon={<LocalShippingIcon sx={{ fontSize: '12px !important' }} />}
+                        icon={<IonIcon name="car-sport-outline" sx={{ fontSize: '12px !important' }} />}
                         label={t.abbreviation || t.name}
                         size="small"
                         variant="outlined"
@@ -194,10 +191,10 @@ export default function AdminEquipmentClasses() {
                     <Switch size="small" checked={cls.is_active} onChange={() => handleToggle(cls)} />
                   </Tooltip>
                   <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => handleEdit(cls)}><EditIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" onClick={() => handleEdit(cls)}><IonIcon name="create-outline" fontSize="small" /></IconButton>
                   </Tooltip>
                   <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => handleDelete(cls)}><DeleteIcon fontSize="small" /></IconButton>
+                    <IconButton size="small" color="error" onClick={() => handleDelete(cls)}><IonIcon name="trash-outline" fontSize="small" /></IconButton>
                   </Tooltip>
                 </Box>
               </Box>

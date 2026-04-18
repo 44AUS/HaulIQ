@@ -1,17 +1,10 @@
 import { useSearchParams } from 'react-router-dom';
 import { Box, Typography, Card, CardContent, CardActionArea } from '@mui/material';
-import PaletteIcon from '@mui/icons-material/Palette';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import SecurityIcon from '@mui/icons-material/Security';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import TuneIcon from '@mui/icons-material/Tune';
-import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import { useAuth } from '../../context/AuthContext';
 import BrandingSettings from './BrandingSettings';
 import Equipment from '../carrier/Equipment';
+import IonIcon from '../../components/IonIcon';
+
 
 const CARDS = [
   { key: 'branding',      icon: PaletteIcon,       title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',   available: true },
@@ -27,7 +20,7 @@ const CARDS = [
 function ComingSoon({ label }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, gap: 1.5 }}>
-      <TuneIcon sx={{ fontSize: 44, color: 'text.disabled' }} />
+      <IonIcon name="options-outline" sx={{ fontSize: 44, color: 'text.disabled' }} />
       <Typography variant="h6" fontWeight={600} color="text.secondary">{label}</Typography>
       <Typography variant="body2" color="text.disabled">Coming soon</Typography>
     </Box>

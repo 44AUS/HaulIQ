@@ -4,13 +4,11 @@ import {
   Box, Typography, Card, CardContent, TextField, Button, Alert,
   Grid, Divider, CircularProgress,
 } from '@mui/material';
-import BusinessIcon from '@mui/icons-material/Business';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import SaveIcon from '@mui/icons-material/Save';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
+import IonIcon from '../../components/IonIcon';
+
 
 const fmtDate = (iso) => {
   if (!iso) return '—';
@@ -92,7 +90,7 @@ function OverviewTab() {
       <Card variant="outlined">
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <BusinessIcon color="primary" />
+            <IonIcon name="business-outline" color="primary" />
             <Typography variant="subtitle1" fontWeight={700}>Business Information</Typography>
           </Box>
           <Box component="form" onSubmit={handleSave}>
@@ -104,7 +102,7 @@ function OverviewTab() {
                   fullWidth
                   value={form.company}
                   onChange={set('company')}
-                  InputProps={{ startAdornment: <BusinessIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
+                  InputProps={{ startAdornment: <IonIcon name="business-outline" sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
                 />
               </Grid>
               {user?.role === 'carrier' && (
@@ -117,7 +115,7 @@ function OverviewTab() {
                       placeholder="MC-000000"
                       value={form.mc}
                       onChange={set('mc')}
-                      InputProps={{ startAdornment: <LocalShippingIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
+                      InputProps={{ startAdornment: <IonIcon name="car-sport-outline" sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -135,7 +133,7 @@ function OverviewTab() {
             </Grid>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 3, mb: 2 }}>
-              <LocationOnIcon color="primary" sx={{ fontSize: 18 }} />
+              <IonIcon name="location-outline" color="primary" sx={{ fontSize: 18 }} />
               <Typography variant="subtitle2" fontWeight={700}>Business Address</Typography>
             </Box>
 
@@ -164,7 +162,7 @@ function OverviewTab() {
             </Grid>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}>
+              <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="save-outline" />}>
                 {saving ? 'Saving…' : 'Save Changes'}
               </Button>
             </Box>

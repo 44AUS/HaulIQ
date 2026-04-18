@@ -5,14 +5,10 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Chip, Avatar,
 } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import BadgeIcon from '@mui/icons-material/Badge';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { analyticsApi, driversApi } from '../../services/api';
 import {
+import IonIcon from '../../components/IonIcon';
+
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';

@@ -7,17 +7,10 @@ import {
   TextField, InputAdornment, MenuItem, Select, FormControl, InputLabel,
   Tooltip, Button, Skeleton,
 } from '@mui/material';
-import FolderIcon from '@mui/icons-material/Folder';
-import ArticleIcon from '@mui/icons-material/Article';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from '../../context/AuthContext';
 import { documentsApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const DOC_TYPE_LABELS = {
   BOL: 'Bill of Lading',
@@ -62,7 +55,7 @@ function DocViewer({ doc, open, onClose }) {
             {doc.load_origin} → {doc.load_destination}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+        <IconButton onClick={onClose} size="small"><IonIcon name="close-outline" /></IconButton>
       </DialogTitle>
       <DialogContent sx={{ p: 0 }}>
         {pages.length === 0 ? (
@@ -89,7 +82,7 @@ function DocViewer({ doc, open, onClose }) {
                     disabled={page === 0}
                     sx={{ color: '#fff', p: 0.5 }}
                   >
-                    <NavigateBeforeIcon fontSize="small" />
+                    <IonIcon name="chevron-back-outline" fontSize="small" />
                   </IconButton>
                   <Typography variant="caption" sx={{ color: '#fff', minWidth: 50, textAlign: 'center' }}>
                     {page + 1} / {pages.length}
@@ -100,7 +93,7 @@ function DocViewer({ doc, open, onClose }) {
                     disabled={page === pages.length - 1}
                     sx={{ color: '#fff', p: 0.5 }}
                   >
-                    <NavigateNextIcon fontSize="small" />
+                    <IonIcon name="chevron-forward-outline" fontSize="small" />
                   </IconButton>
                 </Box>
               )}
@@ -175,7 +168,7 @@ export default function Documents() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <FolderIcon sx={{ color: 'primary.main' }} />
+          <IonIcon name="folder-outline" sx={{ color: 'primary.main' }} />
           <Typography variant="h5" fontWeight={700}>My Documents</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
@@ -192,7 +185,7 @@ export default function Documents() {
           onChange={e => setSearch(e.target.value)}
           sx={{ minWidth: 260 }}
           InputProps={{
-            startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment>,
+            startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment>,
           }}
         />
         <FormControl size="small" sx={{ minWidth: 180 }}>
@@ -215,7 +208,7 @@ export default function Documents() {
       {groups.length === 0 ? (
         <Card variant="outlined">
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
-            <FolderIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+            <IonIcon name="folder-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
             <Typography variant="body1" fontWeight={600} color="text.secondary">
               {search || typeFilter !== 'all' ? 'No documents match your filters' : 'No documents uploaded yet'}
             </Typography>
@@ -233,7 +226,7 @@ export default function Documents() {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Avatar sx={{ bgcolor: 'primary.main', width: 34, height: 34 }}>
-                      <LocalShippingIcon sx={{ fontSize: 18 }} />
+                      <IonIcon name="car-sport-outline" sx={{ fontSize: 18 }} />
                     </Avatar>
                     <Box>
                       <Typography variant="body2" fontWeight={700}>
@@ -251,7 +244,7 @@ export default function Documents() {
                       state={{ from: 'Documents' }}
                       size="small"
                     >
-                      <OpenInNewIcon sx={{ fontSize: 16 }} />
+                      <IonIcon name="open-outline" sx={{ fontSize: 16 }} />
                     </IconButton>
                   </Tooltip>
                 </Box>
@@ -278,7 +271,7 @@ export default function Documents() {
                         >
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <ArticleIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+                              <IonIcon name="document-text-outline" sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
                               <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>{doc.file_name}</Typography>
                             </Box>
                           </TableCell>
@@ -295,12 +288,12 @@ export default function Documents() {
                             <Box sx={{ display: 'flex', gap: 0.5 }}>
                               <Tooltip title="Preview">
                                 <IconButton size="small" onClick={() => setViewing(doc)}>
-                                  <OpenInNewIcon sx={{ fontSize: 14 }} />
+                                  <IonIcon name="open-outline" sx={{ fontSize: 14 }} />
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="Delete">
                                 <IconButton size="small" color="error" onClick={() => setConfirmDelete(doc)}>
-                                  <DeleteIcon sx={{ fontSize: 14 }} />
+                                  <IonIcon name="trash-outline" sx={{ fontSize: 14 }} />
                                 </IconButton>
                               </Tooltip>
                             </Box>
@@ -333,7 +326,7 @@ export default function Documents() {
             variant="contained"
             color="error"
             disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : <DeleteIcon />}
+            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="trash-outline" />}
           >
             {deleting ? 'Deleting…' : 'Delete'}
           </Button>

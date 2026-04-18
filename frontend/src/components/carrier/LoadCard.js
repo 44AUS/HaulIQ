@@ -3,17 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box, Card, CardContent, Typography, Chip, IconButton, Tooltip, Avatar,
 } from '@mui/material';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import BoltIcon from '@mui/icons-material/Bolt';
-import FlashOnIcon from '@mui/icons-material/FlashOn';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import RemoveIcon from '@mui/icons-material/Remove';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import StarIcon from '@mui/icons-material/Star';
 import { loadsApi } from '../../services/api';
+import IonIcon from '../IonIcon';
+
 
 const SCORE_COLOR   = { green: 'success', yellow: 'warning', red: 'error' };
 const SCORE_LABEL   = { green: 'High Profit', yellow: 'Marginal', red: 'Loss Risk' };
@@ -60,15 +52,15 @@ export default function LoadCard({ load, onSave }) {
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2, gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', flex: 1 }}>
             {load.hot && (
-              <Chip icon={<BoltIcon sx={{ fontSize: '12px !important' }} />} label="Hot" size="small" color="error"
+              <Chip icon={<IonIcon name="flash-outline" sx={{ fontSize: '12px !important' }} />} label="Hot" size="small" color="error"
                 sx={{ fontWeight: 700, fontSize: '0.68rem', height: 21 }} />
             )}
             {load.instantBook && (
-              <Chip icon={<FlashOnIcon sx={{ fontSize: '12px !important' }} />} label="Instant Book" size="small" color="primary"
+              <Chip icon={<IonIcon name="flash-outline" sx={{ fontSize: '12px !important' }} />} label="Instant Book" size="small" color="primary"
                 sx={{ fontWeight: 700, fontSize: '0.68rem', height: 21 }} />
             )}
             <Chip
-              icon={<LocalShippingIcon sx={{ fontSize: '12px !important' }} />}
+              icon={<IonIcon name="car-sport-outline" sx={{ fontSize: '12px !important' }} />}
               label={load.type}
               size="small"
               variant="outlined"
@@ -80,7 +72,7 @@ export default function LoadCard({ load, onSave }) {
             <Tooltip title={saved ? 'Remove bookmark' : 'Save load'}>
               <IconButton size="small" onClick={handleSave}
                 sx={{ color: saved ? 'primary.main' : 'text.disabled', p: 0.5 }}>
-                {saved ? <BookmarkIcon sx={{ fontSize: 16 }} /> : <BookmarkBorderIcon sx={{ fontSize: 16 }} />}
+                {saved ? <IonIcon name="bookmark" sx={{ fontSize: 16 }} /> : <IonIcon name="bookmark-outline" sx={{ fontSize: 16 }} />}
               </IconButton>
             </Tooltip>
           </Box>
@@ -96,7 +88,7 @@ export default function LoadCard({ load, onSave }) {
             <Typography variant="body2" fontWeight={700} noWrap>{load.origin}</Typography>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-            <ArrowForwardIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
+            <IonIcon name="arrow-forward-outline" sx={{ fontSize: 15, color: 'text.disabled' }} />
             <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6rem' }}>{load.miles} mi</Typography>
           </Box>
           <Box sx={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
@@ -159,7 +151,7 @@ export default function LoadCard({ load, onSave }) {
                 </Typography>
                 {broker.rating > 0 && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                    <StarIcon sx={{ fontSize: 10, color: 'warning.main' }} />
+                    <IonIcon name="star" sx={{ fontSize: 10, color: 'warning.main' }} />
                     <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
                       {broker.rating?.toFixed(1)} ({broker.reviews})
                     </Typography>

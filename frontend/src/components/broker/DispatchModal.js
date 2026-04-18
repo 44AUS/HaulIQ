@@ -3,9 +3,9 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, Stack, Typography, CircularProgress, IconButton
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { bookingsApi } from '../../services/api';
+import IonIcon from '../IonIcon';
+
 
 export default function DispatchModal({ open, onClose, booking, onDispatched }) {
   const [form, setForm] = useState({
@@ -46,10 +46,10 @@ export default function DispatchModal({ open, onClose, booking, onDispatched }) 
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Stack direction="row" alignItems="center" spacing={1}>
-          <LocalShippingIcon fontSize="small" color="primary" />
+          <IonIcon name="car-sport-outline" fontSize="small" color="primary" />
           <Typography variant="subtitle1" fontWeight={700}>Dispatch Load</Typography>
         </Stack>
-        <IconButton size="small" onClick={onClose}><CloseIcon fontSize="small" /></IconButton>
+        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
       </DialogTitle>
 
       <DialogContent dividers>

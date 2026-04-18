@@ -5,38 +5,7 @@ import {
   Divider, Badge, Tooltip, List,
   useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Search as SearchIcon,
-  Close as CloseIcon,
-  Notifications as BellIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ShowChart as ActivityIcon,
-  AddCircleOutline as AddIcon,
-  Inventory2 as PackageIcon,
-  Event as EventIcon,
-  AttachMoney as MoneyIcon,
-  Group as UsersIcon,
-  ListAlt as ListChecksIcon,
-  AccountBalanceWallet as WalletIcon,
-  Payment as PaymentIcon,
-  CheckCircleOutline as CheckIcon,
-  PendingActions as PendingIcon,
-  MoreVert as MoreVertIcon,
-  FilterList as FilterListIcon,
-  Delete as DeleteIcon,
-  ArrowBack as ArrowBackIcon,
-  Layers as LayersIcon,
-  LocalShipping as TruckIcon,
-  Category as CategoryIcon,
-  Person as PersonIcon,
-  Message as MsgIcon,
-  Bookmark as SavedIcon,
-  CheckCircle as DoneIcon,
-  LocalAtm as PayIcon,
-  EventNote as CalendarIcon,
-} from '@mui/icons-material';
+import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { searchApi, notificationsApi } from '../../services/api';
@@ -47,44 +16,43 @@ const NOTIF_DRAWER_WIDTH = 360;
 
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
-  { icon: CalendarIcon,  label: 'Calendar',    path: '/carrier/calendar' },
-  { icon: SearchIcon,    label: 'Load Board',  path: '/carrier/loads' },
-  { icon: ActivityIcon,  label: 'Loads',       path: '/carrier/job-manager' },
-  { icon: WalletIcon,    label: 'Payments',    path: '/carrier/payments' },
-  { icon: TruckIcon,     label: 'My Trucks',   path: '/carrier/equipment' },
-  { icon: SavedIcon,     label: 'Lane Watch',  path: '/carrier/lane-watches' },
+  { icon: 'calendar-outline',    label: 'Calendar',   path: '/carrier/calendar' },
+  { icon: 'search-outline',      label: 'Load Board', path: '/carrier/loads' },
+  { icon: 'analytics-outline',   label: 'Loads',      path: '/carrier/job-manager' },
+  { icon: 'wallet-outline',      label: 'Payments',   path: '/carrier/payments' },
+  { icon: 'car-sport-outline',   label: 'My Trucks',  path: '/carrier/equipment' },
+  { icon: 'bookmark-outline',    label: 'Lane Watch', path: '/carrier/lane-watches' },
 ];
 
 const BROKER_NAV = [
-  { icon: CalendarIcon,  label: 'Calendar',    path: '/broker/calendar' },
-  { icon: AddIcon,       label: 'Post Load',   path: '/broker/post' },
-  { icon: PackageIcon,   label: 'Loads',       path: '/broker/loads' },
-  { icon: EventIcon,     label: 'Bookings',    path: '/broker/bookings' },
-  { icon: PaymentIcon,   label: 'Payments',    path: '/broker/payments' },
-  { icon: TruckIcon,     label: 'Trucks',      path: '/broker/trucks' },
+  { icon: 'calendar-outline',    label: 'Calendar',  path: '/broker/calendar' },
+  { icon: 'add-circle-outline',  label: 'Post Load', path: '/broker/post' },
+  { icon: 'cube-outline',        label: 'Loads',     path: '/broker/loads' },
+  { icon: 'calendar-outline',    label: 'Bookings',  path: '/broker/bookings' },
+  { icon: 'card-outline',        label: 'Payments',  path: '/broker/payments' },
+  { icon: 'car-sport-outline',   label: 'Trucks',    path: '/broker/trucks' },
 ];
 
 const DRIVER_NAV = [
-  { icon: TruckIcon,  label: 'My Loads', path: '/driver/loads' },
-  { icon: WalletIcon, label: 'Earnings', path: '/driver/earnings' },
-  { icon: MsgIcon,    label: 'Messages', path: '/driver/messages' },
+  { icon: 'car-sport-outline',  label: 'My Loads', path: '/driver/loads' },
+  { icon: 'wallet-outline',     label: 'Earnings', path: '/driver/earnings' },
+  { icon: 'chatbubble-outline', label: 'Messages', path: '/driver/messages' },
 ];
 
 const ADMIN_NAV = [
-  { icon: DashboardIcon,  label: 'Overview',  path: '/admin' },
-  { icon: UsersIcon,      label: 'Users',     path: '/admin/users' },
-  { icon: PackageIcon,    label: 'Loads',     path: '/admin/loads' },
-  { icon: MoneyIcon,      label: 'Revenue',   path: '/admin/revenue' },
-  { icon: PaymentIcon,    label: 'Payments',  path: '/admin/payments' },
-  { icon: ListChecksIcon, label: 'Waitlist',  path: '/admin/waitlist' },
-  { icon: LayersIcon,     label: 'Plans',     path: '/admin/plans' },
-  { icon: TruckIcon,      label: 'Equipment', path: '/admin/equipment' },
-  { icon: CategoryIcon,   label: 'Classes',   path: '/admin/equipment-classes' },
+  { icon: 'grid-outline',       label: 'Overview',  path: '/admin' },
+  { icon: 'people-outline',     label: 'Users',     path: '/admin/users' },
+  { icon: 'cube-outline',       label: 'Loads',     path: '/admin/loads' },
+  { icon: 'cash-outline',       label: 'Revenue',   path: '/admin/revenue' },
+  { icon: 'card-outline',       label: 'Payments',  path: '/admin/payments' },
+  { icon: 'list-outline',       label: 'Waitlist',  path: '/admin/waitlist' },
+  { icon: 'layers-outline',     label: 'Plans',     path: '/admin/plans' },
+  { icon: 'car-sport-outline',  label: 'Equipment', path: '/admin/equipment' },
+  { icon: 'grid-outline',       label: 'Classes',   path: '/admin/equipment-classes' },
 ];
 
 // ── Single top nav link ───────────────────────────────────────────────────────
 function NavLink({ item, active, onClick }) {
-  const Icon = item.icon;
   return (
     <Box
       onClick={onClick}
@@ -116,7 +84,7 @@ function NavLink({ item, active, onClick }) {
         } : {},
       }}
     >
-      <Icon sx={{ fontSize: 18, flexShrink: 0 }} />
+      <IonIcon name={item.icon} sx={{ fontSize: 18, flexShrink: 0 }} />
       <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
         {item.label}
       </Typography>
@@ -127,17 +95,17 @@ function NavLink({ item, active, onClick }) {
 // ── Icon by notification type ─────────────────────────────────────────────────
 function NotifIcon({ type }) {
   const map = {
-    new_bid:             <CheckIcon fontSize="small" color="warning" />,
-    bid_accepted:        <CheckIcon fontSize="small" color="success" />,
-    bid_rejected:        <CloseIcon fontSize="small" color="error" />,
-    bid_countered:       <CheckIcon fontSize="small" color="info" />,
-    booking_approved:    <CheckIcon fontSize="small" color="success" />,
-    booking_denied:      <CloseIcon fontSize="small" color="error" />,
-    new_booking_request: <PendingIcon fontSize="small" color="warning" />,
-    lane_watch_match:    <BellIcon fontSize="small" color="primary" />,
-    tms_update:          <ActivityIcon fontSize="small" color="info" />,
+    new_bid:             <IonIcon name="checkmark-circle-outline" fontSize="small" color="warning" />,
+    bid_accepted:        <IonIcon name="checkmark-circle-outline" fontSize="small" color="success" />,
+    bid_rejected:        <IonIcon name="close-circle-outline"     fontSize="small" color="error" />,
+    bid_countered:       <IonIcon name="checkmark-circle-outline" fontSize="small" color="info" />,
+    booking_approved:    <IonIcon name="checkmark-circle-outline" fontSize="small" color="success" />,
+    booking_denied:      <IonIcon name="close-circle-outline"     fontSize="small" color="error" />,
+    new_booking_request: <IonIcon name="hourglass-outline"        fontSize="small" color="warning" />,
+    lane_watch_match:    <IonIcon name="notifications-outline"    fontSize="small" color="primary" />,
+    tms_update:          <IonIcon name="analytics-outline"        fontSize="small" color="info" />,
   };
-  return map[type] || <BellIcon fontSize="small" color="action" />;
+  return map[type] || <IonIcon name="notifications-outline" fontSize="small" color="action" />;
 }
 
 function notifPath(notif, role) {
@@ -240,7 +208,7 @@ function SwipeableNotifRow({ notif, onDelete, onClick, formatTime }) {
           bgcolor: '#eb445a', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <IconButton size="small" onClick={() => onDelete(notif.id)} sx={{ color: '#fff' }}>
-            <DeleteIcon fontSize="small" />
+            <IonIcon name="trash-outline" fontSize="small" />
           </IconButton>
         </Box>
       )}
@@ -309,12 +277,12 @@ function PreferencesPanel({ onBack, onClose }) {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton size="small" onClick={onBack} sx={{ mr: 0.5 }}>
-            <ArrowBackIcon fontSize="small" />
+            <IonIcon name="arrow-back-outline" fontSize="small" />
           </IconButton>
           <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
         </Box>
         <IconButton size="small" onClick={onClose}>
-          <CloseIcon fontSize="small" />
+          <IonIcon name="close-outline" fontSize="small" />
         </IconButton>
       </Box>
 
@@ -465,11 +433,11 @@ function NotificationsPanel({ onClose, onCountChange }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Notification preferences">
             <IconButton size="small" onClick={() => setShowPrefs(true)} sx={{ color: 'text.secondary' }}>
-              <FilterListIcon fontSize="small" />
+              <IonIcon name="funnel-outline" fontSize="small" />
             </IconButton>
           </Tooltip>
           <IconButton size="small" onClick={onClose}>
-            <CloseIcon fontSize="small" />
+            <IonIcon name="close-outline" fontSize="small" />
           </IconButton>
         </Box>
       </Box>
@@ -490,7 +458,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
           </Box>
         ) : visibleNotifs.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center' }}>
-            <CheckIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
+            <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
             <Typography variant="body1" fontWeight={600}>All caught up!</Typography>
             <Typography variant="body2" color="text.secondary" mt={0.5}>No notifications right now.</Typography>
           </Box>
@@ -518,7 +486,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
             fullWidth
             variant="contained"
             size="small"
-            startIcon={<CheckIcon sx={{ fontSize: 16 }} />}
+            startIcon={<IonIcon name="checkmark-done-outline" sx={{ fontSize: 16 }} />}
             onClick={handleMarkAllRead}
             sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#fff', color: '#000', '&:hover': { bgcolor: '#f0f0f0' }, py: 1, boxShadow: 'none' }}
           >
@@ -528,7 +496,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
             fullWidth
             variant="contained"
             size="small"
-            startIcon={<DeleteIcon sx={{ fontSize: 16 }} />}
+            startIcon={<IonIcon name="trash-outline" sx={{ fontSize: 16 }} />}
             onClick={handleDeleteAll}
             sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#eb445a', '&:hover': { bgcolor: '#c9374b' }, py: 1, boxShadow: 'none' }}
           >
@@ -542,12 +510,12 @@ function NotificationsPanel({ onClose, onCountChange }) {
 
 // ── Search results panel ──────────────────────────────────────────────────────
 const SEARCH_CATEGORIES = [
-  { key: 'connections',       label: 'Connections',       Icon: PersonIcon },
-  { key: 'messages',          label: 'Messages',           Icon: MsgIcon },
-  { key: 'loads_in_progress', label: 'Loads In Progress', Icon: TruckIcon },
-  { key: 'completed_loads',   label: 'Completed Loads',   Icon: DoneIcon },
-  { key: 'saved_loads',       label: 'Saved Loads',       Icon: SavedIcon },
-  { key: 'payments',          label: 'Payments',           Icon: PayIcon },
+  { key: 'connections',       label: 'Connections',        icon: 'person-outline' },
+  { key: 'messages',          label: 'Messages',           icon: 'chatbubble-outline' },
+  { key: 'loads_in_progress', label: 'Loads In Progress',  icon: 'car-sport-outline' },
+  { key: 'completed_loads',   label: 'Completed Loads',    icon: 'checkmark-circle-outline' },
+  { key: 'saved_loads',       label: 'Saved Loads',        icon: 'bookmark-outline' },
+  { key: 'payments',          label: 'Payments',           icon: 'cash-outline' },
 ];
 
 function SearchResultsPanel({ results, loading, onNavigate }) {
@@ -578,7 +546,7 @@ function SearchResultsPanel({ results, loading, onNavigate }) {
 
   return (
     <Box sx={{ maxHeight: 480, overflowY: 'auto', py: 1 }}>
-      {SEARCH_CATEGORIES.map(({ key, label, Icon }) => {
+      {SEARCH_CATEGORIES.map(({ key, label, icon }) => {
         const items = results?.[key] || [];
         if (!items.length) return null;
         return (
@@ -598,7 +566,7 @@ function SearchResultsPanel({ results, loading, onNavigate }) {
                 }}
               >
                 <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
-                  <Icon sx={{ fontSize: 14, color: '#fff' }} />
+                  <IonIcon name={icon} sx={{ fontSize: 14, color: '#fff' }} />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={600} noWrap>
@@ -848,7 +816,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
               size="small"
               sx={{ ml: 1, color: '#fff', '&:hover': { bgcolor: BAR_COLOR_HOVER } }}
             >
-              <ChevronLeftIcon sx={{ fontSize: 26 }} />
+              <IonIcon name="chevron-back-outline" sx={{ fontSize: 26 }} />
             </IconButton>
             <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap', ml: 1, color: '#fff' }}>
               {displayTitle}
@@ -864,7 +832,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                     size="small"
                     sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
                   >
-                    <MsgIcon sx={{ fontSize: 22 }} />
+                    <IonIcon name="chatbubble-outline" sx={{ fontSize: 22 }} />
                   </IconButton>
                 </Tooltip>
               ) : (
@@ -875,7 +843,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                     sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
                   >
                     <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                      <BellIcon sx={{ fontSize: 22 }} />
+                      <IonIcon name="notifications-outline" sx={{ fontSize: 22 }} />
                     </Badge>
                   </IconButton>
                 </Tooltip>
@@ -944,7 +912,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
               size="small"
               sx={{ ml: 1.5, mr: 0.5, color: 'rgba(255,255,255,0.85)', flexShrink: 0, '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
             >
-              <MenuIcon />
+              <IonIcon name="menu-outline" />
             </IconButton>
           </Tooltip>
 
@@ -986,7 +954,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                   size="small"
                   sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
                 >
-                  <MoreVertIcon />
+                  <IonIcon name="ellipsis-vertical-outline" />
                 </IconButton>
               </Tooltip>
             )}
@@ -1015,7 +983,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                 backdropFilter: 'blur(4px)',
               }}
             >
-              <SearchIcon sx={{ fontSize: 17, mr: 1, opacity: 0.8, flexShrink: 0 }} />
+              <IonIcon name="search-outline" sx={{ fontSize: 17, mr: 1, opacity: 0.8, flexShrink: 0 }} />
               <InputBase
                 inputRef={searchRef}
                 value={searchVal}
@@ -1034,7 +1002,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                 onClick={handleCloseSearch}
                 sx={{ color: 'rgba(255,255,255,0.75)', p: 0.25, '&:hover': { color: '#fff' } }}
               >
-                <CloseIcon sx={{ fontSize: 15 }} />
+                <IonIcon name="close-outline" sx={{ fontSize: 15 }} />
               </IconButton>
             </Box>
 
@@ -1084,7 +1052,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                   pointerEvents: searchOpen ? 'none' : 'auto',
                 }}
               >
-                <SearchIcon sx={{ fontSize: 22 }} />
+                <IonIcon name="search-outline" sx={{ fontSize: 22 }} />
               </IconButton>
             </Tooltip>
 
@@ -1096,7 +1064,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                 sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
               >
                 <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                  <BellIcon sx={{ fontSize: 22 }} />
+                  <IonIcon name="notifications-outline" sx={{ fontSize: 22 }} />
                 </Badge>
               </IconButton>
             </Tooltip>
@@ -1121,7 +1089,6 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         {nav.map(item => {
-          const Icon = item.icon;
           const active = isActive(item.path);
           return (
             <MenuItem
@@ -1135,7 +1102,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                 fontSize: '0.875rem',
               }}
             >
-              <Icon sx={{ fontSize: 18, color: active ? 'primary.main' : 'text.secondary' }} />
+              <IonIcon name={item.icon} sx={{ fontSize: 18, color: active ? 'primary.main' : 'text.secondary' }} />
               {item.label}
             </MenuItem>
           );

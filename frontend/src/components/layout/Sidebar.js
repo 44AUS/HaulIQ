@@ -5,39 +5,7 @@ import {
   Typography, Avatar, Divider, IconButton, Badge, Tooltip, useMediaQuery, useTheme,
   Button, alpha, Popover,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  TrendingUp as TrendingUpIcon,
-  BarChart as BarChartIcon,
-  AddCircleOutline as AddIcon,
-  Inventory2 as PackageIcon,
-  Group as UsersIcon,
-  CreditCard as CreditCardIcon,
-  AttachMoney as MoneyIcon,
-  AccountBalanceWallet as WalletIcon,
-  Payment as PaymentIcon,
-  Logout as LogoutIcon,
-  Close as CloseIcon,
-  Event as EventIcon,
-  FlashOn as ZapIcon,
-  ShowChart as ActivityIcon,
-  Hub as NetworkIcon,
-  ListAlt as ListChecksIcon,
-  Brightness4 as DarkIcon,
-  Brightness7 as LightIcon,
-  ChatBubbleOutline as ChatIcon,
-  Tune as PreferencesIcon,
-  Build as ToolsIcon,
-  Folder as FolderIcon,
-  LocalShipping as TruckIcon,
-  Badge as BadgeIcon,
-  ChevronRight as ChevronRightIcon,
-  ManageAccounts as ManageAccountsIcon,
-  Business as BusinessIcon,
-  SwitchAccount as SwitchAccountIcon,
-  AddBusiness as AddBusinessIcon,
-  Extension as IntegrationsIcon,
-} from '@mui/icons-material';
+import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, bookingsApi, networkApi, authApi } from '../../services/api';
@@ -46,49 +14,49 @@ export const DRAWER_WIDTH = 300;
 export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
 
 const DRIVER_LINKS = [
-  { icon: DashboardIcon, label: 'Dashboard', path: '/driver/dashboard' },
-  { icon: TruckIcon,     label: 'My Loads',  path: '/driver/loads' },
-  { icon: WalletIcon,    label: 'Earnings',  path: '/driver/earnings' },
-  { icon: ChatIcon,      label: 'Messages',  path: '/driver/messages' },
+  { icon: 'grid-outline',        label: 'Dashboard', path: '/driver/dashboard' },
+  { icon: 'car-sport-outline',   label: 'My Loads',  path: '/driver/loads' },
+  { icon: 'wallet-outline',      label: 'Earnings',  path: '/driver/earnings' },
+  { icon: 'chatbubble-outline',  label: 'Messages',  path: '/driver/messages' },
 ];
 
 const CARRIER_LINKS = [
-  { icon: DashboardIcon, label: 'Dashboard',        path: '/carrier/dashboard' },
-  { icon: ToolsIcon,     label: 'Tools',             path: '/carrier/tools' },
-  { icon: TrendingUpIcon,label: 'Analytics',         path: '/carrier/analytics' },
-  { icon: BadgeIcon,     label: 'My Drivers',        path: '/carrier/drivers' },
-  { icon: NetworkIcon,   label: 'Network',           path: '/carrier/network', badge: 'network' },
-  { icon: FolderIcon,    label: 'Documents',         path: '/carrier/documents' },
-  { icon: CreditCardIcon,label: 'Billing',           path: '/carrier/billing' },
-  { icon: IntegrationsIcon,label: 'Integrations',   path: '/integrations' },
-  { icon: PreferencesIcon,label: 'Preferences',      path: '/preferences' },
+  { icon: 'grid-outline',            label: 'Dashboard',   path: '/carrier/dashboard' },
+  { icon: 'build-outline',           label: 'Tools',       path: '/carrier/tools' },
+  { icon: 'trending-up-outline',     label: 'Analytics',   path: '/carrier/analytics' },
+  { icon: 'id-card-outline',         label: 'My Drivers',  path: '/carrier/drivers' },
+  { icon: 'git-network-outline',     label: 'Network',     path: '/carrier/network', badge: 'network' },
+  { icon: 'folder-outline',          label: 'Documents',   path: '/carrier/documents' },
+  { icon: 'card-outline',            label: 'Billing',     path: '/carrier/billing' },
+  { icon: 'extension-puzzle-outline',label: 'Integrations',path: '/integrations' },
+  { icon: 'options-outline',         label: 'Preferences', path: '/preferences' },
 ];
 
 const BROKER_LINKS = [
-  { icon: DashboardIcon, label: 'Dashboard',         path: '/broker/dashboard' },
-  { icon: AddIcon,       label: 'Post Load',         path: '/broker/post' },
-  { icon: PackageIcon,   label: 'Manage Loads',      path: '/broker/loads' },
-  { icon: ListChecksIcon,label: 'Templates',          path: '/broker/templates' },
-  { icon: ActivityIcon,  label: 'In Progress',       path: '/broker/active' },
-  { icon: BarChartIcon,  label: 'Analytics',         path: '/broker/analytics' },
-  { icon: NetworkIcon,   label: 'Network',           path: '/broker/network' },
-  { icon: FolderIcon,    label: 'Documents',         path: '/broker/documents' },
-  { icon: EventIcon,     label: 'Booking Requests',  path: '/broker/bookings', badge: 'bookings' },
-  { icon: ZapIcon,       label: 'Instant Book',      path: '/broker/instant-book' },
-  { icon: PaymentIcon,   label: 'Payments',          path: '/broker/payments' },
-  { icon: CreditCardIcon,label: 'Billing',           path: '/broker/billing' },
-  { icon: IntegrationsIcon,label: 'Integrations',   path: '/integrations' },
-  { icon: PreferencesIcon,label: 'Preferences',      path: '/preferences' },
+  { icon: 'grid-outline',            label: 'Dashboard',        path: '/broker/dashboard' },
+  { icon: 'add-circle-outline',      label: 'Post Load',        path: '/broker/post' },
+  { icon: 'cube-outline',            label: 'Manage Loads',     path: '/broker/loads' },
+  { icon: 'list-outline',            label: 'Templates',        path: '/broker/templates' },
+  { icon: 'analytics-outline',       label: 'In Progress',      path: '/broker/active' },
+  { icon: 'bar-chart-outline',       label: 'Analytics',        path: '/broker/analytics' },
+  { icon: 'git-network-outline',     label: 'Network',          path: '/broker/network' },
+  { icon: 'folder-outline',          label: 'Documents',        path: '/broker/documents' },
+  { icon: 'calendar-outline',        label: 'Booking Requests', path: '/broker/bookings', badge: 'bookings' },
+  { icon: 'flash-outline',           label: 'Instant Book',     path: '/broker/instant-book' },
+  { icon: 'card-outline',            label: 'Payments',         path: '/broker/payments' },
+  { icon: 'card-outline',            label: 'Billing',          path: '/broker/billing' },
+  { icon: 'extension-puzzle-outline',label: 'Integrations',     path: '/integrations' },
+  { icon: 'options-outline',         label: 'Preferences',      path: '/preferences' },
 ];
 
 const ADMIN_LINKS = [
-  { icon: DashboardIcon,  label: 'Overview',          path: '/admin' },
-  { icon: UsersIcon,      label: 'Users',             path: '/admin/users' },
-  { icon: PackageIcon,    label: 'Load Moderation',   path: '/admin/loads' },
-  { icon: MoneyIcon,      label: 'Revenue',           path: '/admin/revenue' },
-  { icon: PaymentIcon,    label: 'Payments',          path: '/admin/payments' },
-  { icon: ListChecksIcon, label: 'Waitlist',          path: '/admin/waitlist' },
-  { icon: ChatIcon,       label: 'Contact Messages',  path: '/admin/contacts' },
+  { icon: 'grid-outline',   label: 'Overview',        path: '/admin' },
+  { icon: 'people-outline', label: 'Users',           path: '/admin/users' },
+  { icon: 'cube-outline',   label: 'Load Moderation', path: '/admin/loads' },
+  { icon: 'cash-outline',   label: 'Revenue',         path: '/admin/revenue' },
+  { icon: 'card-outline',   label: 'Payments',        path: '/admin/payments' },
+  { icon: 'list-outline',   label: 'Waitlist',        path: '/admin/waitlist' },
+  { icon: 'chatbubble-outline', label: 'Contact Messages', path: '/admin/contacts' },
 ];
 
 function NavItem({ item, badgeCount, active, onClick }) {
@@ -122,7 +90,7 @@ function NavItem({ item, badgeCount, active, onClick }) {
       >
         <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
           <Badge badgeContent={badgeCount > 0 ? (badgeCount > 9 ? '9+' : badgeCount) : null} color="error" max={9}>
-            <item.icon fontSize="small" />
+            <IonIcon name={item.icon} fontSize="small" />
           </Badge>
         </ListItemIcon>
         <ListItemText
@@ -325,7 +293,7 @@ function SidebarContent({ onNavigate, onClose }) {
       >
         <Tooltip title="Close menu" placement="right">
           <IconButton size="small" onClick={onClose} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
-            <CloseIcon fontSize="small" />
+            <IonIcon name="close-outline" fontSize="small" />
           </IconButton>
         </Tooltip>
 
@@ -335,7 +303,7 @@ function SidebarContent({ onNavigate, onClose }) {
 
         <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'} placement="left">
           <IconButton size="small" onClick={toggleTheme} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
-            {mode === 'dark' ? <LightIcon fontSize="small" /> : <DarkIcon fontSize="small" />}
+            <IonIcon name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
@@ -374,7 +342,7 @@ function SidebarContent({ onNavigate, onClose }) {
               {user.company || user.name}
             </Typography>
           </Box>
-          <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
+          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
         </Box>
 
         {/* Employee/User row */}
@@ -420,7 +388,7 @@ function SidebarContent({ onNavigate, onClose }) {
               )}
             </Box>
           </Box>
-          <ChevronRightIcon sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
+          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
         </Box>
 
         {/* Clock strip */}
@@ -487,17 +455,17 @@ function SidebarContent({ onNavigate, onClose }) {
         }}}
       >
         {[
-          { icon: BusinessIcon,      label: 'Manage Business', action: () => { navigate('/business'); setBizAnchor(null); } },
-          { icon: SwitchAccountIcon, label: 'Switch Business', action: () => setBizAnchor(null) },
-          { icon: AddBusinessIcon,   label: 'Add a business',  action: () => setBizAnchor(null) },
-        ].map(({ icon: Icon, label, action }, i, arr) => (
+          { icon: 'business-outline',       label: 'Manage Business', action: () => { navigate('/business'); setBizAnchor(null); } },
+          { icon: 'swap-horizontal-outline', label: 'Switch Business', action: () => setBizAnchor(null) },
+          { icon: 'add-outline',             label: 'Add a business',  action: () => setBizAnchor(null) },
+        ].map(({ icon, label, action }, i, arr) => (
           <Box key={label}>
             <Box
               onClick={action}
               sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
                 '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
             >
-              <Icon sx={{ fontSize: 20, color: 'text.secondary' }} />
+              <IonIcon name={icon} sx={{ fontSize: 20, color: 'text.secondary' }} />
               <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>{label}</Typography>
             </Box>
             {i < arr.length - 1 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
@@ -525,7 +493,7 @@ function SidebarContent({ onNavigate, onClose }) {
           sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
             '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
         >
-          <ManageAccountsIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+          <IonIcon name="person-circle-outline" sx={{ fontSize: 20, color: 'text.secondary' }} />
           <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>Manage profile</Typography>
         </Box>
         <Divider sx={{ borderColor: sc.dividerFaint }} />
@@ -534,7 +502,7 @@ function SidebarContent({ onNavigate, onClose }) {
           sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
             '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
         >
-          <LogoutIcon sx={{ fontSize: 20, color: 'error.main' }} />
+          <IonIcon name="log-out-outline" sx={{ fontSize: 20, color: 'error.main' }} />
           <Typography sx={{ fontSize: '0.9rem', color: 'error.main' }}>Log out</Typography>
         </Box>
         <Box sx={{ height: 4 }} />
@@ -548,7 +516,7 @@ function SidebarContent({ onNavigate, onClose }) {
               fullWidth
               variant="outlined"
               size="small"
-              startIcon={<ChatIcon fontSize="small" />}
+              startIcon={<IonIcon name="chatbubble-outline" fontSize="small" />}
               onClick={() => handleNav(messagesPath)}
               sx={{
                 borderRadius: 1.5,

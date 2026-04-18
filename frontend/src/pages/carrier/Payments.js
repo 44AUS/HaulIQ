@@ -4,9 +4,9 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { freightPaymentsApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
@@ -148,7 +148,7 @@ export default function CarrierPayments() {
         <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
           <Tooltip title="Refresh">
             <IconButton size="small" onClick={() => fetchData(true)} sx={{ color: 'text.secondary' }}>
-              <RefreshIcon sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -217,7 +217,7 @@ export default function CarrierPayments() {
                         <Chip label={chip.label} size="small" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text }} />
                       </TableCell>
                       <TableCell sx={{ width: 32, minWidth: 32, pr: 1 }}>
-                        <ChevronRightIcon sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
+                        <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
                       </TableCell>
                     </TableRow>
                   );

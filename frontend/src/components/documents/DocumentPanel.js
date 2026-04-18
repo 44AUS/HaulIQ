@@ -4,19 +4,10 @@ import {
   Dialog, DialogContent, DialogTitle, TextField, Select, MenuItem,
   FormControl, InputLabel, Paper, Alert,
 } from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CloseIcon from '@mui/icons-material/Close';
-import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { documentsApi } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import IonIcon from '../IonIcon';
+
 
 const DOC_TYPES = [
   { value: 'BOL',              label: 'Bill of Lading' },
@@ -210,11 +201,11 @@ export default function DocumentPanel({ loadId }) {
       {tab === 0 && (
         <Box>
           <Box sx={{ display: 'flex', gap: 1, pt: 2, pb: 2 }}>
-            <Button variant="contained" size="small" startIcon={<CameraAltIcon />}
+            <Button variant="contained" size="small" startIcon={<IonIcon name="camera-outline" />}
               onClick={() => openUploadWith(cameraInputRef)}>
               Scan / Camera
             </Button>
-            <Button variant="outlined" size="small" startIcon={<UploadFileIcon />}
+            <Button variant="outlined" size="small" startIcon={<IonIcon name="cloud-upload-outline" />}
               onClick={() => openUploadWith(fileInputRef)}>
               Upload File
             </Button>
@@ -224,7 +215,7 @@ export default function DocumentPanel({ loadId }) {
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box>
           ) : docs.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-              <DescriptionIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+              <IonIcon name="document-text-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
               <Typography variant="body2" color="text.secondary">No documents uploaded yet</Typography>
               <Typography variant="caption" color="text.disabled" display="block">Scan BOLs, PODs, receipts — no extra apps needed</Typography>
             </Paper>
@@ -239,7 +230,7 @@ export default function DocumentPanel({ loadId }) {
                   <Box sx={{ width: 44, height: 56, borderRadius: 1, overflow: 'hidden', flexShrink: 0, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {doc.pages?.[0]
                       ? <Box component="img" src={doc.pages[0]} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <DescriptionIcon sx={{ fontSize: 20, color: 'text.disabled' }} />
+                      : <IonIcon name="document-text-outline" sx={{ fontSize: 20, color: 'text.disabled' }} />
                     }
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -262,7 +253,7 @@ export default function DocumentPanel({ loadId }) {
                     >
                       {deletingId === doc.id
                         ? <CircularProgress size={14} />
-                        : <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                        : <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                       }
                     </IconButton>
                   )}
@@ -280,7 +271,7 @@ export default function DocumentPanel({ loadId }) {
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box>
           ) : msgs.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-              <ChatBubbleOutlineIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+              <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
               <Typography variant="body2" color="text.secondary">No messages for this load yet</Typography>
             </Paper>
           ) : (
@@ -317,7 +308,7 @@ export default function DocumentPanel({ loadId }) {
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', pb: 1 }}>
           <Typography variant="subtitle1" fontWeight={700} sx={{ flex: 1 }}>Add Document</Typography>
           <IconButton size="small" onClick={() => { setUploadOpen(false); setPages([]); }} disabled={uploading}>
-            <CloseIcon fontSize="small" />
+            <IonIcon name="close-outline" fontSize="small" />
           </IconButton>
         </DialogTitle>
         <DialogContent>
@@ -332,7 +323,7 @@ export default function DocumentPanel({ loadId }) {
                 </Box>
                 <IconButton size="small" onClick={() => handleRemovePage(i)}
                   sx={{ position: 'absolute', top: -6, right: -6, width: 18, height: 18, bgcolor: 'background.paper', border: 1, borderColor: 'divider' }}>
-                  <CloseIcon sx={{ fontSize: 10 }} />
+                  <IonIcon name="close-outline" sx={{ fontSize: 10 }} />
                 </IconButton>
               </Box>
             ))}
@@ -345,14 +336,14 @@ export default function DocumentPanel({ loadId }) {
               sx={{ width: 80, height: 104, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: 1, borderColor: 'divider', borderStyle: 'dashed', borderRadius: 1, cursor: 'pointer', gap: 0.5, '&:hover': { bgcolor: 'action.hover' } }}
               onClick={() => cameraInputRef.current?.click()}
             >
-              <AddPhotoAlternateIcon sx={{ fontSize: 22, color: 'text.disabled' }} />
+              <IonIcon name="image-outline" sx={{ fontSize: 22, color: 'text.disabled' }} />
               <Typography variant="caption" color="text.disabled" sx={{ fontSize: 10 }}>Add page</Typography>
             </Box>
           </Box>
 
           {/* Scan mode */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <Button size="small" variant={scanMode ? 'contained' : 'outlined'} startIcon={<AutoFixHighIcon />}
+            <Button size="small" variant={scanMode ? 'contained' : 'outlined'} startIcon={<IonIcon name="sparkles-outline" />}
               onClick={() => setScanMode(v => !v)} sx={{ fontSize: '0.72rem', minWidth: 0 }}>
               {scanMode ? 'Scan Mode' : 'Color Mode'}
             </Button>
@@ -376,7 +367,7 @@ export default function DocumentPanel({ loadId }) {
           </Box>
 
           <Button fullWidth variant="contained" size="large"
-            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <CheckCircleIcon />}
+            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="checkmark-circle" />}
             onClick={handleUpload} disabled={!pages.length || uploading}
           >
             {uploading ? 'Uploading…' : `Upload ${pages.length} page${pages.length !== 1 ? 's' : ''}`}
@@ -397,7 +388,7 @@ export default function DocumentPanel({ loadId }) {
                   {viewerPage + 1} / {viewerDoc.page_count}
                 </Typography>
               )}
-              <IconButton size="small" onClick={() => setViewerDoc(null)}><CloseIcon fontSize="small" /></IconButton>
+              <IconButton size="small" onClick={() => setViewerDoc(null)}><IonIcon name="close-outline" fontSize="small" /></IconButton>
             </DialogTitle>
             <DialogContent sx={{ p: 0 }}>
               <Box sx={{ position: 'relative', bgcolor: '#111' }}>
@@ -407,11 +398,11 @@ export default function DocumentPanel({ loadId }) {
                   <Box sx={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 1 }}>
                     <IconButton size="small" disabled={viewerPage === 0} onClick={() => setViewerPage(p => p - 1)}
                       sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                      <NavigateBeforeIcon />
+                      <IonIcon name="chevron-back-outline" />
                     </IconButton>
                     <IconButton size="small" disabled={viewerPage >= viewerDoc.page_count - 1} onClick={() => setViewerPage(p => p + 1)}
                       sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                      <NavigateNextIcon />
+                      <IonIcon name="chevron-forward-outline" />
                     </IconButton>
                   </Box>
                 )}

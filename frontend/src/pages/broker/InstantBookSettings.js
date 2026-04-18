@@ -2,20 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { instantBookApi, networkApi } from '../../services/api';
 import {
+import IonIcon from '../../components/IonIcon';
+
   Box, Typography, Button, Card, CardContent, Paper, Table, TableHead,
   TableRow, TableCell, TableBody, Chip, CircularProgress, Alert, TextField,
   Tabs, Tab, Avatar, IconButton, InputAdornment,
 } from '@mui/material';
-import BoltIcon from '@mui/icons-material/Bolt';
-import SearchIcon from '@mui/icons-material/Search';
-import UploadIcon from '@mui/icons-material/Upload';
-import GroupIcon from '@mui/icons-material/Group';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckIcon from '@mui/icons-material/Check';
-import HubIcon from '@mui/icons-material/Hub';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ArticleIcon from '@mui/icons-material/Article';
 
 export default function InstantBookSettings() {
   const [tab, setTab] = useState(0);
@@ -141,7 +133,7 @@ export default function InstantBookSettings() {
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BoltIcon color="success" /> Instant Book Settings
+            <IonIcon name="flash-outline" color="success" /> Instant Book Settings
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Only carriers on your allowlist can instantly book your loads. Others must submit a Book Now request.
@@ -157,7 +149,7 @@ export default function InstantBookSettings() {
 
       {/* Info banner */}
       <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'flex-start', gap: 1.5, borderColor: 'success.main', bgcolor: 'rgba(46,125,50,0.04)' }}>
-        <InfoOutlinedIcon sx={{ color: 'success.main', flexShrink: 0, mt: 0.2, fontSize: 18 }} />
+        <IonIcon name="information-circle-outline" sx={{ color: 'success.main', flexShrink: 0, mt: 0.2, fontSize: 18 }} />
         <Typography variant="body2" color="text.secondary">
           When a load has <strong>Instant Book</strong> enabled, only your approved carriers will see the Instant Book button. All other carriers will see a standard Book Now request that requires your approval.
         </Typography>
@@ -165,9 +157,9 @@ export default function InstantBookSettings() {
 
       {/* Tabs */}
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tab icon={<GroupIcon sx={{ fontSize: 16 }} />} iconPosition="start" label={`Allowlist (${allowlist.length})`} />
-        <Tab icon={<SearchIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Add from Urload" />
-        <Tab icon={<UploadIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Upload a list" />
+        <Tab icon={<IonIcon name="people-outline" sx={{ fontSize: 16 }} />} iconPosition="start" label={`Allowlist (${allowlist.length})`} />
+        <Tab icon={<IonIcon name="search-outline" sx={{ fontSize: 16 }} />} iconPosition="start" label="Add from Urload" />
+        <Tab icon={<IonIcon name="cloud-upload-outline" sx={{ fontSize: 16 }} />} iconPosition="start" label="Upload a list" />
       </Tabs>
 
       {/* Allowlist tab */}
@@ -179,7 +171,7 @@ export default function InstantBookSettings() {
             <CardContent><Alert severity="error">{listError}</Alert></CardContent>
           ) : allowlist.length === 0 ? (
             <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <GroupIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+              <IonIcon name="people-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
               <Typography variant="body2" color="text.secondary">No carriers on your allowlist yet</Typography>
               <Typography variant="caption" color="text.disabled">Add carriers via search or upload</Typography>
             </CardContent>
@@ -242,7 +234,7 @@ export default function InstantBookSettings() {
                           {entry.carrier_id && (
                             ns.status === 'accepted' ? (
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
-                                <CheckIcon sx={{ fontSize: 14 }} />
+                                <IonIcon name="checkmark-outline" sx={{ fontSize: 14 }} />
                                 <Typography variant="caption" fontWeight={600}>Network</Typography>
                               </Box>
                             ) : ns.status === 'pending' ? (
@@ -251,7 +243,7 @@ export default function InstantBookSettings() {
                               <Button
                                 size="small"
                                 variant="text"
-                                startIcon={ns.loading ? <CircularProgress size={12} /> : <HubIcon sx={{ fontSize: 14 }} />}
+                                startIcon={ns.loading ? <CircularProgress size={12} /> : <IonIcon name="git-network-outline" sx={{ fontSize: 14 }} />}
                                 disabled={ns.loading}
                                 onClick={() => handleAddToNetwork(entry.carrier_id)}
                                 sx={{ fontSize: '0.7rem' }}
@@ -270,7 +262,7 @@ export default function InstantBookSettings() {
                             </Box>
                           ) : (
                             <IconButton size="small" color="error" onClick={() => setConfirmRemove(entry.id)}>
-                              <DeleteIcon sx={{ fontSize: 16 }} />
+                              <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                             </IconButton>
                           )}
                         </TableCell>
@@ -294,7 +286,7 @@ export default function InstantBookSettings() {
             onChange={e => setQuery(e.target.value)}
             autoFocus
             InputProps={{
-              startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></InputAdornment>,
+              startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 18, color: 'text.secondary' }} /></InputAdornment>,
               endAdornment: searching ? <InputAdornment position="end"><CircularProgress size={16} /></InputAdornment> : null,
             }}
           />
@@ -334,7 +326,7 @@ export default function InstantBookSettings() {
                       variant={already ? 'outlined' : 'contained'}
                       color={already ? 'success' : 'primary'}
                       disabled={already || adding}
-                      startIcon={already ? <CheckIcon /> : adding ? <CircularProgress size={12} color="inherit" /> : <PersonAddIcon />}
+                      startIcon={already ? <IonIcon name="checkmark-outline" /> : adding ? <CircularProgress size={12} color="inherit" /> : <IonIcon name="person-add-outline" />}
                       onClick={() => handleAdd(carrier)}
                     >
                       {already ? 'Added' : adding ? 'Adding…' : 'Add'}
@@ -347,7 +339,7 @@ export default function InstantBookSettings() {
 
           {query.length < 2 && (
             <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-              <SearchIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+              <IonIcon name="search-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
               <Typography variant="body2" color="text.secondary">Search Urload's carrier database</Typography>
               <Typography variant="caption" color="text.disabled">
                 Type at least 2 characters to search by name, email, or MC number
@@ -363,7 +355,7 @@ export default function InstantBookSettings() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <ArticleIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                <IonIcon name="document-text-outline" sx={{ fontSize: 18, color: 'text.secondary' }} />
                 <Typography variant="subtitle2">Accepted formats</Typography>
               </Box>
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' }, gap: 1.5 }}>
@@ -396,7 +388,7 @@ export default function InstantBookSettings() {
               '&:hover': { borderColor: 'text.secondary' },
             }}
           >
-            <UploadIcon sx={{ fontSize: 32, color: 'text.secondary', mb: 1 }} />
+            <IonIcon name="cloud-upload-outline" sx={{ fontSize: 32, color: 'text.secondary', mb: 1 }} />
             <Typography variant="body2" color="text.secondary">Drop a .csv or .txt file here</Typography>
             <Typography variant="caption" color="text.disabled">or click to browse</Typography>
             <input ref={fileInputRef} type="file" accept=".csv,.txt" style={{ display: 'none' }} onChange={handleFileDrop} />
@@ -411,7 +403,7 @@ export default function InstantBookSettings() {
           />
 
           {uploadResult && (
-            <Alert severity="success" icon={<CheckIcon />}>
+            <Alert severity="success" icon={<IonIcon name="checkmark-outline" />}>
               <strong>Upload complete — </strong>
               {uploadResult.added} carrier{uploadResult.added !== 1 ? 's' : ''} added
               {uploadResult.skipped > 0 && `, ${uploadResult.skipped} skipped (duplicates or invalid)`}
@@ -423,7 +415,7 @@ export default function InstantBookSettings() {
             size="large"
             onClick={handleUploadSubmit}
             disabled={!uploadText.trim() || uploading}
-            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <UploadIcon />}
+            startIcon={uploading ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="cloud-upload-outline" />}
             sx={{ py: 1.5 }}
           >
             {uploading ? 'Importing…' : 'Import Carriers'}

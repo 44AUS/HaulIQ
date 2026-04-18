@@ -4,10 +4,9 @@ import {
   Chip, Table, TableHead, TableBody, TableRow, TableCell,
   IconButton, Button, CircularProgress, Skeleton,
 } from '@mui/material';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import SearchIcon from '@mui/icons-material/Search';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { adminApi } from '../../services/api';
+import IonIcon from '../../components/IonIcon';
+
 
 const STATUS_COLORS = {
   active:   'success',
@@ -71,7 +70,7 @@ export default function AdminLoads() {
       {/* Header */}
       <Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <InventoryIcon color="primary" />
+          <IonIcon name="cube-outline" color="primary" />
           <Typography variant="h5" fontWeight={700}>Load Moderation</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">{total} total loads on platform</Typography>
@@ -84,7 +83,7 @@ export default function AdminLoads() {
           placeholder="Search by origin, destination, commodity…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18 }} /></InputAdornment> }}
+          InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 18 }} /></InputAdornment> }}
           sx={{ flex: 1, minWidth: 200 }}
         />
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -195,7 +194,7 @@ export default function AdminLoads() {
                             onClick={() => handleRemove(load)}
                             sx={{ '&:hover': { color: 'error.main' } }}
                           >
-                            <DeleteIcon sx={{ fontSize: 16 }} />
+                            <IonIcon name="trash-outline" sx={{ fontSize: 16 }} />
                           </IconButton>
                         )
                       )}

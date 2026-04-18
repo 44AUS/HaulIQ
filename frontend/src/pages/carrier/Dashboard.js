@@ -3,18 +3,20 @@ import { Link } from 'react-router-dom';
 import {
   Box, Typography, Button, Card, CardContent, Grid
 } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import BoltIcon from '@mui/icons-material/Bolt';
+
+
+
+
+
+
+
 import { useAuth } from '../../context/AuthContext';
 import { loadsApi, analyticsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
+import IonIcon from '../../components/IonIcon';
+
 
 const StatCard = ({ icon: Icon, label, value, sub, color = 'primary' }) => {
 
@@ -87,7 +89,7 @@ export default function CarrierDashboard() {
           component={Link}
           to="/carrier/loads"
           variant="contained"
-          startIcon={<LocalShippingIcon />}
+          startIcon={<IonIcon name="car-sport-outline" />}
         >
           Browse Loads
         </Button>
@@ -132,7 +134,7 @@ export default function CarrierDashboard() {
                 to="/carrier/analytics"
                 variant="text"
                 size="small"
-                endIcon={<ArrowForwardIcon />}
+                endIcon={<IonIcon name="arrow-forward-outline" />}
                 sx={{ fontSize: '0.75rem' }}
               >
                 Full analytics
@@ -168,7 +170,7 @@ export default function CarrierDashboard() {
         <Card sx={{ flex: 1, minWidth: 0, border: '1px solid', borderColor: 'primary.dark', display: 'flex', flexDirection: 'column' }}>
           <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <PsychologyIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+              <IonIcon name="bulb-outline" sx={{ color: 'primary.main', fontSize: 20 }} />
               <Typography variant="subtitle2" fontWeight={600}>Earnings Brain</Typography>
             </Box>
             <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -180,7 +182,7 @@ export default function CarrierDashboard() {
               component={Link}
               to="/carrier/brain"
               variant="contained"
-              endIcon={<ArrowForwardIcon />}
+              endIcon={<IonIcon name="arrow-forward-outline" />}
               fullWidth
               sx={{ mt: 2 }}
             >
@@ -193,7 +195,7 @@ export default function CarrierDashboard() {
       {/* Hot Loads */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <BoltIcon sx={{ color: 'error.main' }} />
+          <IonIcon name="flash-outline" sx={{ color: 'error.main' }} />
           <Typography variant="subtitle1" fontWeight={600}>Hot Loads Right Now</Typography>
         </Box>
         <Button
@@ -201,7 +203,7 @@ export default function CarrierDashboard() {
           to="/carrier/loads"
           variant="text"
           size="small"
-          endIcon={<ArrowForwardIcon />}
+          endIcon={<IonIcon name="arrow-forward-outline" />}
           sx={{ fontSize: '0.75rem' }}
         >
           View all

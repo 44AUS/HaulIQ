@@ -5,14 +5,10 @@ import {
   CircularProgress, Stack, Alert, TextField, Divider, Avatar,
   Stepper, Step, StepLabel
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SaveIcon from '@mui/icons-material/Save';
-import AddCommentIcon from '@mui/icons-material/AddComment';
-import PersonIcon from '@mui/icons-material/Person';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { bookingsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
+import IonIcon from '../../components/IonIcon';
+
 
 const TMS_STEPS  = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
 const TMS_VALUES = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
@@ -110,7 +106,7 @@ export default function DispatchDetail() {
 
   if (error || !booking) return (
     <Box sx={{ textAlign: 'center', py: 10 }}>
-      <WarningAmberIcon sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
+      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
       <Typography color="text.secondary" gutterBottom>{error || 'Booking not found.'}</Typography>
       <Button variant="text" onClick={() => navigate(-1)}>Go back</Button>
     </Box>
@@ -123,7 +119,7 @@ export default function DispatchDetail() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Back */}
       <Button
-        startIcon={<ArrowBackIcon />}
+        startIcon={<IonIcon name="arrow-back-outline" />}
         variant="text"
         onClick={() => navigate('/broker/active')}
         sx={{ alignSelf: 'flex-start' }}
@@ -162,7 +158,7 @@ export default function DispatchDetail() {
               variant="contained"
               color="success"
               fullWidth
-              startIcon={markingPOD ? <CircularProgress size={16} color="inherit" /> : <CheckCircleIcon />}
+              startIcon={markingPOD ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="checkmark-circle" />}
               onClick={handleMarkPOD}
               disabled={markingPOD}
             >
@@ -170,7 +166,7 @@ export default function DispatchDetail() {
             </Button>
           )}
           {booking.tms_status === 'pod_received' && (
-            <Alert severity="success" icon={<CheckCircleIcon />}>
+            <Alert severity="success" icon={<IonIcon name="checkmark-circle" />}>
               <Typography variant="body2" fontWeight={600}>POD Received</Typography>
               <Typography variant="caption">Load fully closed out.</Typography>
             </Alert>
@@ -239,7 +235,7 @@ export default function DispatchDetail() {
                 <Button
                   variant="contained"
                   sx={{ mt: 2 }}
-                  startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <SaveIcon />}
+                  startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="save-outline" />}
                   onClick={handleSaveDispatch}
                   disabled={saving}
                 >
@@ -252,7 +248,7 @@ export default function DispatchDetail() {
             <Card>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <AddCommentIcon fontSize="small" color="action" />
+                  <IonIcon name="chatbox-outline" fontSize="small" color="action" />
                   <Typography variant="subtitle1" fontWeight={600}>Check Call Log</Typography>
                   {checkCalls.length > 0 && <Chip label={checkCalls.length} size="small" />}
                 </Box>
@@ -343,7 +339,7 @@ export default function DispatchDetail() {
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <PersonIcon fontSize="small" color="action" />
+                    <IonIcon name="person-outline" fontSize="small" color="action" />
                     <Typography variant="subtitle2" fontWeight={600}>Carrier</Typography>
                   </Box>
                   <Typography variant="body2" fontWeight={600}>{booking.carrier_name}</Typography>
