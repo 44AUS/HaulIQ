@@ -205,9 +205,9 @@ function OverviewTab({ setSnackbar }) {
     </Box>
   );
 
-  const AuthRow = ({ icon: Icon, iconColor, label, desc, actionLabel, onAction }) => (
+  const AuthRow = ({ icon, iconColor, label, desc, actionLabel, onAction }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', py: 1.5, gap: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Icon sx={{ fontSize: 22, color: iconColor || 'text.secondary', flexShrink: 0 }} />
+      <IonIcon name={icon} sx={{ fontSize: 22, color: iconColor || 'text.secondary', flexShrink: 0 }} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="body2" fontWeight={600}>{label}</Typography>
         {desc && <Typography variant="caption" color="text.secondary">{desc}</Typography>}
@@ -282,21 +282,21 @@ function OverviewTab({ setSnackbar }) {
           </Box>
           <Box sx={{ px: 2.5, pb: 1 }}>
             <AuthRow
-              icon={SecurityIcon}
+              icon="shield-checkmark-outline"
               label="Two-factor authentication"
               desc="Adds an extra layer of security. You'll enter your password and a code sent to your mobile device."
               actionLabel="Enable"
               onAction={() => {}}
             />
             <AuthRow
-              icon={LockIcon}
+              icon="lock-closed-outline"
               label="Password"
               actionLabel="Reset"
               onAction={() => { setStatus(null); setPasswords({ next: '', confirm: '' }); setPwOpen(true); }}
             />
             {user?.role === 'carrier' && (
               <AuthRow
-                icon={AccountBalanceIcon}
+                icon="wallet-outline"
                 iconColor={payoutStatus?.connected && payoutStatus?.payouts_enabled ? '#2dd36f' : 'text.secondary'}
                 label="Payout Account"
                 desc={payoutStatus?.connected && payoutStatus?.payouts_enabled ? 'Connected via Stripe' : 'Not connected'}

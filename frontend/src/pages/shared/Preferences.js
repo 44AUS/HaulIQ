@@ -7,14 +7,14 @@ import IonIcon from '../../components/IonIcon';
 
 
 const CARDS = [
-  { key: 'branding',      icon: PaletteIcon,       title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',   available: true },
-  { key: 'notifications', icon: NotificationsIcon,  title: 'Notifications',  desc: 'Control which email and push alerts you receive.',          available: false },
-  { key: 'equipment',     icon: LocalShippingIcon,  title: 'Equipment',      desc: 'Add and manage your trucks, trailers, and load capacity.',  available: true, carrierOnly: true },
-  { key: 'documents',     icon: DescriptionIcon,    title: 'Documents',      desc: 'Upload your CDL, MC authority, insurance, and more.',       available: false },
-  { key: 'billing',       icon: CreditCardIcon,     title: 'Billing',        desc: 'Manage your subscription plan and payment method.',         available: false },
-  { key: 'privacy',       icon: PrivacyTipIcon,     title: 'Privacy',        desc: 'Control your data sharing and profile visibility.',        available: false },
-  { key: 'security',      icon: SecurityIcon,       title: 'Security',       desc: 'Manage trusted devices and login activity.',                available: false },
-  { key: 'support',       icon: SupportAgentIcon,   title: 'Support',        desc: 'Get help, submit a ticket, or browse the help center.',    available: false },
+  { key: 'branding',      icon: 'color-palette-outline',    title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',   available: true },
+  { key: 'notifications', icon: 'notifications-outline',    title: 'Notifications',  desc: 'Control which email and push alerts you receive.',          available: false },
+  { key: 'equipment',     icon: 'car-sport-outline',        title: 'Equipment',      desc: 'Add and manage your trucks, trailers, and load capacity.',  available: true, carrierOnly: true },
+  { key: 'documents',     icon: 'document-text-outline',    title: 'Documents',      desc: 'Upload your CDL, MC authority, insurance, and more.',       available: false },
+  { key: 'billing',       icon: 'card-outline',             title: 'Billing',        desc: 'Manage your subscription plan and payment method.',         available: false },
+  { key: 'privacy',       icon: 'shield-checkmark-outline', title: 'Privacy',        desc: 'Control your data sharing and profile visibility.',        available: false },
+  { key: 'security',      icon: 'lock-closed-outline',      title: 'Security',       desc: 'Manage trusted devices and login activity.',                available: false },
+  { key: 'support',       icon: 'headset-outline',          title: 'Support',        desc: 'Get help, submit a ticket, or browse the help center.',    available: false },
 ];
 
 function ComingSoon({ label }) {
@@ -46,7 +46,7 @@ function AllCards({ user, onSelect }) {
             <CardActionArea onClick={() => onSelect(card.key)} sx={{ height: '100%', alignItems: 'flex-start' }}>
               <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
-                  <card.icon sx={{ fontSize: 22, color: 'primary.main' }} />
+                  <IonIcon name={card.icon} sx={{ fontSize: 22, color: 'primary.main' }} />
                   <Typography variant="subtitle2" fontWeight={700}>{card.title}</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, fontSize: '0.8rem' }}>
@@ -57,7 +57,7 @@ function AllCards({ user, onSelect }) {
           ) : (
             <CardContent sx={{ p: 2.5, display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
-                <card.icon sx={{ fontSize: 22, color: 'text.disabled' }} />
+                <IonIcon name={card.icon} sx={{ fontSize: 22, color: 'text.disabled' }} />
                 <Typography variant="subtitle2" fontWeight={700} color="text.secondary">{card.title}</Typography>
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, fontSize: '0.8rem' }}>{card.desc}</Typography>
