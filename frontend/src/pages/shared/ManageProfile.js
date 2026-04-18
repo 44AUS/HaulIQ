@@ -690,7 +690,7 @@ export default function ManageProfile() {
   const activeTab = searchParams.get('tab') || 'overview';
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, py: 1 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3, lg: 4 }, py: 1 }}>
       {activeTab === 'overview'   && <OverviewTab   snackbar={snackbar} setSnackbar={setSnackbar} />}
       {activeTab === 'earnings'   && <EarningsTab />}
       {activeTab === 'documents'  && <DocumentsTab />}
