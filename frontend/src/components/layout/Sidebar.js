@@ -486,13 +486,6 @@ function SidebarContent({ onNavigate, onClose }) {
           bgcolor: isDark ? '#1e1e1e' : '#fff',
         }}}
       >
-        {/* Header: business name */}
-        <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
-          <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px' }}>Business</Typography>
-          <Typography sx={{ fontSize: '0.95rem', color: sc.nameColor }} noWrap>
-            {user.company || user.name}
-          </Typography>
-        </Box>
         {[
           { icon: BusinessIcon,      label: 'Manage Business', action: () => { navigate('/business'); setBizAnchor(null); } },
           { icon: SwitchAccountIcon, label: 'Switch Business', action: () => setBizAnchor(null) },
@@ -527,11 +520,6 @@ function SidebarContent({ onNavigate, onClose }) {
           bgcolor: isDark ? '#1e1e1e' : '#fff',
         }}}
       >
-        {/* Header: user name */}
-        <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: `1px solid ${sc.divider}` }}>
-          <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, mb: '2px', textTransform: 'capitalize' }}>{user.role}</Typography>
-          <Typography sx={{ fontSize: '0.95rem', color: sc.nameColor }} noWrap>{user.name}</Typography>
-        </Box>
         <Box
           onClick={() => { navigate('/profile'); setUserAnchor(null); }}
           sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
