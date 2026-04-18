@@ -92,7 +92,6 @@ function OverviewTab({ setSnackbar }) {
   const fileRef = useRef();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [payoutStatus,    setPayoutStatus]    = useState(null);
-  const [payoutConnecting,setPayoutConnecting]= useState(false);
   const location = useLocation();
 
   // Edit info dialog
@@ -138,13 +137,11 @@ function OverviewTab({ setSnackbar }) {
   }, [user?.role]);
 
   const handleConnectPayout = async () => {
-    setPayoutConnecting(true);
     try {
       const data = await freightPaymentsApi.onboard();
       if (data?.url) window.location.href = data.url;
     } catch (err) {
       setSnackbar({ open: true, msg: err.message || 'Failed to start payout setup.', severity: 'error' });
-      setPayoutConnecting(false);
     }
   };
 
