@@ -2,19 +2,14 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import {
   Box, Typography, Card, CardContent, TextField, Button, Alert,
-  Grid, Divider, Avatar, CircularProgress, Snackbar, Chip,
+  Divider, CircularProgress, Snackbar, Chip,
   IconButton, Tooltip, LinearProgress, MenuItem, Select, FormControl, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import BusinessIcon from '@mui/icons-material/Business';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import PhoneIcon from '@mui/icons-material/Phone';
-import SaveIcon from '@mui/icons-material/Save';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -22,6 +17,11 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EmailIcon from '@mui/icons-material/Email';
+import SecurityIcon from '@mui/icons-material/Security';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useAuth } from '../../context/AuthContext';
 import { authApi, freightPaymentsApi, profileDocumentsApi } from '../../services/api';
 import { useTheme } from '@mui/material/styles';
@@ -85,14 +85,42 @@ const DOC_TYPE_LABELS = {
 };
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
-function OverviewTab({ snackbar, setSnackbar }) {
+function OverviewTab({ setSnackbar }) {
   const { user, updateUser } = useAuth();
+  const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const fileRef = useRef();
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [payoutStatus,    setPayoutStatus]    = useState(null);
-  const [payoutLoading,   setPayoutLoading]   = useState(false);
   const [payoutConnecting,setPayoutConnecting]= useState(false);
   const location = useLocation();
+
+  // Edit info dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [profile, setProfile] = useState({
+    name: user?.name || '', phone: user?.phone || '',
+    company: user?.company || '', mc: user?.mc || '', dot: user?.dot || '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  // Password dialog
+  const [pwOpen, setPwOpen] = useState(false);
+  const [passwords, setPasswords] = useState({ next: '', confirm: '' });
+  const [pwSaving, setPwSaving] = useState(false);
+
+  // Notes dialog
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notes, setNotes] = useState('');
+
+  // Copied state
+  const [copied, setCopied] = useState(null);
+
+  const copy = (val, key) => {
+    navigator.clipboard.writeText(val || '').catch(() => {});
+    setCopied(key);
+    setTimeout(() => setCopied(null), 1500);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -103,11 +131,9 @@ function OverviewTab({ snackbar, setSnackbar }) {
 
   useEffect(() => {
     if (user?.role === 'carrier') {
-      setPayoutLoading(true);
       freightPaymentsApi.onboardStatus()
         .then(d => setPayoutStatus(d))
-        .catch(() => setPayoutStatus(null))
-        .finally(() => setPayoutLoading(false));
+        .catch(() => setPayoutStatus(null));
     }
   }, [user?.role]);
 
@@ -134,17 +160,8 @@ function OverviewTab({ snackbar, setSnackbar }) {
     finally { setAvatarUploading(false); e.target.value = ''; }
   };
 
-  const [profile, setProfile] = useState({
-    name: user?.name || '', email: user?.email || '',
-    phone: user?.phone || '', company: user?.company || '',
-    mc: user?.mc || '', dot: user?.dot || '',
-  });
-  const [passwords, setPasswords] = useState({ next: '', confirm: '' });
-  const [status,  setStatus]  = useState(null);
-  const [saving,  setSaving]  = useState(false);
-
-  async function saveProfile(e) {
-    e.preventDefault(); setSaving(true); setStatus(null);
+  async function saveProfile() {
+    setSaving(true); setStatus(null);
     try {
       const updated = await authApi.update({
         name: profile.name || undefined, phone: profile.phone || undefined,
@@ -154,191 +171,222 @@ function OverviewTab({ snackbar, setSnackbar }) {
       updateUser({ name: updated.name, phone: updated.phone || null, company: updated.company || updated.name,
         mc: updated.mc_number || null, dot: updated.dot_number || null,
         avatar: updated.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) });
-      setStatus({ type: 'success', msg: 'Profile updated.' });
+      setEditOpen(false);
     } catch (err) { setStatus({ type: 'error', msg: err.message || 'Failed to save.' }); }
     finally { setSaving(false); }
   }
 
-  async function changePassword(e) {
-    e.preventDefault();
+  async function changePassword() {
     if (passwords.next !== passwords.confirm) { setStatus({ type: 'error', msg: 'Passwords do not match.' }); return; }
     if (passwords.next.length < 8) { setStatus({ type: 'error', msg: 'Min 8 characters.' }); return; }
-    setSaving(true); setStatus(null);
+    setPwSaving(true); setStatus(null);
     try {
       await authApi.update({ password: passwords.next });
       setPasswords({ next: '', confirm: '' });
-      setStatus({ type: 'success', msg: 'Password changed.' });
+      setPwOpen(false);
+      setSnackbar({ open: true, msg: 'Password changed.', severity: 'success' });
     } catch (err) { setStatus({ type: 'error', msg: err.message || 'Failed.' }); }
-    finally { setSaving(false); }
+    finally { setPwSaving(false); }
   }
 
+  const cardSx = {
+    bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'background.paper',
+    border: '1px solid',
+    borderColor: 'divider',
+    borderRadius: '10px',
+    overflow: 'hidden',
+  };
+
+  const InfoRow = ({ label, value, copyKey, showEmail }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.3 }}>{label}</Typography>
+        {value && <Typography variant="body2" fontWeight={600} noWrap>{value}</Typography>}
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0, ml: 1 }}>
+        {showEmail && value && (
+          <Tooltip title="Send email">
+            <IconButton size="small" onClick={() => window.location.href = `mailto:${value}`} sx={{ color: 'warning.main', p: 0.5 }}>
+              <EmailIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+        )}
+        {copyKey && value && (
+          <Tooltip title={copied === copyKey ? 'Copied!' : 'Copy'}>
+            <IconButton size="small" onClick={() => copy(value, copyKey)} sx={{ color: copied === copyKey ? 'success.main' : 'text.disabled', p: 0.5 }}>
+              <ContentCopyIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
+    </Box>
+  );
+
+  const AuthRow = ({ icon: Icon, iconColor, label, desc, actionLabel, onAction }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', py: 1.5, gap: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Icon sx={{ fontSize: 22, color: iconColor || 'text.secondary', flexShrink: 0 }} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" fontWeight={600}>{label}</Typography>
+        {desc && <Typography variant="caption" color="text.secondary">{desc}</Typography>}
+      </Box>
+      <Button size="small" onClick={onAction} sx={{ fontWeight: 700, fontSize: '0.72rem', color: 'success.main', flexShrink: 0, minWidth: 0 }}>
+        {actionLabel}
+      </Button>
+    </Box>
+  );
+
   return (
-    <Box sx={{ maxWidth: 640, mx: 'auto', py: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {status && <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>{status.msg}</Alert>}
+    <Box sx={{ py: 2, display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-      {/* Avatar */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <PersonIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Profile Photo</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Box sx={{ position: 'relative', flexShrink: 0 }}>
-              <Avatar src={user?.avatar_url || undefined} sx={{ width: 80, height: 80, bgcolor: 'primary.dark', fontSize: 28, fontWeight: 700 }}>
-                {!user?.avatar_url && user?.avatar}
-              </Avatar>
-              <Box onClick={() => !avatarUploading && fileRef.current.click()} sx={{ position: 'absolute', inset: 0, borderRadius: '50%', bgcolor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, '&:hover': { opacity: 1 }, cursor: 'pointer', transition: 'opacity 0.2s' }}>
-                {avatarUploading ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : <CameraAltIcon sx={{ color: '#fff', fontSize: 22 }} />}
-              </Box>
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
-            </Box>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>{user?.avatar_url ? 'Change photo' : 'Upload a photo'}</Typography>
-              <Typography variant="caption" color="text.secondary">JPG, PNG or GIF, cropped to square.</Typography>
-              <Box sx={{ mt: 1 }}>
-                <Button size="small" variant="outlined" onClick={() => fileRef.current.click()} disabled={avatarUploading}>
-                  {avatarUploading ? 'Uploading…' : 'Choose File'}
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Profile form */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <PersonIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Profile Information</Typography>
-          </Box>
-          <Box component="form" onSubmit={saveProfile}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField label="Full Name" size="small" fullWidth value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField label="Email" size="small" fullWidth value={profile.email} disabled />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField label="Phone Number" size="small" fullWidth type="tel" placeholder="+1 (555) 000-0000" value={profile.phone} onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} InputProps={{ startAdornment: <PhoneIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }} />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField label="Company Name" size="small" fullWidth value={profile.company} onChange={e => setProfile(p => ({ ...p, company: e.target.value }))} InputProps={{ startAdornment: <BusinessIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }} />
-              </Grid>
-              {user?.role === 'carrier' && (<>
-                <Grid item xs={12} sm={6}>
-                  <TextField label="MC Number" size="small" fullWidth placeholder="MC-000000" value={profile.mc} onChange={e => setProfile(p => ({ ...p, mc: e.target.value }))} InputProps={{ startAdornment: <LocalShippingIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField label="DOT Number" size="small" fullWidth placeholder="DOT-000000" value={profile.dot} onChange={e => setProfile(p => ({ ...p, dot: e.target.value }))} />
-                </Grid>
-              </>)}
-            </Grid>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button type="submit" variant="contained" disabled={saving} startIcon={<SaveIcon />}>
-                {saving ? 'Saving…' : 'Save Changes'}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Password */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <LockIcon color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Change Password</Typography>
-          </Box>
-          <Box component="form" onSubmit={changePassword}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField label="New Password" size="small" fullWidth type="password" placeholder="Min. 8 characters" value={passwords.next} onChange={e => setPasswords(p => ({ ...p, next: e.target.value }))} />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField label="Confirm New Password" size="small" fullWidth type="password" value={passwords.confirm} onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))} />
-              </Grid>
-            </Grid>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button type="submit" variant="contained" disabled={saving || !passwords.next} startIcon={<LockIcon />}>
-                {saving ? 'Saving…' : 'Change Password'}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Payout (carrier only) */}
-      {user?.role === 'carrier' && (
-        <Card variant="outlined">
-          <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <AccountBalanceIcon color="primary" />
-              <Typography variant="subtitle1" fontWeight={700}>Payout Account</Typography>
-            </Box>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Connect a bank account via Stripe to receive load payments. HaulIQ retains 1.5%.
+      {/* ── Left: Avatar ── */}
+      <Box sx={{ flexShrink: 0, position: 'relative' }}>
+        <Box
+          onClick={() => !avatarUploading && fileRef.current.click()}
+          sx={{
+            width: 220, height: 220, borderRadius: '10px', overflow: 'hidden',
+            bgcolor: isDark ? '#2a2a2a' : '#e8e8e8',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', position: 'relative',
+            '&:hover .cam-overlay': { opacity: 1 },
+          }}
+        >
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <Typography sx={{ fontSize: '4rem', fontWeight: 300, color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)' }}>
+              {user?.name?.[0] || '?'}
             </Typography>
-            {payoutLoading ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <CircularProgress size={18} />
-                <Typography variant="body2" color="text.secondary">Checking…</Typography>
-              </Box>
-            ) : payoutStatus?.connected && payoutStatus?.payouts_enabled ? (
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                  <CheckCircleIcon sx={{ color: 'success.main', fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight={600} color="success.main">Payout account connected</Typography>
-                </Box>
-                <Button variant="outlined" size="small" onClick={handleConnectPayout} disabled={payoutConnecting} startIcon={payoutConnecting ? <CircularProgress size={14} color="inherit" /> : <AccountBalanceIcon />}>
-                  {payoutConnecting ? 'Opening…' : 'Manage Account'}
-                </Button>
-              </Box>
-            ) : payoutStatus?.connected ? (
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                  <WarningAmberIcon sx={{ color: 'warning.main', fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight={600} color="warning.main">Setup incomplete</Typography>
-                </Box>
-                <Button variant="contained" color="warning" size="small" onClick={handleConnectPayout} disabled={payoutConnecting}>
-                  {payoutConnecting ? 'Opening…' : 'Finish Setup'}
-                </Button>
-              </Box>
-            ) : (
-              <Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>No payout account connected yet.</Typography>
-                <Button variant="contained" size="small" onClick={handleConnectPayout} disabled={payoutConnecting} startIcon={<AccountBalanceIcon />}>
-                  {payoutConnecting ? 'Opening Stripe…' : 'Connect Bank Account'}
-                </Button>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Account info */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={700} mb={2}>Account Info</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {[
-              { label: 'Role',         value: user?.role },
-              { label: 'Plan',         value: user?.plan },
-              ...(user?.joined ? [{ label: 'Member since', value: user.joined }] : []),
-            ].map(({ label, value }, i, arr) => (
-              <Box key={label}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">{label}</Typography>
-                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{value}</Typography>
-                </Box>
-                {i < arr.length - 1 && <Divider sx={{ mt: 1.5 }} />}
-              </Box>
-            ))}
+          )}
+          <Box className="cam-overlay" sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
+            {avatarUploading ? <CircularProgress size={28} sx={{ color: '#fff' }} /> : <CameraAltIcon sx={{ color: '#fff', fontSize: 28 }} />}
           </Box>
-        </CardContent>
-      </Card>
+        </Box>
+        {/* "..." menu button */}
+        <Box sx={{ position: 'absolute', top: 8, right: 8, bgcolor: isDark ? 'rgba(30,30,30,0.85)' : 'rgba(255,255,255,0.85)', borderRadius: '6px', backdropFilter: 'blur(4px)' }}>
+          <IconButton size="small" sx={{ color: 'text.secondary', p: 0.5 }}>
+            <MoreVertIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
+      </Box>
+
+      {/* ── Right: Info sections ── */}
+      <Box sx={{ flex: 1, minWidth: 280, display: 'flex', flexDirection: 'column', gap: 2 }}>
+
+        {/* Employee Info */}
+        <Box sx={cardSx}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75 }}>
+            <Typography variant="subtitle1" fontWeight={700}>Employee Info</Typography>
+            <Button size="small" startIcon={<EditIcon sx={{ fontSize: 14 }} />} onClick={() => { setProfile({ name: user?.name || '', phone: user?.phone || '', company: user?.company || '', mc: user?.mc || '', dot: user?.dot || '' }); setStatus(null); setEditOpen(true); }}
+              sx={{ fontWeight: 700, fontSize: '0.72rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Edit
+            </Button>
+          </Box>
+          <Box sx={{ px: 2.5, pb: 1 }}>
+            <InfoRow label="Name"         value={user?.name}  copyKey="name" />
+            <InfoRow label="Phone Number" value={user?.phone} copyKey="phone" />
+            <InfoRow label="Email"        value={user?.email} copyKey="email" showEmail />
+            <InfoRow label="Role"         value={user?.role}  />
+            {user?.mc  && <InfoRow label="MC Number"  value={user.mc}  copyKey="mc" />}
+            {user?.dot && <InfoRow label="DOT Number" value={user.dot} copyKey="dot" />}
+          </Box>
+        </Box>
+
+        {/* Authentication Methods */}
+        <Box sx={cardSx}>
+          <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700}>Authentication Methods</Typography>
+          </Box>
+          <Box sx={{ px: 2.5, pb: 1 }}>
+            <AuthRow
+              icon={SecurityIcon}
+              label="Two-factor authentication"
+              desc="Adds an extra layer of security. You'll enter your password and a code sent to your mobile device."
+              actionLabel="Enable"
+              onAction={() => {}}
+            />
+            <AuthRow
+              icon={LockIcon}
+              label="Password"
+              actionLabel="Reset"
+              onAction={() => { setStatus(null); setPasswords({ next: '', confirm: '' }); setPwOpen(true); }}
+            />
+            {user?.role === 'carrier' && (
+              <AuthRow
+                icon={AccountBalanceIcon}
+                iconColor={payoutStatus?.connected && payoutStatus?.payouts_enabled ? '#2dd36f' : 'text.secondary'}
+                label="Payout Account"
+                desc={payoutStatus?.connected && payoutStatus?.payouts_enabled ? 'Connected via Stripe' : 'Not connected'}
+                actionLabel={payoutStatus?.connected ? 'Manage' : 'Connect'}
+                onAction={handleConnectPayout}
+              />
+            )}
+          </Box>
+        </Box>
+
+        {/* Notes */}
+        <Box sx={cardSx}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75 }}>
+            <Typography variant="subtitle1" fontWeight={700}>Notes</Typography>
+            <Button size="small" startIcon={<EditIcon sx={{ fontSize: 14 }} />} onClick={() => setNotesOpen(true)}
+              sx={{ fontWeight: 700, fontSize: '0.72rem', color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Edit
+            </Button>
+          </Box>
+          <Box sx={{ px: 2.5, pb: 2 }}>
+            {notes ? (
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap' }}>{notes}</Typography>
+            ) : (
+              <Typography variant="body2" color="text.disabled">No notes added.</Typography>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ── Edit Info Dialog ── */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Profile</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '12px !important' }}>
+          {status && <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>{status.msg}</Alert>}
+          <TextField label="Full Name"    size="small" fullWidth value={profile.name}    onChange={e => setProfile(p => ({ ...p, name:    e.target.value }))} />
+          <TextField label="Phone"        size="small" fullWidth value={profile.phone}   onChange={e => setProfile(p => ({ ...p, phone:   e.target.value }))} />
+          <TextField label="Company"      size="small" fullWidth value={profile.company} onChange={e => setProfile(p => ({ ...p, company: e.target.value }))} />
+          {user?.role === 'carrier' && <>
+            <TextField label="MC Number" size="small" fullWidth value={profile.mc}  onChange={e => setProfile(p => ({ ...p, mc:  e.target.value }))} />
+            <TextField label="DOT Number"size="small" fullWidth value={profile.dot} onChange={e => setProfile(p => ({ ...p, dot: e.target.value }))} />
+          </>}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={saveProfile} disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Change Password Dialog ── */}
+      <Dialog open={pwOpen} onClose={() => setPwOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Reset Password</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '12px !important' }}>
+          {status && <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>{status.msg}</Alert>}
+          <TextField label="New Password"     size="small" fullWidth type="password" placeholder="Min. 8 characters" value={passwords.next}    onChange={e => setPasswords(p => ({ ...p, next:    e.target.value }))} />
+          <TextField label="Confirm Password" size="small" fullWidth type="password" value={passwords.confirm} onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setPwOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={changePassword} disabled={pwSaving || !passwords.next}>{pwSaving ? 'Saving…' : 'Change Password'}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ── Notes Dialog ── */}
+      <Dialog open={notesOpen} onClose={() => setNotesOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>Edit Notes</DialogTitle>
+        <DialogContent sx={{ pt: '12px !important' }}>
+          <TextField multiline rows={4} fullWidth size="small" placeholder="Add notes about yourself…" value={notes} onChange={e => setNotes(e.target.value)} />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setNotesOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => setNotesOpen(false)}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
