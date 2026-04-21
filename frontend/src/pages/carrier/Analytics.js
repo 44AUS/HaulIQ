@@ -6,9 +6,8 @@ import {
   Chip, Avatar,
 } from '@mui/material';
 import { analyticsApi, driversApi } from '../../services/api';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts';

@@ -18,7 +18,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import IonIcon from '../../components/IonIcon';
 
 
-const StatCard = ({ icon: Icon, label, value, sub, color = 'primary' }) => {
+const StatCard = ({ icon, label, value, sub, color = 'primary' }) => {
 
 
   return (
@@ -30,7 +30,7 @@ const StatCard = ({ icon: Icon, label, value, sub, color = 'primary' }) => {
             bgcolor: 'action.hover',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <Icon sx={{ fontSize: 20, color: 'primary.main' }} />
+            <IonIcon name={icon} sx={{ fontSize: 20, color: 'primary.main' }} />
           </Box>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
@@ -98,11 +98,11 @@ export default function CarrierDashboard() {
       {/* Stats */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
         <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard icon={AttachMoneyIcon} label="Total Net" value={fmt(summary?.total_net)} sub="All time" color="primary" />
+          <StatCard icon="cash-outline" label="Total Net" value={fmt(summary?.total_net)} sub="All time" color="primary" />
         </Box>
         <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard
-            icon={TrendingUpIcon}
+            icon="trending-up-outline"
             label="Avg Rate/Mile"
             value={summary?.avg_rate_per_mile ? `$${Number(summary.avg_rate_per_mile).toFixed(2)}` : '—'}
             sub="All time"
@@ -110,11 +110,11 @@ export default function CarrierDashboard() {
           />
         </Box>
         <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard icon={LocalShippingIcon} label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" color="warning" />
+          <StatCard icon="cube-outline" label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" color="warning" />
         </Box>
         <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
           <StatCard
-            icon={LocationOnIcon}
+            icon="location-outline"
             label="Avg Deadhead"
             value={summary?.avg_deadhead_miles ? `${Math.round(summary.avg_deadhead_miles)} mi` : '—'}
             sub="Per load"
