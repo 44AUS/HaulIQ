@@ -458,8 +458,8 @@ function MonthGrid({ date, allEvents, onSelectEvent, onDayClick }) {
 
 // ─── Map Layers Panel ─────────────────────────────────────────────────────────
 const MAP_LAYERS = [
-  { key: 'satellite', label: 'Satellite', Icon: SatelliteAltIcon },
-  { key: 'traffic',   label: 'Live Traffic', Icon: TrafficIcon },
+  { key: 'satellite', label: 'Satellite',    icon: 'globe-outline' },
+  { key: 'traffic',   label: 'Live Traffic', icon: 'car-outline' },
 ];
 
 function MapLayersPanel({ pending, onToggle, onApply, isDark }) {
@@ -485,7 +485,7 @@ function MapLayersPanel({ pending, onToggle, onApply, isDark }) {
         </Button>
       </Box>
       {/* Layer rows */}
-      {MAP_LAYERS.map(({ key, label, Icon }, i) => (
+      {MAP_LAYERS.map(({ key, label, icon }, i) => (
         <Box key={key} onClick={() => onToggle(key)}
           sx={{
             display: 'flex', alignItems: 'center', gap: 2, px: 2.5, py: 1.6,
@@ -503,7 +503,7 @@ function MapLayersPanel({ pending, onToggle, onApply, isDark }) {
             }}
           />
           <Typography sx={{ color: textCol, fontWeight: 500, fontSize: '1rem', flex: 1 }}>{label}</Typography>
-          <Icon sx={{ color: iconCol, fontSize: 22 }} />
+          <IonIcon name={icon} sx={{ color: iconCol, fontSize: 22 }} />
         </Box>
       ))}
       <Box sx={{ height: 6 }} />

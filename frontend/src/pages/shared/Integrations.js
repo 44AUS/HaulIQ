@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import {
-import IonIcon from '../../components/IonIcon';
-
   Box, Typography, Card, CardContent, Chip, Button, Avatar,
   useTheme, Divider, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
+import IonIcon from '../../components/IonIcon';
 
 // ─── Integration definitions ─────────────────────────────────────────────────
 const INTEGRATIONS = [

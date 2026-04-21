@@ -121,10 +121,10 @@ function BrokerLogoCircle({ logo, name, size = 64, isOwner = false, onUpload }) 
 }
 
 const BADGE_MAP = {
-  elite:    { label: 'Elite Partner', color: 'info',    Icon: BoltIcon },
-  trusted:  { label: 'Trusted',       color: 'primary', Icon: ShieldIcon },
-  verified: { label: 'Verified',      color: 'primary', Icon: ShieldIcon },
-  warning:  { label: 'Warning',       color: 'error',   Icon: WarningAmberIcon },
+  elite:    { label: 'Elite Partner', color: 'info',    icon: 'flash-outline' },
+  trusted:  { label: 'Trusted',       color: 'primary', icon: 'shield-outline' },
+  verified: { label: 'Verified',      color: 'primary', icon: 'shield-checkmark-outline' },
+  warning:  { label: 'Warning',       color: 'error',   icon: 'warning-outline' },
 };
 
 export default function BrokerProfile() {
@@ -287,7 +287,7 @@ export default function BrokerProfile() {
                   <Typography variant="h5" fontWeight={700}>{broker.name}</Typography>
                   {badge && (
                     <Chip
-                      icon={<badge.Icon sx={{ fontSize: 14 }} />}
+                      icon={<IonIcon name={badge.icon} sx={{ fontSize: 14 }} />}
                       label={badge.label}
                       size="small"
                       color={badge.color}
