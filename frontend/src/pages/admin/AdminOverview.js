@@ -65,14 +65,14 @@ export default function AdminOverview() {
   );
 
   const kpis = [
-    { Icon: AttachMoneyIcon,   label: 'Monthly MRR',        value: `$${(stats.mrr / 1000).toFixed(1)}K`,     color: 'success' },
-    { Icon: TrendingUpIcon,    label: 'ARR',                value: `$${(stats.arr / 1000).toFixed(1)}K`,     color: 'success' },
-    { Icon: PeopleIcon,        label: 'Active Subscribers', value: stats.active_subscribers.toLocaleString(), color: 'primary' },
-    { Icon: InventoryIcon,     label: 'Active Loads',       value: stats.active_loads.toLocaleString(),       color: 'warning' },
-    { Icon: PeopleIcon,        label: 'Total Users',        value: stats.total_users.toLocaleString(),        color: 'info'    },
-    { Icon: LocalShippingIcon, label: 'Total Carriers',     value: stats.total_carriers.toLocaleString(),     color: 'primary' },
-    { Icon: WorkIcon,          label: 'Total Brokers',      value: stats.total_brokers.toLocaleString(),      color: 'info'    },
-    { Icon: FiberNewIcon,      label: 'New Users (30d)',     value: stats.new_users_30d.toLocaleString(),      color: 'success' },
+    { icon: 'cash-outline',           label: 'Monthly MRR',        value: `$${(stats.mrr / 1000).toFixed(1)}K`,     color: 'success' },
+    { icon: 'trending-up-outline',    label: 'ARR',                value: `$${(stats.arr / 1000).toFixed(1)}K`,     color: 'success' },
+    { icon: 'people-outline',         label: 'Active Subscribers', value: stats.active_subscribers.toLocaleString(), color: 'primary' },
+    { icon: 'cube-outline',           label: 'Active Loads',       value: stats.active_loads.toLocaleString(),       color: 'warning' },
+    { icon: 'person-outline',         label: 'Total Users',        value: stats.total_users.toLocaleString(),        color: 'info'    },
+    { icon: 'car-outline',            label: 'Total Carriers',     value: stats.total_carriers.toLocaleString(),     color: 'primary' },
+    { icon: 'briefcase-outline',      label: 'Total Brokers',      value: stats.total_brokers.toLocaleString(),      color: 'info'    },
+    { icon: 'sparkles-outline',       label: 'New Users (30d)',     value: stats.new_users_30d.toLocaleString(),      color: 'success' },
   ];
 
   return (
@@ -95,7 +95,7 @@ export default function AdminOverview() {
         gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
         gap: 2,
       }}>
-        {kpis.map(({ Icon, label, value, color }) => (
+        {kpis.map(({ icon, label, value, color }) => (
           <Card variant="outlined" key={label}>
             <CardContent sx={{ py: 2 }}>
               <Box sx={{
@@ -103,7 +103,7 @@ export default function AdminOverview() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 bgcolor: `${color}.main`,
               }}>
-                <Icon sx={{ fontSize: 18, color: '#fff' }} />
+                <IonIcon name={icon} sx={{ fontSize: 18, color: '#fff' }} />
               </Box>
               <Typography variant="body2" color="text.secondary" mb={0.25}>{label}</Typography>
               <Typography variant="h4" fontWeight={800}>{value}</Typography>

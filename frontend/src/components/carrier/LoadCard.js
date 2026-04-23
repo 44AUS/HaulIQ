@@ -14,7 +14,7 @@ const SCORE_BORDER  = {
   yellow: 'rgba(237,108,2,0.2)',
   red:    'rgba(211,47,47,0.2)',
 };
-const SCORE_ICONS   = { green: TrendingUpIcon, yellow: RemoveIcon, red: TrendingDownIcon };
+const SCORE_ICONS   = { green: 'trending-up-outline', yellow: 'remove-outline', red: 'trending-down-outline' };
 
 export default function LoadCard({ load, onSave }) {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export default function LoadCard({ load, onSave }) {
     onSave && onSave(load.id, !saved);
   };
 
-  const ProfitIcon = SCORE_ICONS[load.profitScore] || RemoveIcon;
+  const profitIcon = SCORE_ICONS[load.profitScore] || 'remove-outline';
   const broker = load.broker;
   const brokerInitials = broker?.name
     ? broker.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -161,7 +161,7 @@ export default function LoadCard({ load, onSave }) {
             </Box>
           ) : <Box />}
           <Chip
-            icon={<ProfitIcon sx={{ fontSize: '12px !important' }} />}
+            icon={<IonIcon name={profitIcon} sx={{ fontSize: '12px !important' }} />}
             label={SCORE_LABEL[load.profitScore]}
             size="small"
             color={SCORE_COLOR[load.profitScore]}

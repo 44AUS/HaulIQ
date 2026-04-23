@@ -23,11 +23,11 @@ function SkeletonCards() {
   );
 }
 
-function EmptyState({ icon: Icon, title, subtitle }) {
+function EmptyState({ icon, title, subtitle }) {
   return (
     <Card>
       <CardContent sx={{ textAlign: 'center', py: 8 }}>
-        <Icon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+        <IonIcon name={icon} sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
         <Typography variant="body1" fontWeight={600} color="text.secondary">{title}</Typography>
         {subtitle && <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>{subtitle}</Typography>}
       </CardContent>
@@ -115,7 +115,7 @@ function PaymentsTab({ data, loading, error }) {
   const unpaid = data?.total_unpaid     || 0;
 
   if (total === 0 && paid === 0 && unpaid === 0) return (
-    <EmptyState icon={AttachMoneyIcon} title="No payment data yet" subtitle="Payment analytics will appear once loads are booked." />
+    <EmptyState icon="cash-outline" title="No payment data yet" subtitle="Payment analytics will appear once loads are booked." />
   );
 
   const pieData = [
@@ -161,7 +161,7 @@ function DriversTab({ data, loading, error }) {
   const carriers = data?.top_carriers || [];
 
   if (carriers.length === 0) return (
-    <EmptyState icon={GroupIcon} title="No carrier partners yet" subtitle="Top carriers will appear here once loads are completed." />
+    <EmptyState icon="people-outline" title="No carrier partners yet" subtitle="Top carriers will appear here once loads are completed." />
   );
 
   return (
@@ -206,7 +206,7 @@ function DriversTab({ data, loading, error }) {
 // ── Imports tab ───────────────────────────────────────────────────────────────
 function ImportsTab() {
   return (
-    <EmptyState icon={UploadFileIcon} title="Imports coming soon" subtitle="CSV and load template imports will be available here." />
+    <EmptyState icon="cloud-upload-outline" title="Imports coming soon" subtitle="CSV and load template imports will be available here." />
   );
 }
 
