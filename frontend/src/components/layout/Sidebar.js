@@ -95,7 +95,7 @@ function NavItem({ item, badgeCount, active, onClick }) {
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          primaryTypographyProps={{ fontSize: '1.1rem', fontWeight: active ? 600 : 400 }}
+          primaryTypographyProps={{ fontSize: '1rem', fontWeight: active ? 600 : 400 }}
         />
       </ListItemButton>
     </ListItem>
