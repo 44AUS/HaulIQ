@@ -29,11 +29,11 @@ function SkeletonCards() {
   );
 }
 
-function EmptyState({ icon: Icon, title, subtitle }) {
+function EmptyState({ icon, title, subtitle }) {
   return (
     <Card>
       <CardContent sx={{ textAlign: 'center', py: 8 }}>
-        <Icon sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
+        <IonIcon name={icon} sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
         <Typography variant="body1" fontWeight={600} color="text.secondary">{title}</Typography>
         {subtitle && <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>{subtitle}</Typography>}
       </CardContent>
@@ -44,13 +44,13 @@ function EmptyState({ icon: Icon, title, subtitle }) {
 function KpiRow({ items }) {
   return (
     <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
-      {items.map(({ icon: Icon, label, value, color }) => (
+      {items.map(({ icon, label, value, color }) => (
         <Box key={label} sx={{ flex: '1 1 160px', minWidth: 0 }}>
           <Card>
             <CardContent>
-              {Icon && (
+              {icon && (
                 <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.25 }}>
-                  <Icon sx={{ fontSize: 18, color: color || 'primary.main' }} />
+                  <IonIcon name={icon} sx={{ fontSize: 18, color: color || 'primary.main' }} />
                 </Box>
               )}
               <Typography variant="body2" color="text.secondary" gutterBottom>{label}</Typography>
@@ -73,16 +73,16 @@ function LoadsTab({ summary, loading, error }) {
   const isEmpty  = weekly.length === 0 && laneData.length === 0;
 
   if (isEmpty) return (
-    <EmptyState icon={TrendingUpIcon} title="No load analytics yet" subtitle="Complete loads to see your performance." />
+    <EmptyState icon="trending-up-outline" title="No load analytics yet" subtitle="Complete loads to see your performance." />
   );
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <KpiRow items={[
-        { icon: AttachMoneyIcon,   label: 'Total Gross',   value: fmt(summary?.total_gross) },
-        { icon: TrendingUpIcon,    label: 'Total Net',     value: fmt(summary?.total_net) },
-        { icon: LocalShippingIcon, label: 'Total Miles',   value: fmtN(summary?.total_miles) },
-        { icon: LocationOnIcon,    label: 'Avg Net/Mile',  value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—' },
+        { icon: 'cash-outline',         label: 'Total Gross',   value: fmt(summary?.total_gross) },
+        { icon: 'trending-up-outline',  label: 'Total Net',     value: fmt(summary?.total_net) },
+        { icon: 'cube-outline',         label: 'Total Miles',   value: fmtN(summary?.total_miles) },
+        { icon: 'location-outline',     label: 'Avg Net/Mile',  value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—' },
       ]} />
 
       {weekly.length > 0 && (
@@ -190,7 +190,7 @@ function PaymentsTab({ summary, loading, error }) {
   const weekly   = summary?.weekly_earnings || [];
 
   if (gross === 0 && net === 0) return (
-    <EmptyState icon={AttachMoneyIcon} title="No payment data yet" subtitle="Payment analytics will appear once you complete loads." />
+    <EmptyState icon="cash-outline" title="No payment data yet" subtitle="Payment analytics will appear once you complete loads." />
   );
 
   const pieData  = [
@@ -262,7 +262,7 @@ function DriversTab() {
   if (loading) return <SkeletonCards />;
 
   if (drivers.length === 0) return (
-    <EmptyState icon={BadgeIcon} title="No drivers yet" subtitle="Invite drivers from the My Drivers page to see analytics here." />
+    <EmptyState icon="id-card-outline" title="No drivers yet" subtitle="Invite drivers from the My Drivers page to see analytics here." />
   );
 
   const active  = drivers.filter(d =>  d.invite_accepted).length;
@@ -329,7 +329,7 @@ function DriversTab() {
 // ── Imports tab ───────────────────────────────────────────────────────────────
 function ImportsTab() {
   return (
-    <EmptyState icon={UploadFileIcon} title="Imports coming soon" subtitle="CSV and TMS data imports will be available here." />
+    <EmptyState icon="cloud-upload-outline" title="Imports coming soon" subtitle="CSV and TMS data imports will be available here." />
   );
 }
 

@@ -47,7 +47,7 @@ export default function ProfitCalculator() {
   const scoreConfig = {
     green: {
       label: 'High Profit',
-      Icon: TrendingUpIcon,
+      icon: 'trending-up-outline',
       color: 'success.main',
       bgcolor: 'rgba(46,125,50,0.08)',
       borderColor: 'success.main',
@@ -55,7 +55,7 @@ export default function ProfitCalculator() {
     },
     yellow: {
       label: 'Marginal',
-      Icon: RemoveIcon,
+      icon: 'remove-outline',
       color: 'warning.main',
       bgcolor: 'rgba(245,127,23,0.08)',
       borderColor: 'warning.main',
@@ -63,7 +63,7 @@ export default function ProfitCalculator() {
     },
     red: {
       label: 'Loss / Low',
-      Icon: TrendingDownIcon,
+      icon: 'trending-down-outline',
       color: 'error.main',
       bgcolor: 'rgba(198,40,40,0.08)',
       borderColor: 'error.main',
@@ -152,7 +152,7 @@ export default function ProfitCalculator() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0,
                   }}>
-                    <scoreConfig.Icon sx={{ fontSize: 28, color: scoreConfig.color }} />
+                    <IonIcon name={scoreConfig.icon} sx={{ fontSize: 28, color: scoreConfig.color }} />
                   </Box>
                   <Box>
                     <Typography variant="caption" sx={{ color: scoreConfig.color, opacity: 0.8 }}>
