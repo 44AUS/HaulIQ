@@ -136,7 +136,7 @@ function OverviewTab({ setSnackbar }) {
     if (!file) return;
     setAvatarUploading(true);
     try {
-      const dataUrl = await resizeToDataUrl(file, 256);
+      const dataUrl = await resizeToDataUrl(file, 400);
       await authApi.update({ avatar_url: dataUrl });
       updateUser({ avatar_url: dataUrl });
     } catch { alert('Failed to upload photo.'); }
