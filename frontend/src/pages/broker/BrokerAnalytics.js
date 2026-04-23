@@ -38,13 +38,13 @@ function EmptyState({ icon, title, subtitle }) {
 function KpiRow({ items }) {
   return (
     <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
-      {items.map(({ icon: Icon, label, value, sub, color }) => (
+      {items.map(({ icon, label, value, sub, color }) => (
         <Box key={label} sx={{ flex: '1 1 160px', minWidth: 0 }}>
           <Card>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {Icon && (
+              {icon && (
                 <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon sx={{ color: color || 'primary.main' }} />
+                  <IonIcon name={icon} sx={{ color: color || 'primary.main' }} />
                 </Box>
               )}
               <Box>
@@ -72,10 +72,10 @@ function LoadsTab({ data, loading, error }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <KpiRow items={[
-        { icon: VisibilityIcon,  label: 'Total Views',       value: (data.total_views || 0).toLocaleString(), sub: 'All loads',               color: 'info.main' },
-        { icon: GroupIcon,       label: 'Total Bids',        value: (data.total_bids  || 0).toLocaleString(), sub: 'All loads',               color: 'warning.main' },
-        { icon: TrendingUpIcon,  label: 'Fill Rate',         value: `${fillRate}%`,                           sub: 'Loads filled / posted',   color: 'success.main' },
-        { icon: AccessTimeIcon,  label: 'Avg Time-to-Fill',  value: avgTime,                                  sub: 'From post to approval',   color: 'primary.main' },
+        { icon: 'eye-outline',          label: 'Total Views',       value: (data.total_views || 0).toLocaleString(), sub: 'All loads',               color: 'info.main' },
+        { icon: 'people-outline',       label: 'Total Bids',        value: (data.total_bids  || 0).toLocaleString(), sub: 'All loads',               color: 'warning.main' },
+        { icon: 'trending-up-outline',  label: 'Fill Rate',         value: `${fillRate}%`,                           sub: 'Loads filled / posted',   color: 'success.main' },
+        { icon: 'time-outline',         label: 'Avg Time-to-Fill',  value: avgTime,                                  sub: 'From post to approval',   color: 'primary.main' },
       ]} />
 
       <Card>
