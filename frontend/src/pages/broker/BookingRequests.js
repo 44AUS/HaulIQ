@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { bookingsApi, loadsApi, bidsApi, freightPaymentsApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   Box, Typography, Button, Card, CardContent, Chip, CircularProgress, Alert,
   Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
   Tabs, Tab, InputAdornment, Divider, Skeleton, Grid,

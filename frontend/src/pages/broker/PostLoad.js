@@ -3,9 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { loadsApi, equipmentTypesApi, equipmentClassesApi, rateIntelApi, loadTemplatesApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   Box, Typography, Button, Paper, Grid, TextField, FormControl,
   InputLabel, Select, MenuItem, InputAdornment, CircularProgress, Alert,
   FormControlLabel, Switch,

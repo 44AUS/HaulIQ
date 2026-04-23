@@ -5,9 +5,8 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, TableContainer,
 } from '@mui/material';
 import { analyticsApi } from '../../services/api';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Legend, PieChart, Pie, Cell,
 } from 'recharts';

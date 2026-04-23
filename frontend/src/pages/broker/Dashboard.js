@@ -4,9 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { loadsApi, bookingsApi, analyticsApi, brokersApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   Box, Typography, Button, Card, CardContent, Table, TableHead,
   TableRow, TableCell, TableBody, Chip, Paper, Divider,
 } from '@mui/material';

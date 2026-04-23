@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { bookingsApi, locationsApi } from '../../services/api';
-import {
 import IonIcon from '../../components/IonIcon';
-
+import {
   Box, Typography, Button, Card, CardContent, CircularProgress, Alert,
 } from '@mui/material';
 
