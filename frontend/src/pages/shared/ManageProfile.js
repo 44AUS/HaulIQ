@@ -226,7 +226,7 @@ function OverviewTab({ setSnackbar }) {
         <Box
           onClick={() => !avatarUploading && fileRef.current.click()}
           sx={{
-            width: 220, height: 220, borderRadius: '10px', overflow: 'hidden',
+            width: 400, height: 400, borderRadius: '10px', overflow: 'hidden',
             bgcolor: isDark ? '#2a2a2a' : '#e8e8e8',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', position: 'relative',
