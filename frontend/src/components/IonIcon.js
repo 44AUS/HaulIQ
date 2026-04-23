@@ -8,7 +8,7 @@ const SIZE_MAP = {
   inherit: 'inherit',
 };
 
-export default function IonIcon({ name, sx, color, fontSize, style, onClick, className, ...rest }) {
+export default function IonIcon({ name, sx, color, fontSize = 'medium', style, onClick, className, ...rest }) {
   const theme = useTheme();
 
   // Resolve MUI theme color shorthands

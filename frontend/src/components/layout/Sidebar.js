@@ -79,23 +79,23 @@ function NavItem({ item, badgeCount, active, onClick }) {
           px: 2.5,
           py: 1.25,
           minHeight: 48,
-          color: c.text,
-          '&:hover': { bgcolor: c.hover, color: isDark ? '#fff' : 'text.primary' },
+          color: '#fff',
+          '&:hover': { bgcolor: c.hover, color: '#fff' },
           '&.Mui-selected': {
             bgcolor: c.activeBg,
-            color: c.textActive,
+            color: '#fff',
             '&:hover': { bgcolor: c.activeHover },
           },
         }}
       >
         <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
           <Badge badgeContent={badgeCount > 0 ? (badgeCount > 9 ? '9+' : badgeCount) : null} color="error" max={9}>
-            <IonIcon name={item.icon} fontSize="small" />
+            <IonIcon name={item.icon} />
           </Badge>
         </ListItemIcon>
         <ListItemText
           primary={item.label}
-          primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: active ? 600 : 400 }}
+          primaryTypographyProps={{ fontSize: '1.5rem', fontWeight: active ? 600 : 400 }}
         />
       </ListItemButton>
     </ListItem>
