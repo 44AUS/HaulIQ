@@ -108,6 +108,8 @@ function BrandColorSync() {
 function roleDashboard(role) {
   if (role === 'admin')   return '/admin';
   if (role === 'driver')  return '/driver/dashboard';
+  if (role === 'carrier') return '/carrier/calendar';
+  if (role === 'broker')  return '/broker/calendar';
   return `/${role}/dashboard`;
 }
 
@@ -152,7 +154,7 @@ function CarrierRoutes() {
     <ProtectedRoute requiredRole="carrier">
       <DashboardLayout>
         <Routes>
-          <Route path="dashboard" element={<CarrierDashboard />} />
+          <Route path="dashboard" element={<Navigate to="/carrier/calendar" replace />} />
           <Route path="loads" element={<LoadBoard />} />
           <Route path="loads/:id" element={<LoadDetail />} />
           <Route path="calculator" element={<ProfitCalculator />} />
@@ -174,7 +176,7 @@ function CarrierRoutes() {
           <Route path="documents" element={<Documents />} />
           <Route path="billing" element={<Billing />} />
           <Route path="subscription" element={<ManageSubscription />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+          <Route path="*" element={<Navigate to="calendar" replace />} />
         </Routes>
       </DashboardLayout>
     </ProtectedRoute>
@@ -187,7 +189,7 @@ function BrokerRoutes() {
     <ProtectedRoute requiredRole="broker">
       <DashboardLayout>
         <Routes>
-          <Route path="dashboard" element={<BrokerDashboard />} />
+          <Route path="dashboard" element={<Navigate to="/broker/calendar" replace />} />
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
           <Route path="loads/:id" element={<BrokerLoadDetail />} />
@@ -206,7 +208,7 @@ function BrokerRoutes() {
           <Route path="documents" element={<Documents />} />
           <Route path="billing" element={<Billing />} />
           <Route path="subscription" element={<ManageSubscription />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+          <Route path="*" element={<Navigate to="calendar" replace />} />
         </Routes>
       </DashboardLayout>
     </ProtectedRoute>

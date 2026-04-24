@@ -946,16 +946,26 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
               </Box>
             )}
 
-            {/* Mobile: current page name (clickable, opens nav dropdown) */}
+            {/* Mobile: current page name styled like desktop tab (clickable, opens nav dropdown) */}
             {isMobile && !searchOpen && (
               <Box
                 onClick={e => setMobileMenuAnchor(e.currentTarget)}
-                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', px: 1, py: 0.5, borderRadius: 1, '&:hover': { bgcolor: BAR_COLOR_HOVER } }}
+                sx={{
+                  display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.9,
+                  px: 2, height: '100%', cursor: 'pointer', position: 'relative',
+                  color: '#fff', bgcolor: 'rgba(255,255,255,0.12)',
+                  '&:hover': { bgcolor: BAR_COLOR_HOVER },
+                  transition: 'all 0.15s', flexShrink: 0,
+                  '&::after': { content: '""', position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, borderRadius: '3px 3px 0 0', bgcolor: '#fff' },
+                }}
               >
-                <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1 }}>
-                  {nav.find(item => isActive(item.path))?.label || 'Menu'}
+                {nav.find(item => isActive(item.path)) && (
+                  <IonIcon name={nav.find(item => isActive(item.path)).icon} sx={{ fontSize: 18, flexShrink: 0 }} />
+                )}
+                <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                  {nav.find(item => isActive(item.path))?.label}
                 </Typography>
-                <IonIcon name="chevron-down-outline" sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }} />
+                <IonIcon name="chevron-down-outline" sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
               </Box>
             )}
 
