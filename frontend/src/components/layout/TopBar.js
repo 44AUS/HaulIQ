@@ -946,17 +946,17 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
               </Box>
             )}
 
-            {/* Mobile: MoreVert dropdown button */}
+            {/* Mobile: current page name (clickable, opens nav dropdown) */}
             {isMobile && !searchOpen && (
-              <Tooltip title="Navigation" placement="bottom">
-                <IconButton
-                  onClick={e => setMobileMenuAnchor(e.currentTarget)}
-                  size="small"
-                  sx={{ color: 'rgba(255,255,255,0.85)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-                >
-                  <IonIcon name="ellipsis-vertical-outline" />
-                </IconButton>
-              </Tooltip>
+              <Box
+                onClick={e => setMobileMenuAnchor(e.currentTarget)}
+                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer', px: 1, py: 0.5, borderRadius: 1, '&:hover': { bgcolor: BAR_COLOR_HOVER } }}
+              >
+                <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1 }}>
+                  {nav.find(item => isActive(item.path))?.label || 'Menu'}
+                </Typography>
+                <IonIcon name="chevron-down-outline" sx={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)' }} />
+              </Box>
             )}
 
             {/* Expanding search bar — overlays center area when open */}
