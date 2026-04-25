@@ -646,6 +646,7 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
   const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
+  const [tabMenuAnchor, setTabMenuAnchor] = useState(null);
   const searchRef = useRef(null);
   const [searchResults, setSearchResults] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -853,16 +854,48 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
 
           {/* Row 2 — Tabs (only when config has tabs) */}
           {hasTabs && (
-            <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
-              {config.tabs.map(({ key, label }) => (
-                <NetworkTab
-                  key={key}
-                  label={label}
-                  active={activeTab === key}
-                  onClick={() => setTab(key)}
-                />
-              ))}
-            </Box>
+            isMobile ? (
+              <>
+                <Box
+                  onClick={e => setTabMenuAnchor(e.currentTarget)}
+                  sx={{
+                    display: 'flex', alignItems: 'center', gap: 0.9,
+                    px: 2, height: 48, cursor: 'pointer',
+                    color: '#fff',
+                    '&:hover': { bgcolor: BAR_COLOR_HOVER },
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
+                    {config.tabs.find(t => t.key === activeTab)?.label}
+                  </Typography>
+                  <IonIcon name="chevron-down-outline" sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
+                </Box>
+                <Menu anchorEl={tabMenuAnchor} open={Boolean(tabMenuAnchor)} onClose={() => setTabMenuAnchor(null)}>
+                  {config.tabs.map(({ key, label }) => (
+                    <MenuItem
+                      key={key}
+                      selected={activeTab === key}
+                      onClick={() => { setTab(key); setTabMenuAnchor(null); }}
+                      sx={{ fontSize: '0.875rem', fontWeight: activeTab === key ? 700 : 500 }}
+                    >
+                      {label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </>
+            ) : (
+              <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
+                {config.tabs.map(({ key, label }) => (
+                  <NetworkTab
+                    key={key}
+                    label={label}
+                    active={activeTab === key}
+                    onClick={() => setTab(key)}
+                  />
+                ))}
+              </Box>
+            )
           )}
         </AppBar>
 
