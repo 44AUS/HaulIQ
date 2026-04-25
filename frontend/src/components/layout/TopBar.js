@@ -952,11 +952,10 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
                 onClick={e => setMobileMenuAnchor(e.currentTarget)}
                 sx={{
                   display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.9,
-                  px: 2, height: '100%', cursor: 'pointer', position: 'relative',
-                  color: '#fff', bgcolor: 'rgba(255,255,255,0.12)',
+                  px: 2, height: '100%', cursor: 'pointer',
+                  color: '#fff',
                   '&:hover': { bgcolor: BAR_COLOR_HOVER },
                   transition: 'all 0.15s', flexShrink: 0,
-                  '&::after': { content: '""', position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, borderRadius: '3px 3px 0 0', bgcolor: '#fff' },
                 }}
               >
                 {nav.find(item => isActive(item.path)) && (
