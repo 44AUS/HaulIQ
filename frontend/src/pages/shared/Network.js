@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Avatar, IconButton, Tooltip,
   CircularProgress, TextField, InputAdornment,
-  ToggleButtonGroup, ToggleButton, Menu, MenuItem, Chip,
+  ToggleButtonGroup, ToggleButton, Chip,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
@@ -21,16 +21,15 @@ function initials(name) {
 
 // ─── Connection row ────────────────────────────────────────────────────────────
 function ConnectionRow({ conn, onRemove, userRole }) {
-  const [anchor, setAnchor] = useState(null);
+  const navigate = useNavigate();
   return (
     <Box
+      onClick={() => navigate(profilePath(conn))}
       sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, cursor: 'pointer', gap: 1.5 }}
     >
       <Avatar
-        component={Link}
-        to={profilePath(conn)}
         src={conn.avatar_url || undefined}
-        sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0, textDecoration: 'none' }}
+        sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}
       >
         {initials(conn.name)}
       </Avatar>
@@ -54,14 +53,6 @@ function ConnectionRow({ conn, onRemove, userRole }) {
             <IonIcon name="trash-outline" sx={{ fontSize: 17 }} />
           </IconButton>
         </Tooltip>
-        <IconButton size="small" onClick={e => setAnchor(e.currentTarget)}>
-          <IonIcon name="ellipsis-horizontal-outline" sx={{ fontSize: 17 }} />
-        </IconButton>
-        <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
-          <MenuItem component={Link} to={profilePath(conn)} onClick={() => setAnchor(null)} sx={{ fontSize: '0.875rem' }}>
-            View profile
-          </MenuItem>
-        </Menu>
       </Box>
 
       <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
@@ -109,14 +100,13 @@ function PendingRow({ req, onRespond, responding }) {
 
 // ─── Suggestion / search result row ───────────────────────────────────────────
 function SuggestRow({ user, onConnect, connecting }) {
+  const navigate = useNavigate();
   const status = user.connection_status;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, cursor: 'pointer', gap: 1.5 }}>
+    <Box onClick={() => navigate(profilePath(user))} sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, cursor: 'pointer', gap: 1.5 }}>
       <Avatar
-        component={Link}
-        to={profilePath(user)}
         src={user.avatar_url || undefined}
-        sx={{ width: 40, height: 40, bgcolor: 'secondary.dark', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0, textDecoration: 'none' }}
+        sx={{ width: 40, height: 40, bgcolor: 'secondary.dark', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}
       >
         {initials(user.name)}
       </Avatar>
