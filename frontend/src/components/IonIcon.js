@@ -1,5 +1,4 @@
-import Box from '@mui/material/Box';
-import { useTheme } from '@mui/material/styles';
+import { sxToStyle } from '../utils/sxToStyle';
 
 const SIZE_MAP = {
   small:   '1.25rem',
@@ -8,44 +7,37 @@ const SIZE_MAP = {
   inherit: 'inherit',
 };
 
-export default function IonIcon({ name, sx, color, fontSize = '1rem', style, onClick, className, ...rest }) {
-  const theme = useTheme();
+const COLOR_VARS = {
+  primary:   'var(--ion-color-primary)',
+  secondary: 'var(--ion-color-secondary)',
+  error:     'var(--ion-color-danger)',
+  warning:   'var(--ion-color-warning)',
+  info:      'var(--ion-color-tertiary, #5260ff)',
+  success:   'var(--ion-color-success)',
+  action:    'var(--ion-color-step-400)',
+  disabled:  'var(--ion-color-step-300)',
+  inherit:   'inherit',
+};
 
-  // Resolve MUI theme color shorthands
-  const colorMap = {
-    primary:   theme.palette.primary.main,
-    secondary: theme.palette.secondary.main,
-    error:     theme.palette.error.main,
-    warning:   theme.palette.warning.main,
-    info:      theme.palette.info.main,
-    success:   theme.palette.success.main,
-    action:    theme.palette.action.active,
-    disabled:  theme.palette.action.disabled,
-    inherit:   'inherit',
+export default function IonIcon({ name, sx, color, fontSize = '1rem', style, onClick, className, ...rest }) {
+  const resolvedColor = COLOR_VARS[color] ?? color;
+  const resolvedSize  = SIZE_MAP[fontSize] ?? fontSize;
+
+  const combined = {
+    display:         'inline-flex',
+    alignItems:      'center',
+    justifyContent:  'center',
+    lineHeight:      0,
+    flexShrink:      0,
+    ...(resolvedColor && { color: resolvedColor }),
+    ...(resolvedSize  && { fontSize: resolvedSize }),
+    ...sxToStyle(sx),
+    ...style,
   };
 
-  const resolvedColor    = colorMap[color] || color;
-  const resolvedFontSize = SIZE_MAP[fontSize] || fontSize;
-
   return (
-    <Box
-      component="span"
-      onClick={onClick}
-      className={className}
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        lineHeight: 0,
-        flexShrink: 0,
-        ...(resolvedColor    && { color:    resolvedColor }),
-        ...(resolvedFontSize && { fontSize: resolvedFontSize }),
-        ...sx,
-      }}
-      style={style}
-      {...rest}
-    >
+    <span onClick={onClick} className={className} style={combined} {...rest}>
       <ion-icon name={name} style={{ fontSize: 'inherit', color: 'inherit', pointerEvents: 'none' }} />
-    </Box>
+    </span>
   );
 }

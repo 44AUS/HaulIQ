@@ -17,7 +17,14 @@
       "Bash(curl -sv \"https://hauliq-production.up.railway.app/api/waitlist/\" -H \"Origin: https://hauliq.vercel.app\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: content-type\" -X OPTIONS)",
       "Bash(curl -sv -X POST \"https://hauliq-production.up.railway.app/api/waitlist/\" -H \"Origin: https://hauliq.vercel.app\" -H \"Content-Type: application/json\" -d '{\"\"\"\"email\"\"\"\":\"\"\"\"test@example.com\"\"\"\",\"\"\"\"name\"\"\"\":\"\"\"\"Test User\"\"\"\",\"\"\"\"role\"\"\"\":\"\"\"\"carrier\"\"\"\"}')",
       "Bash(ls -1 /c/Users/austi/Desktop/HaulIQ/backend/app/routers/*.py)",
-      "Bash(xargs -I {} basename {})"
+      "Bash(xargs -I {} basename {})",
+      "Bash(python -m py_compile app/routers/load_templates.py)",
+      "Bash(python -m py_compile app/main.py)",
+      "Bash(python -m py_compile app/routers/rate_confirmation.py app/models/booking.py)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -v \"^[^:]+:[0-9]+:\\\\s*//\")",
+      "Bash(grep -E \"^\\(Box|Button|Card|Dialog|Drawer|Table|TextField|Chip|Paper|Modal|Menu|List|Typography|AppBar|Tooltip|IconButton|MenuItem|Select|Badge|Popover|Avatar|Divider|CircularProgress|LinearProgress|Snackbar|Alert|Tab|Tabs|Switch|Radio|Checkbox|FormControl|FormLabel|InputLabel|Grid|Stack|Container|CssBaseline|ListItem|ListItemButton|ListItemIcon|ListItemText|TableBody|TableCell|TableContainer|TableHead|TableRow|FormHelperText|OutlinedInput|Input|InputAdornment|Collapse\\)$\")",
+      "Bash(npx cap *)"
     ]
   }
 }

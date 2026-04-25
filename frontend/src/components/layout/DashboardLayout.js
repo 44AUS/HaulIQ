@@ -1,9 +1,10 @@
-import { useState, createContext } from 'react';
+import { createContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
-import Sidebar, { DRAWER_WIDTH } from './Sidebar';
+import { IonContent, IonMenu, IonPage, IonSplitPane } from '@ionic/react';
+import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
+export const DRAWER_WIDTH = 300;
 export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
 
 const NETWORK_PATHS   = ['/carrier/network',    '/broker/network'];
@@ -15,6 +16,7 @@ const DRIVERS_PATHS   = ['/carrier/drivers'];
 const PREFERENCES_PATHS = ['/preferences'];
 const PROFILE_PATHS     = ['/profile'];
 const BUSINESS_PATHS    = ['/business'];
+
 const COMPACT_PADDING_PATHS = [
   '/carrier/calendar', '/broker/calendar',
   '/carrier/loads', '/broker/loads', '/driver/loads',
@@ -23,70 +25,71 @@ const COMPACT_PADDING_PATHS = [
   '/broker/trucks', '/carrier/equipment',
 ];
 
-const isLoadDetail = (path) =>
-  /^\/carrier\/loads\/[^/]+$/.test(path) ||
-  /^\/carrier\/active\/[^/]+$/.test(path);
-
-const isCarrierProfile = (path) => /^\/c\/[^/]+$/.test(path);
-const isBrokerProfile  = (path) => /^\/b\/[^/]+$/.test(path);
+const isLoadDetail      = (p) => /^\/carrier\/loads\/[^/]+$/.test(p) || /^\/carrier\/active\/[^/]+$/.test(p);
+const isCarrierProfile  = (p) => /^\/c\/[^/]+$/.test(p);
+const isBrokerProfile   = (p) => /^\/b\/[^/]+$/.test(p);
 
 export default function DashboardLayout({ children }) {
-  const theme = useTheme();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const compactPadding = COMPACT_PADDING_PATHS.includes(location.pathname);
 
-  const immersiveMode = NETWORK_PATHS.includes(location.pathname)   ? 'network'
-    : BILLING_PATHS.includes(location.pathname)   ? 'billing'
-    : MESSAGES_PATHS.includes(location.pathname)  ? 'messages'
-    : ANALYTICS_PATHS.includes(location.pathname) ? 'analytics'
-    : TOOLS_PATHS.includes(location.pathname)     ? 'tools'
-    : DRIVERS_PATHS.includes(location.pathname)     ? 'drivers'
-    : PREFERENCES_PATHS.includes(location.pathname) ? 'preferences'
-    : PROFILE_PATHS.includes(location.pathname) ? 'profile'
-    : BUSINESS_PATHS.includes(location.pathname) ? 'business'
-    : isLoadDetail(location.pathname)     ? 'load_detail'
-    : isCarrierProfile(location.pathname) ? 'carrier_profile'
-    : isBrokerProfile(location.pathname)  ? 'broker_profile'
+  const immersiveMode = NETWORK_PATHS.includes(location.pathname)    ? 'network'
+    : BILLING_PATHS.includes(location.pathname)    ? 'billing'
+    : MESSAGES_PATHS.includes(location.pathname)   ? 'messages'
+    : ANALYTICS_PATHS.includes(location.pathname)  ? 'analytics'
+    : TOOLS_PATHS.includes(location.pathname)      ? 'tools'
+    : DRIVERS_PATHS.includes(location.pathname)    ? 'drivers'
+    : PREFERENCES_PATHS.includes(location.pathname)? 'preferences'
+    : PROFILE_PATHS.includes(location.pathname)    ? 'profile'
+    : BUSINESS_PATHS.includes(location.pathname)   ? 'business'
+    : isLoadDetail(location.pathname)              ? 'load_detail'
+    : isCarrierProfile(location.pathname)          ? 'carrier_profile'
+    : isBrokerProfile(location.pathname)           ? 'broker_profile'
     : null;
-  const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 
+  const padding = compactPadding ? '10px' : '24px';
+
+  // Immersive pages: full-width, no sidebar
+  if (immersiveMode) {
+    return (
+      <LayoutContext.Provider value={{ drawerWidth: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--ion-background-color)' }}>
+          <TopBar immersiveMode={immersiveMode} />
+          <div style={{ flex: 1, overflowY: 'auto', padding }}>
+            {children}
+          </div>
+        </div>
+      </LayoutContext.Provider>
+    );
+  }
+
+  // Normal pages: IonSplitPane with sidebar
   return (
-    <LayoutContext.Provider value={{ drawerWidth }}>
-    <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden', bgcolor: 'background.default' }}>
-      {!immersiveMode && (
-        <Sidebar
-          mobileOpen={mobileOpen}
-          onMobileClose={() => setMobileOpen(false)}
-          sidebarOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          onMobileOpen={() => setMobileOpen(true)}
-        />
-      )}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          minWidth: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-        }}
-      >
-        <TopBar
-          sidebarOpen={!immersiveMode && sidebarOpen}
-          onToggleSidebar={() => isMobile ? setMobileOpen(o => !o) : setSidebarOpen(o => !o)}
-          immersiveMode={immersiveMode}
-        />
-        {/* Scroll container */}
-        <Box sx={{ flex: 1, overflowY: 'auto', p: compactPadding ? '10px' : { xs: 2, sm: 3, lg: 4 }, width: '100%' }}>
-          {children}
-        </Box>
-      </Box>
-    </Box>
+    <LayoutContext.Provider value={{ drawerWidth: DRAWER_WIDTH }}>
+      <IonSplitPane contentId="main-content" when="lg" style={{ '--side-max-width': `${DRAWER_WIDTH}px`, '--side-min-width': `${DRAWER_WIDTH}px` }}>
+        {/* Sidebar */}
+        <IonMenu contentId="main-content" menuId="main-menu" type="overlay" style={{ '--width': `${DRAWER_WIDTH}px` }}>
+          <IonContent>
+            <Sidebar onNavigate={() => {}} />
+          </IonContent>
+        </IonMenu>
+
+        {/* Main content */}
+        <IonPage id="main-content">
+          <TopBar
+            onToggleSidebar={() => {
+              const menu = document.querySelector('ion-menu');
+              if (menu) menu.toggle();
+            }}
+          />
+          <IonContent scrollY style={{ '--background': 'var(--ion-background-color)' }}>
+            <div style={{ padding }}>
+              {children}
+            </div>
+          </IonContent>
+        </IonPage>
+      </IonSplitPane>
     </LayoutContext.Provider>
   );
 }

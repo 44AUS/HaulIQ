@@ -1,393 +1,199 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  AppBar, Toolbar, Box, IconButton, Typography, InputBase, Drawer,
-  Divider, Badge, Tooltip, List,
-  useTheme, useMediaQuery, Menu, MenuItem, Skeleton, Paper, Switch, Button,
-} from '@mui/material';
+  IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
+  IonBadge, IonModal, IonContent, IonList, IonItem, IonLabel,
+  IonToggle, IonSkeletonText, IonPopover,
+} from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { searchApi, notificationsApi } from '../../services/api';
 
 const DEFAULT_BAR_COLOR = '#1565C0';
-const BAR_COLOR_HOVER = 'rgba(255,255,255,0.12)';
 const NOTIF_DRAWER_WIDTH = 360;
 
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
-  { icon: 'calendar-outline',    label: 'Calendar',   path: '/carrier/calendar' },
-  { icon: 'search-outline',      label: 'Load Board', path: '/carrier/loads' },
-  { icon: 'analytics-outline',   label: 'Loads',      path: '/carrier/job-manager' },
-  { icon: 'wallet-outline',      label: 'Payments',   path: '/carrier/payments' },
-  { icon: 'car-sport-outline',   label: 'My Trucks',  path: '/carrier/equipment' },
-  { icon: 'bookmark-outline',    label: 'Lane Watch', path: '/carrier/lane-watches' },
+  { icon: 'calendar-outline',   label: 'Calendar',   path: '/carrier/calendar' },
+  { icon: 'search-outline',     label: 'Load Board', path: '/carrier/loads' },
+  { icon: 'analytics-outline',  label: 'Loads',      path: '/carrier/job-manager' },
+  { icon: 'wallet-outline',     label: 'Payments',   path: '/carrier/payments' },
+  { icon: 'car-sport-outline',  label: 'My Trucks',  path: '/carrier/equipment' },
+  { icon: 'bookmark-outline',   label: 'Lane Watch', path: '/carrier/lane-watches' },
 ];
-
 const BROKER_NAV = [
-  { icon: 'calendar-outline',    label: 'Calendar',  path: '/broker/calendar' },
-  { icon: 'add-circle-outline',  label: 'Post Load', path: '/broker/post' },
-  { icon: 'cube-outline',        label: 'Loads',     path: '/broker/loads' },
-  { icon: 'calendar-outline',    label: 'Bookings',  path: '/broker/bookings' },
-  { icon: 'card-outline',        label: 'Payments',  path: '/broker/payments' },
-  { icon: 'car-sport-outline',   label: 'Trucks',    path: '/broker/trucks' },
+  { icon: 'calendar-outline',   label: 'Calendar',  path: '/broker/calendar' },
+  { icon: 'add-circle-outline', label: 'Post Load', path: '/broker/post' },
+  { icon: 'cube-outline',       label: 'Loads',     path: '/broker/loads' },
+  { icon: 'calendar-outline',   label: 'Bookings',  path: '/broker/bookings' },
+  { icon: 'card-outline',       label: 'Payments',  path: '/broker/payments' },
+  { icon: 'car-sport-outline',  label: 'Trucks',    path: '/broker/trucks' },
 ];
-
 const DRIVER_NAV = [
   { icon: 'car-sport-outline',  label: 'My Loads', path: '/driver/loads' },
   { icon: 'wallet-outline',     label: 'Earnings', path: '/driver/earnings' },
   { icon: 'chatbubble-outline', label: 'Messages', path: '/driver/messages' },
 ];
-
 const ADMIN_NAV = [
-  { icon: 'grid-outline',       label: 'Overview',  path: '/admin' },
-  { icon: 'people-outline',     label: 'Users',     path: '/admin/users' },
-  { icon: 'cube-outline',       label: 'Loads',     path: '/admin/loads' },
-  { icon: 'cash-outline',       label: 'Revenue',   path: '/admin/revenue' },
-  { icon: 'card-outline',       label: 'Payments',  path: '/admin/payments' },
-  { icon: 'list-outline',       label: 'Waitlist',  path: '/admin/waitlist' },
-  { icon: 'layers-outline',     label: 'Plans',     path: '/admin/plans' },
-  { icon: 'car-sport-outline',  label: 'Equipment', path: '/admin/equipment' },
-  { icon: 'grid-outline',       label: 'Classes',   path: '/admin/equipment-classes' },
+  { icon: 'grid-outline',      label: 'Overview',  path: '/admin' },
+  { icon: 'people-outline',    label: 'Users',     path: '/admin/users' },
+  { icon: 'cube-outline',      label: 'Loads',     path: '/admin/loads' },
+  { icon: 'cash-outline',      label: 'Revenue',   path: '/admin/revenue' },
+  { icon: 'card-outline',      label: 'Payments',  path: '/admin/payments' },
+  { icon: 'list-outline',      label: 'Waitlist',  path: '/admin/waitlist' },
+  { icon: 'layers-outline',    label: 'Plans',     path: '/admin/plans' },
+  { icon: 'car-sport-outline', label: 'Equipment', path: '/admin/equipment' },
+  { icon: 'grid-outline',      label: 'Classes',   path: '/admin/equipment-classes' },
 ];
 
-// ── Single top nav link ───────────────────────────────────────────────────────
-function NavLink({ item, active, onClick }) {
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 0.9,
-        px: 2.5,
-        height: '100%',
-        cursor: 'pointer',
-        position: 'relative',
-        userSelect: 'none',
-        color: active ? '#fff' : 'rgba(255,255,255,0.75)',
-        bgcolor: active ? 'rgba(255,255,255,0.12)' : 'transparent',
-        '&:hover': { bgcolor: BAR_COLOR_HOVER, color: '#fff' },
-        transition: 'all 0.15s',
-        minWidth: 0,
-        flexShrink: 0,
-        '&::after': active ? {
-          content: '""',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 3,
-          borderRadius: '3px 3px 0 0',
-          bgcolor: '#fff',
-        } : {},
-      }}
-    >
-      <IonIcon name={item.icon} sx={{ fontSize: 18, flexShrink: 0 }} />
-      <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
-        {item.label}
-      </Typography>
-    </Box>
-  );
-}
+// ── Immersive mode config ─────────────────────────────────────────────────────
+const IMMERSIVE_CONFIG = {
+  network:        { title: 'Network',         tabs: [{ key: 'connections', label: 'Connections' }, { key: 'know', label: 'People You May Know' }] },
+  billing:        { title: 'Billing',         tabs: [{ key: 'plans', label: 'Subscription Plans' }, { key: 'referrals', label: 'Referrals' }] },
+  messages:       { title: 'Message Center',  tabs: [] },
+  analytics:      { title: 'Analytics',       tabs: [{ key: 'loads', label: 'Loads' }, { key: 'payments', label: 'Payments' }, { key: 'drivers', label: 'Drivers' }, { key: 'imports', label: 'Imports' }] },
+  tools:          { title: 'Tools',           tabs: [{ key: 'brain', label: 'Earnings Brain' }, { key: 'calculator', label: 'Profit Calculator' }] },
+  drivers:        { title: 'My Drivers',      tabs: [] },
+  preferences:    { title: 'Preferences',     tabs: [{ key: 'all', label: 'All' }, { key: 'branding', label: 'Branding' }, { key: 'notifications', label: 'Notifications' }, { key: 'equipment', label: 'Equipment' }, { key: 'documents', label: 'Documents' }, { key: 'billing', label: 'Billing' }, { key: 'privacy', label: 'Privacy' }, { key: 'security', label: 'Security' }, { key: 'support', label: 'Support' }] },
+  business:       { title: 'Manage Business', tabs: [{ key: 'overview', label: 'Overview' }, { key: 'metadata', label: 'Metadata' }] },
+  profile:        { title: 'Manage Profile',  tabs: [{ key: 'overview', label: 'Overview' }, { key: 'earnings', label: 'Earnings' }, { key: 'documents', label: 'Documents' }, { key: 'businesses', label: 'Businesses' }, { key: 'time_off', label: 'Time Off' }, { key: 'metadata', label: 'Metadata' }] },
+  load_detail:    { title: 'Load Details',    tabs: [{ key: 'overview', label: 'Overview' }, { key: 'payments', label: 'Payments' }, { key: 'documents', label: 'Documents' }], messageMode: true },
+  carrier_profile:{ title: 'Carrier Profile', tabs: [{ key: 'overview', label: 'Overview' }, { key: 'reviews', label: 'Reviews' }] },
+  broker_profile: { title: 'Broker Profile',  tabs: [{ key: 'overview', label: 'Overview' }, { key: 'reviews', label: 'Reviews' }, { key: 'pay_speed', label: 'Pay Speed' }] },
+};
 
-// ── Icon by notification type ─────────────────────────────────────────────────
-function NotifIcon({ type }) {
-  const map = {
-    new_bid:             <IonIcon name="checkmark-circle-outline" fontSize="small" color="warning" />,
-    bid_accepted:        <IonIcon name="checkmark-circle-outline" fontSize="small" color="success" />,
-    bid_rejected:        <IonIcon name="close-circle-outline"     fontSize="small" color="error" />,
-    bid_countered:       <IonIcon name="checkmark-circle-outline" fontSize="small" color="info" />,
-    booking_approved:    <IonIcon name="checkmark-circle-outline" fontSize="small" color="success" />,
-    booking_denied:      <IonIcon name="close-circle-outline"     fontSize="small" color="error" />,
-    new_booking_request: <IonIcon name="hourglass-outline"        fontSize="small" color="warning" />,
-    lane_watch_match:    <IonIcon name="notifications-outline"    fontSize="small" color="primary" />,
-    tms_update:          <IonIcon name="analytics-outline"        fontSize="small" color="info" />,
-  };
-  return map[type] || <IonIcon name="notifications-outline" fontSize="small" color="action" />;
-}
+// ── Notification helpers ──────────────────────────────────────────────────────
+const NOTIF_PREF_CATEGORIES = [
+  { key: 'loads',      label: 'Loads',      desc: 'Notified when a bid is placed or accepted on a load', items: [{ key: 'new_bid', label: 'New Bids' }, { key: 'bid_accepted', label: 'Bid Accepted' }] },
+  { key: 'bookings',   label: 'Bookings',   desc: 'Notified when a booking is requested, approved, or denied', items: [{ key: 'new_booking_request', label: 'Booking Requests' }, { key: 'booking_approved', label: 'Booking Approved' }, { key: 'booking_denied', label: 'Booking Denied' }] },
+  { key: 'lane_watch', label: 'Lane Watch', desc: 'Notified when a lane watch match is found', items: [{ key: 'lane_watch_match', label: 'Lane Watch Matches' }] },
+  { key: 'system',     label: 'System',     desc: 'TMS updates and platform notifications', items: [{ key: 'tms_update', label: 'TMS Updates' }] },
+];
+const PREF_STORAGE_KEY = 'hauliq_notif_prefs';
+const loadPrefs  = () => { try { return JSON.parse(localStorage.getItem(PREF_STORAGE_KEY) || '{}'); } catch { return {}; } };
+const savePrefs  = (p) => localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(p));
 
 function notifPath(notif, role) {
   const d = notif.data || {};
-  if (notif.type === 'new_bid' || notif.type === 'new_booking_request') {
-    return d.load_id ? `/${role}/loads/${d.load_id}` : `/${role}/loads`;
-  }
-  if (notif.type === 'bid_accepted' || notif.type === 'booking_approved') {
-    return `/${role}/active`;
-  }
-  if (notif.type === 'lane_watch_match') {
-    return d.load_id ? `/carrier/loads/${d.load_id}` : '/carrier/loads';
-  }
+  if (notif.type === 'new_bid' || notif.type === 'new_booking_request') return d.load_id ? `/${role}/loads/${d.load_id}` : `/${role}/loads`;
+  if (notif.type === 'bid_accepted' || notif.type === 'booking_approved') return `/${role}/active`;
+  if (notif.type === 'lane_watch_match') return d.load_id ? `/carrier/loads/${d.load_id}` : '/carrier/loads';
   return `/${role}/dashboard`;
 }
 
-// ── Notification preference categories ────────────────────────────────────────
-const NOTIF_PREF_CATEGORIES = [
-  {
-    key: 'loads',
-    label: 'Loads',
-    desc: 'Notified when a bid is placed or accepted on a load',
-    items: [
-      { key: 'new_bid',      label: 'New Bids' },
-      { key: 'bid_accepted', label: 'Bid Accepted' },
-    ],
-  },
-  {
-    key: 'bookings',
-    label: 'Bookings',
-    desc: 'Notified when a booking is requested, approved, or denied',
-    items: [
-      { key: 'new_booking_request', label: 'Booking Requests' },
-      { key: 'booking_approved',    label: 'Booking Approved' },
-      { key: 'booking_denied',      label: 'Booking Denied' },
-    ],
-  },
-  {
-    key: 'lane_watch',
-    label: 'Lane Watch',
-    desc: 'Notified when a lane watch match is found',
-    items: [{ key: 'lane_watch_match', label: 'Lane Watch Matches' }],
-  },
-  {
-    key: 'system',
-    label: 'System',
-    desc: 'TMS updates and platform notifications',
-    items: [{ key: 'tms_update', label: 'TMS Updates' }],
-  },
+function formatTime(iso) {
+  if (!iso) return '';
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+// ── Search results panel ──────────────────────────────────────────────────────
+const SEARCH_CATS = [
+  { key: 'connections',       label: 'Connections',       icon: 'person-outline' },
+  { key: 'messages',          label: 'Messages',          icon: 'chatbubble-outline' },
+  { key: 'loads_in_progress', label: 'Loads In Progress', icon: 'car-sport-outline' },
+  { key: 'completed_loads',   label: 'Completed Loads',   icon: 'checkmark-circle-outline' },
+  { key: 'saved_loads',       label: 'Saved Loads',       icon: 'bookmark-outline' },
+  { key: 'payments',          label: 'Payments',          icon: 'cash-outline' },
 ];
 
-const PREF_STORAGE_KEY = 'hauliq_notif_prefs';
+function SearchPanel({ results, loading, onNavigate }) {
+  if (loading) return (
+    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <IonSkeletonText animated style={{ width: 28, height: 28, borderRadius: '50%' }} />
+          <div style={{ flex: 1 }}>
+            <IonSkeletonText animated style={{ width: '60%', height: 16 }} />
+            <IonSkeletonText animated style={{ width: '40%', height: 13, marginTop: 2 }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
-function loadPrefs() {
-  try { return JSON.parse(localStorage.getItem(PREF_STORAGE_KEY) || '{}'); }
-  catch { return {}; }
-}
-function savePrefs(prefs) {
-  localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(prefs));
-}
-
-// ── Swipeable notification row ─────────────────────────────────────────────────
-function SwipeableNotifRow({ notif, onDelete, onClick, formatTime }) {
-  const theme  = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const ref     = useRef(null);
-  const startX  = useRef(null);
-  const dragX   = useRef(0);
-  const [offset, setOffset] = useState(0);
-  const [swiped, setSwiped] = useState(false);
-
-  const onPointerDown = (e) => {
-    startX.current = e.clientX;
-    dragX.current  = 0;
-  };
-  const onPointerMove = (e) => {
-    if (startX.current === null) return;
-    const delta = e.clientX - startX.current;
-    if (delta > 0) return; // only left swipe
-    dragX.current = delta;
-    setOffset(Math.max(delta, -80));
-  };
-  const onPointerUp = () => {
-    if (dragX.current < -50) {
-      setOffset(-80);
-      setSwiped(true);
-    } else {
-      setOffset(0);
-      setSwiped(false);
-    }
-    startX.current = null;
-  };
+  const hasAny = SEARCH_CATS.some(c => (results?.[c.key] || []).length > 0);
+  if (!hasAny) return (
+    <div style={{ padding: 24, textAlign: 'center', color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No results found</div>
+  );
 
   return (
-    <Box ref={ref} sx={{ position: 'relative', overflow: 'hidden' }}>
-      {/* Red delete background — only visible when swiped */}
-      {offset < 0 && (
-        <Box sx={{
-          position: 'absolute', right: 0, top: 0, bottom: 0, width: 80,
-          bgcolor: '#eb445a', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <IconButton size="small" onClick={() => onDelete(notif.id)} sx={{ color: '#fff' }}>
-            <IonIcon name="trash-outline" fontSize="small" />
-          </IconButton>
-        </Box>
-      )}
-
-      {/* Notification content */}
-      <Box
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        onClick={() => { if (!swiped) onClick(notif); }}
-        sx={{
-          transform: `translateX(${offset}px)`,
-          transition: startX.current !== null ? 'none' : 'transform 0.2s ease',
-          cursor: 'pointer',
-          px: 2.5, py: 1.5,
-          display: 'flex', alignItems: 'flex-start', gap: 1.5,
-          bgcolor: notif.read ? 'background.paper' : (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)'),
-          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
-          userSelect: 'none',
-        }}
-      >
-        <Box sx={{ mt: 0.25, flexShrink: 0 }}>
-          <NotifIcon type={notif.type} />
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Typography variant="body2" fontWeight={notif.read ? 500 : 700} sx={{ flex: 1, mr: 1 }}>
-              {notif.title}
-            </Typography>
-            <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0, mt: 0.1 }}>
-              {formatTime(notif.created_at)}
-            </Typography>
-          </Box>
-          {notif.body && (
-            <Typography variant="caption" color="text.secondary">{notif.body}</Typography>
-          )}
-        </Box>
-      </Box>
-    </Box>
+    <div style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0' }}>
+      {SEARCH_CATS.map(({ key, label, icon }) => {
+        const items = results?.[key] || [];
+        if (!items.length) return null;
+        return (
+          <div key={key}>
+            <div style={{ padding: '6px 16px', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ion-color-step-400)' }}>{label}</div>
+            {items.map(item => (
+              <div key={item.id} onClick={() => onNavigate(item)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', cursor: 'pointer' }} className="search-result-row">
+                <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
+                  <IonIcon name={icon} style={{ fontSize: 14, color: '#fff' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {key === 'connections' ? item.name : key === 'messages' ? `${item.other_name}: ${item.body}` : `${item.origin} → ${item.destination}`}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {key === 'connections' ? (item.company || item.role) : key === 'messages' ? 'Message' : key === 'payments' ? `$${item.amount?.toFixed(2)} · ${item.status}` : `${item.commodity || ''} · $${item.rate?.toLocaleString()}`}
+                  </div>
+                </div>
+              </div>
+            ))}
+            <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid var(--ion-border-color)' }} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-// ── Preferences sub-panel ──────────────────────────────────────────────────────
-function PreferencesPanel({ onBack, onClose }) {
-  const [prefs, setPrefs] = useState(loadPrefs);
-
-  const isEnabled = (key) => prefs[key] !== false;
-
-  const toggle = (key) => {
-    setPrefs(prev => {
-      const next = { ...prev, [key]: !isEnabled(key) };
-      savePrefs(next);
-      return next;
-    });
-  };
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        px: 1.5, py: 1.5, flexShrink: 0,
-        boxShadow: '0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)',
-        zIndex: 1,
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton size="small" onClick={onBack} sx={{ mr: 0.5 }}>
-            <IonIcon name="arrow-back-outline" fontSize="small" />
-          </IconButton>
-          <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
-        </Box>
-        <IconButton size="small" onClick={onClose}>
-          <IonIcon name="close-outline" fontSize="small" />
-        </IconButton>
-      </Box>
-
-      {/* Body */}
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
-        <Typography variant="caption" color="text.disabled" sx={{ px: 2.5, pt: 2, pb: 0.5, display: 'block', fontWeight: 600, letterSpacing: '0.06em' }}>
-          Preferences
-        </Typography>
-        {NOTIF_PREF_CATEGORIES.map((cat, ci) => (
-          <Box key={cat.key}>
-            {ci > 0 && <Divider />}
-            {cat.items.length === 1 ? (
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', px: 2.5, py: 1.5, gap: 2 }}>
-                <Box>
-                  <Typography variant="body2" fontWeight={700}>{cat.label}</Typography>
-                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.25 }}>{cat.desc}</Typography>
-                </Box>
-                <Switch
-                  size="small"
-                  checked={isEnabled(cat.items[0].key)}
-                  onChange={() => toggle(cat.items[0].key)}
-                  sx={{ flexShrink: 0 }}
-                />
-              </Box>
-            ) : (
-              <Box sx={{ px: 2.5, py: 1.5 }}>
-                <Typography variant="body2" fontWeight={700} sx={{ mb: 0.25 }}>{cat.label}</Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>{cat.desc}</Typography>
-                {cat.items.map(item => (
-                  <Box key={item.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}>
-                    <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-                    <Switch
-                      size="small"
-                      checked={isEnabled(item.key)}
-                      onChange={() => toggle(item.key)}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
-// ── Notifications panel content ───────────────────────────────────────────────
+// ── Notification panel ────────────────────────────────────────────────────────
 function NotificationsPanel({ onClose, onCountChange }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [notifs,  setNotifs]  = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showPrefs, setShowPrefs] = useState(false);
-  const [prefs, setPrefs] = useState(loadPrefs);
+  const [notifs,     setNotifs]     = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [showPrefs,  setShowPrefs]  = useState(false);
+  const [prefs,      setPrefs]      = useState(loadPrefs);
 
   const load = () => {
     if (!user) return;
     notificationsApi.list()
       .then(data => {
         setNotifs(Array.isArray(data) ? data : []);
-        const unread = Array.isArray(data) ? data.filter(n => !n.read).length : 0;
-        if (onCountChange) onCountChange(unread);
+        const u = Array.isArray(data) ? data.filter(n => !n.read).length : 0;
+        onCountChange?.(u);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Sync prefs from localStorage whenever panel opens
   useEffect(() => { setPrefs(loadPrefs()); }, []);
 
-  const visibleNotifs = notifs.filter(n => {
-    const stored = prefs[n.type];
-    return stored !== false;
-  });
+  const visibleNotifs = notifs.filter(n => prefs[n.type] !== false);
 
   const handleMarkAllRead = () => {
     notificationsApi.markAllRead()
-      .then(() => {
-        setNotifs(prev => prev.map(n => ({ ...n, read: true })));
-        if (onCountChange) onCountChange(0);
-      })
+      .then(() => { setNotifs(prev => prev.map(n => ({ ...n, read: true }))); onCountChange?.(0); })
       .catch(() => {});
   };
-
   const handleDeleteAll = () => {
-    notificationsApi.deleteAll()
-      .then(() => {
-        setNotifs([]);
-        if (onCountChange) onCountChange(0);
-      })
-      .catch(() => {});
+    notificationsApi.deleteAll().then(() => { setNotifs([]); onCountChange?.(0); }).catch(() => {});
   };
-
   const handleDelete = (id) => {
     notificationsApi.delete(id).catch(() => {});
     setNotifs(prev => {
       const next = prev.filter(n => n.id !== id);
-      if (onCountChange) onCountChange(next.filter(n => !n.read).length);
+      onCountChange?.(next.filter(n => !n.read).length);
       return next;
     });
   };
-
   const handleClick = (notif) => {
     if (!notif.read) {
       notificationsApi.markRead(notif.id).catch(() => {});
@@ -397,269 +203,212 @@ function NotificationsPanel({ onClose, onCountChange }) {
     onClose();
   };
 
-
-  const formatTime = (iso) => {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const now = new Date();
-    const diff = Math.floor((now - d) / 1000);
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  };
-
   if (showPrefs) {
     return (
-      <PreferencesPanel
-        onBack={() => { setShowPrefs(false); setPrefs(loadPrefs()); }}
-        onClose={onClose}
-      />
-    );
-  }
-
-  return (
-    <Box sx={{ width: NOTIF_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <Box sx={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        px: 1.5, py: 1.5, flexShrink: 0,
-        boxShadow: '0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)',
-        zIndex: 1,
-      }}>
-        <Box sx={{ pl: 1 }}>
-          <Typography variant="subtitle1" fontWeight={700}>Notifications</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Tooltip title="Notification preferences">
-            <IconButton size="small" onClick={() => setShowPrefs(true)} sx={{ color: 'text.secondary' }}>
-              <IonIcon name="funnel-outline" fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <IconButton size="small" onClick={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <IonButton fill="clear" size="small" onClick={() => { setShowPrefs(false); setPrefs(loadPrefs()); }}>
+              <IonIcon name="arrow-back-outline" fontSize="small" />
+            </IonButton>
+            <span style={{ fontWeight: 700, fontSize: '1rem' }}>Notifications</span>
+          </div>
+          <IonButton fill="clear" size="small" onClick={onClose}>
             <IonIcon name="close-outline" fontSize="small" />
-          </IconButton>
-        </Box>
-      </Box>
+          </IonButton>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+          <div style={{ padding: '16px 20px 4px', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.06em', color: 'var(--ion-color-step-400)', textTransform: 'uppercase' }}>Preferences</div>
+          {NOTIF_PREF_CATEGORIES.map((cat) => (
+            <div key={cat.key} style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+              {cat.items.length === 1 ? (
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '12px 20px', gap: 16 }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{cat.label}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 2 }}>{cat.desc}</div>
+                  </div>
+                  <IonToggle
+                    size="small"
+                    checked={prefs[cat.items[0].key] !== false}
+                    onIonChange={() => {
+                      setPrefs(prev => { const n = { ...prev, [cat.items[0].key]: !( prev[cat.items[0].key] !== false) }; savePrefs(n); return n; });
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{ padding: '12px 20px' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: 2 }}>{cat.label}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>{cat.desc}</div>
+                  {cat.items.map(item => (
+                    <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
+                      <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{item.label}</span>
+                      <IonToggle
+                        size="small"
+                        checked={prefs[item.key] !== false}
+                        onIonChange={() => {
+                          setPrefs(prev => { const n = { ...prev, [item.key]: !(prev[item.key] !== false) }; savePrefs(n); return n; });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-      {/* Items */}
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+  return (
+    <div style={{ width: NOTIF_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 1 }}>
+        <div style={{ paddingLeft: 8, fontWeight: 700, fontSize: '1rem' }}>Notifications</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <IonButton fill="clear" size="small" onClick={() => setShowPrefs(true)}>
+            <IonIcon name="funnel-outline" fontSize="small" />
+          </IonButton>
+          <IonButton fill="clear" size="small" onClick={onClose}>
+            <IonIcon name="close-outline" fontSize="small" />
+          </IonButton>
+        </div>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
         {loading ? (
-          <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[1, 2, 3].map(i => (
-              <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
-                <Skeleton variant="circular" width={32} height={32} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton variant="text" width="75%" height={18} />
-                  <Skeleton variant="text" width="50%" height={14} sx={{ mt: 0.5 }} />
-                </Box>
-              </Box>
+              <div key={i} style={{ display: 'flex', gap: 12 }}>
+                <IonSkeletonText animated style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                <div style={{ flex: 1 }}>
+                  <IonSkeletonText animated style={{ width: '75%', height: 18 }} />
+                  <IonSkeletonText animated style={{ width: '50%', height: 14, marginTop: 4 }} />
+                </div>
+              </div>
             ))}
-          </Box>
+          </div>
         ) : visibleNotifs.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
-            <Typography variant="body1" fontWeight={600}>All caught up!</Typography>
-            <Typography variant="body2" color="text.secondary" mt={0.5}>No notifications right now.</Typography>
-          </Box>
+          <div style={{ padding: 32, textAlign: 'center' }}>
+            <IonIcon name="checkmark-circle-outline" style={{ fontSize: 40, color: 'var(--ion-color-success)', marginBottom: 8 }} />
+            <div style={{ fontWeight: 600 }}>All caught up!</div>
+            <div style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', marginTop: 4 }}>No notifications right now.</div>
+          </div>
         ) : (
-          <List disablePadding>
-            {visibleNotifs.map((notif, i) => (
-              <Box key={notif.id}>
-                {i > 0 && <Divider />}
-                <SwipeableNotifRow
-                  notif={notif}
-                  onDelete={handleDelete}
-                  onClick={handleClick}
-                  formatTime={formatTime}
-                />
-              </Box>
-            ))}
-          </List>
-        )}
-      </Box>
-
-      {/* Bottom action buttons */}
-      {!loading && notifs.length > 0 && (
-        <Box sx={{ display: 'flex', gap: 1, p: 1.5, borderTop: 1, borderColor: 'divider', flexShrink: 0 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            size="small"
-            startIcon={<IonIcon name="checkmark-done-outline" sx={{ fontSize: 16 }} />}
-            onClick={handleMarkAllRead}
-            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#fff', color: '#000', '&:hover': { bgcolor: '#f0f0f0' }, py: 1, boxShadow: 'none' }}
-          >
-            Mark as Read
-          </Button>
-          <Button
-            fullWidth
-            variant="contained"
-            size="small"
-            startIcon={<IonIcon name="trash-outline" sx={{ fontSize: 16 }} />}
-            onClick={handleDeleteAll}
-            sx={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', bgcolor: '#eb445a', '&:hover': { bgcolor: '#c9374b' }, py: 1, boxShadow: 'none' }}
-          >
-            Delete All
-          </Button>
-        </Box>
-      )}
-    </Box>
-  );
-}
-
-// ── Search results panel ──────────────────────────────────────────────────────
-const SEARCH_CATEGORIES = [
-  { key: 'connections',       label: 'Connections',        icon: 'person-outline' },
-  { key: 'messages',          label: 'Messages',           icon: 'chatbubble-outline' },
-  { key: 'loads_in_progress', label: 'Loads In Progress',  icon: 'car-sport-outline' },
-  { key: 'completed_loads',   label: 'Completed Loads',    icon: 'checkmark-circle-outline' },
-  { key: 'saved_loads',       label: 'Saved Loads',        icon: 'bookmark-outline' },
-  { key: 'payments',          label: 'Payments',           icon: 'cash-outline' },
-];
-
-function SearchResultsPanel({ results, loading, onNavigate }) {
-  if (loading) {
-    return (
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-        {[1, 2, 3].map(i => (
-          <Box key={i} sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-            <Skeleton variant="circular" width={28} height={28} />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="60%" height={16} />
-              <Skeleton variant="text" width="40%" height={13} sx={{ mt: 0.25 }} />
-            </Box>
-          </Box>
-        ))}
-      </Box>
-    );
-  }
-
-  const hasAny = SEARCH_CATEGORIES.some(c => (results?.[c.key] || []).length > 0);
-  if (!hasAny) {
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary">No results found</Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ maxHeight: 480, overflowY: 'auto', py: 1 }}>
-      {SEARCH_CATEGORIES.map(({ key, label, icon }) => {
-        const items = results?.[key] || [];
-        if (!items.length) return null;
-        return (
-          <Box key={key}>
-            <Typography variant="caption" sx={{ px: 2, py: 0.75, display: 'block', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.disabled', fontSize: '0.68rem' }}>
-              {label}
-            </Typography>
-            {items.map(item => (
-              <Box
-                key={item.id}
-                onClick={() => onNavigate(item)}
-                sx={{
-                  display: 'flex', alignItems: 'center', gap: 1.5,
-                  px: 2, py: 1, cursor: 'pointer',
-                  '&:hover': { bgcolor: 'action.hover' },
-                  transition: 'background 0.12s',
-                }}
+          visibleNotifs.map((notif, i) => (
+            <div key={notif.id}>
+              {i > 0 && <hr style={{ margin: 0, border: 'none', borderTop: '1px solid var(--ion-border-color)' }} />}
+              <div
+                onClick={() => handleClick(notif)}
+                style={{ padding: '12px 20px', display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', backgroundColor: notif.read ? 'var(--ion-card-background)' : 'var(--ion-color-step-50)' }}
               >
-                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
-                  <IonIcon name={icon} sx={{ fontSize: 14, color: '#fff' }} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="body2" fontWeight={600} noWrap>
-                    {key === 'connections' ? item.name
-                      : key === 'messages' ? `${item.other_name}: ${item.body}`
-                      : key === 'payments' ? `${item.origin} → ${item.destination}`
-                      : `${item.origin} → ${item.destination}`}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {key === 'connections' ? (item.company || item.role)
-                      : key === 'messages' ? 'Message'
-                      : key === 'payments' ? `$${item.amount?.toFixed(2)} · ${item.status}`
-                      : `${item.commodity || ''} · $${item.rate?.toLocaleString()}`}
-                  </Typography>
-                </Box>
-              </Box>
-            ))}
-            <Divider sx={{ my: 0.5 }} />
-          </Box>
-        );
-      })}
-    </Box>
+                <div style={{ marginTop: 2, flexShrink: 0 }}>
+                  <IonIcon name="notifications-outline" style={{ fontSize: '1.25rem', color: 'var(--ion-color-primary)' }} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <span style={{ fontWeight: notif.read ? 500 : 700, fontSize: '0.875rem', flex: 1, marginRight: 8 }}>{notif.title}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-step-300)', flexShrink: 0 }}>{formatTime(notif.created_at)}</span>
+                  </div>
+                  {notif.body && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 2 }}>{notif.body}</div>}
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-danger)', padding: 4, flexShrink: 0 }}
+                >
+                  <IonIcon name="trash-outline" style={{ fontSize: '1rem' }} />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      {!loading && notifs.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+          <IonButton expand="block" size="small" onClick={handleMarkAllRead} style={{ flex: 1, '--background': '#fff', '--color': '#000', '--box-shadow': 'none' }}>
+            <IonIcon name="checkmark-done-outline" slot="start" />
+            Mark Read
+          </IonButton>
+          <IonButton expand="block" size="small" color="danger" onClick={handleDeleteAll} style={{ flex: 1 }}>
+            <IonIcon name="trash-outline" slot="start" />
+            Delete All
+          </IonButton>
+        </div>
+      )}
+    </div>
   );
 }
 
-// ── Network tab item ──────────────────────────────────────────────────────────
-function NetworkTab({ label, active, onClick }) {
+// ── Desktop nav link ──────────────────────────────────────────────────────────
+function NavLink({ item, active, onClick }) {
   return (
-    <Box
+    <div
       onClick={onClick}
-      sx={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100%',
-        cursor: 'pointer',
-        position: 'relative',
+      style={{
+        display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 7,
+        padding: '0 20px', height: '100%', cursor: 'pointer', flexShrink: 0,
+        color: active ? '#fff' : 'rgba(255,255,255,0.75)',
+        backgroundColor: active ? 'rgba(255,255,255,0.12)' : 'transparent',
+        position: 'relative', userSelect: 'none', minWidth: 0,
+        borderBottom: active ? '3px solid #fff' : '3px solid transparent',
+        transition: 'all 0.15s',
+      }}
+    >
+      <IonIcon name={item.icon} style={{ fontSize: 18, flexShrink: 0 }} />
+      <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+        {item.label}
+      </span>
+    </div>
+  );
+}
+
+// ── Immersive tab ─────────────────────────────────────────────────────────────
+function ImmersiveTab({ label, active, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '100%', cursor: 'pointer', position: 'relative',
         color: active ? '#fff' : 'rgba(255,255,255,0.60)',
-        userSelect: 'none',
-        letterSpacing: '0.08em',
-        fontSize: '13px',
-        fontWeight: 700,
-        textTransform: 'uppercase',
-        '&:hover': { color: '#fff' },
+        userSelect: 'none', letterSpacing: '0.08em', fontSize: 13,
+        fontWeight: 700, textTransform: 'uppercase',
+        borderBottom: active ? '3px solid #fff' : '3px solid transparent',
         transition: 'color 0.15s',
-        '&::after': active ? {
-          content: '""',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 3,
-          borderRadius: '3px 3px 0 0',
-          bgcolor: '#fff',
-        } : {},
       }}
     >
       {label}
-    </Box>
+    </div>
   );
 }
 
 // ── Main TopBar ───────────────────────────────────────────────────────────────
-export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) {
+export default function TopBar({ onToggleSidebar, immersiveMode }) {
   const { user } = useAuth();
   const { brandColor } = useThemeMode();
   const barColor = brandColor || DEFAULT_BAR_COLOR;
   const location = useLocation();
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 960);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 960);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchVal, setSearchVal] = useState('');
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifCount, setNotifCount] = useState(0);
-  const [mobileMenuAnchor, setMobileMenuAnchor] = useState(null);
-  const [tabMenuAnchor, setTabMenuAnchor] = useState(null);
-  const searchRef = useRef(null);
+  const [searchOpen,   setSearchOpen]   = useState(false);
+  const [searchVal,    setSearchVal]    = useState('');
+  const [notifOpen,    setNotifOpen]    = useState(false);
+  const [notifCount,   setNotifCount]   = useState(0);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [tabMenuOpen,  setTabMenuOpen]  = useState(false);
   const [searchResults, setSearchResults] = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
+  const searchRef    = useRef(null);
   const searchPanelRef = useRef(null);
 
-  // Fetch notification count — poll every 30s
   useEffect(() => {
     if (!user) return;
-    const fetchCount = () => {
-      notificationsApi.count()
-        .then(d => setNotifCount(d.unread || 0))
-        .catch(() => {});
-    };
+    const fetchCount = () => notificationsApi.count().then(d => setNotifCount(d.unread || 0)).catch(() => {});
     fetchCount();
     const interval = setInterval(fetchCount, 30000);
     return () => clearInterval(interval);
@@ -670,262 +419,118 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
   }, [searchOpen]);
 
   useEffect(() => {
-    if (!searchVal || searchVal.trim().length < 2) {
-      setSearchResults(null);
-      return;
-    }
+    if (!searchVal || searchVal.trim().length < 2) { setSearchResults(null); return; }
     setSearchLoading(true);
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       searchApi.search(searchVal.trim())
-        .then(data => setSearchResults(data))
+        .then(d => setSearchResults(d))
         .catch(() => setSearchResults(null))
         .finally(() => setSearchLoading(false));
     }, 350);
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [searchVal]);
 
   useEffect(() => {
-    const handler = (e) => {
-      if (searchPanelRef.current && !searchPanelRef.current.contains(e.target)) {
-        setSearchResults(null);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const h = (e) => { if (searchPanelRef.current && !searchPanelRef.current.contains(e.target)) setSearchResults(null); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
   }, []);
 
-  const handleCloseSearch = () => {
-    setSearchOpen(false);
-    setSearchVal('');
-    setSearchResults(null);
-  };
+  const handleCloseSearch = () => { setSearchOpen(false); setSearchVal(''); setSearchResults(null); };
 
   if (!user) return null;
 
-  // ── Immersive-mode bar (network or billing) ────────────────────────────────
+  const toolbarStyle = { '--background': barColor, '--color': '#ffffff', '--min-height': '60px', '--padding-start': '0', '--padding-end': '0' };
+
+  // ── Immersive mode ──────────────────────────────────────────────────────────
   if (immersiveMode) {
-    const IMMERSIVE_CONFIG = {
-      network: {
-        title: 'Network',
-        tabs: [
-          { key: 'connections', label: 'Connections' },
-          { key: 'know',        label: 'People You May Know' },
-        ],
-      },
-      billing: {
-        title: 'Billing',
-        tabs: [
-          { key: 'plans',     label: 'Subscription Plans' },
-          { key: 'referrals', label: 'Referrals' },
-        ],
-      },
-      messages: {
-        title: 'Message Center',
-        tabs: [],
-      },
-      analytics: {
-        title: 'Analytics',
-        tabs: [
-          { key: 'loads',    label: 'Loads' },
-          { key: 'payments', label: 'Payments' },
-          { key: 'drivers',  label: 'Drivers' },
-          { key: 'imports',  label: 'Imports' },
-        ],
-      },
-      tools: {
-        title: 'Tools',
-        tabs: [
-          { key: 'brain',      label: 'Earnings Brain' },
-          { key: 'calculator', label: 'Profit Calculator' },
-        ],
-      },
-      drivers: {
-        title: 'My Drivers',
-        tabs: [],
-      },
-      preferences: {
-        title: 'Preferences',
-        tabs: [
-          { key: 'all',           label: 'All' },
-          { key: 'branding',      label: 'Branding' },
-          { key: 'notifications', label: 'Notifications' },
-          { key: 'equipment',     label: 'Equipment' },
-          { key: 'documents',     label: 'Documents' },
-          { key: 'billing',       label: 'Billing' },
-          { key: 'privacy',       label: 'Privacy' },
-          { key: 'security',      label: 'Security' },
-          { key: 'support',       label: 'Support' },
-        ],
-      },
-      business: {
-        title: 'Manage Business',
-        tabs: [
-          { key: 'overview',  label: 'Overview' },
-          { key: 'metadata',  label: 'Metadata' },
-        ],
-      },
-      profile: {
-        title: 'Manage Profile',
-        tabs: [
-          { key: 'overview',   label: 'Overview' },
-          { key: 'earnings',   label: 'Earnings' },
-          { key: 'documents',  label: 'Documents' },
-          { key: 'businesses', label: 'Businesses' },
-          { key: 'time_off',   label: 'Time Off' },
-          { key: 'metadata',   label: 'Metadata' },
-        ],
-      },
-      load_detail: {
-        title: 'Load Details',
-        tabs: [
-          { key: 'overview',   label: 'Overview' },
-          { key: 'payments',   label: 'Payments' },
-          { key: 'documents',  label: 'Documents' },
-        ],
-        messageMode: true,
-      },
-      carrier_profile: {
-        title: 'Carrier Profile',
-        tabs: [
-          { key: 'overview', label: 'Overview' },
-          { key: 'reviews',  label: 'Reviews' },
-        ],
-      },
-      broker_profile: {
-        title: 'Broker Profile',
-        tabs: [
-          { key: 'overview',   label: 'Overview' },
-          { key: 'reviews',    label: 'Reviews' },
-          { key: 'pay_speed',  label: 'Pay Speed' },
-        ],
-      },
-    };
-    const config = IMMERSIVE_CONFIG[immersiveMode];
-    const displayTitle = immersiveMode === 'profile' && user?.name
-      ? user.name
-      : immersiveMode === 'business' && user?.company
-      ? user.company
-      : config.title;
-    const hasTabs = config.tabs.length > 0;
-    const defaultTab = hasTabs ? config.tabs[0].key : null;
-    const activeTab = searchParams.get('tab') || defaultTab;
-    const setTab = (t) => setSearchParams({ tab: t }, { replace: true });
+    const config    = IMMERSIVE_CONFIG[immersiveMode];
+    const displayTitle = immersiveMode === 'profile' && user?.name ? user.name
+                       : immersiveMode === 'business' && user?.company ? user.company
+                       : config.title;
+    const hasTabs   = config.tabs.length > 0;
+    const activeTab = searchParams.get('tab') || (hasTabs ? config.tabs[0].key : null);
+    const setTab    = (t) => setSearchParams({ tab: t }, { replace: true });
 
     return (
       <>
-        <AppBar
-          position="static"
-          elevation={0}
-          sx={{
-            bgcolor: barColor,
-            color: '#fff',
-            flexShrink: 0,
-            zIndex: theme.zIndex.appBar,
-            borderRadius: 0,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-          }}
-        >
-          {/* Row 1 — Back + Title + Bell */}
-          <Box sx={{ display: 'flex', alignItems: 'center', height: 56, px: 0 }}>
-            <IconButton
-              onClick={() => navigate(-1)}
-              size="small"
-              sx={{ ml: 1, color: '#fff', '&:hover': { bgcolor: BAR_COLOR_HOVER } }}
-            >
-              <IonIcon name="chevron-back-outline" sx={{ fontSize: 26 }} />
-            </IconButton>
-            <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', whiteSpace: 'nowrap', ml: 1, color: '#fff' }}>
+        <IonHeader style={{ '--background': barColor }}>
+          <IonToolbar style={toolbarStyle}>
+            <IonButtons slot="start">
+              <IonButton fill="clear" onClick={() => navigate(-1)} style={{ '--color': '#fff' }}>
+                <IonIcon name="chevron-back-outline" style={{ fontSize: 26 }} />
+              </IonButton>
+            </IonButtons>
+            <span slot="start" style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', color: '#fff', marginLeft: 4 }}>
               {displayTitle}
-            </Typography>
-
-            <Box sx={{ flex: 1 }} />
-
-            <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
+            </span>
+            <IonButtons slot="end">
               {config.messageMode ? (
-                <Tooltip title="Messages" placement="bottom">
-                  <IconButton
-                    onClick={() => navigate(`/${user.role}/messages`)}
-                    size="small"
-                    sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-                  >
-                    <IonIcon name="chatbubble-outline" sx={{ fontSize: 22 }} />
-                  </IconButton>
-                </Tooltip>
+                <IonButton fill="clear" onClick={() => navigate(`/${user.role}/messages`)} style={{ '--color': 'rgba(255,255,255,0.8)' }}>
+                  <IonIcon name="chatbubble-outline" style={{ fontSize: 22 }} />
+                </IonButton>
               ) : (
-                <Tooltip title="Notifications" placement="bottom">
-                  <IconButton
-                    onClick={() => setNotifOpen(true)}
-                    size="small"
-                    sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-                  >
-                    <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                      <IonIcon name="notifications-outline" sx={{ fontSize: 22 }} />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
+                <IonButton fill="clear" onClick={() => setNotifOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)' }}>
+                  <div style={{ position: 'relative' }}>
+                    <IonIcon name="notifications-outline" style={{ fontSize: 22 }} />
+                    {notifCount > 0 && (
+                      <IonBadge color="danger" style={{ position: 'absolute', top: -4, right: -4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8 }}>
+                        {notifCount > 9 ? '9+' : notifCount}
+                      </IonBadge>
+                    )}
+                  </div>
+                </IonButton>
               )}
-            </Box>
-          </Box>
+            </IonButtons>
+          </IonToolbar>
 
-          {/* Row 2 — Tabs (only when config has tabs) */}
+          {/* Tab row */}
           {hasTabs && (
-            isMobile ? (
-              <>
-                <Box
-                  onClick={e => setTabMenuAnchor(e.currentTarget)}
-                  sx={{
-                    display: 'flex', alignItems: 'center', gap: 0.9,
-                    px: 2, height: 48, cursor: 'pointer',
-                    color: '#fff',
-                    '&:hover': { bgcolor: BAR_COLOR_HOVER },
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
-                    {config.tabs.find(t => t.key === activeTab)?.label}
-                  </Typography>
-                  <IonIcon name="chevron-down-outline" sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
-                </Box>
-                <Menu anchorEl={tabMenuAnchor} open={Boolean(tabMenuAnchor)} onClose={() => setTabMenuAnchor(null)}>
+            <IonToolbar style={{ ...toolbarStyle, '--min-height': isMobile ? '48px' : '56px' }}>
+              {isMobile ? (
+                <>
+                  <div
+                    id="tab-menu-trigger"
+                    onClick={() => setTabMenuOpen(true)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', height: 48, cursor: 'pointer', color: '#fff' }}
+                  >
+                    <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                      {config.tabs.find(t => t.key === activeTab)?.label}
+                    </span>
+                    <IonIcon name="chevron-down-outline" style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
+                  </div>
+                  <IonPopover open={tabMenuOpen} onDidDismiss={() => setTabMenuOpen(false)} trigger="tab-menu-trigger" triggerAction="click">
+                    <IonList lines="none">
+                      {config.tabs.map(({ key, label }) => (
+                        <IonItem key={key} button detail={false} onClick={() => { setTab(key); setTabMenuOpen(false); }} style={{ '--background': activeTab === key ? 'var(--ion-color-step-100)' : 'transparent' }}>
+                          <IonLabel style={{ fontWeight: activeTab === key ? 700 : 500, fontSize: '0.875rem' }}>{label}</IonLabel>
+                        </IonItem>
+                      ))}
+                    </IonList>
+                  </IonPopover>
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
                   {config.tabs.map(({ key, label }) => (
-                    <MenuItem
-                      key={key}
-                      selected={activeTab === key}
-                      onClick={() => { setTab(key); setTabMenuAnchor(null); }}
-                      sx={{ fontSize: '0.875rem', fontWeight: activeTab === key ? 700 : 500 }}
-                    >
-                      {label}
-                    </MenuItem>
+                    <ImmersiveTab key={key} label={label} active={activeTab === key} onClick={() => setTab(key)} />
                   ))}
-                </Menu>
-              </>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'stretch', height: 56, width: '100%' }}>
-                {config.tabs.map(({ key, label }) => (
-                  <NetworkTab
-                    key={key}
-                    label={label}
-                    active={activeTab === key}
-                    onClick={() => setTab(key)}
-                  />
-                ))}
-              </Box>
-            )
+                </div>
+              )}
+            </IonToolbar>
           )}
-        </AppBar>
+        </IonHeader>
 
-        <Drawer
-          anchor="right"
-          open={notifOpen}
-          onClose={() => setNotifOpen(false)}
-          PaperProps={{ sx: { width: NOTIF_DRAWER_WIDTH, borderRadius: 0 } }}
-        >
-          <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
-        </Drawer>
+        {/* Notifications modal */}
+        <IonModal isOpen={notifOpen} onDidDismiss={() => setNotifOpen(false)} style={{ '--width': `${NOTIF_DRAWER_WIDTH}px`, '--height': '100%', '--border-radius': 0 }} breakpoints={undefined} initialBreakpoint={undefined} className="notif-modal">
+          <IonContent>
+            <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
+          </IonContent>
+        </IonModal>
       </>
     );
   }
 
+  // ── Normal mode ─────────────────────────────────────────────────────────────
   const nav = user.role === 'carrier' ? CARRIER_NAV
             : user.role === 'broker'  ? BROKER_NAV
             : user.role === 'driver'  ? DRIVER_NAV
@@ -936,245 +541,123 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
       ? location.pathname === '/admin'
       : location.pathname === path || location.pathname.startsWith(path + '/');
 
+  const activeNavItem = nav.find(item => isActive(item.path));
+
   return (
     <>
-      <AppBar
-        position="static"
-        elevation={0}
-        sx={{
-          bgcolor: barColor,
-          color: '#fff',
-          height: 60,
-          flexShrink: 0,
-          zIndex: theme.zIndex.appBar,
-          borderRadius: 0,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-        }}
-      >
-        <Toolbar disableGutters sx={{ height: 60, minHeight: '60px !important', px: 0 }}>
+      <IonHeader>
+        <IonToolbar style={toolbarStyle}>
+          {/* Menu toggle */}
+          <IonButtons slot="start">
+            {isMobile ? (
+              <IonMenuButton style={{ '--color': 'rgba(255,255,255,0.85)' }} />
+            ) : (
+              <IonButton fill="clear" onClick={onToggleSidebar} style={{ '--color': 'rgba(255,255,255,0.85)', marginLeft: 4 }}>
+                <IonIcon name="menu-outline" style={{ fontSize: '1.5rem' }} />
+              </IonButton>
+            )}
+          </IonButtons>
 
-          {/* Menu toggle — far left */}
-          <Tooltip title={sidebarOpen ? 'Close menu' : 'Open menu'} placement="bottom">
-            <IconButton
-              onClick={onToggleSidebar}
-              size="small"
-              sx={{ ml: 1.5, mr: 0.5, color: 'rgba(255,255,255,0.85)', flexShrink: 0, '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-            >
-              <IonIcon name="menu-outline" />
-            </IconButton>
-          </Tooltip>
-
-          {/* Center area: nav links (desktop) | mobile dropdown trigger | expanding search */}
-          <Box ref={searchPanelRef} sx={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
-
-            {/* Desktop nav links — fades out when search opens */}
+          {/* Center: nav links (desktop) | mobile dropdown | search */}
+          <div ref={searchPanelRef} style={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
+            {/* Desktop nav */}
             {!isMobile && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'stretch',
-                  height: 60,
-                  width: '100%',
-                  overflowX: 'auto',
-                  '&::-webkit-scrollbar': { display: 'none' },
-                  scrollbarWidth: 'none',
-                  opacity: searchOpen ? 0 : 1,
-                  transition: 'opacity 0.18s',
-                  pointerEvents: searchOpen ? 'none' : 'auto',
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'stretch', height: 60, width: '100%', overflowX: 'auto', scrollbarWidth: 'none', opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
                 {nav.map(item => (
-                  <NavLink
-                    key={item.path}
-                    item={item}
-                    active={isActive(item.path)}
-                    onClick={() => navigate(item.path)}
-                  />
+                  <NavLink key={item.path} item={item} active={isActive(item.path)} onClick={() => navigate(item.path)} />
                 ))}
-              </Box>
+              </div>
             )}
 
-            {/* Mobile: current page name styled like desktop tab (clickable, opens nav dropdown) */}
+            {/* Mobile: current page label */}
             {isMobile && !searchOpen && (
-              <Box
-                onClick={e => setMobileMenuAnchor(e.currentTarget)}
-                sx={{
-                  display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 0.9,
-                  px: 2, height: '100%', cursor: 'pointer',
-                  color: '#fff',
-                  '&:hover': { bgcolor: BAR_COLOR_HOVER },
-                  transition: 'all 0.15s', flexShrink: 0,
-                }}
+              <div
+                id="mobile-nav-trigger"
+                onClick={() => setMobileNavOpen(true)}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 8px', height: '100%', cursor: 'pointer', color: '#fff' }}
               >
-                {nav.find(item => isActive(item.path)) && (
-                  <IonIcon name={nav.find(item => isActive(item.path)).icon} sx={{ fontSize: 18, flexShrink: 0 }} />
-                )}
-                <Typography sx={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1, whiteSpace: 'nowrap' }}>
-                  {nav.find(item => isActive(item.path))?.label}
-                </Typography>
-                <IonIcon name="chevron-down-outline" sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
-              </Box>
+                {activeNavItem && <IonIcon name={activeNavItem.icon} style={{ fontSize: 18, flexShrink: 0 }} />}
+                <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                  {activeNavItem?.label}
+                </span>
+                <IonIcon name="chevron-down-outline" style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
+              </div>
             )}
 
-            {/* Expanding search bar — overlays center area when open */}
-            <Box
-              sx={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                top: '50%',
-                transform: searchOpen
-                  ? 'translateY(-50%) scaleX(1)'
-                  : 'translateY(-50%) scaleX(0.88)',
-                transformOrigin: 'right center',
-                opacity: searchOpen ? 1 : 0,
-                transition: 'opacity 0.2s, transform 0.2s',
-                pointerEvents: searchOpen ? 'auto' : 'none',
-                display: 'flex',
-                alignItems: 'center',
-                bgcolor: 'rgba(255,255,255,0.16)',
-                borderRadius: 1.5,
-                px: 1.5,
-                height: 38,
-                mx: 0.5,
-                backdropFilter: 'blur(4px)',
-              }}
-            >
-              <IonIcon name="search-outline" sx={{ fontSize: 17, mr: 1, opacity: 0.8, flexShrink: 0 }} />
-              <InputBase
-                inputRef={searchRef}
+            {/* Expanding search */}
+            <div style={{
+              position: 'absolute', left: 0, right: 0, top: '50%',
+              transform: searchOpen ? 'translateY(-50%) scaleX(1)' : 'translateY(-50%) scaleX(0.88)',
+              transformOrigin: 'right center',
+              opacity: searchOpen ? 1 : 0, transition: 'opacity 0.2s, transform 0.2s',
+              pointerEvents: searchOpen ? 'auto' : 'none',
+              display: 'flex', alignItems: 'center',
+              backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 8,
+              padding: '0 12px', height: 38, margin: '0 4px',
+              backdropFilter: 'blur(4px)',
+            }}>
+              <IonIcon name="search-outline" style={{ fontSize: 17, marginRight: 8, opacity: 0.8, flexShrink: 0 }} />
+              <input
+                ref={searchRef}
                 value={searchVal}
                 onChange={e => setSearchVal(e.target.value)}
                 onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
                 placeholder="Search…"
-                sx={{
-                  flex: 1,
-                  color: '#fff',
-                  fontSize: '0.85rem',
-                  '& input::placeholder': { color: 'rgba(255,255,255,0.65)', opacity: 1 },
-                }}
+                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#fff', fontSize: '0.85rem' }}
               />
-              <IconButton
-                size="small"
-                onClick={handleCloseSearch}
-                sx={{ color: 'rgba(255,255,255,0.75)', p: 0.25, '&:hover': { color: '#fff' } }}
-              >
-                <IonIcon name="close-outline" sx={{ fontSize: 15 }} />
-              </IconButton>
-            </Box>
+              <button onClick={handleCloseSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.75)', padding: 2, display: 'flex', alignItems: 'center' }}>
+                <IonIcon name="close-outline" style={{ fontSize: 15 }} />
+              </button>
+            </div>
 
-            {/* Search results panel */}
+            {/* Search results dropdown */}
             {searchOpen && (searchResults !== null || searchLoading) && (
-              <Paper
-                elevation={8}
-                sx={{
-                  position: 'absolute',
-                  top: 62,
-                  left: 0,
-                  right: 0,
-                  zIndex: 9999,
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  minWidth: 320,
-                }}
-              >
-                <SearchResultsPanel
-                  results={searchResults}
-                  loading={searchLoading}
-                  onNavigate={(item) => {
-                    if (item.conv_id) {
-                      navigate(`${item.path}?conv=${item.conv_id}`);
-                    } else {
-                      navigate(item.path);
-                    }
-                    handleCloseSearch();
-                  }}
-                />
-              </Paper>
+              <div style={{ position: 'absolute', top: 62, left: 0, right: 0, zIndex: 9999, borderRadius: 8, overflow: 'hidden', minWidth: 320, backgroundColor: 'var(--ion-card-background)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+                <SearchPanel results={searchResults} loading={searchLoading} onNavigate={(item) => { navigate(item.conv_id ? `${item.path}?conv=${item.conv_id}` : item.path); handleCloseSearch(); }} />
+              </div>
             )}
-          </Box>
+          </div>
 
-          {/* Right: search icon + notifications */}
-          <Box sx={{ display: 'flex', alignItems: 'center', pr: 1, gap: 0.5, flexShrink: 0 }}>
-            {/* Search icon — hidden when search is open */}
-            <Tooltip title="Search" placement="bottom">
-              <IconButton
-                onClick={() => setSearchOpen(true)}
-                size="small"
-                sx={{
-                  color: 'rgba(255,255,255,0.8)',
-                  '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER },
-                  opacity: searchOpen ? 0 : 1,
-                  transition: 'opacity 0.18s',
-                  pointerEvents: searchOpen ? 'none' : 'auto',
-                }}
-              >
-                <IonIcon name="search-outline" sx={{ fontSize: 22 }} />
-              </IconButton>
-            </Tooltip>
-
-            {/* Notifications bell */}
-            <Tooltip title="Notifications" placement="bottom">
-              <IconButton
-                onClick={() => setNotifOpen(true)}
-                size="small"
-                sx={{ color: 'rgba(255,255,255,0.8)', '&:hover': { color: '#fff', bgcolor: BAR_COLOR_HOVER } }}
-              >
-                <Badge badgeContent={notifCount > 0 ? (notifCount > 9 ? '9+' : notifCount) : null} color="error" max={9}>
-                  <IonIcon name="notifications-outline" sx={{ fontSize: 22 }} />
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Toolbar>
-      </AppBar>
+          {/* Right icons */}
+          <IonButtons slot="end">
+            <IonButton fill="clear" onClick={() => setSearchOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)', opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
+              <IonIcon name="search-outline" style={{ fontSize: 22 }} />
+            </IonButton>
+            <IonButton fill="clear" onClick={() => setNotifOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)', marginRight: 4 }}>
+              <div style={{ position: 'relative' }}>
+                <IonIcon name="notifications-outline" style={{ fontSize: 22 }} />
+                {notifCount > 0 && (
+                  <IonBadge color="danger" style={{ position: 'absolute', top: -4, right: -4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {notifCount > 9 ? '9+' : notifCount}
+                  </IonBadge>
+                )}
+              </div>
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
 
       {/* Mobile nav dropdown */}
-      <Menu
-        anchorEl={mobileMenuAnchor}
-        open={Boolean(mobileMenuAnchor)}
-        onClose={() => setMobileMenuAnchor(null)}
-        PaperProps={{
-          sx: {
-            mt: 0.5,
-            minWidth: 200,
-            borderRadius: 2,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-          },
-        }}
-        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-      >
-        {nav.map(item => {
-          const active = isActive(item.path);
-          return (
-            <MenuItem
-              key={item.path}
-              onClick={() => { navigate(item.path); setMobileMenuAnchor(null); }}
-              selected={active}
-              sx={{
-                gap: 1.5,
-                py: 1.25,
-                fontWeight: active ? 700 : 500,
-                fontSize: '0.875rem',
-              }}
-            >
-              <IonIcon name={item.icon} sx={{ fontSize: 18, color: active ? 'primary.main' : 'text.secondary' }} />
-              {item.label}
-            </MenuItem>
-          );
-        })}
-      </Menu>
+      <IonPopover open={mobileNavOpen} onDidDismiss={() => setMobileNavOpen(false)} trigger="mobile-nav-trigger" triggerAction="click" style={{ '--min-width': '200px', '--border-radius': '12px' }}>
+        <IonList lines="none">
+          {nav.map(item => {
+            const active = isActive(item.path);
+            return (
+              <IonItem key={item.path} button detail={false} onClick={() => { navigate(item.path); setMobileNavOpen(false); }} style={{ '--background': active ? 'var(--ion-color-step-100)' : 'transparent', '--padding-start': '16px', '--padding-end': '16px' }}>
+                <IonIcon name={item.icon} style={{ fontSize: 18, marginRight: 12, color: active ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }} slot="start" />
+                <IonLabel style={{ fontSize: '0.875rem', fontWeight: active ? 700 : 500 }}>{item.label}</IonLabel>
+              </IonItem>
+            );
+          })}
+        </IonList>
+      </IonPopover>
 
-      {/* Notifications slide-in drawer */}
-      <Drawer
-        anchor="right"
-        open={notifOpen}
-        onClose={() => setNotifOpen(false)}
-        PaperProps={{ sx: { width: NOTIF_DRAWER_WIDTH, borderRadius: 0 } }}
-      >
-        <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
-      </Drawer>
+      {/* Notifications modal */}
+      <IonModal isOpen={notifOpen} onDidDismiss={() => setNotifOpen(false)} style={{ '--width': `${NOTIF_DRAWER_WIDTH}px`, '--height': '100%', '--border-radius': 0 }} className="notif-modal">
+        <IonContent>
+          <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
+        </IonContent>
+      </IonModal>
     </>
   );
 }

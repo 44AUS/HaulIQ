@@ -1,0 +1,128 @@
+/* ── Ionic core CSS ── */
+@import '@ionic/react/css/core.css';
+@import '@ionic/react/css/normalize.css';
+@import '@ionic/react/css/structure.css';
+@import '@ionic/react/css/typography.css';
+@import '@ionic/react/css/padding.css';
+@import '@ionic/react/css/flex-utils.css';
+@import '@ionic/react/css/display.css';
+
+/* ── Light mode (default) ── */
+:root {
+  --ion-font-family: 'Inter', system-ui, sans-serif;
+
+  --ion-color-primary:          #1565C0;
+  --ion-color-primary-rgb:      21, 101, 192;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade:    #1259a9;
+  --ion-color-primary-tint:     #2c74c6;
+
+  --ion-color-secondary:          #3dc2ff;
+  --ion-color-secondary-rgb:      61, 194, 255;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade:    #36abe0;
+  --ion-color-secondary-tint:     #50c8ff;
+
+  --ion-color-success:          #2dd36f;
+  --ion-color-success-shade:    #28ba62;
+  --ion-color-success-tint:     #42d77d;
+
+  --ion-color-warning:          #ffc409;
+  --ion-color-warning-shade:    #e0ac08;
+  --ion-color-warning-tint:     #ffca22;
+
+  --ion-color-danger:           #eb445a;
+  --ion-color-danger-shade:     #cf3c4f;
+  --ion-color-danger-tint:      #ed576b;
+
+  --ion-color-medium:           #92949c;
+  --ion-color-medium-shade:     #808289;
+  --ion-color-medium-tint:      #9d9fa6;
+
+  --ion-background-color:       #f4f5f8;
+  --ion-background-color-rgb:   244, 245, 248;
+  --ion-text-color:             #0d1b2a;
+  --ion-text-color-rgb:         13, 27, 42;
+  --ion-card-background:        #ffffff;
+  --ion-border-color:           rgba(0, 0, 0, 0.12);
+  --ion-toolbar-background:     #1565C0;
+  --ion-toolbar-color:          #ffffff;
+  --ion-item-background:        #ffffff;
+
+  --ion-color-step-50:          rgba(0, 0, 0, 0.04);
+  --ion-color-step-100:         rgba(0, 0, 0, 0.08);
+  --ion-color-step-150:         rgba(0, 0, 0, 0.12);
+  --ion-color-step-200:         rgba(0, 0, 0, 0.16);
+  --ion-color-step-300:         rgba(0, 0, 0, 0.26);
+  --ion-color-step-400:         rgba(0, 0, 0, 0.54);
+  --ion-color-step-500:         rgba(0, 0, 0, 0.60);
+  --ion-color-step-600:         rgba(0, 0, 0, 0.70);
+  --ion-color-step-700:         rgba(0, 0, 0, 0.80);
+  --ion-color-step-800:         rgba(0, 0, 0, 0.87);
+
+  --app-bar-color:              #1565C0;
+  --app-sidebar-bg:             #ffffff;
+  --app-divider:                rgba(0, 0, 0, 0.08);
+}
+
+/* ── Dark mode ── */
+body.dark {
+  --ion-background-color:     #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color:           #ffffff;
+  --ion-text-color-rgb:       255, 255, 255;
+  --ion-card-background:      #1e1e1e;
+  --ion-border-color:         rgba(255, 255, 255, 0.12);
+  --ion-item-background:      #1e1e1e;
+
+  --ion-color-step-50:        rgba(255, 255, 255, 0.04);
+  --ion-color-step-100:       rgba(255, 255, 255, 0.08);
+  --ion-color-step-150:       rgba(255, 255, 255, 0.12);
+  --ion-color-step-200:       rgba(255, 255, 255, 0.16);
+  --ion-color-step-300:       rgba(255, 255, 255, 0.26);
+  --ion-color-step-400:       rgba(255, 255, 255, 0.54);
+  --ion-color-step-500:       rgba(255, 255, 255, 0.60);
+  --ion-color-step-600:       rgba(255, 255, 255, 0.70);
+  --ion-color-step-700:       rgba(255, 255, 255, 0.80);
+  --ion-color-step-800:       rgba(255, 255, 255, 0.87);
+
+  --app-sidebar-bg:           #1a1a1a;
+  --app-divider:              rgba(255, 255, 255, 0.08);
+}
+
+/* ── Global resets for Ionic in a web context ── */
+ion-app {
+  font-family: var(--ion-font-family);
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+}
+
+ion-header ion-toolbar {
+  --background: var(--app-bar-color, var(--ion-color-primary));
+  --color: #ffffff;
+  --min-height: 60px;
+}
+
+ion-menu ion-content {
+  --background: var(--app-sidebar-bg);
+}
+
+ion-item {
+  --background: transparent;
+  --color: var(--ion-text-color);
+  --border-color: var(--app-divider);
+}
+
+ion-list {
+  background: transparent;
+  padding: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: transparent; }
+::-webkit-scrollbar-thumb   { background: var(--ion-color-step-200); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ion-color-step-300); }

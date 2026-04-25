@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Box, Typography, IconButton, Button } from '@mui/material';
 import IonIcon from './IonIcon';
 
-
-const POLL_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const POLL_INTERVAL = 5 * 60 * 1000;
 
 async function fetchVersion() {
-  // HEAD request to index.html — Vercel sets a unique ETag per deployment
-  // and explicitly does NOT CDN-cache index.html, so this is always fresh.
-  const r = await fetch('/', {
-    method: 'HEAD',
-    cache: 'no-store',
-    headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' },
-  });
+  const r = await fetch('/', { method: 'HEAD', cache: 'no-store', headers: { 'pragma': 'no-cache', 'cache-control': 'no-cache' } });
   if (!r.ok) return null;
   return r.headers.get('etag') || r.headers.get('last-modified') || null;
 }
@@ -26,14 +18,10 @@ export default function UpdateNotifier() {
       try {
         const version = await fetchVersion();
         if (!version) return;
-        if (versionRef.current === null) {
-          versionRef.current = version;
-        } else if (version !== versionRef.current) {
-          setVisible(true);
-        }
+        if (versionRef.current === null) { versionRef.current = version; }
+        else if (version !== versionRef.current) { setVisible(true); }
       } catch {}
     };
-
     check();
     const id = setInterval(check, POLL_INTERVAL);
     return () => clearInterval(id);
@@ -42,38 +30,26 @@ export default function UpdateNotifier() {
   if (!visible) return null;
 
   return (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: 16,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 9999,
-        width: { xs: 'calc(100% - 32px)', sm: 640 },
-        borderTop: '3px solid #f97316',
-        borderRadius: 2,
-        bgcolor: 'background.paper',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
-        display: 'flex',
-        alignItems: 'center',
-        px: 2,
-        py: 1.25,
-        gap: 1.5,
-      }}
-    >
-      <IconButton size="small" onClick={() => setVisible(false)} sx={{ color: 'text.secondary', flexShrink: 0 }}>
+    <div style={{
+      position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
+      zIndex: 9999, width: 'min(calc(100% - 32px), 640px)',
+      borderTop: '3px solid #f97316', borderRadius: 8,
+      backgroundColor: 'var(--ion-card-background)',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+      display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 12,
+    }}>
+      <button onClick={() => setVisible(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', flexShrink: 0, display: 'flex', alignItems: 'center', padding: 4 }}>
         <IonIcon name="close-outline" fontSize="small" />
-      </IconButton>
-      <Typography variant="body2" sx={{ flex: 1, fontWeight: 500, color: 'text.primary' }}>
+      </button>
+      <span style={{ flex: 1, fontWeight: 500, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>
         New version available!
-      </Typography>
-      <Button
-        size="small"
+      </span>
+      <button
         onClick={() => window.location.reload()}
-        sx={{ fontWeight: 800, fontSize: '0.78rem', letterSpacing: '0.06em', color: 'text.primary', flexShrink: 0 }}
+        style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 800, fontSize: '0.78rem', letterSpacing: '0.06em', color: 'var(--ion-text-color)', flexShrink: 0 }}
       >
         REFRESH
-      </Button>
-    </Box>
+      </button>
+    </div>
   );
 }

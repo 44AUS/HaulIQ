@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { IonApp, IonSpinner } from '@ionic/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
 import { AppThemeProvider, useThemeMode } from './context/ThemeContext';
-import { Box, CircularProgress } from '@mui/material';
 import UpdateNotifier from './components/UpdateNotifier';
 
 // Pages — Public
@@ -113,7 +113,11 @@ function roleDashboard(role) {
 
 function ProtectedRoute({ children, requiredRole }) {
   const { user, loading } = useAuth();
-  if (loading) return <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><CircularProgress /></Box>;
+  if (loading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <IonSpinner name="crescent" />
+    </div>
+  );
   if (!user) return <Navigate to="/login" replace />;
   if (requiredRole && user.role !== requiredRole) {
     return <Navigate to={roleDashboard(user.role)} replace />;
@@ -296,15 +300,17 @@ function AppRoutes() {
 export default function App() {
   return (
     <AppThemeProvider>
-      <AuthProvider>
-        <MessagingProvider>
-          <BrowserRouter>
-            <UpdateNotifier />
-            <BrandColorSync />
-            <AppRoutes />
-          </BrowserRouter>
-        </MessagingProvider>
-      </AuthProvider>
+      <IonApp>
+        <AuthProvider>
+          <MessagingProvider>
+            <BrowserRouter>
+              <UpdateNotifier />
+              <BrandColorSync />
+              <AppRoutes />
+            </BrowserRouter>
+          </MessagingProvider>
+        </AuthProvider>
+      </IonApp>
     </AppThemeProvider>
   );
 }

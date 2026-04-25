@@ -1,17 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Typography, Avatar, Divider, IconButton, Badge, Tooltip, useMediaQuery, useTheme,
-  Button, alpha, Popover,
-} from '@mui/material';
+  IonList, IonItem, IonLabel, IonBadge,
+  IonAvatar, IonPopover,
+} from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, bookingsApi, networkApi, authApi } from '../../services/api';
 
 export const DRAWER_WIDTH = 300;
-export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
+export const DRAWER_COLLAPSED_WIDTH = 72;
 
 const DRIVER_LINKS = [
   { icon: 'car-sport-outline',   label: 'My Loads',  path: '/driver/loads' },
@@ -20,149 +19,78 @@ const DRIVER_LINKS = [
 ];
 
 const CARRIER_LINKS = [
-  { icon: 'build-outline',           label: 'Tools',       path: '/carrier/tools' },
-  { icon: 'trending-up-outline',     label: 'Analytics',   path: '/carrier/analytics' },
-  { icon: 'id-card-outline',         label: 'My Drivers',  path: '/carrier/drivers' },
-  { icon: 'git-network-outline',     label: 'Network',     path: '/carrier/network', badge: 'network' },
-  { icon: 'folder-outline',          label: 'Documents',   path: '/carrier/documents' },
-  { icon: 'card-outline',            label: 'Billing',     path: '/carrier/billing' },
-  { icon: 'extension-puzzle-outline',label: 'Integrations',path: '/integrations' },
-  { icon: 'options-outline',         label: 'Preferences', path: '/preferences' },
+  { icon: 'build-outline',            label: 'Tools',        path: '/carrier/tools' },
+  { icon: 'trending-up-outline',      label: 'Analytics',    path: '/carrier/analytics' },
+  { icon: 'id-card-outline',          label: 'My Drivers',   path: '/carrier/drivers' },
+  { icon: 'git-network-outline',      label: 'Network',      path: '/carrier/network', badge: 'network' },
+  { icon: 'folder-outline',           label: 'Documents',    path: '/carrier/documents' },
+  { icon: 'card-outline',             label: 'Billing',      path: '/carrier/billing' },
+  { icon: 'extension-puzzle-outline', label: 'Integrations', path: '/integrations' },
+  { icon: 'options-outline',          label: 'Preferences',  path: '/preferences' },
 ];
 
 const BROKER_LINKS = [
-  { icon: 'add-circle-outline',      label: 'Post Load',        path: '/broker/post' },
-  { icon: 'cube-outline',            label: 'Manage Loads',     path: '/broker/loads' },
-  { icon: 'list-outline',            label: 'Templates',        path: '/broker/templates' },
-  { icon: 'analytics-outline',       label: 'In Progress',      path: '/broker/active' },
-  { icon: 'bar-chart-outline',       label: 'Analytics',        path: '/broker/analytics' },
-  { icon: 'git-network-outline',     label: 'Network',          path: '/broker/network' },
-  { icon: 'folder-outline',          label: 'Documents',        path: '/broker/documents' },
-  { icon: 'calendar-outline',        label: 'Booking Requests', path: '/broker/bookings', badge: 'bookings' },
-  { icon: 'flash-outline',           label: 'Instant Book',     path: '/broker/instant-book' },
-  { icon: 'card-outline',            label: 'Payments',         path: '/broker/payments' },
-  { icon: 'card-outline',            label: 'Billing',          path: '/broker/billing' },
-  { icon: 'extension-puzzle-outline',label: 'Integrations',     path: '/integrations' },
-  { icon: 'options-outline',         label: 'Preferences',      path: '/preferences' },
+  { icon: 'add-circle-outline',       label: 'Post Load',        path: '/broker/post' },
+  { icon: 'cube-outline',             label: 'Manage Loads',     path: '/broker/loads' },
+  { icon: 'list-outline',             label: 'Templates',        path: '/broker/templates' },
+  { icon: 'analytics-outline',        label: 'In Progress',      path: '/broker/active' },
+  { icon: 'bar-chart-outline',        label: 'Analytics',        path: '/broker/analytics' },
+  { icon: 'git-network-outline',      label: 'Network',          path: '/broker/network' },
+  { icon: 'folder-outline',           label: 'Documents',        path: '/broker/documents' },
+  { icon: 'calendar-outline',         label: 'Booking Requests', path: '/broker/bookings', badge: 'bookings' },
+  { icon: 'flash-outline',            label: 'Instant Book',     path: '/broker/instant-book' },
+  { icon: 'card-outline',             label: 'Payments',         path: '/broker/payments' },
+  { icon: 'card-outline',             label: 'Billing',          path: '/broker/billing' },
+  { icon: 'extension-puzzle-outline', label: 'Integrations',     path: '/integrations' },
+  { icon: 'options-outline',          label: 'Preferences',      path: '/preferences' },
 ];
 
 const ADMIN_LINKS = [
-  { icon: 'grid-outline',   label: 'Overview',        path: '/admin' },
-  { icon: 'people-outline', label: 'Users',           path: '/admin/users' },
-  { icon: 'cube-outline',   label: 'Load Moderation', path: '/admin/loads' },
-  { icon: 'cash-outline',   label: 'Revenue',         path: '/admin/revenue' },
-  { icon: 'card-outline',   label: 'Payments',        path: '/admin/payments' },
-  { icon: 'list-outline',   label: 'Waitlist',        path: '/admin/waitlist' },
-  { icon: 'chatbubble-outline', label: 'Contact Messages', path: '/admin/contacts' },
+  { icon: 'grid-outline',        label: 'Overview',          path: '/admin' },
+  { icon: 'people-outline',      label: 'Users',             path: '/admin/users' },
+  { icon: 'cube-outline',        label: 'Load Moderation',   path: '/admin/loads' },
+  { icon: 'cash-outline',        label: 'Revenue',           path: '/admin/revenue' },
+  { icon: 'card-outline',        label: 'Payments',          path: '/admin/payments' },
+  { icon: 'list-outline',        label: 'Waitlist',          path: '/admin/waitlist' },
+  { icon: 'chatbubble-outline',  label: 'Contact Messages',  path: '/admin/contacts' },
 ];
 
-function NavItem({ item, badgeCount, active, onClick }) {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const c = {
-    text:        isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.60)',
-    textActive:  isDark ? '#fff' : theme.palette.primary.main,
-    hover:       isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
-    activeBg:    isDark ? 'rgba(255,255,255,0.12)' : alpha(theme.palette.primary.main, 0.08),
-    activeHover: isDark ? 'rgba(255,255,255,0.16)' : alpha(theme.palette.primary.main, 0.13),
-  };
-  return (
-    <ListItem disablePadding>
-      <ListItemButton
-        selected={active}
-        onClick={onClick}
-        sx={{
-          borderRadius: '0 !important',
-          px: 2.5,
-          py: 1.25,
-          minHeight: 48,
-          color: isDark ? '#fff' : '#000',
-          '&:hover': { bgcolor: c.hover, color: isDark ? '#fff' : '#000' },
-          '&.Mui-selected': {
-            bgcolor: c.activeBg,
-            color: isDark ? '#fff' : '#000',
-            '&:hover': { bgcolor: c.activeHover },
-          },
-        }}
-      >
-        <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
-          <Badge badgeContent={badgeCount > 0 ? (badgeCount > 9 ? '9+' : badgeCount) : null} color="error" max={9}>
-            <IonIcon name={item.icon} />
-          </Badge>
-        </ListItemIcon>
-        <ListItemText
-          primary={item.label}
-          primaryTypographyProps={{ fontSize: '1rem', fontWeight: active ? 600 : 400 }}
-        />
-      </ListItemButton>
-    </ListItem>
-  );
-}
-
-function SidebarContent({ onNavigate, onClose }) {
+export default function Sidebar({ onNavigate }) {
   const { user, logout, updateUser } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
   const isDark = mode === 'dark';
-  const sc = {
-    divider:      isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-    dividerFaint: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    icon:         isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)',
-    iconHover:    isDark ? '#fff' : '#0D1B2A',
-    nameColor:    isDark ? '#fff' : '#0D1B2A',
-    subtitleColor:isDark ? 'rgba(255,255,255,0.45)' : '#78909C',
-    planColor:    isDark ? 'primary.light' : 'primary.main',
-    msgBorder:    isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)',
-    msgText:      isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)',
-    msgHoverBorder:isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
-    msgHoverBg:   isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-    msgIconActive:isDark ? 'primary.light' : 'primary.main',
-    msgIconIdle:  isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)',
-    logoutColor:  isDark ? '#ef9a9a' : '#C62828',
-    logoutHoverBg:'rgba(239,83,80,0.12)',
-    logoutHoverColor:'#ef5350',
-  };
   const location = useLocation();
   const navigate = useNavigate();
+
   const [unread, setUnread] = useState(0);
   const [pendingBookings, setPendingBookings] = useState(0);
   const [pendingNetwork, setPendingNetwork] = useState(0);
+  const [bizPopoverOpen, setBizPopoverOpen] = useState(false);
+  const [userPopoverOpen, setUserPopoverOpen] = useState(false);
+  const bizRef  = useRef(null);
+  const userRef = useRef(null);
 
-  // Popover anchors
-  const [bizAnchor,  setBizAnchor]  = useState(null);
-  const [userAnchor, setUserAnchor] = useState(null);
-  const bizOpen  = Boolean(bizAnchor);
-  const userOpen = Boolean(userAnchor);
-
-  // Clock in/out  — states: 'out' | 'in' | 'paused'
-  const parseUtc = (ts) => ts ? new Date(ts.endsWith('Z') ? ts : ts + 'Z') : null;
-  const PAUSE_KEY = 'hauliq_clock_pause'; // localStorage key
-
-  // Derive initial state — check localStorage for a persisted pause
+  // ── Clock in/out ──
+  const parseUtc   = (ts) => ts ? new Date(ts.endsWith('Z') ? ts : ts + 'Z') : null;
+  const PAUSE_KEY  = 'hauliq_clock_pause';
   const _savedPause = (() => { try { return JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch { return null; } })();
-  const _initialState = user?.clocked_in
-    ? (_savedPause ? 'paused' : 'in')
-    : 'out';
-  const _initialAt = _savedPause
-    ? new Date(Date.now() - _savedPause.elapsedMs) // virtual clockedInAt that preserves paused offset
+  const _initial    = user?.clocked_in ? (_savedPause ? 'paused' : 'in') : 'out';
+  const _initialAt  = _savedPause
+    ? new Date(Date.now() - _savedPause.elapsedMs)
     : parseUtc(user?.clocked_in_at);
 
-  const [clockState,   setClockState]   = useState(_initialState);
+  const [clockState,   setClockState]   = useState(_initial);
   const [clockLoading, setClockLoading] = useState(false);
   const [clockedInAt,  setClockedInAt]  = useState(_initialAt);
-  const [elapsed, setElapsed] = useState('');
+  const [elapsed,      setElapsed]      = useState('');
   const pausedMsRef = useRef(_savedPause?.elapsedMs ?? 0);
 
-  // Sync clock state when user object first loads after refresh
   useEffect(() => {
     if (!user) return;
     const saved = (() => { try { return JSON.parse(localStorage.getItem(PAUSE_KEY)); } catch { return null; } })();
     if (!user.clocked_in) {
-      // clocked out — clear everything
-      localStorage.removeItem(PAUSE_KEY);
-      pausedMsRef.current = 0;
-      setClockState('out');
-      setClockedInAt(null);
-      return;
+      localStorage.removeItem(PAUSE_KEY); pausedMsRef.current = 0;
+      setClockState('out'); setClockedInAt(null); return;
     }
     if (saved) {
       pausedMsRef.current = saved.elapsedMs;
@@ -177,16 +105,12 @@ function SidebarContent({ onNavigate, onClose }) {
   }, [user?.clocked_in, user?.clocked_in_at]);
 
   useEffect(() => {
-    if (clockState === 'out') { setElapsed(''); return; }
-    if (clockState === 'paused') return; // freeze — don't clear, don't tick
-    // clockState === 'in'
+    if (clockState === 'out')    { setElapsed(''); return; }
+    if (clockState === 'paused') return;
     const tick = () => {
       if (!clockedInAt) return;
-      const secs = Math.floor((Date.now() - clockedInAt.getTime()) / 1000);
-      const h = Math.floor(secs / 3600);
-      const m = Math.floor((secs % 3600) / 60);
-      const s = secs % 60;
-      setElapsed(`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`);
+      const s = Math.floor((Date.now() - clockedInAt.getTime()) / 1000);
+      setElapsed(`${Math.floor(s/3600)}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`);
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -198,17 +122,15 @@ function SidebarContent({ onNavigate, onClose }) {
   const handleClockToggle = async (action) => {
     if (clockLoading) return;
     if (action === 'pause') {
-      const elapsedMs = clockedInAt ? Date.now() - clockedInAt.getTime() : 0;
-      pausedMsRef.current = elapsedMs;
-      localStorage.setItem(PAUSE_KEY, JSON.stringify({ elapsedMs }));
-      setClockState('paused');
-      return;
+      const ms = clockedInAt ? Date.now() - clockedInAt.getTime() : 0;
+      pausedMsRef.current = ms;
+      localStorage.setItem(PAUSE_KEY, JSON.stringify({ elapsedMs: ms }));
+      setClockState('paused'); return;
     }
     if (action === 'continue') {
       localStorage.removeItem(PAUSE_KEY);
       setClockedInAt(new Date(Date.now() - pausedMsRef.current));
-      setClockState('in');
-      return;
+      setClockState('in'); return;
     }
     setClockLoading(true);
     try {
@@ -217,25 +139,22 @@ function SidebarContent({ onNavigate, onClose }) {
         const loc = await new Promise((resolve) => {
           if (!navigator.geolocation) { resolve({}); return; }
           navigator.geolocation.getCurrentPosition(
-            (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-            ()    => resolve({}),
-            { timeout: 5000 },
-          );
+            (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+            ()  => resolve({}), { timeout: 5000 });
         });
         updated = await authApi.clockIn(loc);
       } else {
         updated = await authApi.clockOut();
       }
-      const newState = updated.clocked_in ? 'in' : 'out';
+      const ns = updated.clocked_in ? 'in' : 'out';
       pausedMsRef.current = 0;
       localStorage.removeItem(PAUSE_KEY);
-      setClockState(newState);
-      setClockedInAt(newState === 'in' ? new Date() : null);
+      setClockState(ns);
+      setClockedInAt(ns === 'in' ? new Date() : null);
       updateUser({ clocked_in: updated.clocked_in, clocked_in_at: updated.clocked_in_at });
     } catch {}
     setClockLoading(false);
   };
-
 
   useEffect(() => {
     if (!user) return;
@@ -265,9 +184,9 @@ function SidebarContent({ onNavigate, onClose }) {
                      : null;
 
   const getBadge = (badge) => {
-    if (badge === 'unread') return unread;
+    if (badge === 'unread')   return unread;
     if (badge === 'bookings') return pendingBookings;
-    if (badge === 'network') return pendingNetwork;
+    if (badge === 'network')  return pendingNetwork;
     return 0;
   };
 
@@ -276,346 +195,216 @@ function SidebarContent({ onNavigate, onClose }) {
 
   const handleNav = (path) => { onNavigate?.(); navigate(path); };
 
+  const divColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const nameColor = isDark ? '#fff' : '#0D1B2A';
+  const subColor  = isDark ? 'rgba(255,255,255,0.45)' : '#78909C';
+  const iconColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)';
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header: [X close] [centered logo] [theme toggle] */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          minHeight: 60,
-          px: 1,
-          flexShrink: 0,
-        }}
-      >
-        <Tooltip title="Close menu" placement="right">
-          <IconButton size="small" onClick={onClose} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
-            <IonIcon name="close-outline" fontSize="small" />
-          </IconButton>
-        </Tooltip>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', userSelect: 'none', backgroundColor: 'var(--app-sidebar-bg)' }}>
 
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', minHeight: 60, padding: '0 8px', flexShrink: 0 }}>
+        <button
+          onClick={() => { const m = document.querySelector('ion-menu'); if (m) m.close(); }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: iconColor, padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center' }}
+        >
+          <IonIcon name="close-outline" fontSize="small" />
+        </button>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
           <img src="/urload-logo.png" alt="HaulIQ" style={{ height: 30, width: 'auto' }} />
-        </Box>
-
-        <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'} placement="left">
-          <IconButton size="small" onClick={toggleTheme} sx={{ color: sc.icon, '&:hover': { color: sc.iconHover } }}>
-            <IonIcon name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'} fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      {/* ═══ User identity block ═══ */}
-      <Box sx={{ px: 1, pb: 1.5, pt: 1.5, flexShrink: 0 }}>
-      <Box sx={{
-        borderRadius: '10px',
-        overflow: 'hidden',
-        bgcolor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)',
-        border: `1px solid ${sc.divider}`,
-      }}>
-        {/* Business row */}
-        <Box
-          onClick={e => setBizAnchor(e.currentTarget)}
-          sx={{
-            display: 'flex', alignItems: 'center', gap: 1.5,
-            px: 2.5, py: 1.5, cursor: 'pointer',
-            borderBottom: `1px solid ${sc.divider}`,
-            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
-          }}
+        </div>
+        <button
+          onClick={toggleTheme}
+          title={isDark ? 'Light mode' : 'Dark mode'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: iconColor, padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center' }}
         >
-          <Avatar sx={{
-            width: 40, height: 40,
-            bgcolor: isDark ? '#444' : '#d0d0d0',
-            color: isDark ? '#fff' : '#333',
-            fontSize: '1rem', flexShrink: 0,
-          }}>
-            {(user.company || user.name)?.charAt(0)?.toUpperCase()}
-          </Avatar>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px' }}>
-              Business
-            </Typography>
-            <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3 }} noWrap>
-              {user.company || user.name}
-            </Typography>
-          </Box>
-          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
-        </Box>
+          <IonIcon name={isDark ? 'sunny-outline' : 'moon-outline'} fontSize="small" />
+        </button>
+      </div>
 
-        {/* Employee/User row */}
-        <Box
-          onClick={e => setUserAnchor(e.currentTarget)}
-          sx={{
-            display: 'flex', alignItems: 'center', gap: 1.5,
-            px: 2.5, py: 1.5, cursor: 'pointer',
-            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
-          }}
-        >
-          <Box sx={{ position: 'relative', flexShrink: 0 }}>
-            <Avatar
-              src={user.avatar_url || undefined}
-              sx={{
-                width: 40, height: 40,
-                bgcolor: isDark ? '#444' : '#d0d0d0',
-                color: isDark ? '#fff' : '#333',
-                fontSize: '1rem',
-              }}
+      {/* User identity block */}
+      <div style={{ padding: '0 8px 12px', flexShrink: 0 }}>
+        <div style={{ borderRadius: 10, overflow: 'hidden', backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)', border: `1px solid ${divColor}` }}>
+
+          {/* Business row */}
+          <div
+            ref={bizRef}
+            id="biz-trigger"
+            onClick={() => setBizPopoverOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', cursor: 'pointer', borderBottom: `1px solid ${divColor}` }}
+          >
+            <IonAvatar style={{ width: 40, height: 40, flexShrink: 0 }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: isDark ? '#444' : '#d0d0d0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isDark ? '#fff' : '#333', fontSize: '1rem', fontWeight: 600 }}>
+                {(user.company || user.name)?.charAt(0)?.toUpperCase()}
+              </div>
+            </IonAvatar>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.68rem', color: subColor, lineHeight: 1.2, marginBottom: 1 }}>Business</div>
+              <div style={{ fontSize: '0.9rem', color: nameColor, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user.company || user.name}
+              </div>
+            </div>
+            <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: subColor, flexShrink: 0 }} />
+          </div>
+
+          {/* User row */}
+          <div
+            ref={userRef}
+            id="user-trigger"
+            onClick={() => setUserPopoverOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', cursor: 'pointer' }}
+          >
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <IonAvatar style={{ width: 40, height: 40 }}>
+                {user.avatar_url
+                  ? <img src={user.avatar_url} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: isDark ? '#444' : '#d0d0d0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isDark ? '#fff' : '#333', fontSize: '1rem', fontWeight: 600 }}>
+                      {user.name?.charAt(0)?.toUpperCase()}
+                    </div>
+                }
+              </IonAvatar>
+              <div style={{
+                position: 'absolute', bottom: 1, right: 1,
+                width: 10, height: 10, borderRadius: '50%',
+                backgroundColor: clockState === 'in' ? '#2dd36f' : clockState === 'paused' ? '#ffce00' : '#eb445a',
+                border: `2px solid ${isDark ? '#111' : '#f5f5f5'}`,
+              }} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: '0.68rem', color: subColor, lineHeight: 1.2, marginBottom: 1, textTransform: 'capitalize' }}>{user.role}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
+                <div style={{ fontSize: '0.9rem', color: nameColor, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+                {elapsed && <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{elapsed}</span>}
+              </div>
+            </div>
+            <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: subColor, flexShrink: 0 }} />
+          </div>
+
+          {/* Clock strip */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            {clockState === 'out' && (
+              <button onClick={() => handleClockToggle('in')} style={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '4px 0', cursor: 'pointer', backgroundColor: '#2dd36f', color: '#fff', fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em', borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}` }}>
+                <span style={{ fontSize: '0.55rem' }}>▶</span>CLOCK-IN
+              </button>
+            )}
+            {clockState === 'in' && (
+              <button onClick={() => handleClockToggle('pause')} style={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '4px 0', cursor: 'pointer', backgroundColor: '#ffce00', color: '#000', fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em', borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}` }}>
+                <span style={{ fontSize: '0.7rem' }}>⏸</span>PAUSE
+              </button>
+            )}
+            {clockState === 'paused' && (
+              <button onClick={() => handleClockToggle('continue')} style={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '4px 0', cursor: 'pointer', backgroundColor: '#2a7fff', color: '#fff', fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em', borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}` }}>
+                <span style={{ fontSize: '0.55rem' }}>▶</span>CONTINUE
+              </button>
+            )}
+            <button
+              onClick={() => clockedIn && !clockLoading && handleClockToggle('out')}
+              style={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '4px 0', cursor: clockedIn ? 'pointer' : 'default', backgroundColor: clockedIn ? '#eb445a' : (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.1)'), color: clockedIn ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'), fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em' }}
             >
-              {!user.avatar_url && (user.avatar || user.name?.charAt(0)?.toUpperCase())}
-            </Avatar>
-            <Box sx={{
-              position: 'absolute', bottom: 1, right: 1,
-              width: 10, height: 10, borderRadius: '50%',
-              bgcolor: clockState === 'in' ? '#2dd36f' : clockState === 'paused' ? '#ffce00' : '#eb445a',
-              border: `2px solid ${isDark ? '#111' : '#f5f5f5'}`,
-            }} />
-          </Box>
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography sx={{ fontSize: '0.68rem', color: sc.subtitleColor, lineHeight: 1.2, mb: '1px', textTransform: 'capitalize' }}>
-              {user.role}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor, lineHeight: 1.3, minWidth: 0 }} noWrap>
-                {user.name}
-              </Typography>
-              {elapsed && (
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: '#fff', flexShrink: 0, lineHeight: 1.3 }}>
-                  {elapsed}
-                </Typography>
-              )}
-            </Box>
-          </Box>
-          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: sc.subtitleColor, flexShrink: 0 }} />
-        </Box>
-
-        {/* Clock strip */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-          {/* Left button: CLOCK-IN → PAUSE → CONTINUE */}
-          {clockState === 'out' && (
-            <Box component="button" onClick={() => handleClockToggle('in')}
-              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#2dd36f', color: '#fff',
-                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
-                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
-                '&:hover': { bgcolor: '#27bc61' }, transition: 'background-color 0.15s' }}>
-              <Box component="span" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>▶</Box>CLOCK-IN
-            </Box>
-          )}
-          {clockState === 'in' && (
-            <Box component="button" onClick={() => handleClockToggle('pause')}
-              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#ffce00', color: '#000',
-                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
-                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
-                '&:hover': { bgcolor: '#e6b800' }, transition: 'background-color 0.15s' }}>
-              <Box component="span" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>⏸</Box>PAUSE
-            </Box>
-          )}
-          {clockState === 'paused' && (
-            <Box component="button" onClick={() => handleClockToggle('continue')}
-              sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                gap: 0.6, py: 0.55, cursor: 'pointer', bgcolor: '#2a7fff', color: '#fff',
-                fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
-                borderRight: `1px solid ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
-                '&:hover': { bgcolor: '#1a6fe6' }, transition: 'background-color 0.15s' }}>
-              <Box component="span" sx={{ fontSize: '0.55rem', lineHeight: 1 }}>▶</Box>CONTINUE
-            </Box>
-          )}
-          {/* Right button: CLOCK-OUT */}
-          <Box component="button"
-            onClick={() => clockedIn && !clockLoading && handleClockToggle('out')}
-            sx={{ all: 'unset', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 0.6, py: 0.55, cursor: clockedIn ? 'pointer' : 'default',
-              bgcolor: clockedIn ? '#eb445a' : (isDark ? 'rgba(235,68,90,0.12)' : 'rgba(235,68,90,0.1)'),
-              color: clockedIn ? '#fff' : (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'),
-              fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.07em',
-              '&:hover': clockedIn ? { bgcolor: '#d03a4e' } : {},
-              transition: 'background-color 0.15s' }}>
-            <Box component="span" sx={{ fontSize: '0.75rem', lineHeight: 1, fontWeight: 400 }}>□</Box>CLOCK-OUT
-          </Box>
-        </Box>
-      </Box>
-      </Box>
+              <span style={{ fontSize: '0.75rem', fontWeight: 400 }}>□</span>CLOCK-OUT
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Business popover */}
-      <Popover
-        open={bizOpen}
-        anchorEl={bizAnchor}
-        onClose={() => setBizAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{ sx: {
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
-          mt: 0.5, minWidth: 240,
-          bgcolor: isDark ? '#1e1e1e' : '#fff',
-        }}}
+      <IonPopover
+        isOpen={bizPopoverOpen}
+        onDidDismiss={() => setBizPopoverOpen(false)}
+        trigger="biz-trigger"
+        triggerAction="click"
+        style={{ '--width': '240px', '--border-radius': '12px' }}
       >
-        {[
-          { icon: 'business-outline',       label: 'Manage Business', action: () => { navigate('/business'); setBizAnchor(null); } },
-          { icon: 'swap-horizontal-outline', label: 'Switch Business', action: () => setBizAnchor(null) },
-          { icon: 'add-outline',             label: 'Add a business',  action: () => setBizAnchor(null) },
-        ].map(({ icon, label, action }, i, arr) => (
-          <Box key={label}>
-            <Box
-              onClick={action}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
-                '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
-            >
-              <IonIcon name={icon} sx={{ fontSize: 20, color: 'text.secondary' }} />
-              <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>{label}</Typography>
-            </Box>
-            {i < arr.length - 1 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
-          </Box>
-        ))}
-        <Box sx={{ height: 4 }} />
-      </Popover>
+        <IonList lines="none">
+          {[
+            { icon: 'business-outline',        label: 'Manage Business', action: () => { navigate('/business'); setBizPopoverOpen(false); } },
+            { icon: 'swap-horizontal-outline', label: 'Switch Business', action: () => setBizPopoverOpen(false) },
+            { icon: 'add-outline',             label: 'Add a business',  action: () => setBizPopoverOpen(false) },
+          ].map(({ icon, label, action }) => (
+            <IonItem key={label} button detail={false} onClick={action} style={{ '--padding-start': '20px', '--padding-end': '20px', '--inner-padding-end': '0' }}>
+              <IonIcon name={icon} style={{ fontSize: 20, marginRight: 14, color: 'var(--ion-color-medium)' }} />
+              <IonLabel style={{ fontSize: '0.9rem' }}>{label}</IonLabel>
+            </IonItem>
+          ))}
+        </IonList>
+      </IonPopover>
 
       {/* User popover */}
-      <Popover
-        open={userOpen}
-        anchorEl={userAnchor}
-        onClose={() => setUserAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        PaperProps={{ sx: {
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.28)',
-          mt: 0.5, minWidth: 220,
-          bgcolor: isDark ? '#1e1e1e' : '#fff',
-        }}}
+      <IonPopover
+        isOpen={userPopoverOpen}
+        onDidDismiss={() => setUserPopoverOpen(false)}
+        trigger="user-trigger"
+        triggerAction="click"
+        style={{ '--width': '220px', '--border-radius': '12px' }}
       >
-        <Box
-          onClick={() => { navigate('/profile'); setUserAnchor(null); }}
-          sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
-            '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)' } }}
-        >
-          <IonIcon name="person-circle-outline" sx={{ fontSize: 20, color: 'text.secondary' }} />
-          <Typography sx={{ fontSize: '0.9rem', color: sc.nameColor }}>Manage profile</Typography>
-        </Box>
-        <Divider sx={{ borderColor: sc.dividerFaint }} />
-        <Box
-          onClick={() => { setUserAnchor(null); logout(); navigate('/'); }}
-          sx={{ display: 'flex', alignItems: 'center', gap: 1.75, px: 2.5, py: 1.4, cursor: 'pointer',
-            '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}
-        >
-          <IonIcon name="log-out-outline" sx={{ fontSize: 20, color: 'error.main' }} />
-          <Typography sx={{ fontSize: '0.9rem', color: 'error.main' }}>Log out</Typography>
-        </Box>
-        <Box sx={{ height: 4 }} />
-      </Popover>
+        <IonList lines="none">
+          <IonItem button detail={false} onClick={() => { navigate('/profile'); setUserPopoverOpen(false); }} style={{ '--padding-start': '20px', '--padding-end': '20px', '--inner-padding-end': '0' }}>
+            <IonIcon name="person-circle-outline" style={{ fontSize: 20, marginRight: 14, color: 'var(--ion-color-medium)' }} />
+            <IonLabel style={{ fontSize: '0.9rem' }}>Manage profile</IonLabel>
+          </IonItem>
+          <IonItem button detail={false} onClick={() => { setUserPopoverOpen(false); logout(); navigate('/'); }} style={{ '--padding-start': '20px', '--padding-end': '20px', '--inner-padding-end': '0' }}>
+            <IonIcon name="log-out-outline" style={{ fontSize: 20, marginRight: 14, color: 'var(--ion-color-danger)' }} />
+            <IonLabel style={{ fontSize: '0.9rem', color: 'var(--ion-color-danger)' }}>Log out</IonLabel>
+          </IonItem>
+        </IonList>
+      </IonPopover>
 
-      {/* Message Center button */}
+      {/* Message Center */}
       {messagesPath && (
-        <>
-          <Box sx={{ px: 2, pb: 1.5, flexShrink: 0 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              size="small"
-              startIcon={<IonIcon name="chatbubble-outline" fontSize="small" />}
-              onClick={() => handleNav(messagesPath)}
-              sx={{
-                borderRadius: 1.5,
-                borderColor: sc.msgBorder,
-                color: sc.msgText,
-                textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '0.8rem',
-                py: 0.75,
-                '&:hover': { borderColor: sc.msgHoverBorder, bgcolor: sc.msgHoverBg },
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                Message Center
-                {unread > 0 && (
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'error.main', flexShrink: 0 }} />
-                )}
-              </Box>
-            </Button>
-          </Box>
-          <Divider sx={{ borderColor: sc.divider }} />
-        </>
+        <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
+          <button
+            onClick={() => handleNav(messagesPath)}
+            style={{ width: '100%', background: 'none', border: `1px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)'}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            <IonIcon name="chatbubble-outline" fontSize="small" />
+            Message Center
+            {unread > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
+          </button>
+        </div>
       )}
+
+      <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
       {/* Nav list */}
-      <List dense disablePadding sx={{ flexGrow: 1, overflowY: 'auto' }}>
-        {links.map((item, idx) => (
-          <Box key={item.path}>
-            {idx > 0 && <Divider sx={{ borderColor: sc.dividerFaint }} />}
-            <NavItem
-              item={item}
-              badgeCount={item.badge ? getBadge(item.badge) : 0}
-              active={isActive(item.path)}
+      <IonList lines="none" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
+        {links.map((item) => {
+          const active    = isActive(item.path);
+          const badgeCount = item.badge ? getBadge(item.badge) : 0;
+          return (
+            <IonItem
+              key={item.path}
+              button
+              detail={false}
               onClick={() => handleNav(item.path)}
-            />
-          </Box>
-        ))}
-      </List>
+              style={{
+                '--background':           active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
+                '--background-hover':     isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                '--color':                isDark ? '#fff' : '#000',
+                '--border-color':         divColor,
+                '--min-height':           '48px',
+                '--padding-start':        '20px',
+                '--padding-end':          '20px',
+                '--inner-padding-end':    '0',
+                fontWeight: active ? 600 : 400,
+                borderBottom: `1px solid ${divColor}`,
+              }}
+            >
+              <div slot="start" style={{ marginRight: 12, position: 'relative', display: 'flex' }}>
+                <IonIcon name={item.icon} style={{ fontSize: '1.25rem' }} />
+                {badgeCount > 0 && (
+                  <IonBadge color="danger" style={{ position: 'absolute', top: -6, right: -8, fontSize: '0.6rem', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8 }}>
+                    {badgeCount > 9 ? '9+' : badgeCount}
+                  </IonBadge>
+                )}
+              </div>
+              <IonLabel style={{ fontSize: '1rem' }}>{item.label}</IonLabel>
+            </IonItem>
+          );
+        })}
+      </IonList>
 
-      {/* Bottom: theme toggle */}
-      <Divider sx={{ borderColor: sc.divider }} />
-    </Box>
-  );
-}
-
-export default function Sidebar({ mobileOpen, onMobileClose, sidebarOpen, onClose, onMobileOpen }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('lg'));
-  const drawerWidth = sidebarOpen ? DRAWER_WIDTH : 0;
-
-  const drawerSx = {
-    width: drawerWidth,
-    flexShrink: 0,
-    userSelect: 'none',
-    '& .MuiDrawer-paper': {
-      width: DRAWER_WIDTH,
-      boxSizing: 'border-box',
-      overflowX: 'hidden',
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-  };
-
-  return (
-    <>
-      {/* Mobile drawer */}
-      {isMobile && (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={onMobileClose}
-          ModalProps={{ keepMounted: true }}
-          sx={{ ...drawerSx, display: { xs: 'block', lg: 'none' } }}
-        >
-          <SidebarContent onNavigate={onMobileClose} onClose={onMobileClose} />
-        </Drawer>
-      )}
-
-      {/* Desktop drawer */}
-      {!isMobile && (
-        <Drawer
-          variant="permanent"
-          sx={{
-            ...drawerSx,
-            display: { xs: 'none', lg: 'block' },
-            width: drawerWidth,
-            '& .MuiDrawer-paper': {
-              width: sidebarOpen ? DRAWER_WIDTH : 0,
-              overflowX: 'hidden',
-              transition: theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-            },
-          }}
-          open
-        >
-          <SidebarContent onClose={onClose} />
-        </Drawer>
-      )}
-    </>
+      <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
+    </div>
   );
 }
