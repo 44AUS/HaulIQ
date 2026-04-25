@@ -173,7 +173,7 @@ export default function CarrierProfile() {
         {/* Left: Photo */}
         <Box sx={{ flexShrink: 0 }}>
           <Box sx={{
-            width: { xs: 160, sm: 260, md: 300 }, height: { xs: 160, sm: 260, md: 300 },
+            width: 400, height: 400,
             borderRadius: '10px', overflow: 'hidden',
             bgcolor: isDark ? '#2a2a2a' : '#e8e8e8',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
