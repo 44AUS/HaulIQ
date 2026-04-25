@@ -14,14 +14,12 @@ export const DRAWER_WIDTH = 300;
 export const DRAWER_COLLAPSED_WIDTH = 72; // kept for any external imports
 
 const DRIVER_LINKS = [
-  { icon: 'grid-outline',        label: 'Dashboard', path: '/driver/dashboard' },
   { icon: 'car-sport-outline',   label: 'My Loads',  path: '/driver/loads' },
   { icon: 'wallet-outline',      label: 'Earnings',  path: '/driver/earnings' },
   { icon: 'chatbubble-outline',  label: 'Messages',  path: '/driver/messages' },
 ];
 
 const CARRIER_LINKS = [
-  { icon: 'grid-outline',            label: 'Dashboard',   path: '/carrier/dashboard' },
   { icon: 'build-outline',           label: 'Tools',       path: '/carrier/tools' },
   { icon: 'trending-up-outline',     label: 'Analytics',   path: '/carrier/analytics' },
   { icon: 'id-card-outline',         label: 'My Drivers',  path: '/carrier/drivers' },
@@ -33,7 +31,6 @@ const CARRIER_LINKS = [
 ];
 
 const BROKER_LINKS = [
-  { icon: 'grid-outline',            label: 'Dashboard',        path: '/broker/dashboard' },
   { icon: 'add-circle-outline',      label: 'Post Load',        path: '/broker/post' },
   { icon: 'cube-outline',            label: 'Manage Loads',     path: '/broker/loads' },
   { icon: 'list-outline',            label: 'Templates',        path: '/broker/templates' },
