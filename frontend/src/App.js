@@ -26,7 +26,6 @@ import DriverLoadDetail from './pages/driver/LoadDetail';
 import DriverEarnings from './pages/driver/Earnings';
 
 // Pages — Carrier
-import CarrierDashboard from './pages/carrier/Dashboard';
 import LoadBoard from './pages/carrier/LoadBoard';
 import LoadDetail from './pages/carrier/LoadDetail';
 import ProfitCalculator from './pages/carrier/ProfitCalculator';
@@ -44,7 +43,6 @@ import LoadManager from './pages/carrier/LoadManager';
 import Tools from './pages/carrier/Tools';
 
 // Pages — Broker
-import BrokerDashboard from './pages/broker/Dashboard';
 import BrokerPayments from './pages/broker/Payments';
 import PostLoad from './pages/broker/PostLoad';
 import ManageLoads from './pages/broker/ManageLoads';
