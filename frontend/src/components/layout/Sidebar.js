@@ -79,11 +79,11 @@ function NavItem({ item, badgeCount, active, onClick }) {
           px: 2.5,
           py: 1.25,
           minHeight: 48,
-          color: '#fff',
-          '&:hover': { bgcolor: c.hover, color: '#fff' },
+          color: isDark ? '#fff' : '#000',
+          '&:hover': { bgcolor: c.hover, color: isDark ? '#fff' : '#000' },
           '&.Mui-selected': {
             bgcolor: c.activeBg,
-            color: '#fff',
+            color: isDark ? '#fff' : '#000',
             '&:hover': { bgcolor: c.activeHover },
           },
         }}
