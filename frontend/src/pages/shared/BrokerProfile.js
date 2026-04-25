@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress, Paper,
@@ -72,9 +72,11 @@ const BADGE_MAP = {
 
 export default function BrokerProfile() {
   const { brokerId } = useParams();
+  const [searchParams] = useSearchParams();
   const { user, updateUser } = useAuth();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const activeTab = searchParams.get('tab') || 'overview';
   const photoRef = useRef();
   const [photoUploading, setPhotoUploading] = useState(false);
 
@@ -217,7 +219,8 @@ export default function BrokerProfile() {
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3, lg: 4 }, py: 2 }}>
 
-      {/* ── Photo + Info ── */}
+      {/* ── Overview Tab ── */}
+      {activeTab === 'overview' && (
       <Box sx={{ py: 2, display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: 'wrap', mb: 3 }}>
 
         {/* Left: Photo */}
@@ -377,158 +380,179 @@ export default function BrokerProfile() {
           )}
         </Box>
       </Box>
-
-      {/* ── Pay Speed ── */}
-      <Box sx={{ ...cardSx, borderColor: paySpeedVerified ? 'primary.main' : 'divider', bgcolor: paySpeedVerified ? (isDark ? 'rgba(21,101,192,0.08)' : 'rgba(21,101,192,0.04)') : (isDark ? 'rgba(255,255,255,0.03)' : 'background.paper'), mb: 3 }}>
-        <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IonIcon name="time-outline" sx={{ color: paySpeedVerified ? 'primary.main' : 'text.secondary' }} />
-          <Typography variant="subtitle1" fontWeight={700}>Pay Speed</Typography>
-          {paySpeedVerified
-            ? <Chip label="✓ Carrier-Verified" size="small" color="primary" variant="outlined" />
-            : <Chip label="Self-Reported" size="small" variant="outlined" />
-          }
-        </Box>
-        <Box sx={{ px: 2.5, py: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="caption" color="text.secondary">Broker self-reported</Typography>
-              <Typography variant="body2" fontWeight={700} color={broker.paySpeed === 'Quick-Pay' ? 'primary.main' : 'text.primary'}>
-                {broker.paySpeed}
-              </Typography>
-            </Grid>
-            {avgPaymentDays && (
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Carrier-reported avg ({allPaymentDays.length} reports)</Typography>
-                <Typography variant="body2" fontWeight={700}
-                  color={avgPaymentDays <= 21 ? 'primary.main' : avgPaymentDays <= 35 ? 'warning.main' : 'error.main'}>
-                  {avgPaymentDays} days avg
-                </Typography>
-              </Grid>
-            )}
-          </Grid>
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1.5, lineHeight: 1.6 }}>
-            {paySpeedVerified
-              ? `Pay speed is calculated from ${allPaymentDays.length} carriers who reported their actual payment time.`
-              : 'Pay speed is self-declared by the broker. It will be verified once 3+ carriers report in reviews.'
-            }
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* ── Review Form ── */}
-      {showForm && (
-        <Box sx={{ ...cardSx, borderColor: 'primary.main', mb: 3 }}>
-          <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="subtitle1" fontWeight={700}>Your Review of {broker.name}</Typography>
-          </Box>
-          <Box sx={{ px: 2.5, py: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <Box>
-              <Typography variant="body2" fontWeight={600} mb={1}>Overall Rating *</Typography>
-              <StarInput value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} size={28} />
-            </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" fontWeight={600} mb={1}>Communication</Typography>
-                <StarInput value={form.communication} onChange={v => setForm(f => ({ ...f, communication: v }))} size={22} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" fontWeight={600} mb={1}>Load Accuracy</Typography>
-                <StarInput value={form.accuracy} onChange={v => setForm(f => ({ ...f, accuracy: v }))} size={22} />
-              </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField label="Actual payment received in (days)" size="small" fullWidth type="number"
-                  inputProps={{ min: 1, max: 180 }} placeholder="e.g. 21"
-                  value={form.paymentDays} onChange={e => setForm(f => ({ ...f, paymentDays: e.target.value }))}
-                  helperText="Helps verify pay speed for other drivers" />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" fontWeight={600} mb={1}>Would you work with them again?</Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'} size="small"
-                    startIcon={<IonIcon name="thumbs-up-outline" />}
-                    onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}>Yes</Button>
-                  <Button variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
-                    color={form.wouldWorkAgain === false ? 'error' : 'inherit'} size="small"
-                    startIcon={<IonIcon name="thumbs-down-outline" />}
-                    onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}>No</Button>
-                </Box>
-              </Grid>
-            </Grid>
-            <TextField label="Your experience" size="small" fullWidth multiline rows={3}
-              placeholder="Tell other drivers about your experience with this broker..."
-              value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
-              <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
-              <Button variant="contained" size="small" onClick={handleSubmitReview} disabled={form.rating === 0}>Submit Review</Button>
-            </Box>
-          </Box>
-        </Box>
       )}
 
-      {/* ── Reviews ── */}
-      <Box sx={cardSx}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle1" fontWeight={700}>Carrier Reviews</Typography>
-          <Typography variant="caption" color="text.disabled">{reviews.length}</Typography>
-        </Box>
-        {loadingReviews ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress size={24} /></Box>
-        ) : reviews.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body2" color="text.secondary">No reviews yet. Be the first to review this broker.</Typography>
-          </Box>
-        ) : (
-          <Box>
-            {reviews.map((review, idx) => (
-              <Box key={review.id} sx={{ px: 2.5, py: 2, borderBottom: idx < reviews.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 1.5 }}>
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-                      <Avatar sx={{ width: 28, height: 28, bgcolor: 'action.selected', fontSize: 12, fontWeight: 700 }}>
-                        {review.isAnonymous ? '?' : review.carrierName.charAt(0)}
-                      </Avatar>
-                      <Typography variant="body2" fontWeight={600}>
-                        {review.isAnonymous ? 'Anonymous Driver' : review.carrierName}
-                      </Typography>
-                      {review.wouldWorkAgain === true  && <Chip label="✓ Would work again"    size="small" color="success" variant="outlined" />}
-                      {review.wouldWorkAgain === false && <Chip label="✗ Would not work again" size="small" color="error"   variant="outlined" />}
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {[1,2,3,4,5].map(n => (
-                        n <= review.rating
-                          ? <IonIcon name="star" key={n} sx={{ fontSize: 13, color: '#FFC107' }} />
-                          : <IonIcon name="star-outline" key={n} sx={{ fontSize: 13, color: 'text.disabled' }} />
-                      ))}
-                      <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
-                      <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>
-                    </Box>
-                  </Box>
-                  {review.paymentDays && (
-                    <Paper variant="outlined" sx={{ px: 2, py: 1, textAlign: 'center',
-                      borderColor: review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main' }}>
-                      <Typography variant="caption" color="text.secondary" display="block">Paid in</Typography>
-                      <Typography variant="body2" fontWeight={700}
-                        color={review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main'}>
-                        {review.paymentDays} days
-                      </Typography>
-                    </Paper>
-                  )}
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: review.comment ? 1.5 : 0 }}>
-                  <SubRating label="Communication" value={review.communication} />
-                  <SubRating label="Load Accuracy" value={review.accuracy} />
-                </Box>
-                {review.comment && (
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{review.comment}</Typography>
-                )}
+      {/* ── Reviews Tab ── */}
+      {activeTab === 'reviews' && (
+      <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+        {/* Write a review action */}
+        {!isOwner && user?.role === 'carrier' && !submitted && !showForm && canReview?.can_review && (
+          <Button variant="contained" size="small" startIcon={<IonIcon name="star" />} onClick={() => setShowForm(true)} sx={{ alignSelf: 'flex-start' }}>
+            Write a Review
+          </Button>
+        )}
+        {submitted && <Chip icon={<IonIcon name="checkmark-circle" />} label="Review submitted" color="success" size="small" sx={{ alignSelf: 'flex-start' }} />}
+
+        {/* Review Form */}
+        {showForm && (
+          <Box sx={{ ...cardSx, borderColor: 'primary.main' }}>
+            <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle1" fontWeight={700}>Your Review of {broker.name}</Typography>
+            </Box>
+            <Box sx={{ px: 2.5, py: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+              <Box>
+                <Typography variant="body2" fontWeight={600} mb={1}>Overall Rating *</Typography>
+                <StarInput value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} size={28} />
               </Box>
-            ))}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" fontWeight={600} mb={1}>Communication</Typography>
+                  <StarInput value={form.communication} onChange={v => setForm(f => ({ ...f, communication: v }))} size={22} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" fontWeight={600} mb={1}>Load Accuracy</Typography>
+                  <StarInput value={form.accuracy} onChange={v => setForm(f => ({ ...f, accuracy: v }))} size={22} />
+                </Grid>
+              </Grid>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField label="Actual payment received in (days)" size="small" fullWidth type="number"
+                    inputProps={{ min: 1, max: 180 }} placeholder="e.g. 21"
+                    value={form.paymentDays} onChange={e => setForm(f => ({ ...f, paymentDays: e.target.value }))}
+                    helperText="Helps verify pay speed for other drivers" />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body2" fontWeight={600} mb={1}>Would you work with them again?</Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'} size="small"
+                      startIcon={<IonIcon name="thumbs-up-outline" />}
+                      onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}>Yes</Button>
+                    <Button variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
+                      color={form.wouldWorkAgain === false ? 'error' : 'inherit'} size="small"
+                      startIcon={<IonIcon name="thumbs-down-outline" />}
+                      onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}>No</Button>
+                  </Box>
+                </Grid>
+              </Grid>
+              <TextField label="Your experience" size="small" fullWidth multiline rows={3}
+                placeholder="Tell other drivers about your experience with this broker..."
+                value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button variant="contained" size="small" onClick={handleSubmitReview} disabled={form.rating === 0}>Submit Review</Button>
+              </Box>
+            </Box>
           </Box>
         )}
+
+        {/* Reviews list */}
+        <Box sx={cardSx}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700}>Carrier Reviews</Typography>
+            <Typography variant="caption" color="text.disabled">{reviews.length}</Typography>
+          </Box>
+          {loadingReviews ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress size={24} /></Box>
+          ) : reviews.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 6 }}>
+              <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">No reviews yet. Be the first to review this broker.</Typography>
+            </Box>
+          ) : (
+            <Box>
+              {reviews.map((review, idx) => (
+                <Box key={review.id} sx={{ px: 2.5, py: 2, borderBottom: idx < reviews.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 1.5 }}>
+                    <Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                        <Avatar sx={{ width: 28, height: 28, bgcolor: 'action.selected', fontSize: 12, fontWeight: 700 }}>
+                          {review.isAnonymous ? '?' : review.carrierName.charAt(0)}
+                        </Avatar>
+                        <Typography variant="body2" fontWeight={600}>
+                          {review.isAnonymous ? 'Anonymous Driver' : review.carrierName}
+                        </Typography>
+                        {review.wouldWorkAgain === true  && <Chip label="✓ Would work again"    size="small" color="success" variant="outlined" />}
+                        {review.wouldWorkAgain === false && <Chip label="✗ Would not work again" size="small" color="error"   variant="outlined" />}
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        {[1,2,3,4,5].map(n => (
+                          n <= review.rating
+                            ? <IonIcon name="star" key={n} sx={{ fontSize: 13, color: '#FFC107' }} />
+                            : <IonIcon name="star-outline" key={n} sx={{ fontSize: 13, color: 'text.disabled' }} />
+                        ))}
+                        <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
+                        <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>
+                      </Box>
+                    </Box>
+                    {review.paymentDays && (
+                      <Paper variant="outlined" sx={{ px: 2, py: 1, textAlign: 'center',
+                        borderColor: review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main' }}>
+                        <Typography variant="caption" color="text.secondary" display="block">Paid in</Typography>
+                        <Typography variant="body2" fontWeight={700}
+                          color={review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main'}>
+                          {review.paymentDays} days
+                        </Typography>
+                      </Paper>
+                    )}
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: review.comment ? 1.5 : 0 }}>
+                    <SubRating label="Communication" value={review.communication} />
+                    <SubRating label="Load Accuracy" value={review.accuracy} />
+                  </Box>
+                  {review.comment && (
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{review.comment}</Typography>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
+
       </Box>
+      )}
+
+      {/* ── Pay Speed Tab ── */}
+      {activeTab === 'pay_speed' && (
+      <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box sx={{ ...cardSx, borderColor: paySpeedVerified ? 'primary.main' : 'divider', bgcolor: paySpeedVerified ? (isDark ? 'rgba(21,101,192,0.08)' : 'rgba(21,101,192,0.04)') : (isDark ? 'rgba(255,255,255,0.03)' : 'background.paper') }}>
+          <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <IonIcon name="time-outline" sx={{ color: paySpeedVerified ? 'primary.main' : 'text.secondary' }} />
+            <Typography variant="subtitle1" fontWeight={700}>Pay Speed</Typography>
+            {paySpeedVerified
+              ? <Chip label="✓ Carrier-Verified" size="small" color="primary" variant="outlined" />
+              : <Chip label="Self-Reported" size="small" variant="outlined" />
+            }
+          </Box>
+          <Box sx={{ px: 2.5, py: 2 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="caption" color="text.secondary">Broker self-reported</Typography>
+                <Typography variant="body2" fontWeight={700} color={broker.paySpeed === 'Quick-Pay' ? 'primary.main' : 'text.primary'}>
+                  {broker.paySpeed}
+                </Typography>
+              </Grid>
+              {avgPaymentDays && (
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">Carrier-reported avg ({allPaymentDays.length} reports)</Typography>
+                  <Typography variant="body2" fontWeight={700}
+                    color={avgPaymentDays <= 21 ? 'primary.main' : avgPaymentDays <= 35 ? 'warning.main' : 'error.main'}>
+                    {avgPaymentDays} days avg
+                  </Typography>
+                </Grid>
+              )}
+            </Grid>
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1.5, lineHeight: 1.6 }}>
+              {paySpeedVerified
+                ? `Pay speed is calculated from ${allPaymentDays.length} carriers who reported their actual payment time.`
+                : 'Pay speed is self-declared by the broker. It will be verified once 3+ carriers report in reviews.'
+              }
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+      )}
+
     </Box>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useParams, useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   Box, Typography, Avatar, Button, IconButton, Chip,
   TextField, Grid, CircularProgress, LinearProgress,
@@ -48,10 +48,12 @@ function MiniBar({ value, max = 5 }) {
 export default function CarrierProfile() {
   const { carrierId: carrierIdParam } = useParams();
   const { state } = useLocation();
+  const [searchParams] = useSearchParams();
   const carrierId = state?.carrierId || carrierIdParam;
   const { user } = useAuth();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
+  const activeTab = searchParams.get('tab') || 'overview';
 
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
@@ -164,7 +166,8 @@ export default function CarrierProfile() {
   return (
     <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3, lg: 4 }, py: 2 }}>
 
-      {/* ── Photo + Info ── */}
+      {/* ── Overview Tab ── */}
+      {activeTab === 'overview' && (
       <Box sx={{ py: 2, display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: 'wrap', mb: 3 }}>
 
         {/* Left: Photo */}
@@ -289,8 +292,25 @@ export default function CarrierProfile() {
           )}
         </Box>
       </Box>
+      )}
 
-      {/* ── Review Form ── */}
+      {/* ── Reviews Tab ── */}
+      {activeTab === 'reviews' && (
+      <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+      {/* Write a review action */}
+      {user?.role === 'broker' && !submitted && !showForm && (
+        canReviewReason === 'already_reviewed' ? (
+          <Chip icon={<IonIcon name="checkmark-circle" />} label="Reviewed" color="success" size="small" sx={{ alignSelf: 'flex-start' }} />
+        ) : canReview ? (
+          <Button variant="contained" size="small" startIcon={<IonIcon name="star" />} onClick={() => setShowForm(true)} sx={{ alignSelf: 'flex-start' }}>
+            Write a Review
+          </Button>
+        ) : null
+      )}
+      {submitted && <Chip icon={<IonIcon name="checkmark-circle" />} label="Review submitted" color="success" size="small" sx={{ alignSelf: 'flex-start' }} />}
+
+      {/* Review Form */}
       {showForm && (
         <Box sx={{ ...cardSx, borderColor: 'primary.main', mb: 3 }}>
           <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
@@ -414,6 +434,10 @@ export default function CarrierProfile() {
           </Box>
         )}
       </Box>
+
+      </Box>
+      )}
+
     </Box>
   );
 }

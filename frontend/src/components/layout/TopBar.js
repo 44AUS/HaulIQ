@@ -784,6 +784,21 @@ export default function TopBar({ sidebarOpen, onToggleSidebar, immersiveMode }) 
         ],
         messageMode: true,
       },
+      carrier_profile: {
+        title: 'Carrier Profile',
+        tabs: [
+          { key: 'overview', label: 'Overview' },
+          { key: 'reviews',  label: 'Reviews' },
+        ],
+      },
+      broker_profile: {
+        title: 'Broker Profile',
+        tabs: [
+          { key: 'overview',   label: 'Overview' },
+          { key: 'reviews',    label: 'Reviews' },
+          { key: 'pay_speed',  label: 'Pay Speed' },
+        ],
+      },
     };
     const config = IMMERSIVE_CONFIG[immersiveMode];
     const displayTitle = immersiveMode === 'profile' && user?.name

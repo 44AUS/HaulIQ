@@ -27,6 +27,9 @@ const isLoadDetail = (path) =>
   /^\/carrier\/loads\/[^/]+$/.test(path) ||
   /^\/carrier\/active\/[^/]+$/.test(path);
 
+const isCarrierProfile = (path) => /^\/c\/[^/]+$/.test(path);
+const isBrokerProfile  = (path) => /^\/b\/[^/]+$/.test(path);
+
 export default function DashboardLayout({ children }) {
   const theme = useTheme();
   const location = useLocation();
@@ -45,7 +48,9 @@ export default function DashboardLayout({ children }) {
     : PREFERENCES_PATHS.includes(location.pathname) ? 'preferences'
     : PROFILE_PATHS.includes(location.pathname) ? 'profile'
     : BUSINESS_PATHS.includes(location.pathname) ? 'business'
-    : isLoadDetail(location.pathname) ? 'load_detail'
+    : isLoadDetail(location.pathname)     ? 'load_detail'
+    : isCarrierProfile(location.pathname) ? 'carrier_profile'
+    : isBrokerProfile(location.pathname)  ? 'broker_profile'
     : null;
   const drawerWidth = isMobile || immersiveMode ? 0 : (sidebarOpen ? DRAWER_WIDTH : 0);
 
