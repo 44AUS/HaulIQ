@@ -567,6 +567,7 @@ export default function Sidebar({ mobileOpen, onMobileClose, sidebarOpen, onClos
   const drawerSx = {
     width: drawerWidth,
     flexShrink: 0,
+    userSelect: 'none',
     '& .MuiDrawer-paper': {
       width: DRAWER_WIDTH,
       boxSizing: 'border-box',
