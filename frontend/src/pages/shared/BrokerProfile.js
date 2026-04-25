@@ -203,12 +203,14 @@ export default function BrokerProfile() {
   const wwaPct = reviews.length ? Math.round(wwaCount / reviews.length * 100) : null;
 
   const cardSx = {
-    bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'background.paper',
-    border: '1px solid', borderColor: 'divider', borderRadius: '10px', overflow: 'hidden',
+    bgcolor: 'background.paper',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
   };
 
   const InfoRow = ({ label, value }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.3 }}>{label}</Typography>
         {value && <Typography variant="body2" fontWeight={600} noWrap>{value}</Typography>}
@@ -272,7 +274,7 @@ export default function BrokerProfile() {
                 <Typography variant="caption" color="text.secondary">({reviews.length} reviews)</Typography>
               </Box>
             </Box>
-            <Box sx={{ px: 2.5, pb: 1 }}>
+            <Box>
               <InfoRow label="Name" value={broker.name} />
               {broker.mc    && <InfoRow label="MC Number"    value={broker.mc} />}
               {broker.phone && <InfoRow label="Phone"        value={formatPhone(broker.phone)} />}

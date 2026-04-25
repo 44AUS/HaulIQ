@@ -150,12 +150,14 @@ export default function CarrierProfile() {
   const displayName = stats?.company || stats?.name || `Carrier ${carrierId.slice(0, 8)}`;
 
   const cardSx = {
-    bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'background.paper',
-    border: '1px solid', borderColor: 'divider', borderRadius: '10px', overflow: 'hidden',
+    bgcolor: 'background.paper',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
   };
 
   const InfoRow = ({ label, value }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.3 }}>{label}</Typography>
         {value && <Typography variant="body2" fontWeight={600} noWrap>{value}</Typography>}
@@ -200,7 +202,7 @@ export default function CarrierProfile() {
                 <Typography variant="caption" color="text.secondary">({reviews.length} reviews)</Typography>
               </Box>
             </Box>
-            <Box sx={{ px: 2.5, pb: 1 }}>
+            <Box>
               <InfoRow label="Name" value={displayName} />
               {stats?.company && stats?.name && stats.company !== stats.name && (
                 <InfoRow label="Company" value={stats.company} />
@@ -264,14 +266,14 @@ export default function CarrierProfile() {
               <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
                 <Typography variant="subtitle1" fontWeight={700}>Rating Breakdown</Typography>
               </Box>
-              <Box sx={{ px: 2.5, pb: 1 }}>
+              <Box>
                 {[
                   { label: 'Communication',    value: _avg('communication') },
                   { label: 'On-Time Pickup',   value: _avg('onTimePickup') },
                   { label: 'On-Time Delivery', value: _avg('onTimeDelivery') },
                   { label: 'Load Care',        value: _avg('loadCare') },
                 ].map(({ label, value }) => (
-                  <Box key={label} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                  <Box key={label} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
                     <Typography variant="caption" color="text.disabled">{label}</Typography>
                     <MiniBar value={value} />
                   </Box>
