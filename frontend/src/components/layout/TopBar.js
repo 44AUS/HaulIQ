@@ -229,8 +229,8 @@ function NotificationsPanel({ onClose, onCountChange }) {
             <IonIcon name="close-outline" style={{ fontSize: 20, pointerEvents: 'none' }} />
           </button>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-          <div style={{ padding: '10px 20px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--ion-color-medium)', textTransform: 'uppercase', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>Preferences</div>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ padding: '10px 20px', fontSize: '0.82rem', fontWeight: 400, color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>Preferences</div>
           {NOTIF_PREF_CATEGORIES.map((cat) => (
             <div key={cat.key} style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
               {cat.items.length === 1 ? (
