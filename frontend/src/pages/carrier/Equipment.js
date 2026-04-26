@@ -336,6 +336,9 @@ export default function Equipment() {
       @media (min-width: 768px) {
         .equipment-post-modal { --width: 560px; --max-height: 90vh; }
       }
+      .alert-radio-label, .alert-checkbox-label, .alert-radio-group button, .alert-button-inner {
+        color: var(--ion-text-color) !important;
+      }
     `}</style>
     </div>
 
@@ -381,7 +384,7 @@ export default function Equipment() {
         <IonList inset>
           <IonItem>
             <IonLabel position="stacked">Equipment Type <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonSelect interface="popover" value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
+            <IonSelect value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
               {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
             </IonSelect>
           </IonItem>
