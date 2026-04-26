@@ -334,7 +334,7 @@ export default function Equipment() {
     </div>
 
     {/* Create / Edit / Repost Modal */}
-    <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '14px' }}>
+    <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '0px' }}>
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
           <IonButtons slot="start">
@@ -432,7 +432,7 @@ export default function Equipment() {
     </IonModal>
 
     {/* Delete Confirm Modal */}
-    <IonModal isOpen={Boolean(deleteId)} onDidDismiss={() => setDeleteId(null)} style={{ '--width': '360px', '--border-radius': '14px', '--height': 'auto' }}>
+    <IonModal isOpen={Boolean(deleteId)} onDidDismiss={() => setDeleteId(null)} style={{ '--width': '360px', '--border-radius': '0px', '--height': 'auto' }}>
       <IonHeader>
         <IonToolbar>
           <IonTitle>Delete Posting?</IonTitle>
