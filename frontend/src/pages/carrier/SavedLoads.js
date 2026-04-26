@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { IonSpinner } from '@ionic/react';
+
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';

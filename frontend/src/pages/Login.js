@@ -6,7 +6,6 @@ import AuthHeader from '../components/AuthHeader';
 import WaveBg from '../components/WaveBg';
 import IonIcon from '../components/IonIcon';
 
-const BRAND     = '#1565C0';
 const BRAND_MED = '#1976d2';
 const BRAND_LIGHT = '#42a5f5';
 

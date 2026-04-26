@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { IonModal, IonSpinner } from '@ionic/react';
+import { IonModal } from '@ionic/react';
 import { equipmentClassesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
