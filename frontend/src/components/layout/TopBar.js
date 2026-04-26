@@ -230,13 +230,13 @@ function NotificationsPanel({ onClose, onCountChange }) {
           </button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-          <div style={{ padding: '16px 20px 4px', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.06em', color: 'var(--ion-color-step-400)', textTransform: 'uppercase' }}>Preferences</div>
+          <div style={{ padding: '10px 20px', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', color: 'var(--ion-color-medium)', textTransform: 'uppercase', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>Preferences</div>
           {NOTIF_PREF_CATEGORIES.map((cat) => (
             <div key={cat.key} style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
               {cat.items.length === 1 ? (
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '12px 20px', gap: 16 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{cat.label}</div>
+                    <div style={{ fontWeight: 400, fontSize: '0.875rem' }}>{cat.label}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 2 }}>{cat.desc}</div>
                   </div>
                   <IonToggle
@@ -249,7 +249,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
                 </div>
               ) : (
                 <div style={{ padding: '12px 20px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: 2 }}>{cat.label}</div>
+                  <div style={{ fontWeight: 400, fontSize: '0.875rem', marginBottom: 2 }}>{cat.label}</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>{cat.desc}</div>
                   {cat.items.map(item => (
                     <div key={item.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}>
