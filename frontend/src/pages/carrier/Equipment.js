@@ -343,17 +343,28 @@ export default function Equipment() {
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} className="equipment-post-modal">
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
-          <IonButtons slot="start">
-            <IonButton onClick={() => setDialogOpen(false)}>
-              <IonIcon name="close-outline" style={{ fontSize: 24 }} />
-            </IonButton>
-          </IonButtons>
+          <div slot="start" style={{ paddingLeft: 4 }}>
+            <button
+              onClick={() => setDialogOpen(false)}
+              style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: 'var(--ion-text-color)' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+            </button>
+          </div>
           <IonTitle style={{ fontWeight: 700 }}>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleSave} disabled={saving} style={{ '--color': '#2dd36f' }}>
-              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20 }} /> : <IonIcon name="checkmark-outline" style={{ fontSize: 26, fontWeight: 700 }} />}
-            </IonButton>
-          </IonButtons>
+          <div slot="end" style={{ paddingRight: 4 }}>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: '#2dd36f', opacity: saving ? 0.6 : 1 }}
+              onMouseEnter={e => { if (!saving) e.currentTarget.style.backgroundColor = 'rgba(45,211,111,0.2)'; }}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: '#2dd36f' }} /> : <IonIcon name="checkmark-outline" style={{ fontSize: 24, pointerEvents: 'none' }} />}
+            </button>
+          </div>
         </IonToolbar>
       </IonHeader>
 
@@ -370,7 +381,7 @@ export default function Equipment() {
         <IonList inset>
           <IonItem>
             <IonLabel position="stacked">Equipment Type <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonSelect value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
+            <IonSelect interface="popover" value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
               {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
             </IonSelect>
           </IonItem>
