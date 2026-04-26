@@ -218,7 +218,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
             >
               <IonIcon name="arrow-back-outline" style={{ fontSize: 20, pointerEvents: 'none' }} />
             </button>
-            <span style={{ fontWeight: 700, fontSize: '1rem' }}>Notifications</span>
+            <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Notifications</span>
           </div>
           <button
             onClick={onClose}
@@ -275,7 +275,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
   return (
     <div style={{ width: NOTIF_DRAWER_WIDTH, display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 1 }}>
-        <div style={{ paddingLeft: 8, fontWeight: 700, fontSize: '1rem' }}>Notifications</div>
+        <div style={{ paddingLeft: 8, fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Notifications</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <button
             onClick={() => setShowPrefs(true)}
