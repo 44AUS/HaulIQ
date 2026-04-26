@@ -55,7 +55,7 @@ const ADMIN_LINKS = [
   { icon: 'chatbubble-outline',  label: 'Contact Messages',  path: '/admin/contacts' },
 ];
 
-export default function Sidebar({ onNavigate }) {
+export default function Sidebar({ onNavigate, onClose }) {
   const { user, logout, updateUser } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
   const isDark = mode === 'dark';
@@ -206,7 +206,7 @@ export default function Sidebar({ onNavigate }) {
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', minHeight: 60, padding: '0 8px', flexShrink: 0 }}>
         <button
-          onClick={() => { const m = document.querySelector('ion-menu'); if (m) m.close(); }}
+          onClick={() => { onClose?.(); const m = document.querySelector('ion-menu'); if (m) m.close(); }}
           style={{ width: 40, height: 40, background: 'none', border: 'none', cursor: 'pointer', color: iconColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}

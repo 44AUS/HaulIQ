@@ -72,7 +72,7 @@ export default function DashboardLayout({ children }) {
         {/* Sidebar */}
         <IonMenu contentId="main-content" menuId="main-menu" type="overlay" style={{ '--width': `${DRAWER_WIDTH}px` }}>
           <IonContent>
-            <Sidebar onNavigate={() => {}} />
+            <Sidebar onNavigate={() => {}} onClose={() => setSidebarOpen(false)} />
           </IonContent>
         </IonMenu>
 
