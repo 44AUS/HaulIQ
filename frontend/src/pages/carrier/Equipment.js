@@ -197,7 +197,10 @@ export default function Equipment() {
   const fmtDateTime = (iso) => {
     if (!iso) return 'Tap to select…';
     const d = new Date(iso.includes('T') ? iso : iso + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const hasTime = iso.includes('T') && !iso.endsWith('T00:00:00');
+    const time = hasTime ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : null;
+    return time ? `${date} · ${time}` : date;
   };
 
   return (
@@ -500,12 +503,22 @@ export default function Equipment() {
 
           <IonItem>
             <IonLabel position="stacked">Preferred Origin</IonLabel>
-            <IonInput value={form.preferred_origin} onIonChange={setField('preferred_origin')} placeholder="e.g. Chicago, IL" />
+            <AddressAutocomplete
+              placeholder="e.g. Chicago, IL"
+              value={form.preferred_origin}
+              onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_origin: cityState || address || '' }))}
+              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
+            />
           </IonItem>
 
           <IonItem>
             <IonLabel position="stacked">Preferred Destination</IonLabel>
-            <IonInput value={form.preferred_destination} onIonChange={setField('preferred_destination')} placeholder="e.g. Atlanta, GA" />
+            <AddressAutocomplete
+              placeholder="e.g. Atlanta, GA"
+              value={form.preferred_destination}
+              onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_destination: cityState || address || '' }))}
+              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
+            />
           </IonItem>
         </IonList>
 
