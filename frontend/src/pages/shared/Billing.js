@@ -1,121 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, Button, Chip,
-  CircularProgress, ToggleButtonGroup, ToggleButton, Paper,
-  Table, TableHead, TableRow, TableCell, TableBody, Divider,
-  TextField, InputAdornment, IconButton, Alert, Tooltip, Skeleton, Grid,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { LineChart, Line, XAxis, YAxis, Tooltip as ReTooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
 import IonIcon from '../../components/IonIcon';
 
-
 const API = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// ─── Plan definitions ─────────────────────────────────────────────────────────
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8, overflow: 'hidden' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
+
 const PLANS = {
   broker: [
-    {
-      key: 'starter',
-      name: 'Starter',
-      monthly: 0,
-      annual: 0,
-      badge: null,
-      intro: 'Key Features',
-      features: [
-        'Up to 5 active load postings',
-        'Carrier search & booking',
-        'Basic document management',
-        'Email notifications',
-        'Standard analytics',
-      ],
-    },
-    {
-      key: 'pro',
-      name: 'Pro',
-      monthly: 79,
-      annual: 63,
-      badge: 'Most Popular',
-      intro: 'Everything in Starter, plus…',
-      features: [
-        'Unlimited load postings',
-        'Instant Book feature',
-        'Advanced analytics & reporting',
-        'Network management',
-        'Booking request management',
-        'Priority email support',
-      ],
-    },
-    {
-      key: 'enterprise',
-      name: 'Enterprise',
-      monthly: 199,
-      annual: 159,
-      badge: null,
-      intro: 'Everything in Pro, plus…',
-      features: [
-        'Dedicated account manager',
-        'Custom carrier allowlists',
-        'API access',
-        'Load performance insights',
-        'Custom integrations (TMS/ELD)',
-        'SLA-backed uptime guarantee',
-      ],
-    },
+    { key: 'starter', name: 'Starter', monthly: 0, annual: 0, badge: null, intro: 'Key Features', features: ['Up to 5 active load postings','Carrier search & booking','Basic document management','Email notifications','Standard analytics'] },
+    { key: 'pro', name: 'Pro', monthly: 79, annual: 63, badge: 'Most Popular', intro: 'Everything in Starter, plus…', features: ['Unlimited load postings','Instant Book feature','Advanced analytics & reporting','Network management','Booking request management','Priority email support'] },
+    { key: 'enterprise', name: 'Enterprise', monthly: 199, annual: 159, badge: null, intro: 'Everything in Pro, plus…', features: ['Dedicated account manager','Custom carrier allowlists','API access','Load performance insights','Custom integrations (TMS/ELD)','SLA-backed uptime guarantee'] },
   ],
   carrier: [
-    {
-      key: 'starter',
-      name: 'Starter',
-      monthly: 0,
-      annual: 0,
-      badge: null,
-      intro: 'Key Features',
-      features: [
-        'Access to the load board',
-        'Bid on up to 10 loads/month',
-        'Document uploads (BOL, POD)',
-        'Basic profit calculator',
-        'Email notifications',
-      ],
-    },
-    {
-      key: 'pro',
-      name: 'Pro',
-      monthly: 49,
-      annual: 39,
-      badge: 'Most Popular',
-      intro: 'Everything in Starter, plus…',
-      features: [
-        'Unlimited load bids',
-        'Instant Book access',
-        'Advanced profit & fuel analytics',
-        'Earnings Brain AI suggestions',
-        'Priority load visibility',
-        'Priority support',
-      ],
-    },
-    {
-      key: 'enterprise',
-      name: 'Enterprise',
-      monthly: 149,
-      annual: 119,
-      badge: null,
-      intro: 'Everything in Pro, plus…',
-      features: [
-        'Fleet management tools',
-        'Multi-driver accounts',
-        'Dedicated account manager',
-        'Custom ELD integrations',
-        'Load performance reporting',
-        'API access',
-      ],
-    },
+    { key: 'starter', name: 'Starter', monthly: 0, annual: 0, badge: null, intro: 'Key Features', features: ['Access to the load board','Bid on up to 10 loads/month','Document uploads (BOL, POD)','Basic profit calculator','Email notifications'] },
+    { key: 'pro', name: 'Pro', monthly: 49, annual: 39, badge: 'Most Popular', intro: 'Everything in Starter, plus…', features: ['Unlimited load bids','Instant Book access','Advanced profit & fuel analytics','Earnings Brain AI suggestions','Priority load visibility','Priority support'] },
+    { key: 'enterprise', name: 'Enterprise', monthly: 149, annual: 119, badge: null, intro: 'Everything in Pro, plus…', features: ['Fleet management tools','Multi-driver accounts','Dedicated account manager','Custom ELD integrations','Load performance reporting','API access'] },
   ],
 };
 
-// ─── Feature comparison table ─────────────────────────────────────────────────
 const FEATURE_TABLE = {
   broker: [
     { section: 'Load Management' },
@@ -162,85 +69,56 @@ const FEATURE_TABLE = {
   ],
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
 function FeatureValue({ val }) {
-  if (val === true)  return <IonIcon name="checkmark-outline" sx={{ fontSize: 16, color: 'success.main' }} />;
-  if (val === false) return <IonIcon name="remove-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />;
-  return <Typography variant="body2" fontWeight={600}>{val}</Typography>;
+  if (val === true)  return <IonIcon name="checkmark-outline" style={{ fontSize: 15, color: '#2dd36f' }} />;
+  if (val === false) return <IonIcon name="remove-outline" style={{ fontSize: 15, color: 'var(--ion-color-medium)' }} />;
+  return <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{val}</span>;
 }
 
 function PlanCard({ plan, billing, currentKey, onActivate, activating }) {
   const price = billing === 'annual' ? plan.annual : plan.monthly;
   const isCurrent = currentKey === plan.key;
   const isFree = plan.monthly === 0;
-
-  const statusLabel = isCurrent ? 'Current Plan' : 'Inactive';
   const statusColor = isCurrent ? '#22c55e' : '#b91c1c';
   const statusBg    = isCurrent ? 'rgba(34,197,94,0.12)' : 'rgba(185,28,28,0.12)';
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', border: '1px solid', borderColor: isCurrent ? 'success.main' : 'divider', borderRadius: 2, overflow: 'hidden', height: '100%' }}>
-      {/* Status badge */}
-      <Box sx={{ textAlign: 'center', py: 0.75, bgcolor: statusBg }}>
-        <Typography variant="caption" fontWeight={700} sx={{ color: statusColor, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          {statusLabel}
-        </Typography>
-      </Box>
-
-      <Box sx={{ px: 2.5, pt: 2, pb: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="subtitle1" fontWeight={800}>{plan.name}</Typography>
-        <Box sx={{ textAlign: 'right' }}>
-          <Typography component="span" variant="h6" fontWeight={800}>
-            {isFree ? 'Free' : `$${price}.00`}
-          </Typography>
-          {!isFree && (
-            <Typography component="span" variant="caption" color="text.secondary">/mo</Typography>
-          )}
-        </Box>
-      </Box>
-
-      <Box sx={{ px: 2.5, pb: 2 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', border: `1px solid ${isCurrent ? '#22c55e' : 'var(--ion-border-color)'}`, borderRadius: 8, overflow: 'hidden', height: '100%' }}>
+      <div style={{ textAlign: 'center', padding: '6px 0', backgroundColor: statusBg }}>
+        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: statusColor, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{isCurrent ? 'Current Plan' : 'Inactive'}</span>
+      </div>
+      <div style={{ padding: '16px 20px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--ion-text-color)' }}>{plan.name}</span>
+        <div style={{ textAlign: 'right' }}>
+          <span style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>{isFree ? 'Free' : `$${price}.00`}</span>
+          {!isFree && <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>/mo</span>}
+        </div>
+      </div>
+      <div style={{ padding: '0 20px 16px' }}>
         {isCurrent ? (
-          <Button fullWidth variant="outlined" color="success" disabled sx={{ fontWeight: 700 }}>
-            Current Plan
-          </Button>
+          <div style={{ textAlign: 'center', padding: '8px 0', border: '1px solid #22c55e', borderRadius: 6, color: '#22c55e', fontWeight: 700, fontSize: '0.875rem' }}>Current Plan</div>
         ) : (
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{ bgcolor: '#22c55e', '&:hover': { bgcolor: '#16a34a' }, fontWeight: 700, letterSpacing: '0.05em' }}
-            disabled={activating === plan.key}
-            onClick={() => onActivate(plan)}
-            startIcon={activating === plan.key ? <CircularProgress size={14} color="inherit" /> : null}
-          >
+          <button onClick={() => onActivate(plan)} disabled={activating === plan.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', backgroundColor: '#22c55e', color: '#fff', border: 'none', borderRadius: 6, padding: '9px 0', cursor: activating === plan.key ? 'default' : 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.875rem', letterSpacing: '0.04em', opacity: activating === plan.key ? 0.7 : 1 }}>
+            {activating === plan.key && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
             {activating === plan.key ? 'Processing…' : isFree ? 'Switch to Free' : 'Activate'}
-          </Button>
+          </button>
         )}
-      </Box>
-
-      <Divider />
-
-      <Box sx={{ px: 2.5, pt: 1.5, pb: 2.5, flex: 1 }}>
-        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1.25, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.65rem' }}>
-          {plan.intro}
-        </Typography>
+      </div>
+      <div style={{ borderTop: '1px solid var(--ion-border-color)', padding: '12px 20px 20px', flex: 1 }}>
+        <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>{plan.intro}</div>
         {plan.features.map(f => (
-          <Box key={f} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-            <IonIcon name="checkmark-outline" sx={{ fontSize: 15, color: 'text.secondary', mt: '2px', flexShrink: 0 }} />
-            <Typography variant="body2" color="text.secondary">{f}</Typography>
-          </Box>
+          <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+            <IonIcon name="checkmark-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)', marginTop: 2, flexShrink: 0 }} />
+            <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{f}</span>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
-// ─── Referrals Tab ────────────────────────────────────────────────────────────
-// Generate last-7-days date labels
 function last7Days() {
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
+    const d = new Date(); d.setDate(d.getDate() - (6 - i));
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
 }
@@ -253,105 +131,59 @@ function ReferralsTab({ user, currentSub }) {
   const referralCode = `URLOAD-${(user?.name || 'USER').split(' ')[0].toUpperCase().slice(0, 6)}`;
   const referralLink = `https://urload.app/join?ref=${referralCode}`;
   const maskedLink = '•'.repeat(36);
-
-  const copy = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
+  const copy = () => { navigator.clipboard.writeText(referralLink); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   const dateRange = `${CHART_DATES[0]} - ${CHART_DATES[6]}`;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      {/* Program description card */}
-      <Card variant="outlined" sx={{ borderRadius: 2, mb: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" fontWeight={800} sx={{ mb: 1.5 }}>
-            Urload Referral Program
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={cardStyle}>
+        <div style={{ padding: 24 }}>
+          <h3 style={{ margin: '0 0 12px', fontWeight: 800, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Urload Referral Program</h3>
+          <p style={{ margin: '0 0 12px', fontSize: '0.875rem', color: 'var(--ion-color-medium)', lineHeight: 1.7 }}>
             Get Urload to credit you! If a broker or carrier uses your referral link to sign up, they'll enjoy{' '}
             <strong>10% off their first billing cycle</strong> when they subscribe. And you'll get a{' '}
             <strong>10% credit</strong> towards your next billing cycle!
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+          </p>
+          <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--ion-color-medium)', lineHeight: 1.7 }}>
             For example, if someone using your referral link subscribes to the annual Enterprise plan, they will
             get a 10% discount and Urload will apply a credit towards your subscription automatically.
-          </Typography>
-
-          <Divider sx={{ my: 2 }} />
-
-          {/* Referral link field */}
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
-              <Typography variant="caption" fontWeight={600} color="text.secondary">Referral Link</Typography>
-              <IonIcon name="information-circle-outline" sx={{ fontSize: 14, color: 'text.disabled' }} />
-            </Box>
-
+          </p>
+          <div style={{ borderTop: '1px solid var(--ion-border-color)', paddingTop: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ion-color-medium)' }}>Referral Link</span>
+              <IonIcon name="information-circle-outline" style={{ fontSize: 13, color: 'var(--ion-color-medium)' }} />
+            </div>
             {hasActivePlan ? (
               <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={referralLink}
-                  InputProps={{
-                    readOnly: true,
-                    sx: { fontFamily: 'monospace', fontSize: '0.82rem' },
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Tooltip title={copied ? 'Copied!' : 'Copy link'}>
-                          <IconButton onClick={copy} size="small" color={copied ? 'success' : 'default'}>
-                            <IonIcon name="copy-outline" sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {copied && (
-                  <Typography variant="caption" color="success.main" sx={{ mt: 0.5, display: 'block' }}>
-                    Link copied to clipboard!
-                  </Typography>
-                )}
+                <div style={{ position: 'relative' }}>
+                  <input readOnly value={referralLink} style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '0.82rem', paddingRight: 40 }} />
+                  <button onClick={copy} title={copied ? 'Copied!' : 'Copy link'} style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: copied ? '#2dd36f' : 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+                    <IonIcon name="copy-outline" style={{ fontSize: 15 }} />
+                  </button>
+                </div>
+                {copied && <div style={{ fontSize: '0.75rem', color: '#2dd36f', marginTop: 4 }}>Link copied to clipboard!</div>}
               </>
             ) : (
               <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={maskedLink}
-                  InputProps={{
-                    readOnly: true,
-                    sx: { letterSpacing: '0.08em', color: 'text.disabled' },
-                  }}
-                />
-                <Box sx={{
-                  mt: 1, px: 1.5, py: 0.75, borderRadius: 1,
-                  bgcolor: 'error.main', display: 'inline-block',
-                }}>
-                  <Typography variant="caption" sx={{ color: '#fff', fontWeight: 500 }}>
-                    You must have an active Urload subscription to unlock your referral link
-                  </Typography>
-                </Box>
+                <input readOnly value={maskedLink} style={{ ...inputStyle, letterSpacing: '0.08em', color: 'var(--ion-color-medium)', marginBottom: 8 }} />
+                <div style={{ display: 'inline-block', backgroundColor: 'var(--ion-color-danger)', borderRadius: 4, padding: '4px 12px' }}>
+                  <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: 500 }}>You must have an active Urload subscription to unlock your referral link</span>
+                </div>
               </>
             )}
-          </Box>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
 
-      {/* Analytics section */}
-      <Card variant="outlined" sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="subtitle2" fontWeight={700} color="text.secondary">Analytics</Typography>
-            <Typography variant="caption" color="text.disabled">Days · {dateRange}</Typography>
-          </Box>
-
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
-            {/* Trials started chart */}
-            <Box>
-              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>Trials Started</Typography>
+      <div style={cardStyle}>
+        <div style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>Analytics</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Days · {dateRange}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>Trials Started</div>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={EMPTY_CHART} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
@@ -361,11 +193,9 @@ function ReferralsTab({ user, currentSub }) {
                   <Line type="monotone" dataKey="trials" stroke="#9ca3af" strokeWidth={2} dot={false} name="Trials Started" />
                 </LineChart>
               </ResponsiveContainer>
-            </Box>
-
-            {/* Revenue / conversions chart */}
-            <Box>
-              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1 }}>Conversions by Plan</Typography>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>Conversions by Plan</div>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={EMPTY_CHART} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
@@ -379,15 +209,14 @@ function ReferralsTab({ user, currentSub }) {
                   <Line type="monotone" dataKey="credit"    stroke="#22c55e" strokeWidth={2} dot={false} name="Credit" />
                 </LineChart>
               </ResponsiveContainer>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Billing() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -406,215 +235,125 @@ export default function Billing() {
     Promise.all([
       fetch(`${API}/api/subscriptions/plans?role=${user.role}`, { headers }).then(r => r.json()).catch(() => []),
       fetch(`${API}/api/subscriptions/me`, { headers }).then(r => r.json()).catch(() => null),
-    ]).then(([p, s]) => {
-      setPlans(Array.isArray(p) ? p : []);
-      setCurrentSub(s && !s.detail ? s : null);
-      setLoading(false);
-    });
+    ]).then(([p, s]) => { setPlans(Array.isArray(p) ? p : []); setCurrentSub(s && !s.detail ? s : null); setLoading(false); });
   }, [token, user.role]);
 
-  // Match current sub tier to our plan keys
-  const currentKey = currentSub?.plan?.tier === 'elite' ? 'enterprise'
-    : currentSub?.plan?.tier === 'pro' ? 'pro'
-    : currentSub ? 'starter' : null;
-
-  const daysLeft = currentSub?.current_period_end
-    ? Math.max(0, Math.ceil((new Date(currentSub.current_period_end) - Date.now()) / 86400000))
-    : null;
+  const currentKey = currentSub?.plan?.tier === 'elite' ? 'enterprise' : currentSub?.plan?.tier === 'pro' ? 'pro' : currentSub ? 'starter' : null;
+  const daysLeft   = currentSub?.current_period_end ? Math.max(0, Math.ceil((new Date(currentSub.current_period_end) - Date.now()) / 86400000)) : null;
 
   const handleActivate = (plan) => {
     if (plan.monthly === 0) {
-      // Free/starter — use subscriptions change endpoint
       const backendPlan = plans.find(p => p.tier === 'basic' || p.price === 0);
       if (backendPlan) {
         setActivating(plan.key);
-        fetch(`${API}/api/subscriptions/change`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan_id: backendPlan.id }),
-        }).finally(() => setActivating(null));
+        fetch(`${API}/api/subscriptions/change`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ plan_id: backendPlan.id }) }).finally(() => setActivating(null));
       }
       return;
     }
-    // Paid plan — go to checkout
     const tierMap = { pro: 'pro', enterprise: 'elite' };
-    const backendTier = tierMap[plan.key];
-    const backendPlan = plans.find(p => p.tier === backendTier);
-    if (backendPlan) {
-      navigate(`/checkout?plan_id=${backendPlan.id}`);
-    } else {
-      navigate('/checkout');
-    }
+    const backendPlan = plans.find(p => p.tier === tierMap[plan.key]);
+    navigate(backendPlan ? `/checkout?plan_id=${backendPlan.id}` : '/checkout');
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* ── Subscription Plans Tab ─────────────────────────────────────────── */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {activeTab === 'plans' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
           {loading ? (
-            <Grid container spacing={3}>
-              {[...Array(6)].map((_, i) => (
-                <Grid item xs={12} sm={6} key={i}>
-                  <Card variant="outlined">
-                    <CardContent>
-                      <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
-                      <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
-                      <Skeleton variant="text" width="50%" height={18} />
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+              {[...Array(6)].map((_, i) => <div key={i} style={{ height: 160, borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.05)', border: '1px solid var(--ion-border-color)' }} />)}
+            </div>
           ) : (
             <>
-              {/* Current plan card — always shown */}
-              <Box sx={{ maxWidth: 400, mx: 'auto', width: '100%' }}>
-                <Typography variant="subtitle1" fontWeight={700} textAlign="center" sx={{ mb: 1.5 }}>Current Plan</Typography>
-                <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  {/* Status badge */}
-                  <Box sx={{
-                    textAlign: 'center', py: 0.75,
-                    bgcolor: currentSub?.status === 'trialing' ? 'rgba(161,138,0,0.25)'
-                      : currentSub ? 'rgba(34,197,94,0.12)' : 'action.selected',
-                  }}>
-                    <Typography variant="caption" fontWeight={700} sx={{
-                      color: currentSub?.status === 'trialing' ? '#c9a800'
-                        : currentSub ? 'success.main' : 'text.disabled',
-                      textTransform: 'capitalize', letterSpacing: '0.06em',
-                    }}>
-                      {currentSub?.status === 'trialing' ? 'Trialing'
-                        : currentSub ? currentSub.status : 'No Active Plan'}
-                    </Typography>
-                  </Box>
-
-                  {/* Plan name + days left */}
-                  <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography variant="h6" fontWeight={800}>
-                      {currentSub?.plan?.name || 'Starter'}
-                    </Typography>
-                    {daysLeft !== null && currentSub && (
-                      <Typography variant="body2" fontWeight={600} color="text.secondary">{daysLeft} days left</Typography>
-                    )}
-                  </Box>
-
-                  {/* Company row */}
-                  <Box sx={{
-                    mx: 2, mb: 2, px: 1.5, py: 1.25,
-                    display: 'flex', alignItems: 'center', gap: 1.5,
-                    bgcolor: 'action.hover', borderRadius: 1.5,
-                  }}>
-                    <Box sx={{
-                      width: 36, height: 36, borderRadius: '50%',
-                      bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
-                      <Typography variant="subtitle2" fontWeight={700}>
-                        {(user?.company || user?.name || '?')[0].toUpperCase()}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2 }}>
-                        {user?.role === 'broker' ? 'Business' : 'Carrier'}
-                      </Typography>
-                      <Typography variant="body2" fontWeight={600} noWrap>
-                        {user?.company || user?.name}
-                      </Typography>
-                    </Box>
-                    <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
-                  </Box>
-                </Paper>
-              </Box>
+              {/* Current plan card */}
+              <div style={{ maxWidth: 400, margin: '0 auto', width: '100%' }}>
+                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', textAlign: 'center', marginBottom: 12 }}>Current Plan</div>
+                <div style={{ ...cardStyle, border: '1px solid var(--ion-border-color)' }}>
+                  <div style={{ textAlign: 'center', padding: '6px 0', backgroundColor: currentSub?.status === 'trialing' ? 'rgba(161,138,0,0.25)' : currentSub ? 'rgba(34,197,94,0.12)' : 'rgba(0,0,0,0.06)' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: currentSub?.status === 'trialing' ? '#c9a800' : currentSub ? '#22c55e' : 'var(--ion-color-medium)', textTransform: 'capitalize', letterSpacing: '0.06em' }}>
+                      {currentSub?.status === 'trialing' ? 'Trialing' : currentSub ? currentSub.status : 'No Active Plan'}
+                    </span>
+                  </div>
+                  <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>{currentSub?.plan?.name || 'Starter'}</span>
+                    {daysLeft !== null && currentSub && <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{daysLeft} days left</span>}
+                  </div>
+                  <div style={{ margin: '0 16px 16px', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 12, backgroundColor: 'rgba(0,0,0,0.04)', borderRadius: 6 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{(user?.company || user?.name || '?')[0].toUpperCase()}</span>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', lineHeight: 1.2 }}>{user?.role === 'broker' ? 'Business' : 'Carrier'}</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.company || user?.name}</div>
+                    </div>
+                    <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+                  </div>
+                </div>
+              </div>
 
               {/* Billing toggle */}
-              <Box sx={{ textAlign: 'center' }}>
-                <ToggleButtonGroup value={billing} exclusive onChange={(_, v) => v && setBilling(v)} size="small">
-                  <ToggleButton value="monthly" sx={{ px: 3, textTransform: 'none', fontWeight: 600 }}>Monthly</ToggleButton>
-                  <ToggleButton value="annual"  sx={{ px: 3, textTransform: 'none', fontWeight: 600 }}>
-                    Annual
-                    <Chip label="Save 20%" size="small" color="success" sx={{ ml: 1, height: 18, fontSize: '0.6rem' }} />
-                  </ToggleButton>
-                </ToggleButtonGroup>
-                <Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ display: 'inline-flex', backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: 10, padding: 3, gap: 2 }}>
+                  {[{ v: 'monthly', l: 'Monthly' }, { v: 'annual', l: 'Annual' }].map(({ v, l }) => (
+                    <button key={v} onClick={() => setBilling(v)} style={{ background: billing === v ? 'var(--ion-card-background)' : 'transparent', color: billing === v ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '6px 20px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.875rem', boxShadow: billing === v ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {l}
+                      {v === 'annual' && <span style={{ backgroundColor: 'rgba(45,211,111,0.15)', color: '#2dd36f', borderRadius: 8, padding: '1px 6px', fontSize: '0.65rem', fontWeight: 700 }}>Save 20%</span>}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)', marginTop: 16 }}>
                   {billing === 'annual' ? 'Annual' : 'Monthly'} Plans
-                </Typography>
-              </Box>
+                </div>
+              </div>
 
               {/* Plan cards */}
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
-                {rolePlans.map(plan => (
-                  <PlanCard
-                    key={plan.key}
-                    plan={plan}
-                    billing={billing}
-                    currentKey={currentKey}
-                    onActivate={handleActivate}
-                    activating={activating}
-                  />
-                ))}
-              </Box>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                {rolePlans.map(plan => <PlanCard key={plan.key} plan={plan} billing={billing} currentKey={currentKey} onActivate={handleActivate} activating={activating} />)}
+              </div>
 
               {/* Feature comparison table */}
-              <Box>
-                <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>Full Feature Comparison</Typography>
-                <Card variant="outlined" sx={{ overflow: 'hidden' }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'action.hover' }}>
-                        <TableCell sx={{ fontWeight: 700, fontSize: '1rem', py: 1.5 }}>Features</TableCell>
-                        {rolePlans.map(p => (
-                          <TableCell key={p.key} align="center" sx={{ fontWeight: 700, whiteSpace: 'nowrap', py: 1.5 }}>
-                            {p.name}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', marginBottom: 16 }}>Full Feature Comparison</div>
+                <div style={{ ...cardStyle }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' }}>Features</th>
+                        {rolePlans.map(p => <th key={p.key} style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700, whiteSpace: 'nowrap', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' }}>{p.name}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
                       {(FEATURE_TABLE[user?.role] || FEATURE_TABLE.carrier).map((row, i) => {
-                        if (row.section) {
-                          return (
-                            <TableRow key={i}>
-                              <TableCell colSpan={4} sx={{ bgcolor: 'action.selected', py: 0.75, pl: 2 }}>
-                                <Typography variant="caption" color="text.disabled" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.65rem' }}>
-                                  {row.section}
-                                </Typography>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        }
+                        if (row.section) return (
+                          <tr key={i}>
+                            <td colSpan={4} style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.06)' }}>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{row.section}</span>
+                            </td>
+                          </tr>
+                        );
                         return (
-                          <TableRow key={i} sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}>
-                            <TableCell sx={{ py: 1 }}>{row.label}</TableCell>
-                            {row.values.map((v, vi) => (
-                              <TableCell key={vi} align="center" sx={{ py: 1 }}>
-                                <FeatureValue val={v} />
-                              </TableCell>
-                            ))}
-                          </TableRow>
+                          <tr key={i} style={{ backgroundColor: i % 2 === 0 ? 'transparent' : 'rgba(0,0,0,0.02)' }}>
+                            <td style={{ padding: '8px 16px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' }}>{row.label}</td>
+                            {row.values.map((v, vi) => <td key={vi} style={{ padding: '8px 16px', textAlign: 'center', borderBottom: '1px solid var(--ion-border-color)' }}><FeatureValue val={v} /></td>)}
+                          </tr>
                         );
                       })}
-                    </TableBody>
-                  </Table>
-                </Card>
-              </Box>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              {/* Cancel */}
               {currentSub && currentSub.status !== 'cancelled' && currentKey !== 'starter' && (
-                <Alert severity="warning" sx={{ maxWidth: 500 }}>
-                  To cancel your plan, contact{' '}
-                  <Typography component="a" href="mailto:support@urload.app" variant="body2" color="warning.main">
-                    support@urload.app
-                  </Typography>
-                  . You'll keep access until the end of your billing period.
-                </Alert>
+                <div style={{ maxWidth: 500, padding: '12px 16px', borderRadius: 6, backgroundColor: 'rgba(255,196,9,0.1)', border: '1px solid rgba(255,196,9,0.3)', color: 'var(--ion-color-warning)', fontSize: '0.875rem' }}>
+                  To cancel your plan, contact <a href="mailto:support@urload.app" style={{ color: 'var(--ion-color-warning)', fontWeight: 600 }}>support@urload.app</a>. You'll keep access until the end of your billing period.
+                </div>
               )}
             </>
           )}
-        </Box>
+        </div>
       )}
 
-      {/* ── Referrals Tab ─────────────────────────────────────────────────── */}
       {activeTab === 'referrals' && <ReferralsTab user={user} currentSub={currentSub} />}
-    </Box>
+    </div>
   );
 }

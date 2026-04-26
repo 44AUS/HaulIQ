@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box, Typography, Card, CardContent, Button, Grid, Chip,
-  List, ListItem, ListItemIcon, ListItemText, Tabs, Tab,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, IconButton, Skeleton,
-} from '@mui/material';
+import { IonModal } from '@ionic/react';
 import { adminApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
+
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4, marginBottom: 8 }} />;
+}
 
 function EditModal({ plan, onClose, onSaved }) {
   const [price, setPrice] = useState(String(plan.price));
@@ -35,109 +37,97 @@ function EditModal({ plan, onClose, onSaved }) {
   }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        Edit Plan: {plan.name}
-        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          <TextField
-            label="Monthly Price ($)"
-            size="small"
-            fullWidth
-            type="number"
-            value={price}
-            onChange={e => setPrice(e.target.value)}
-          />
-          <TextField
-            label="Description"
-            size="small"
-            fullWidth
-            multiline
-            rows={2}
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-          />
+    <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '400px', '--height': 'auto', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Edit Plan: {plan.name}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+            <IonIcon name="close-outline" style={{ fontSize: 20 }} />
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+          <div>
+            <label style={labelStyle}>Monthly Price ($)</label>
+            <input style={inputStyle} type="number" value={price} onChange={e => setPrice(e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Description</label>
+            <textarea style={{ ...inputStyle, height: 64, resize: 'vertical' }} value={description} onChange={e => setDescription(e.target.value)} />
+          </div>
           {plan.features?.length > 0 && (
-            <Box>
-              <Typography variant="body2" fontWeight={600} mb={1}>Features</Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+            <div>
+              <span style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: 8, color: 'var(--ion-text-color)' }}>Features</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {plan.features.map((f, i) => (
-                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <IonIcon name="checkmark-outline" sx={{ fontSize: 13, color: 'primary.main', flexShrink: 0 }} />
-                    <Typography variant="body2">{f}</Typography>
-                  </Box>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <IonIcon name="checkmark-outline" style={{ fontSize: 13, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{f}</span>
+                  </div>
                 ))}
-              </Box>
-            </Box>
+              </div>
+            </div>
           )}
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-        <Button variant="outlined" onClick={onClose} fullWidth>Cancel</Button>
-        <Button variant="contained" onClick={handleSave} fullWidth disabled={saving}>
-          {saving ? 'Saving…' : 'Save Changes'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '8px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>Cancel</button>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: '8px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
 function PlanCard({ plan, onEdit }) {
+  const borderColor = plan.tier === 'elite' ? '#7b1fa2' : plan.tier === 'pro' ? 'var(--ion-color-primary)' : 'var(--ion-border-color)';
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        height: '100%',
-        borderColor: plan.tier === 'elite' ? 'secondary.main' : plan.tier === 'pro' ? 'primary.main' : 'divider',
-      }}
-    >
-      <CardContent sx={{ p: 2.5, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Typography variant="subtitle1" fontWeight={700} sx={{ textTransform: 'capitalize' }}>
-                {plan.name}
-              </Typography>
-              {plan.tier === 'pro' && <Chip label="Popular" size="small" color="success" />}
-            </Box>
-            <Typography variant="caption" color="text.secondary">{plan.description || '—'}</Typography>
-          </Box>
-          <IconButton size="small" onClick={() => onEdit(plan)}>
-            <IonIcon name="create-outline" sx={{ fontSize: 16 }} />
-          </IconButton>
-        </Box>
-        <Typography variant="h4" fontWeight={800} mb={2}>
-          {plan.price === 0 ? 'Free' : `$${plan.price}/mo`}
-        </Typography>
-        {plan.features?.length > 0 && (
-          <List dense disablePadding sx={{ flex: 1, mb: 2 }}>
-            {plan.features.slice(0, 4).map(f => (
-              <ListItem key={f} disablePadding sx={{ py: 0.25 }}>
-                <ListItemIcon sx={{ minWidth: 24 }}>
-                  <IonIcon name="checkmark-outline" sx={{ fontSize: 13, color: 'primary.main' }} />
-                </ListItemIcon>
-                <ListItemText primary={<Typography variant="caption">{f}</Typography>} />
-              </ListItem>
-            ))}
-            {plan.features.length > 4 && (
-              <ListItem disablePadding>
-                <ListItemText primary={<Typography variant="caption" color="text.secondary">+{plan.features.length - 4} more</Typography>} />
-              </ListItem>
-            )}
-          </List>
-        )}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <IonIcon name="ellipse" sx={{ fontSize: 8, color: plan.is_active ? 'success.main' : 'error.main' }} />
-          <Typography variant="caption" color={plan.is_active ? 'success.main' : 'error.main'} fontWeight={600}>
-            {plan.is_active ? 'Active' : 'Inactive'}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
+    <div style={{ ...cardStyle, border: `1px solid ${borderColor}`, padding: 20, display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <span style={{ fontWeight: 700, fontSize: '1rem', textTransform: 'capitalize', color: 'var(--ion-text-color)' }}>{plan.name}</span>
+            {plan.tier === 'pro' && <span style={{ backgroundColor: '#2e7d32', color: '#fff', fontSize: '0.65rem', fontWeight: 700, padding: '1px 7px', borderRadius: 10 }}>Popular</span>}
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{plan.description || '—'}</span>
+        </div>
+        <button onClick={() => onEdit(plan)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+          <IonIcon name="create-outline" style={{ fontSize: 16 }} />
+        </button>
+      </div>
+      <p style={{ margin: '0 0 16px', fontSize: '1.5rem', fontWeight: 800, color: 'var(--ion-text-color)' }}>
+        {plan.price === 0 ? 'Free' : `$${plan.price}/mo`}
+      </p>
+      {plan.features?.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, marginBottom: 12 }}>
+          {plan.features.slice(0, 4).map(f => (
+            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <IonIcon name="checkmark-outline" style={{ fontSize: 13, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-text-color)' }}>{f}</span>
+            </div>
+          ))}
+          {plan.features.length > 4 && (
+            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>+{plan.features.length - 4} more</span>
+          )}
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <IonIcon name="ellipse" style={{ fontSize: 8, color: plan.is_active ? '#2e7d32' : '#d32f2f' }} />
+        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: plan.is_active ? '#2e7d32' : '#d32f2f' }}>
+          {plan.is_active ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+    </div>
   );
 }
+
+const tabBtnStyle = (active) => ({
+  flex: 1, padding: '8px 12px', fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: active ? 600 : 400,
+  background: 'none', border: 'none', borderBottom: active ? '2px solid var(--ion-color-primary)' : '2px solid transparent',
+  color: active ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', cursor: 'pointer',
+});
 
 export default function AdminSubscriptions() {
   const [tab, setTab] = useState(0);
@@ -146,10 +136,7 @@ export default function AdminSubscriptions() {
   const [editingPlan, setEditingPlan] = useState(null);
 
   useEffect(() => {
-    adminApi.plans()
-      .then(setPlans)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    adminApi.plans().then(setPlans).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const carrierPlans = plans.filter(p => p.role === 'carrier');
@@ -162,58 +149,45 @@ export default function AdminSubscriptions() {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* Header */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <IonIcon name="card-outline" color="primary" />
-          <Typography variant="h5" fontWeight={700}>Subscription Plans</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">Manage pricing and features for all subscription tiers</Typography>
-      </Box>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <IonIcon name="card-outline" style={{ color: 'var(--ion-color-primary)' }} />
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Subscription Plans</h2>
+        </div>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Manage pricing and features for all subscription tiers</p>
+      </div>
 
-      {/* Plans */}
       {loading ? (
-        <Grid container spacing={2}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
           {[...Array(6)].map((_, i) => (
-            <Grid item xs={12} sm={4} key={i}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
-                  <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
-                  <Skeleton variant="text" width="50%" height={18} />
-                </CardContent>
-              </Card>
-            </Grid>
+            <div key={i} style={{ ...cardStyle, padding: 20 }}>
+              <SkeletonBox width="60%" height={20} />
+              <SkeletonBox width="80%" height={16} />
+              <SkeletonBox width="50%" height={16} />
+            </div>
           ))}
-        </Grid>
+        </div>
       ) : (
-        <Box>
-          <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tab label={`Carrier Plans (${carrierPlans.length})`} />
-            <Tab label={`Broker Plans (${brokerPlans.length})`} />
-          </Tabs>
+        <div>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--ion-border-color)', marginBottom: 24 }}>
+            <button style={tabBtnStyle(tab === 0)} onClick={() => setTab(0)}>Carrier Plans ({carrierPlans.length})</button>
+            <button style={tabBtnStyle(tab === 1)} onClick={() => setTab(1)}>Broker Plans ({brokerPlans.length})</button>
+          </div>
           {visiblePlans.length === 0 ? (
-            <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>No plans found.</Typography>
+            <p style={{ textAlign: 'center', color: 'var(--ion-color-medium)', fontSize: '0.875rem', padding: '32px 0' }}>No plans found.</p>
           ) : (
-            <Grid container spacing={2}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
               {visiblePlans.map(plan => (
-                <Grid item xs={12} sm={4} key={plan.id}>
-                  <PlanCard plan={plan} onEdit={setEditingPlan} />
-                </Grid>
+                <PlanCard key={plan.id} plan={plan} onEdit={setEditingPlan} />
               ))}
-            </Grid>
+            </div>
           )}
-        </Box>
+        </div>
       )}
 
-      {editingPlan && (
-        <EditModal
-          plan={editingPlan}
-          onClose={() => setEditingPlan(null)}
-          onSaved={handleSaved}
-        />
-      )}
-    </Box>
+      {editingPlan && <EditModal plan={editingPlan} onClose={() => setEditingPlan(null)} onSaved={handleSaved} />}
+    </div>
   );
 }

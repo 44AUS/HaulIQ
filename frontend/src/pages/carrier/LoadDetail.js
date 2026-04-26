@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import {
-  Box, Typography, Button, Card, CardContent, Grid, Chip,
-  CircularProgress, IconButton, TextField, Alert, Stack, Paper, Divider,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { loadsApi, messagesApi, bidsApi, bookingsApi, instantBookApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
@@ -13,7 +10,6 @@ import DocumentPanel from '../../components/documents/DocumentPanel';
 import RateConSignature from '../../components/shared/RateConSignature';
 import IonIcon from '../../components/IonIcon';
 
-
 const LIBRARIES = ['places'];
 
 const MAP_OPTIONS = {
@@ -21,7 +17,7 @@ const MAP_OPTIONS = {
   zoomControl: false,
   scrollwheel: false,
   styles: [
-    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi',     stylers: [{ visibility: 'off' }] },
     { featureType: 'transit', stylers: [{ visibility: 'off' }] },
   ],
 };
@@ -37,6 +33,9 @@ const B_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="4
   <circle cx="16" cy="16" r="8" fill="white"/>
   <text x="16" y="20" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="#ef4444">B</text>
 </svg>`;
+
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
 
 function LoadHeroMap({ load }) {
   const { isLoaded } = useJsApiLoader({
@@ -87,69 +86,45 @@ function LoadHeroMap({ load }) {
     anchor: new window.google.maps.Point(16, 40),
   } : undefined;
 
-  if (!isLoaded) {
-    return (
-      <Box sx={{ height: 420, bgcolor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size={28} sx={{ color: '#22c55e' }} />
-      </Box>
-    );
-  }
+  if (!isLoaded) return (
+    <div style={{ height: 420, backgroundColor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <IonSpinner name="crescent" style={{ '--color': '#22c55e' }} />
+    </div>
+  );
 
   return (
-    <Box sx={{ position: 'relative' }}>
-      <GoogleMap
-        mapContainerStyle={{ height: 420, width: '100%' }}
-        options={MAP_OPTIONS}
-        zoom={6}
-        onLoad={onMapLoad}
-      >
+    <div style={{ position: 'relative' }}>
+      <GoogleMap mapContainerStyle={{ height: 420, width: '100%' }} options={MAP_OPTIONS} zoom={6} onLoad={onMapLoad}>
         {directions && (
-          <DirectionsRenderer
-            directions={directions}
-            options={{
-              suppressMarkers: true,
-              polylineOptions: { strokeColor: '#22c55e', strokeWeight: 4, strokeOpacity: 0.9 },
-            }}
-          />
+          <DirectionsRenderer directions={directions} options={{ suppressMarkers: true, polylineOptions: { strokeColor: '#22c55e', strokeWeight: 4, strokeOpacity: 0.9 } }} />
         )}
-        {directions && (
-          <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} title={load.origin} />
-        )}
-        {directions && (
-          <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} title={load.dest} />
-        )}
+        {directions && <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} title={load.origin} />}
+        {directions && <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} title={load.dest} />}
       </GoogleMap>
-
-      {/* Route overlay */}
-      <Box sx={{
-        position: 'absolute', bottom: 12, left: 12, right: 12,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        pointerEvents: 'none',
-      }}>
-        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{load.origin}</Typography>
-          </Box>
-        </Paper>
-        <Box sx={{ flex: 1, mx: 1, height: 1, bgcolor: 'rgba(34,197,94,0.3)', borderStyle: 'dashed' }} />
-        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#ef4444' }} />
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{load.dest}</Typography>
-          </Box>
-        </Paper>
-      </Box>
-    </Box>
+      <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
+        <div style={{ padding: '6px 12px', backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#22c55e' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e5e7eb' }}>{load.origin}</span>
+          </div>
+        </div>
+        <div style={{ flex: 1, margin: '0 8px', height: 1, backgroundColor: 'rgba(34,197,94,0.3)', borderTop: '1px dashed rgba(34,197,94,0.3)' }} />
+        <div style={{ padding: '6px 12px', backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e5e7eb' }}>{load.dest}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ─── Stepper ───────────────────────────────────────────────────────────────────
 const STEPS = [
-  { key: 'posted',     label: 'Posted',     icon: <IonIcon name="location-outline" sx={{ fontSize: 16 }} /> },
-  { key: 'booked',     label: 'Booked',     icon: <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} /> },
-  { key: 'in_transit', label: 'In Transit', icon: <IonIcon name="navigate-outline" sx={{ fontSize: 16 }} /> },
-  { key: 'delivered',  label: 'Delivered',  icon: <IonIcon name="car-sport-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'posted',     label: 'Posted',     iconName: 'location-outline' },
+  { key: 'booked',     label: 'Booked',     iconName: 'checkmark-circle' },
+  { key: 'in_transit', label: 'In Transit', iconName: 'navigate-outline' },
+  { key: 'delivered',  label: 'Delivered',  iconName: 'car-sport-outline' },
 ];
 
 function stepIndex(loadStatus, bookingStatus) {
@@ -163,82 +138,69 @@ function stepIndex(loadStatus, bookingStatus) {
 function LoadStepper({ load, bookingStatus }) {
   const active = stepIndex(load.status, bookingStatus);
   const CIRCLE = 32;
+  const pct = (active / (STEPS.length - 1)) * 100;
 
   return (
-    <Box sx={{ py: 1.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', mb: 1 }}>
-        <Box sx={{
-          position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
-          height: 3, bgcolor: 'action.selected', borderRadius: 2, transform: 'translateY(-50%)',
-        }} />
-        <Box sx={{
-          position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
-          height: 3, borderRadius: 2, transform: 'translateY(-50%)',
-          '&::after': {
-            content: '""', position: 'absolute', top: 0, left: 0, height: '100%',
-            width: `${(active / (STEPS.length - 1)) * 100}%`,
-            bgcolor: 'primary.main', borderRadius: 2, transition: 'width 0.5s ease',
-          },
-        }} />
+    <div style={{ padding: '12px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', position: 'relative', marginBottom: 8 }}>
+        <div style={{ position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2, height: 3, backgroundColor: 'var(--ion-color-light)', borderRadius: 2, transform: 'translateY(-50%)' }} />
+        <div style={{ position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2, height: 3, borderRadius: 2, transform: 'translateY(-50%)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, backgroundColor: 'var(--ion-color-primary)', borderRadius: 2, transition: 'width 0.5s ease' }} />
+        </div>
         {STEPS.map((step, i) => {
           const done    = i < active;
           const current = i === active;
           return (
-            <Box key={step.key} sx={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-              <Box sx={{
-                width: CIRCLE, height: CIRCLE, borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: done ? 'primary.main' : current ? 'primary.main' : 'background.paper',
-                border: '2.5px solid',
-                borderColor: done || current ? 'primary.main' : 'action.disabled',
-                color: done || current ? '#fff' : 'text.disabled',
-                transition: 'all 0.3s ease',
-                boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none',
-              }}>
-                {done ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} />
-                  : current ? step.icon
-                  : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />}
-              </Box>
-            </Box>
+            <div key={step.key} style={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: CIRCLE, height: CIRCLE, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: done || current ? 'var(--ion-color-primary)' : 'var(--ion-card-background)', border: `2.5px solid ${done || current ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)'}`, color: done || current ? '#fff' : 'var(--ion-color-medium)', transition: 'all 0.3s ease', boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none' }}>
+                {done
+                  ? <IonIcon name="checkmark-circle" style={{ fontSize: 16 }} />
+                  : current
+                  ? <IonIcon name={step.iconName} style={{ fontSize: 16 }} />
+                  : <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-medium)' }} />}
+              </div>
+            </div>
           );
         })}
-      </Box>
-      <Box sx={{ display: 'flex' }}>
+      </div>
+      <div style={{ display: 'flex' }}>
         {STEPS.map((step, i) => {
           const done    = i < active;
           const current = i === active;
           return (
-            <Box key={step.key} sx={{ flex: 1, textAlign: 'center' }}>
-              <Typography variant="caption" sx={{
-                fontSize: '0.7rem',
-                fontWeight: current ? 700 : done ? 500 : 400,
-                color: current ? 'primary.main' : done ? 'text.primary' : 'text.disabled',
-                letterSpacing: current ? 0.3 : 0,
-              }}>
+            <div key={step.key} style={{ flex: 1, textAlign: 'center' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: current ? 700 : done ? 500 : 400, color: current ? 'var(--ion-color-primary)' : done ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', letterSpacing: current ? '0.3px' : 0 }}>
                 {step.label}
-              </Typography>
-            </Box>
+              </span>
+            </div>
           );
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
+
+const BID_STATUS = {
+  accepted: { label: 'Bid Accepted!',     bg: 'rgba(46,125,50,0.12)',  color: '#2e7d32',  border: '#2e7d32' },
+  countered:{ label: 'Broker Countered',  bg: 'rgba(2,136,209,0.12)',  color: '#0288d1',  border: '#0288d1' },
+  rejected: { label: 'Bid Rejected',      bg: 'rgba(211,47,47,0.12)',  color: '#d32f2f',  border: '#d32f2f' },
+  pending:  { label: 'Bid Pending',        bg: 'rgba(237,108,2,0.12)',  color: '#ed6c02',  border: '#ed6c02' },
+};
 
 export default function LoadDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
 
-  const [load, setLoad] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saved, setSaved] = useState(false);
+  const [load, setLoad]               = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [saved, setSaved]             = useState(false);
   const [canInstantBook, setCanInstantBook] = useState(false);
   const [bookingData, setBookingData] = useState(null);
   const [messageOpen, setMessageOpen] = useState(false);
   const [messageText, setMessageText] = useState('');
   const [bookingStatus, setBookingStatus] = useState(null);
-  const [myBid, setMyBid] = useState(null);
+  const [myBid, setMyBid]             = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -262,24 +224,24 @@ export default function LoadDetail() {
   }, [id]);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
-    </Box>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>
+      <IonSpinner name="crescent" />
+    </div>
   );
 
   if (!load) return (
-    <Box sx={{ textAlign: 'center', py: 10 }}>
-      <Typography color="text.secondary" gutterBottom>Load not found.</Typography>
-      <Button component={Link} to="/carrier/loads" variant="text">Back to Load Board</Button>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+      <p style={{ margin: '0 0 16px', color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>Load not found.</p>
+      <Link to="/carrier/loads" style={{ color: 'var(--ion-color-primary)', fontSize: '0.875rem', textDecoration: 'none' }}>Back to Load Board</Link>
+    </div>
   );
 
   const booking = bookingData?.booking || null;
-  const fuelCostEst = load.fuel;
+  const fuelCostEst  = load.fuel;
   const deadheadCost = Math.round(load.deadhead * 0.62);
   const grossRevenue = load.rate;
-  const expenses = fuelCostEst + deadheadCost + 120;
-  const netProfit = grossRevenue - expenses;
+  const expenses     = fuelCostEst + deadheadCost + 120;
+  const netProfit    = grossRevenue - expenses;
 
   const handleInstantBook = () => {
     bookingsApi.request({ load_id: load._raw.id, is_instant: true })
@@ -302,209 +264,263 @@ export default function LoadDetail() {
     setMessageOpen(false);
   };
 
-  const getBidStatusColor = (status) => {
-    if (status === 'accepted') return 'success';
-    if (status === 'countered') return 'info';
-    if (status === 'rejected') return 'error';
-    return 'warning';
-  };
-
-  const getBidStatusLabel = (status) => {
-    if (status === 'accepted') return 'Bid Accepted!';
-    if (status === 'countered') return 'Broker Countered';
-    if (status === 'rejected') return 'Bid Rejected';
-    return 'Bid Pending';
-  };
-
   const activeBookingStatus = booking?.status || bookingStatus;
+  const bidCfg = myBid ? (BID_STATUS[myBid.status] || BID_STATUS.pending) : null;
 
-  // ── Tab: Overview ──────────────────────────────────────────────────────────
+  // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Full-bleed map */}
-      <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ margin: '-24px -24px 24px', overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} />
-        {/* Save bookmark */}
-        <Box sx={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
-          <IconButton
+        <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+          <button
             onClick={() => { loadsApi.toggleSave(load._raw.id).catch(() => {}); setSaved(s => !s); }}
-            sx={{ bgcolor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.08)', color: saved ? 'primary.main' : 'text.secondary', '&:hover': { bgcolor: 'rgba(255,255,255,1)' } }}
+            style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: saved ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }}
           >
-            {saved ? <IonIcon name="bookmark-outline" /> : <IonIcon name="bookmark" />}
-          </IconButton>
-        </Box>
-      </Box>
+            <IonIcon name={saved ? 'bookmark' : 'bookmark-outline'} style={{ fontSize: 18 }} />
+          </button>
+        </div>
+      </div>
 
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         {/* LEFT */}
-        <Card sx={{ flex: '0 0 550px', minWidth: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
-          <CardContent sx={{ pt: 2.5 }}>
-            <LoadStepper load={load} bookingStatus={activeBookingStatus} />
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: 2.5 }}>
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                  <Typography variant="caption" color="text.secondary">Load #{load.id.slice(0, 8).toUpperCase()}</Typography>
-                  {load.hot && <Chip label="Hot Load" size="small" color="error" />}
-                  {load.instantBook && <Chip icon={<IonIcon name="flash-outline" />} label="Instant Book" size="small" color="success" variant="outlined" />}
-                  <Chip icon={<IonIcon name="car-sport-outline" />} label={load.type} size="small" color="primary" variant="outlined" />
-                </Box>
-                <Typography variant="h6" fontWeight={700}>{load.origin} → {load.dest}</Typography>
-                <Typography variant="body2" color="text.secondary">{load.commodity} · {load.miles} mi · Pickup {load.pickup}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                {load.status === 'active' && <Chip label="Active" color="success" size="small" />}
-                {load.status === 'filled' && <Chip label="Filled" color="info" size="small" />}
-                {activeBookingStatus === 'in_transit' && <Chip icon={<IonIcon name="ellipse" sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />} label="In Transit" size="small" sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }} />}
-                {activeBookingStatus === 'completed' && <Chip label="Delivered" color="success" size="small" variant="outlined" />}
-              </Box>
-            </Box>
-            <Grid container spacing={1.5} sx={{ mb: 2 }}>
-              {[{ label: 'Rate', value: `$${(load.rate || 0).toLocaleString()}` }, { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` }, { label: 'Miles', value: `${load.miles} mi` }, { label: 'Weight', value: load.weight }].map(({ label, value }) => (
-                <Grid item xs={6} key={label}>
-                  <Paper variant="outlined" sx={{ p: 1.25, textAlign: 'center', borderRadius: 2 }}>
-                    <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-            <Grid container spacing={2}>
-              {[{ label: 'Pickup', addr: load.pickupAddress || load.origin, city: load.pickupAddress ? load.origin : null, date: load.pickup, dot: '#22c55e' }, { label: 'Delivery', addr: load.deliveryAddress || load.dest, city: load.deliveryAddress ? load.dest : null, date: load.delivery, dot: '#ef4444' }].map(({ label, addr, city, date, dot }) => (
-                <Grid item xs={12} key={label}>
-                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
-                    <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">{label}</Typography>
-                      <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr}</Typography>
-                      {city && <Typography variant="caption" color="text.secondary" display="block">{city}</Typography>}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                        <IonIcon name="calendar-outline" sx={{ fontSize: 11, color: 'text.disabled' }} />
-                        <Typography variant="caption" color="text.disabled">{date}</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Grid>
-              ))}
-            </Grid>
-            {load.notes && <Paper variant="outlined" sx={{ p: 1.5, mt: 2, borderRadius: 2 }}><Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>Notes</Typography><Typography variant="body2">{load.notes}</Typography></Paper>}
-          </CardContent>
-        </Card>
+        <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
+          <LoadStepper load={load} bookingStatus={activeBookingStatus} />
+          <div style={{ borderTop: '1px solid var(--ion-border-color)', margin: '16px 0' }} />
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Load #{load.id.slice(0, 8).toUpperCase()}</span>
+                {load.hot && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: 'rgba(211,47,47,0.12)', color: '#d32f2f' }}>Hot Load</span>}
+                {load.instantBook && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, border: '1px solid #2e7d32', color: '#2e7d32' }}>⚡ Instant Book</span>}
+                <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, border: '1px solid var(--ion-color-primary)', color: 'var(--ion-color-primary)' }}>{load.type}</span>
+              </div>
+              <h3 style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>{load.origin} → {load.dest}</h3>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{load.commodity} · {load.miles} mi · Pickup {load.pickup}</p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              {load.status === 'active'                 && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: 'rgba(46,125,50,0.12)', color: '#2e7d32' }}>Active</span>}
+              {load.status === 'filled'                 && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: 'rgba(2,136,209,0.12)', color: '#0288d1' }}>Filled</span>}
+              {activeBookingStatus === 'in_transit'     && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>In Transit</span>}
+              {activeBookingStatus === 'completed'      && <span style={{ padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, border: '1px solid #2e7d32', color: '#2e7d32' }}>Delivered</span>}
+            </div>
+          </div>
+
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+            {[
+              { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}` },
+              { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}` },
+              { label: 'Miles',    value: `${load.miles} mi` },
+              { label: 'Weight',   value: load.weight },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{label}</span>
+                <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'block', marginTop: 2 }}>{value}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Pickup / Delivery */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: load.notes ? 16 : 0 }}>
+            {[
+              { label: 'Pickup',   addr: load.pickupAddress || load.origin, city: load.pickupAddress ? load.origin : null, date: load.pickup, dot: '#22c55e' },
+              { label: 'Delivery', addr: load.deliveryAddress || load.dest, city: load.deliveryAddress ? load.dest : null, date: load.delivery, dot: '#ef4444' },
+            ].map(({ label, addr, city, date, dot }) => (
+              <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                <div style={{ marginTop: 4, width: 10, height: 10, borderRadius: '50%', backgroundColor: dot, flexShrink: 0 }} />
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{label}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)', display: 'block', lineHeight: 1.3 }}>{addr}</span>
+                  {city && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{city}</span>}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                    <IonIcon name="calendar-outline" style={{ fontSize: 11, color: 'var(--ion-color-medium)' }} />
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{date}</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {load.notes && (
+            <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: 12, marginTop: 16 }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 2 }}>Notes</span>
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{load.notes}</p>
+            </div>
+          )}
+        </div>
 
         {/* RIGHT */}
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {load.broker && <Card sx={{ boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}><CardContent><Typography variant="subtitle2" fontWeight={600} gutterBottom>Broker</Typography><BrokerRating broker={load.broker} /></CardContent></Card>}
-          <Card sx={{ boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
-            <CardContent>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 2 }}>Book This Load</Typography>
-              <Stack spacing={1.5}>
-                {bookingStatus === 'instant_booked' && <Alert severity="success" icon={<IonIcon name="checkmark-circle" />}><Typography variant="body2" fontWeight={600}>Booked!</Typography><Typography variant="caption">This load is now assigned to you.</Typography></Alert>}
-                {activeBookingStatus === 'pending' && <Alert severity="warning" icon={<IonIcon name="time-outline" />}><Typography variant="body2" fontWeight={600}>Request Sent</Typography><Typography variant="caption">Awaiting broker approval.</Typography></Alert>}
-                {activeBookingStatus === 'approved' && <Alert severity="info" icon={<IonIcon name="checkmark-circle" />}><Typography variant="body2" fontWeight={600}>Booking Approved</Typography><Typography variant="caption">Your booking has been approved by the broker.</Typography></Alert>}
-                {activeBookingStatus === 'in_transit' && <Alert severity="warning" icon={<IonIcon name="navigate-outline" />}><Typography variant="body2" fontWeight={600}>In Transit</Typography><Typography variant="caption">You are currently hauling this load.</Typography></Alert>}
-                {activeBookingStatus === 'completed' && <Alert severity="success" icon={<IonIcon name="checkmark-circle" />}><Typography variant="body2" fontWeight={600}>Delivered</Typography><Typography variant="caption">This load has been delivered successfully.</Typography></Alert>}
-                {!bookingStatus && !activeBookingStatus && (
-                  <>
-                    {canInstantBook && <Button onClick={handleInstantBook} variant="contained" color="success" fullWidth startIcon={<IonIcon name="flash-outline" />} size="large">Instant Book</Button>}
-                    {load.instantBook && !canInstantBook && <Button variant="outlined" disabled fullWidth startIcon={<IonIcon name="flash-outline" />}>Instant Book · Not on allowlist</Button>}
-                    {load.bookNow && !canInstantBook && <Button onClick={handleBookNow} variant="contained" fullWidth startIcon={<IonIcon name="calendar-outline" />} size="large">Book Now</Button>}
-                    {myBid ? (
-                      <Card variant="outlined" sx={{ borderColor: myBid.status === 'accepted' ? 'success.main' : myBid.status === 'countered' ? 'info.main' : myBid.status === 'rejected' ? 'error.main' : 'warning.main' }}>
-                        <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                            <Chip label={getBidStatusLabel(myBid.status)} size="small" color={getBidStatusColor(myBid.status)} />
-                            <Typography variant="body2" fontWeight={700}>${myBid.amount.toLocaleString()}</Typography>
-                          </Box>
-                          {myBid.status === 'countered' && myBid.counter_amount && <Typography variant="caption" color="info.main">Counter offer: <strong>${myBid.counter_amount.toLocaleString()}</strong>{myBid.counter_note && ` — "${myBid.counter_note}"`}</Typography>}
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <Button component={Link} to={`/carrier/loads/${id}/bid`} variant="outlined" fullWidth startIcon={<IonIcon name="cash-outline" />} size="large">Place Bid / Counter Offer</Button>
-                    )}
-                  </>
-                )}
-                {!messageOpen
-                  ? <Button onClick={() => setMessageOpen(true)} variant="outlined" fullWidth startIcon={<IonIcon name="chatbubble-outline" />}>Message Broker</Button>
-                  : <Card variant="outlined"><CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                        <Typography variant="body2" fontWeight={600}>Message {load.broker?.name}</Typography>
-                        <IconButton size="small" onClick={() => setMessageOpen(false)}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-                      </Box>
-                      <TextField fullWidth multiline rows={3} size="small" placeholder="Ask about the load, negotiate rate, etc..." value={messageText} onChange={e => setMessageText(e.target.value)} sx={{ mb: 1.5 }} />
-                      <Button onClick={handleSendMessage} disabled={!messageText.trim()} variant="contained" fullWidth startIcon={<IonIcon name="send-outline" />}>Send Message</Button>
-                    </CardContent></Card>
-                }
-                {load.broker?.warns > 0 && <Alert severity="error" icon={<IonIcon name="warning-outline" />}><Typography variant="body2" fontWeight={600} gutterBottom>Broker Warning</Typography><Typography variant="caption">This broker has {load.broker.warns} active warning flag{load.broker.warns > 1 ? 's' : ''}. Proceed with caution.</Typography></Alert>}
-              </Stack>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-    </Box>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {load.broker && (
+            <div style={{ ...cardStyle, padding: 20 }}>
+              <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 12 }}>Broker</span>
+              <BrokerRating broker={load.broker} />
+            </div>
+          )}
+
+          <div style={{ ...cardStyle, padding: 20 }}>
+            <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 16 }}>Book This Load</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {bookingStatus === 'instant_booked' && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(46,125,50,0.08)', border: '1px solid rgba(46,125,50,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#2e7d32' }}>Booked!</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#2e7d32' }}>This load is now assigned to you.</p>
+                </div>
+              )}
+              {activeBookingStatus === 'pending' && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(237,108,2,0.08)', border: '1px solid rgba(237,108,2,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#ed6c02' }}>Request Sent</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#ed6c02' }}>Awaiting broker approval.</p>
+                </div>
+              )}
+              {activeBookingStatus === 'approved' && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(2,136,209,0.08)', border: '1px solid rgba(2,136,209,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#0288d1' }}>Booking Approved</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#0288d1' }}>Your booking has been approved by the broker.</p>
+                </div>
+              )}
+              {activeBookingStatus === 'in_transit' && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(237,108,2,0.08)', border: '1px solid rgba(237,108,2,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#ed6c02' }}>In Transit</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#ed6c02' }}>You are currently hauling this load.</p>
+                </div>
+              )}
+              {activeBookingStatus === 'completed' && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(46,125,50,0.08)', border: '1px solid rgba(46,125,50,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#2e7d32' }}>Delivered</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#2e7d32' }}>This load has been delivered successfully.</p>
+                </div>
+              )}
+
+              {!bookingStatus && !activeBookingStatus && (
+                <>
+                  {canInstantBook && (
+                    <button onClick={handleInstantBook} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', backgroundColor: '#2e7d32', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '1rem' }}>
+                      <IonIcon name="flash-outline" style={{ fontSize: 18 }} /> Instant Book
+                    </button>
+                  )}
+                  {load.instantBook && !canInstantBook && (
+                    <button disabled style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-color-medium)', fontFamily: 'inherit', fontSize: '1rem', cursor: 'not-allowed', opacity: 0.6 }}>
+                      <IonIcon name="flash-outline" style={{ fontSize: 18 }} /> Instant Book · Not on allowlist
+                    </button>
+                  )}
+                  {load.bookNow && !canInstantBook && (
+                    <button onClick={handleBookNow} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '1rem' }}>
+                      <IonIcon name="calendar-outline" style={{ fontSize: 18 }} /> Book Now
+                    </button>
+                  )}
+                  {myBid ? (
+                    <div style={{ border: `1px solid ${bidCfg.border}`, borderRadius: 8, padding: '12px 14px', backgroundColor: bidCfg.bg }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: bidCfg.color }}>{bidCfg.label}</span>
+                        <span style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>${myBid.amount.toLocaleString()}</span>
+                      </div>
+                      {myBid.status === 'countered' && myBid.counter_amount && (
+                        <span style={{ fontSize: '0.75rem', color: '#0288d1' }}>Counter offer: <strong>${myBid.counter_amount.toLocaleString()}</strong>{myBid.counter_note && ` — "${myBid.counter_note}"`}</span>
+                      )}
+                    </div>
+                  ) : (
+                    <Link to={`/carrier/loads/${id}/bid`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, color: 'var(--ion-color-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '1rem' }}>
+                      <IonIcon name="cash-outline" style={{ fontSize: 18 }} /> Place Bid / Counter Offer
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {!messageOpen ? (
+                <button onClick={() => setMessageOpen(true)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', cursor: 'pointer', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 500 }}>
+                  <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} /> Message Broker
+                </button>
+              ) : (
+                <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Message {load.broker?.name}</span>
+                    <button onClick={() => setMessageOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                      <IonIcon name="close-outline" style={{ fontSize: 18 }} />
+                    </button>
+                  </div>
+                  <textarea
+                    style={{ ...inputStyle, resize: 'vertical', minHeight: 80, marginBottom: 12 }}
+                    rows={3}
+                    placeholder="Ask about the load, negotiate rate, etc..."
+                    value={messageText}
+                    onChange={e => setMessageText(e.target.value)}
+                  />
+                  <button onClick={handleSendMessage} disabled={!messageText.trim()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: messageText.trim() ? 'pointer' : 'not-allowed', fontFamily: 'inherit', fontWeight: 600, fontSize: '0.875rem', opacity: messageText.trim() ? 1 : 0.6 }}>
+                    <IonIcon name="send-outline" style={{ fontSize: 16 }} /> Send Message
+                  </button>
+                </div>
+              )}
+
+              {load.broker?.warns > 0 && (
+                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#d32f2f' }}>Broker Warning</p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#d32f2f' }}>This broker has {load.broker.warns} active warning flag{load.broker.warns > 1 ? 's' : ''}. Proceed with caution.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
-  // ── Tab: Payments ──────────────────────────────────────────────────────────
+  // ── Tab: Payments ────────────────────────────────────────────────────────────
   const PaymentsTab = (
-    <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
-      <Card sx={{ flex: 1, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
-        <CardContent>
-          <Typography variant="subtitle1" fontWeight={600} gutterBottom>Profit Breakdown</Typography>
-          <Stack spacing={0}>
-            {[
-              { label: 'Gross Rate', value: `+$${grossRevenue.toLocaleString()}`, color: 'success.main' },
-              { label: `Fuel (~${load.miles} mi @ $${load.dieselPrice ? load.dieselPrice.toFixed(2) : '—'}/gal)`, value: `-$${fuelCostEst}`, color: 'error.main' },
-              { label: `Deadhead (${load.deadhead} mi)`, value: `-$${deadheadCost}`, color: 'error.main' },
-              { label: 'Misc / tolls', value: '-$120', color: 'error.main' },
-            ].map(({ label, value, color }) => (
-              <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="body2" color="text.secondary">{label}</Typography>
-                <Typography variant="body2" fontWeight={600} sx={{ color }}>{value}</Typography>
-              </Box>
-            ))}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pt: 2 }}>
-              <Typography variant="body1" fontWeight={700}>Estimated Net Profit</Typography>
-              <Typography variant="h5" fontWeight={800} sx={{ color: netProfit > 0 ? 'success.main' : 'error.main' }}>
-                {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}
-              </Typography>
-            </Box>
-          </Stack>
-          <Box sx={{ mt: 2 }}>
-            <ProfitBadge score={load.profitScore} net={netProfit} ratePerMile={load.ratePerMile} size="lg" />
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
+        <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 16 }}>Profit Breakdown</span>
+        {[
+          { label: 'Gross Rate',                                                                  value: `+$${grossRevenue.toLocaleString()}`, color: '#2e7d32' },
+          { label: `Fuel (~${load.miles} mi @ $${load.dieselPrice ? load.dieselPrice.toFixed(2) : '—'}/gal)`, value: `-$${fuelCostEst}`,     color: '#d32f2f' },
+          { label: `Deadhead (${load.deadhead} mi)`,                                             value: `-$${deadheadCost}`,                  color: '#d32f2f' },
+          { label: 'Misc / tolls',                                                               value: '-$120',                               color: '#d32f2f' },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{label}</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color }}>{value}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 16 }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Estimated Net Profit</span>
+          <span style={{ fontSize: '1.5rem', fontWeight: 800, color: netProfit > 0 ? '#2e7d32' : '#d32f2f' }}>
+            {netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()}
+          </span>
+        </div>
+        <div style={{ marginTop: 16 }}>
+          <ProfitBadge score={load.profitScore} net={netProfit} ratePerMile={load.ratePerMile} size="lg" />
+        </div>
+      </div>
+    </div>
   );
 
-  // ── Tab: Documents ─────────────────────────────────────────────────────────
+  // ── Tab: Documents ───────────────────────────────────────────────────────────
   const DocumentsTab = (
-    <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
-      <Card sx={{ flex: 1, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <IonIcon name="document-text-outline" color="primary" fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>Documents</Typography>
-          </Box>
-          <DocumentPanel loadId={id} />
-        </CardContent>
-      </Card>
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <IonIcon name="document-text-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 16 }} />
+          <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Documents</span>
+        </div>
+        <DocumentPanel loadId={id} />
+      </div>
       {booking && (
-        <Card sx={{ flex: '0 0 360px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', borderRadius: '8px' }}>
-          <CardContent>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>Rate Confirmation</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Sign or download the rate confirmation for this load.</Typography>
-            <RateConSignature bookingId={booking.id} role="carrier" />
-          </CardContent>
-        </Card>
+        <div style={{ ...cardStyle, flex: '0 0 360px', padding: 20 }}>
+          <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 4 }}>Rate Confirmation</span>
+          <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Sign or download the rate confirmation for this load.</p>
+          <RateConSignature bookingId={booking.id} role="carrier" />
+        </div>
       )}
-    </Box>
+    </div>
   );
 
   return (
-    <Box>
+    <div>
       {activeTab === 'overview'  && OverviewTab}
       {activeTab === 'payments'  && PaymentsTab}
       {activeTab === 'documents' && DocumentsTab}
-    </Box>
+    </div>
   );
 }

@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Typography, Grid, Card, CardContent, Alert, Skeleton
-} from '@mui/material';
+import { useState, useEffect } from 'react';
+import { IonSpinner } from '@ionic/react';
 import { loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import LoadCard from '../../components/carrier/LoadCard';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4 }} />;
+}
 
 export default function SavedLoads() {
   const [loads, setLoads] = useState([]);
@@ -21,55 +24,44 @@ export default function SavedLoads() {
   }, []);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IonIcon name="bookmark-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
-          <Typography variant="h5" fontWeight={700}>Saved Loads</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <IonIcon name="bookmark-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 26 }} />
+          <h2 style={{ margin: 0, fontWeight: 700, color: 'var(--ion-text-color)' }}>Saved Loads</h2>
+        </div>
+        <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
           {loads.length} loads saved
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
       {loading ? (
-        <Grid container spacing={3}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
           {[...Array(6)].map((_, i) => (
-            <Grid item xs={12} sm={6} key={i}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
-                  <Skeleton variant="text" width="80%" height={18} sx={{ mb: 0.75 }} />
-                  <Skeleton variant="text" width="50%" height={18} />
-                </CardContent>
-              </Card>
-            </Grid>
+            <div key={i} style={{ ...cardStyle, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <SkeletonBox width="60%" height={20} />
+              <SkeletonBox width="80%" height={16} />
+              <SkeletonBox width="50%" height={16} />
+            </div>
           ))}
-        </Grid>
+        </div>
       ) : error ? (
-        <Alert severity="error">{error}</Alert>
+        <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>
+          {error}
+        </div>
       ) : loads.length === 0 ? (
-        <Card>
-          <CardContent sx={{ textAlign: 'center', py: 10 }}>
-            <IonIcon name="bookmark-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body1" color="text.secondary" gutterBottom>
-              No saved loads yet.
-            </Typography>
-            <Typography variant="body2" color="text.disabled">
-              Bookmark loads from the Load Board to track them here.
-            </Typography>
-          </CardContent>
-        </Card>
+        <div style={{ ...cardStyle, padding: '80px 0', textAlign: 'center' }}>
+          <IonIcon name="bookmark-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+          <p style={{ margin: '0 0 4px', fontSize: '1rem', color: 'var(--ion-color-medium)' }}>No saved loads yet.</p>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Bookmark loads from the Load Board to track them here.</p>
+        </div>
       ) : (
-        <Grid container spacing={3}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
           {loads.map(l => (
-            <Grid item xs={12} sm={6} xl={4} key={l.id}>
-              <LoadCard load={l} />
-            </Grid>
+            <LoadCard key={l.id} load={l} />
           ))}
-        </Grid>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

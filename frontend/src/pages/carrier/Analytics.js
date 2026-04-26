@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, Alert, Skeleton,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, Avatar,
-} from '@mui/material';
 import { analyticsApi, driversApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 import {
@@ -18,55 +13,67 @@ const TT = {
   },
 };
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle   = { padding: '10px 12px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle   = { padding: '12px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' };
+
 const fmt  = (n) => n != null ? `$${Number(n).toLocaleString()}` : '—';
 const fmtN = (n) => n != null ? Number(n).toLocaleString() : '—';
 
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4 }} />;
+}
+
 function SkeletonCards() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[...Array(4)].map((_, i) => <Skeleton key={i} variant="rounded" height={88} sx={{ borderRadius: 2 }} />)}
-    </Box>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {[...Array(4)].map((_, i) => (
+        <div key={i} style={{ ...cardStyle, padding: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <SkeletonBox width="40%" height={20} />
+          <SkeletonBox width="60%" height={40} />
+        </div>
+      ))}
+    </div>
   );
 }
 
 function EmptyState({ icon, title, subtitle }) {
   return (
-    <Card>
-      <CardContent sx={{ textAlign: 'center', py: 8 }}>
-        <IonIcon name={icon} sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
-        <Typography variant="body1" fontWeight={600} color="text.secondary">{title}</Typography>
-        {subtitle && <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>{subtitle}</Typography>}
-      </CardContent>
-    </Card>
+    <div style={{ ...cardStyle, padding: '64px 20px', textAlign: 'center' }}>
+      <IonIcon name={icon} style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+      <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>{title}</p>
+      {subtitle && <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{subtitle}</p>}
+    </div>
   );
 }
 
 function KpiRow({ items }) {
   return (
-    <Box sx={{ display: 'flex', gap: 2.5, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
       {items.map(({ icon, label, value, color }) => (
-        <Box key={label} sx={{ flex: '1 1 160px', minWidth: 0 }}>
-          <Card>
-            <CardContent>
-              {icon && (
-                <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 1.25 }}>
-                  <IonIcon name={icon} sx={{ fontSize: 18, color: color || 'primary.main' }} />
-                </Box>
-              )}
-              <Typography variant="body2" color="text.secondary" gutterBottom>{label}</Typography>
-              <Typography variant="h4" fontWeight={800} color={color || 'text.primary'}>{value}</Typography>
-            </CardContent>
-          </Card>
-        </Box>
+        <div key={label} style={{ ...cardStyle, flex: '1 1 160px', minWidth: 0, padding: 16 }}>
+          {icon && (
+            <div style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+              <IonIcon name={icon} style={{ fontSize: 18, color: color || 'var(--ion-color-primary)' }} />
+            </div>
+          )}
+          <p style={{ margin: '0 0 2px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+          <span style={{ fontSize: '1.75rem', fontWeight: 800, color: color || 'var(--ion-text-color)', display: 'block' }}>{value}</span>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }
 
-// ── Loads tab ─────────────────────────────────────────────────────────────────
+const VERDICT = {
+  'Run it': { bg: 'rgba(46,125,50,0.12)',  color: '#2e7d32' },
+  'Okay':   { bg: 'rgba(237,108,2,0.12)',  color: '#ed6c02' },
+  'Avoid':  { bg: 'rgba(211,47,47,0.12)',  color: '#d32f2f' },
+};
+
 function LoadsTab({ summary, loading, error }) {
   if (loading) return <SkeletonCards />;
-  if (error)   return <Alert severity="error">{error}</Alert>;
+  if (error)   return <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>;
 
   const weekly   = summary?.weekly_earnings || [];
   const laneData = summary?.lane_stats || [];
@@ -77,19 +84,21 @@ function LoadsTab({ summary, loading, error }) {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <KpiRow items={[
-        { icon: 'cash-outline',         label: 'Total Gross',   value: fmt(summary?.total_gross) },
-        { icon: 'trending-up-outline',  label: 'Total Net',     value: fmt(summary?.total_net) },
-        { icon: 'cube-outline',         label: 'Total Miles',   value: fmtN(summary?.total_miles) },
-        { icon: 'location-outline',     label: 'Avg Net/Mile',  value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—' },
+        { icon: 'cash-outline',        label: 'Total Gross',  value: fmt(summary?.total_gross) },
+        { icon: 'trending-up-outline', label: 'Total Net',    value: fmt(summary?.total_net) },
+        { icon: 'cube-outline',        label: 'Total Miles',  value: fmtN(summary?.total_miles) },
+        { icon: 'location-outline',    label: 'Avg Net/Mile', value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—' },
       ]} />
 
       {weekly.length > 0 && (
         <>
-          <Card>
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>Net Earnings by Week</Typography>
+          <div style={cardStyle}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Net Earnings by Week</span>
+            </div>
+            <div style={{ padding: 16 }}>
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={weekly}>
                   <defs>
@@ -110,20 +119,22 @@ function LoadsTab({ summary, loading, error }) {
                   <Area type="monotone" dataKey="net"   stroke="#1976D2" strokeWidth={2} fill="url(#cagNet)" strokeDasharray="4 2" />
                 </AreaChart>
               </ResponsiveContainer>
-              <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
+              <div style={{ display: 'flex', gap: 24, marginTop: 8 }}>
                 {[['#1565C0', 'Gross'], ['#1976D2', 'Net']].map(([c, l]) => (
-                  <Box key={l} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 12, height: 2, bgcolor: c }} />
-                    <Typography variant="caption" color="text.secondary">{l}</Typography>
-                  </Box>
+                  <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 12, height: 2, backgroundColor: c }} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{l}</span>
+                  </div>
                 ))}
-              </Box>
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+          </div>
 
-          <Card>
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>Miles Driven</Typography>
+          <div style={cardStyle}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Miles Driven</span>
+            </div>
+            <div style={{ padding: 16 }}>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={weekly}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
@@ -133,56 +144,56 @@ function LoadsTab({ summary, loading, error }) {
                   <Bar dataKey="miles" fill="#1565C0" fillOpacity={0.75} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </>
       )}
 
       {laneData.length > 0 && (
-        <Card>
-          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="subtitle1" fontWeight={600}>Top Lane Performance</Typography>
-          </Box>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
+        <div style={cardStyle}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Top Lane Performance</span>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
                   {['Lane', 'Runs', 'Avg Net Profit', 'Avg Rate/Mile', 'Verdict'].map(h => (
-                    <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 700, letterSpacing: 0.5, color: 'secondary.main', bgcolor: 'action.hover' }}>
-                      {h}
-                    </TableCell>
+                    <th key={h} style={thStyle}>{h}</th>
                   ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {laneData.map((lane, i) => (
-                  <TableRow key={i} sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}>
-                    <TableCell><Typography variant="body2" fontWeight={600}>{lane.origin} → {lane.destination}</Typography></TableCell>
-                    <TableCell><Typography variant="body2">{lane.run_count}x</Typography></TableCell>
-                    <TableCell><Typography variant="body2" fontWeight={600}>{fmt(lane.avg_net_profit)}</Typography></TableCell>
-                    <TableCell><Typography variant="body2">${Number(lane.avg_rate_per_mile || 0).toFixed(2)}/mi</Typography></TableCell>
-                    <TableCell>
-                      <Chip
-                        label={(lane.avg_net_profit || 0) > 1000 ? 'Run it' : (lane.avg_net_profit || 0) > 0 ? 'Okay' : 'Avoid'}
-                        size="small"
-                        color={(lane.avg_net_profit || 0) > 1000 ? 'success' : (lane.avg_net_profit || 0) > 0 ? 'warning' : 'error'}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Card>
+                </tr>
+              </thead>
+              <tbody>
+                {laneData.map((lane, i) => {
+                  const profit = lane.avg_net_profit || 0;
+                  const verdict = profit > 1000 ? 'Run it' : profit > 0 ? 'Okay' : 'Avoid';
+                  const vStyle = VERDICT[verdict];
+                  return (
+                    <tr key={i}>
+                      <td style={tdStyle}><strong>{lane.origin} → {lane.destination}</strong></td>
+                      <td style={tdStyle}>{lane.run_count}x</td>
+                      <td style={{ ...tdStyle, fontWeight: 600 }}>{fmt(lane.avg_net_profit)}</td>
+                      <td style={tdStyle}>${Number(lane.avg_rate_per_mile || 0).toFixed(2)}/mi</td>
+                      <td style={tdStyle}>
+                        <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: vStyle.bg, color: vStyle.color }}>
+                          {verdict}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
 
-// ── Payments tab ──────────────────────────────────────────────────────────────
 function PaymentsTab({ summary, loading, error }) {
   if (loading) return <SkeletonCards />;
-  if (error)   return <Alert severity="error">{error}</Alert>;
+  if (error)   return <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>;
 
   const gross    = summary?.total_gross || 0;
   const net      = summary?.total_net   || 0;
@@ -193,25 +204,27 @@ function PaymentsTab({ summary, loading, error }) {
     <EmptyState icon="cash-outline" title="No payment data yet" subtitle="Payment analytics will appear once you complete loads." />
   );
 
-  const pieData  = [
+  const pieData = [
     { name: 'Net Profit', value: net      > 0 ? net      : 0 },
     { name: 'Expenses',   value: expenses > 0 ? expenses : 0 },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <KpiRow items={[
-        { label: 'Total Gross Revenue', value: fmt(gross),    color: 'primary.main' },
-        { label: 'Total Net Profit',    value: fmt(net),      color: 'success.main' },
-        { label: 'Total Expenses',      value: fmt(expenses), color: 'warning.main' },
-        { label: 'Profit Margin',       value: gross > 0 ? `${((net / gross) * 100).toFixed(1)}%` : '—', color: 'info.main' },
+        { label: 'Total Gross Revenue', value: fmt(gross),    color: 'var(--ion-color-primary)' },
+        { label: 'Total Net Profit',    value: fmt(net),      color: '#2e7d32' },
+        { label: 'Total Expenses',      value: fmt(expenses), color: '#ed6c02' },
+        { label: 'Profit Margin',       value: gross > 0 ? `${((net / gross) * 100).toFixed(1)}%` : '—', color: '#0288d1' },
       ]} />
 
-      <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
         {weekly.length > 0 && (
-          <Card sx={{ flex: '1 1 320px' }}>
-            <CardContent>
-              <Typography variant="subtitle1" fontWeight={600} gutterBottom>Gross vs Net by Week</Typography>
+          <div style={{ ...cardStyle, flex: '1 1 320px' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Gross vs Net by Week</span>
+            </div>
+            <div style={{ padding: 16 }}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={weekly} barGap={4}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
@@ -222,13 +235,15 @@ function PaymentsTab({ summary, loading, error }) {
                   <Bar dataKey="net"   name="Net"   fill="#2E7D32" fillOpacity={0.85} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
-        <Card sx={{ flex: '0 0 280px' }}>
-          <CardContent>
-            <Typography variant="subtitle1" fontWeight={600} gutterBottom>Profit Breakdown</Typography>
+        <div style={{ ...cardStyle, flex: '0 0 280px' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Profit Breakdown</span>
+          </div>
+          <div style={{ padding: 16 }}>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} dataKey="value" paddingAngle={3}>
@@ -240,14 +255,21 @@ function PaymentsTab({ summary, loading, error }) {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Drivers tab ───────────────────────────────────────────────────────────────
+function Avatar({ name }) {
+  return (
+    <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#fff' }}>{name.charAt(0).toUpperCase()}</span>
+    </div>
+  );
+}
+
 function DriversTab() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -269,71 +291,64 @@ function DriversTab() {
   const pending = drivers.filter(d => !d.invite_accepted).length;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <KpiRow items={[
         { label: 'Total Drivers',  value: drivers.length },
         { label: 'Active',         value: active },
         { label: 'Invite Pending', value: pending },
       ]} />
 
-      <Card>
-        <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle1" fontWeight={600}>Driver Roster</Typography>
-        </Box>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
+      <div style={cardStyle}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Driver Roster</span>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
                 {['Driver', 'License', 'Status'].map(h => (
-                  <TableCell key={h} sx={{ textTransform: 'uppercase', fontSize: '0.7rem', fontWeight: 700, letterSpacing: 0.5, color: 'secondary.main', bgcolor: 'action.hover' }}>
-                    {h}
-                  </TableCell>
+                  <th key={h} style={thStyle}>{h}</th>
                 ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {drivers.map((d, i) => (
-                <TableRow key={d.id} sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.8rem', fontWeight: 700 }}>
-                        {d.name.charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>{d.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">{d.email}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" color="text.secondary">{d.license_number || '—'}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={d.invite_accepted ? 'Active' : 'Pending'}
-                      size="small"
-                      color={d.invite_accepted ? 'success' : 'warning'}
-                      variant="outlined"
-                    />
-                  </TableCell>
-                </TableRow>
+              </tr>
+            </thead>
+            <tbody>
+              {drivers.map((d) => (
+                <tr key={d.id}>
+                  <td style={tdStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <Avatar name={d.name} />
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{d.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{d.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ ...tdStyle, color: 'var(--ion-color-medium)' }}>{d.license_number || '—'}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600,
+                      border: `1px solid ${d.invite_accepted ? '#2e7d32' : '#ed6c02'}`,
+                      color: d.invite_accepted ? '#2e7d32' : '#ed6c02',
+                    }}>
+                      {d.invite_accepted ? 'Active' : 'Pending'}
+                    </span>
+                  </td>
+                </tr>
               ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-    </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Imports tab ───────────────────────────────────────────────────────────────
 function ImportsTab() {
   return (
     <EmptyState icon="cloud-upload-outline" title="Imports coming soon" subtitle="CSV and TMS data imports will be available here." />
   );
 }
 
-// ── Root ──────────────────────────────────────────────────────────────────────
 export default function CarrierAnalytics() {
   const [searchParams] = useSearchParams();
   const [summary, setSummary] = useState(null);
@@ -350,11 +365,11 @@ export default function CarrierAnalytics() {
   }, []);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {activeTab === 'loads'    && <LoadsTab    summary={summary} loading={loading} error={error} />}
       {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
       {activeTab === 'drivers'  && <DriversTab />}
       {activeTab === 'imports'  && <ImportsTab />}
-    </Box>
+    </div>
   );
 }

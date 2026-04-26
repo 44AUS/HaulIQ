@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Avatar, IconButton, Tooltip,
-  CircularProgress, TextField, InputAdornment,
-  ToggleButtonGroup, ToggleButton, Chip,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -19,140 +15,110 @@ function initials(name) {
   return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-// ─── Connection row ────────────────────────────────────────────────────────────
+const avatarStyle = (bg = 'var(--ion-color-primary)') => ({
+  width: 40, height: 40, borderRadius: '50%', backgroundColor: bg,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  fontWeight: 700, fontSize: '0.85rem', color: '#fff', flexShrink: 0,
+  overflow: 'hidden',
+});
+
 function ConnectionRow({ conn, onRemove, userRole }) {
   const navigate = useNavigate();
   return (
-    <Box
+    <div
       onClick={() => navigate(profilePath(conn))}
-      sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, cursor: 'pointer', gap: 1.5 }}
+      style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12 }}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
     >
-      <Avatar
-        src={conn.avatar_url || undefined}
-        sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}
-      >
-        {initials(conn.name)}
-      </Avatar>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={600} noWrap>{conn.name}</Typography>
-        <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ textTransform: 'capitalize' }}>
-          {conn.role}{conn.company ? ` · ${conn.company}` : ''}
-          {conn.mc_number ? ` · MC-${conn.mc_number}` : ''}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-        <Tooltip title="Message">
-          <IconButton size="small" component={Link} to={`/${userRole}/messages?userId=${conn.user_id}`} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>
-            <IonIcon name="chatbubble-outline" sx={{ fontSize: 17 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Remove">
-          <IconButton size="small" onClick={() => onRemove(conn.id)} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}>
-            <IonIcon name="trash-outline" sx={{ fontSize: 17 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
-    </Box>
+      <div style={avatarStyle()}>
+        {conn.avatar_url ? <img src={conn.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials(conn.name)}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conn.name}</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {conn.role}{conn.company ? ` · ${conn.company}` : ''}{conn.mc_number ? ` · MC-${conn.mc_number}` : ''}
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+        <Link to={`/${userRole}/messages?userId=${conn.user_id}`} title="Message" style={{ display: 'flex', padding: 6, color: 'var(--ion-color-medium)', borderRadius: 4 }}>
+          <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} />
+        </Link>
+        <button title="Remove" onClick={() => onRemove(conn.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', borderRadius: 4 }}>
+          <IonIcon name="trash-outline" style={{ fontSize: 16 }} />
+        </button>
+      </div>
+      <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+    </div>
   );
 }
 
-// ─── Pending request row ───────────────────────────────────────────────────────
 function PendingRow({ req, onRespond, responding }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}>
-      <Avatar
-        component={Link}
-        to={profilePath(req)}
-        src={req.avatar_url || undefined}
-        sx={{ width: 40, height: 40, bgcolor: 'warning.dark', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0, textDecoration: 'none' }}
-      >
-        {initials(req.name)}
-      </Avatar>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={600} noWrap>{req.name}</Typography>
-        <Typography variant="caption" color="text.secondary" noWrap display="block">
-          {req.company || 'Wants to connect with you'}
-        </Typography>
-      </Box>
-
-      <Box sx={{ display: 'flex', gap: 0.75, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-        <Tooltip title="Accept">
-          <IconButton size="small" onClick={() => onRespond(req.id, true)} disabled={responding === req.id + '_accept'} sx={{ color: 'success.main' }}>
-            <IonIcon name="checkmark-outline" sx={{ fontSize: 17 }} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Ignore">
-          <IconButton size="small" onClick={() => onRespond(req.id, false)} disabled={responding === req.id + '_decline'} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}>
-            <IonIcon name="close-outline" sx={{ fontSize: 17 }} />
-          </IconButton>
-        </Tooltip>
-      </Box>
-
-      <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
-    </Box>
+    <div style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', gap: 12 }}>
+      <Link to={profilePath(req)} style={{ textDecoration: 'none' }}>
+        <div style={avatarStyle('#b45309')}>
+          {req.avatar_url ? <img src={req.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials(req.name)}
+        </div>
+      </Link>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.name}</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{req.company || 'Wants to connect with you'}</div>
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+        <button title="Accept" onClick={() => onRespond(req.id, true)} disabled={responding === req.id + '_accept'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2dd36f', padding: 6, display: 'flex', borderRadius: 4 }}>
+          <IonIcon name="checkmark-outline" style={{ fontSize: 16 }} />
+        </button>
+        <button title="Ignore" onClick={() => onRespond(req.id, false)} disabled={responding === req.id + '_decline'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', borderRadius: 4 }}>
+          <IonIcon name="close-outline" style={{ fontSize: 16 }} />
+        </button>
+      </div>
+      <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+    </div>
   );
 }
 
-// ─── Suggestion / search result row ───────────────────────────────────────────
 function SuggestRow({ user, onConnect, connecting }) {
   const navigate = useNavigate();
   const status = user.connection_status;
   return (
-    <Box onClick={() => navigate(profilePath(user))} sx={{ display: 'flex', alignItems: 'center', px: 3, py: 1.5, borderBottom: 1, borderColor: 'divider', '&:hover': { bgcolor: 'action.hover' }, cursor: 'pointer', gap: 1.5 }}>
-      <Avatar
-        src={user.avatar_url || undefined}
-        sx={{ width: 40, height: 40, bgcolor: 'secondary.dark', fontWeight: 700, fontSize: '0.85rem', flexShrink: 0 }}
-      >
-        {initials(user.name)}
-      </Avatar>
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="body2" fontWeight={600} noWrap>{user.name}</Typography>
-        <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ textTransform: 'capitalize' }}>
-          {user.role}{user.company ? ` · ${user.company}` : ''}
-          {user.mc_number ? ` · MC-${user.mc_number}` : ''}
-        </Typography>
-      </Box>
-
-      <Box sx={{ flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+    <div onClick={() => navigate(profilePath(user))} style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12 }}
+      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'}
+      onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
+      <div style={avatarStyle('#374151')}>
+        {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials(user.name)}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.name}</div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', textTransform: 'capitalize', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {user.role}{user.company ? ` · ${user.company}` : ''}{user.mc_number ? ` · MC-${user.mc_number}` : ''}
+        </div>
+      </div>
+      <div style={{ flexShrink: 0 }} onClick={e => e.stopPropagation()}>
         {status === 'accepted' ? (
-          <Chip label="Connected" size="small" color="success" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+          <span style={{ color: '#2dd36f', border: '1px solid rgba(45,211,111,0.4)', borderRadius: 10, padding: '2px 8px', fontSize: '0.7rem', fontWeight: 600 }}>Connected</span>
         ) : status === 'pending' ? (
-          <Chip label="Pending" size="small" color="warning" variant="outlined" sx={{ fontSize: '0.7rem' }} />
+          <span style={{ color: 'var(--ion-color-warning)', border: '1px solid rgba(255,196,9,0.4)', borderRadius: 10, padding: '2px 8px', fontSize: '0.7rem', fontWeight: 600 }}>Pending</span>
         ) : (
-          <Tooltip title="Connect">
-            <IconButton size="small" onClick={() => onConnect(user)} disabled={connecting === user.user_id} sx={{ color: 'primary.main' }}>
-              <IonIcon name="person-add-outline" sx={{ fontSize: 17 }} />
-            </IconButton>
-          </Tooltip>
+          <button title="Connect" onClick={() => onConnect(user)} disabled={connecting === user.user_id} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', padding: 6, display: 'flex', borderRadius: 4 }}>
+            <IonIcon name="person-add-outline" style={{ fontSize: 16 }} />
+          </button>
         )}
-      </Box>
-
-      <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
-    </Box>
+      </div>
+      <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+    </div>
   );
 }
 
-// ─── Section header (matches Drivers group header) ────────────────────────────
 function SectionHeader({ label, count }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 0.75, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default' }}>
-      <Typography variant="caption" sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.disabled', letterSpacing: '0.04em' }}>
-        {label}
-      </Typography>
-      <Typography variant="caption" sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'text.disabled' }}>
-        {count}
-      </Typography>
-    </Box>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)' }}>
+      <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--ion-color-medium)', letterSpacing: '0.04em' }}>{label}</span>
+      <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--ion-color-medium)' }}>{count}</span>
+    </div>
   );
 }
 
-// ─── Main component ────────────────────────────────────────────────────────────
 export default function Network() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -234,117 +200,90 @@ export default function Network() {
     : suggestions;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '10px', alignItems: 'center' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '8px', width: '100%', maxWidth: 1200, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 10, alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, width: '100%', maxWidth: 1200, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
-      {/* ── Header row ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0 }}>
-        <Typography variant="h6" fontWeight={700}>Network</Typography>
-        <ToggleButtonGroup
-          value={activeTab}
-          exclusive
-          onChange={(_, v) => v && navigate(`?tab=${v}`)}
-          size="small"
-          sx={{
-            bgcolor: 'action.hover',
-            borderRadius: '10px',
-            p: '3px',
-            gap: '2px',
-            '& .MuiToggleButtonGroup-grouped': { border: '0 !important', borderRadius: '8px !important', mx: 0 },
-            '& .MuiToggleButton-root': {
-              fontSize: '0.78rem', fontWeight: 600, textTransform: 'none', px: 2, py: 0.55,
-              color: 'text.secondary',
-              '&.Mui-selected': { bgcolor: 'background.paper', color: 'text.primary', boxShadow: '0 1px 4px rgba(0,0,0,0.15)', '&:hover': { bgcolor: 'background.paper' } },
-              '&:hover': { bgcolor: 'transparent' },
-            },
-          }}
-        >
-          <ToggleButton value="connections" disableRipple>
-            Connections {pending.length > 0 && `(${pending.length})`}
-          </ToggleButton>
-          <ToggleButton value="know" disableRipple>People You May Know</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
+          <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Network</span>
+          <div style={{ display: 'flex', backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: 10, padding: 3, gap: 2 }}>
+            {[
+              { value: 'connections', label: `Connections${pending.length > 0 ? ` (${pending.length})` : ''}` },
+              { value: 'know', label: 'People You May Know' },
+            ].map(tab => (
+              <button key={tab.value} onClick={() => navigate(`?tab=${tab.value}`)}
+                style={{ background: activeTab === tab.value ? 'var(--ion-card-background)' : 'transparent', color: activeTab === tab.value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: activeTab === tab.value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none' }}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {/* ── Search bar ── */}
-      <Box sx={{ px: 3, pb: 1.5, flexShrink: 0 }}>
-        <TextField
-          size="small"
-          fullWidth
-          placeholder="Search by name, company, or MC number…"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <IonIcon name="search-outline" sx={{ fontSize: 17, color: 'text.disabled' }} />
-              </InputAdornment>
-            ),
-            endAdornment: searching ? (
-              <InputAdornment position="end"><CircularProgress size={14} /></InputAdornment>
-            ) : query ? (
-              <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setQuery('')}>
-                  <IonIcon name="close-outline" sx={{ fontSize: 15 }} />
-                </IconButton>
-              </InputAdornment>
-            ) : null,
-          }}
-        />
-      </Box>
-
-      {/* ── List ── */}
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
-        ) : activeTab === 'connections' ? (
-          <>
-            {/* Pending requests */}
-            {pending.length > 0 && (
-              <>
-                <SectionHeader label="PENDING REQUESTS" count={pending.length} />
-                {pending.map(req => (
-                  <PendingRow key={req.id} req={req} onRespond={handleRespond} responding={responding} />
-                ))}
-              </>
+        {/* Search */}
+        <div style={{ padding: '0 24px 12px', flexShrink: 0 }}>
+          <div style={{ position: 'relative' }}>
+            <IonIcon name="search-outline" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
+            <input
+              placeholder="Search by name, company, or MC number…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 36px', outline: 'none', fontFamily: 'inherit' }}
+            />
+            {searching && (
+              <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>
+                <IonSpinner name="crescent" style={{ width: 14, height: 14 }} />
+              </div>
             )}
-
-            {/* Connections */}
-            <SectionHeader label="MY CONNECTIONS" count={filteredConnections.length} />
-            {filteredConnections.length === 0 ? (
-              <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Typography variant="body2" color="text.disabled">
-                  {isSearchActive ? 'No connections match your search' : 'No connections yet'}
-                </Typography>
-              </Box>
-            ) : (
-              filteredConnections.map(conn => (
-                <ConnectionRow key={conn.id} conn={conn} onRemove={handleRemove} userRole={user?.role} />
-              ))
+            {!searching && query && (
+              <button onClick={() => setQuery('')} style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+                <IonIcon name="close-outline" style={{ fontSize: 14 }} />
+              </button>
             )}
-          </>
-        ) : (
-          <>
-            {/* People You May Know */}
-            <SectionHeader label={isSearchActive ? 'SEARCH RESULTS' : 'SUGGESTED'} count={rightColumnItems.length} />
-            {searching ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={24} /></Box>
-            ) : rightColumnItems.length === 0 ? (
-              <Box sx={{ px: 3, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-                <Typography variant="body2" color="text.disabled">
-                  {isSearchActive ? 'No results found' : 'No suggestions right now'}
-                </Typography>
-              </Box>
-            ) : (
-              rightColumnItems.map(u => (
-                <SuggestRow key={u.user_id} user={u} onConnect={handleConnect} connecting={connecting} />
-              ))
-            )}
-          </>
-        )}
-      </Box>
+          </div>
+        </div>
 
-    </Box>
-    </Box>
+        {/* List */}
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}><IonSpinner name="crescent" /></div>
+          ) : activeTab === 'connections' ? (
+            <>
+              {pending.length > 0 && (
+                <>
+                  <SectionHeader label="PENDING REQUESTS" count={pending.length} />
+                  {pending.map(req => <PendingRow key={req.id} req={req} onRespond={handleRespond} responding={responding} />)}
+                </>
+              )}
+              <SectionHeader label="MY CONNECTIONS" count={filteredConnections.length} />
+              {filteredConnections.length === 0 ? (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+                    {isSearchActive ? 'No connections match your search' : 'No connections yet'}
+                  </span>
+                </div>
+              ) : (
+                filteredConnections.map(conn => <ConnectionRow key={conn.id} conn={conn} onRemove={handleRemove} userRole={user?.role} />)
+              )}
+            </>
+          ) : (
+            <>
+              <SectionHeader label={isSearchActive ? 'SEARCH RESULTS' : 'SUGGESTED'} count={rightColumnItems.length} />
+              {searching ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}><IonSpinner name="crescent" style={{ width: 24, height: 24 }} /></div>
+              ) : rightColumnItems.length === 0 ? (
+                <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+                    {isSearchActive ? 'No results found' : 'No suggestions right now'}
+                  </span>
+                </div>
+              ) : (
+                rightColumnItems.map(u => <SuggestRow key={u.user_id} user={u} onConnect={handleConnect} connecting={connecting} />)
+              )}
+            </>
+          )}
+        </div>
+
+      </div>
+    </div>
   );
 }

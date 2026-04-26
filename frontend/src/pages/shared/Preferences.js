@@ -1,10 +1,8 @@
 import { useSearchParams } from 'react-router-dom';
-import { Box, Typography, Card, CardContent, CardActionArea } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import BrandingSettings from './BrandingSettings';
 import Equipment from '../carrier/Equipment';
 import IonIcon from '../../components/IonIcon';
-
 
 const CARDS = [
   { key: 'branding',      icon: 'color-palette-outline',    title: 'Branding',       desc: 'Customize your navigation bar color and visual identity.',   available: true },
@@ -19,54 +17,45 @@ const CARDS = [
 
 function ComingSoon({ label }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, gap: 1.5 }}>
-      <IonIcon name="options-outline" sx={{ fontSize: 44, color: 'text.disabled' }} />
-      <Typography variant="h6" fontWeight={600} color="text.secondary">{label}</Typography>
-      <Typography variant="body2" color="text.disabled">Coming soon</Typography>
-    </Box>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, gap: 12 }}>
+      <IonIcon name="options-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)' }} />
+      <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-color-medium)' }}>{label}</span>
+      <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium-shade)' }}>Coming soon</span>
+    </div>
   );
 }
 
 function AllCards({ user, onSelect }) {
   const cards = CARDS.filter(c => !c.carrierOnly || user?.role === 'carrier');
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 2, p: 3 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, padding: 24 }}>
       {cards.map(card => (
-        <Card
+        <div
           key={card.key}
-          variant="outlined"
-          sx={{
-            height: '100%',
+          onClick={card.available ? () => onSelect(card.key) : undefined}
+          style={{
+            backgroundColor: 'var(--ion-card-background)',
+            border: '1px solid var(--ion-border-color)',
+            borderRadius: 8,
+            padding: 20,
+            display: 'flex',
+            flexDirection: 'column',
             opacity: card.available ? 1 : 0.55,
-            transition: 'all 0.15s',
-            ...(card.available && { '&:hover': { borderColor: 'primary.main', boxShadow: 3, cursor: 'pointer' } }),
+            cursor: card.available ? 'pointer' : 'default',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
           }}
         >
-          {card.available ? (
-            <CardActionArea onClick={() => onSelect(card.key)} sx={{ height: '100%', alignItems: 'flex-start' }}>
-              <CardContent sx={{ p: 2.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
-                  <IonIcon name={card.icon} sx={{ fontSize: 22, color: 'primary.main' }} />
-                  <Typography variant="subtitle2" fontWeight={700}>{card.title}</Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, fontSize: '0.8rem' }}>
-                  {card.desc}
-                </Typography>
-              </CardContent>
-            </CardActionArea>
-          ) : (
-            <CardContent sx={{ p: 2.5, display: 'flex', flexDirection: 'column' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.25 }}>
-                <IonIcon name={card.icon} sx={{ fontSize: 22, color: 'text.disabled' }} />
-                <Typography variant="subtitle2" fontWeight={700} color="text.secondary">{card.title}</Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5, fontSize: '0.8rem' }}>{card.desc}</Typography>
-              <Typography variant="caption" color="text.disabled" sx={{ mt: 'auto', pt: 1.5 }}>Coming soon</Typography>
-            </CardContent>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+            <IonIcon name={card.icon} style={{ fontSize: 22, color: card.available ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }} />
+            <span style={{ fontWeight: 700, fontSize: '0.875rem', color: card.available ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{card.title}</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--ion-color-medium)', lineHeight: 1.5, flex: 1 }}>{card.desc}</p>
+          {!card.available && (
+            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium-shade)', marginTop: 12 }}>Coming soon</span>
           )}
-        </Card>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -78,17 +67,17 @@ export default function Preferences() {
   const goToTab = (key) => setSearchParams({ tab: key }, { replace: true });
 
   return (
-    <Box sx={{ height: '100%' }}>
-      {activeTab === 'all'          && <AllCards user={user} onSelect={goToTab} />}
-      {activeTab === 'branding'     && <BrandingSettings embedded />}
-      {activeTab === 'equipment'    && user?.role === 'carrier' && <Equipment />}
-      {activeTab === 'equipment'    && user?.role !== 'carrier' && <ComingSoon label="Equipment" />}
-      {activeTab === 'notifications'&& <ComingSoon label="Notifications" />}
-      {activeTab === 'documents'    && <ComingSoon label="Documents" />}
-      {activeTab === 'billing'      && <ComingSoon label="Billing" />}
-      {activeTab === 'privacy'      && <ComingSoon label="Privacy" />}
-      {activeTab === 'security'     && <ComingSoon label="Security" />}
-      {activeTab === 'support'      && <ComingSoon label="Support" />}
-    </Box>
+    <div style={{ height: '100%' }}>
+      {activeTab === 'all'           && <AllCards user={user} onSelect={goToTab} />}
+      {activeTab === 'branding'      && <BrandingSettings embedded />}
+      {activeTab === 'equipment'     && user?.role === 'carrier' && <Equipment />}
+      {activeTab === 'equipment'     && user?.role !== 'carrier' && <ComingSoon label="Equipment" />}
+      {activeTab === 'notifications' && <ComingSoon label="Notifications" />}
+      {activeTab === 'documents'     && <ComingSoon label="Documents" />}
+      {activeTab === 'billing'       && <ComingSoon label="Billing" />}
+      {activeTab === 'privacy'       && <ComingSoon label="Privacy" />}
+      {activeTab === 'security'      && <ComingSoon label="Security" />}
+      {activeTab === 'support'       && <ComingSoon label="Support" />}
+    </div>
   );
 }

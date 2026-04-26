@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { IonSpinner } from '@ionic/react';
 import { bookingsApi, locationsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
-import {
-  Box, Typography, Button, Card, CardContent, CircularProgress, Alert,
-} from '@mui/material';
 
-// Ensure ISO string is treated as UTC even if it lacks a Z suffix
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+
 function toUtc(iso) {
   if (!iso) return null;
   return iso.endsWith('Z') || iso.includes('+') ? new Date(iso) : new Date(iso + 'Z');
@@ -64,7 +63,6 @@ export default function TrackLoad() {
       .finally(() => setLoading(false));
   }, [bookingId]);
 
-  // Reverse-geocode coords to a readable city if the API didn't provide one
   useEffect(() => {
     if (!location?.available) return;
     if (location.city) { setCityLabel(location.city); return; }
@@ -88,166 +86,137 @@ export default function TrackLoad() {
   };
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
-    </Box>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}><IonSpinner name="crescent" /></div>
   );
 
   if (error && !booking) return (
-    <Box sx={{ textAlign: 'center', py: 8 }}>
-      <IonIcon name="warning-outline" sx={{ fontSize: 40, color: 'error.main', mb: 1.5 }} />
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{error}</Typography>
-      <Button variant="text" onClick={() => navigate(-1)}>Go back</Button>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '64px 0' }}>
+      <IonIcon name="warning-outline" style={{ fontSize: 40, color: '#d32f2f', display: 'block', margin: '0 auto 12px' }} />
+      <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{error}</p>
+      <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontSize: '0.875rem', fontFamily: 'inherit' }}>Go back</button>
+    </div>
   );
 
   const isInTransit = booking?.status === 'in_transit';
 
   return (
-    <Box sx={{ maxWidth: 520, mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-      <Button
-        startIcon={<IonIcon name="arrow-back-outline" />}
-        variant="text"
+    <div style={{ maxWidth: 520, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <button
         onClick={() => navigate('/broker/active')}
-        sx={{ alignSelf: 'flex-start' }}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontSize: '0.875rem', fontFamily: 'inherit', alignSelf: 'flex-start', padding: 0 }}
       >
-        Back to Active Loads
-      </Button>
+        <IonIcon name="arrow-back-outline" style={{ fontSize: 16 }} /> Back to Active Loads
+      </button>
 
       {/* Load summary */}
-      <Card variant="outlined">
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <IonIcon name="navigate-outline" color="primary" sx={{ fontSize: 18 }} />
-            <Typography variant="subtitle1" fontWeight={700}>Locate Load</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">{load?.origin} → {load?.destination}</Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div style={cardStyle}>
+        <div style={{ padding: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <IonIcon name="navigate-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 18 }} />
+            <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Locate Load</span>
+          </div>
+          <p style={{ margin: '0 0 2px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{load?.origin} → {load?.destination}</p>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
             {load?.miles} mi · {load?.commodity} · {booking?.carrier_name}
-          </Typography>
-        </CardContent>
-      </Card>
+          </span>
+        </div>
+      </div>
 
       {/* Last known location */}
       {location?.available && (
-        <Card sx={{ border: '1px solid', borderColor: 'success.main', bgcolor: 'rgba(46,125,50,0.04)' }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}>
-              <Box sx={{
-                width: 40, height: 40, borderRadius: '50%',
-                bgcolor: 'rgba(46,125,50,0.1)', border: '1px solid',
-                borderColor: 'success.main',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              }}>
-                <IonIcon name="location-outline" sx={{ color: 'success.main' }} />
-              </Box>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="caption" color="text.secondary">Last known location</Typography>
-                <Typography variant="body2" fontWeight={600}>
+        <div style={{ ...cardStyle, border: '1px solid #2e7d32', backgroundColor: 'rgba(46,125,50,0.04)' }}>
+          <div style={{ padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(46,125,50,0.1)', border: '1px solid #2e7d32', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <IonIcon name="location-outline" style={{ color: '#2e7d32' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>Last known location</span>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)', display: 'block' }}>
                   {booking?.carrier_name || 'Carrier'} is currently near
-                </Typography>
-                <Typography variant="h6" fontWeight={700} color="success.main">
-                  {cityLabel || '…'}
-                </Typography>
+                </span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2e7d32', display: 'block' }}>{cityLabel || '…'}</span>
                 {location.updated_at && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                    <IonIcon name="time-outline" sx={{ fontSize: 12, color: 'text.disabled' }} />
-                    <Typography variant="caption" color="text.disabled">
-                      Shared {timeAgo(location.updated_at)}
-                    </Typography>
-                  </Box>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 4, fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+                    <IonIcon name="time-outline" style={{ fontSize: 12 }} /> Shared {timeAgo(location.updated_at)}
+                  </span>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
             {location.lat && location.lng && (
-              <Button
-                component={Link}
+              <Link
                 to={`/map/${location.lat}/${location.lng}/${encodeURIComponent(cityLabel || '')}/${encodeURIComponent(booking?.carrier_name || 'Carrier')}`}
-                variant="contained"
-                color="success"
-                fullWidth
-                startIcon={<IonIcon name="location-outline" />}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', backgroundColor: '#2e7d32', color: '#fff', borderRadius: 6, textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}
               >
-                View Map
-              </Button>
+                <IonIcon name="location-outline" style={{ fontSize: 16 }} /> View Map
+              </Link>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       {/* Locate / request section */}
-      <Card variant="outlined">
-        <CardContent sx={{ textAlign: 'center' }}>
+      <div style={cardStyle}>
+        <div style={{ padding: 16, textAlign: 'center' }}>
           {!isInTransit ? (
-            <Box>
-              <IonIcon name="navigate-outline" sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
-              <Typography variant="body2" color="text.secondary">
+            <div>
+              <IonIcon name="navigate-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 8px' }} />
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
                 Location requests can only be sent once the load is in transit.
-              </Typography>
-            </Box>
+              </p>
+            </div>
           ) : requested ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
-              <IonIcon name="checkmark-circle" sx={{ fontSize: 44, color: 'success.main' }} />
-              <Box>
-                <Typography variant="subtitle1" fontWeight={700}>Request Sent!</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <IonIcon name="checkmark-circle" style={{ fontSize: 44, color: '#2e7d32', display: 'block' }} />
+              <div>
+                <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Request Sent!</p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
                   {booking?.carrier_name || 'The carrier'} will receive a notification in messages to share their location.
-                </Typography>
-              </Box>
-              <Button
-                component={Link}
+                </p>
+              </div>
+              <Link
                 to="/broker/messages"
-                variant="text"
-                startIcon={<IonIcon name="chatbubble-outline" />}
-                color="primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--ion-color-primary)', textDecoration: 'none', fontSize: '0.875rem' }}
               >
-                View in Messages
-              </Button>
-            </Box>
+                <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} /> View in Messages
+              </Link>
+            </div>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <Box>
-                <IonIcon name="navigate-outline" sx={{ fontSize: 40, color: 'text.secondary', mb: 1 }} />
-                <Typography variant="subtitle1" fontWeight={700}>Request Carrier Location</Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+              <div>
+                <IonIcon name="navigate-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 8px' }} />
+                <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Request Carrier Location</p>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
                   Sends a message to {booking?.carrier_name || 'the carrier'} asking them to share their current location.
                   They'll see it in messages and can respond with one tap.
-                </Typography>
-              </Box>
+                </p>
+              </div>
               {error && (
-                <Alert severity="error" icon={<IonIcon name="warning-outline" />} sx={{ width: '100%' }}>
-                  {error}
-                </Alert>
+                <div style={{ width: '100%', padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <IonIcon name="warning-outline" style={{ fontSize: 16 }} /> {error}
+                </div>
               )}
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
+              <button
                 onClick={handleLocate}
                 disabled={requesting}
-                startIcon={requesting ? <CircularProgress size={16} color="inherit" /> : <IonIcon name="navigate-outline" />}
-                sx={{ py: 1.5 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '12px 0', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: requesting ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: requesting ? 0.7 : 1 }}
               >
+                {requesting ? <IonSpinner name="crescent" style={{ width: 16, height: 16, color: '#fff' }} /> : <IonIcon name="navigate-outline" style={{ fontSize: 16 }} />}
                 {requesting ? 'Sending…' : 'Locate Load'}
-              </Button>
-            </Box>
+              </button>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Link to messages */}
       {!requested && (
-        <Button
-          component={Link}
+        <Link
           to="/broker/messages"
-          variant="outlined"
-          color="inherit"
-          startIcon={<IonIcon name="chatbubble-outline" />}
-          fullWidth
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 0', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}
         >
-          View Messages with Carrier
-        </Button>
+          <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} /> View Messages with Carrier
+        </Link>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Typography, Card, CardContent, Alert, Skeleton,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow
-} from '@mui/material';
+import { useState, useEffect } from 'react';
 import { analyticsApi } from '../../services/api';
 import { adaptHistory } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
 
-const ScoreIcon = ({ score }) => {
-  if (score === 'green') return <IonIcon name="trending-up-outline" sx={{ fontSize: 16, color: 'success.main' }} />;
-  if (score === 'yellow') return <IonIcon name="remove-outline" sx={{ fontSize: 16, color: 'warning.main' }} />;
-  return <IonIcon name="trending-down-outline" sx={{ fontSize: 16, color: 'error.main' }} />;
-};
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4, display: 'inline-block' }} />;
+}
+
+function ScoreIcon({ score }) {
+  if (score === 'green')  return <IonIcon name="trending-up-outline"   style={{ fontSize: 16, color: '#2e7d32' }} />;
+  if (score === 'yellow') return <IonIcon name="remove-outline"        style={{ fontSize: 16, color: '#ed6c02' }} />;
+  return                         <IonIcon name="trending-down-outline" style={{ fontSize: 16, color: '#d32f2f' }} />;
+}
 
 export default function LoadHistory() {
   const [history, setHistory] = useState([]);
@@ -26,142 +29,99 @@ export default function LoadHistory() {
       .finally(() => setLoading(false));
   }, []);
 
-  const totalNet = history.reduce((s, l) => s + (l.net || 0), 0);
+  const totalNet   = history.reduce((s, l) => s + (l.net  || 0), 0);
   const totalGross = history.reduce((s, l) => s + (l.rate || 0), 0);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IonIcon name="time-outline" sx={{ color: 'primary.main', fontSize: 26 }} />
-          <Typography variant="h5" fontWeight={700}>Load History</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Your completed loads
-        </Typography>
-      </Box>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <IonIcon name="time-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 26 }} />
+          <h2 style={{ margin: 0, fontWeight: 700, color: 'var(--ion-text-color)' }}>Load History</h2>
+        </div>
+        <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Your completed loads</p>
+      </div>
 
       {loading ? (
-        <Card>
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  {[...Array(5)].map((_, i) => (
-                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+        <div style={cardStyle}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {[...Array(5)].map((_, i) => <th key={i} style={thStyle}><SkeletonBox width={80} height={12} /></th>)}
+                </tr>
+              </thead>
+              <tbody>
                 {[...Array(8)].map((_, i) => (
-                  <TableRow key={i}>
+                  <tr key={i}>
                     {[120, 100, 80, 80, 80].map((w, j) => (
-                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
+                      <td key={j} style={tdStyle}><SkeletonBox width={w} height={14} /></td>
                     ))}
-                  </TableRow>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </Box>
-        </Card>
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : error ? (
-        <Alert severity="error">{error}</Alert>
+        <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>
+          {error}
+        </div>
       ) : (
         <>
           {/* Summary */}
-          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[
-              { label: 'Total Gross', value: `$${totalGross.toLocaleString()}`, highlight: false },
-              { label: 'Total Net', value: `$${totalNet.toLocaleString()}`, highlight: true },
-              { label: 'Loads Completed', value: history.length, highlight: false },
+              { label: 'Total Gross',     value: `$${totalGross.toLocaleString()}`, highlight: false },
+              { label: 'Total Net',       value: `$${totalNet.toLocaleString()}`,   highlight: true },
+              { label: 'Loads Completed', value: history.length,                   highlight: false },
             ].map(({ label, value, highlight }) => (
-              <Box key={label} sx={{ flex: '1 1 180px', minWidth: 0 }}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>{label}</Typography>
-                    <Typography variant="h4" fontWeight={800} sx={{ color: highlight ? 'primary.main' : 'text.primary' }}>
-                      {value}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Box>
+              <div key={label} style={{ ...cardStyle, flex: '1 1 180px', minWidth: 0, padding: '16px', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+                <span style={{ fontSize: '2rem', fontWeight: 800, color: highlight ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>
+                  {value}
+                </span>
+              </div>
             ))}
-          </Box>
+          </div>
 
           {history.length === 0 ? (
-            <Card>
-              <CardContent sx={{ textAlign: 'center', py: 10 }}>
-                <IonIcon name="time-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
-                <Typography variant="body1" color="text.secondary">No completed loads yet.</Typography>
-              </CardContent>
-            </Card>
+            <div style={{ ...cardStyle, padding: '80px 0', textAlign: 'center' }}>
+              <IonIcon name="time-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+              <p style={{ margin: 0, fontSize: '1rem', color: 'var(--ion-color-medium)' }}>No completed loads yet.</p>
+            </div>
           ) : (
-            <Card>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
+            <div style={cardStyle}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+                  <thead>
+                    <tr>
                       {['Date', 'Route', 'Miles', 'Rate', 'Net Profit', 'Broker', 'Score'].map(h => (
-                        <TableCell
-                          key={h}
-                          sx={{
-                            textTransform: 'uppercase',
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            letterSpacing: 0.5,
-                            color: 'secondary.main',
-                            bgcolor: 'action.hover',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {h}
-                        </TableCell>
+                        <th key={h} style={thStyle}>{h}</th>
                       ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {history.map((load, idx) => (
-                      <TableRow
-                        key={load.id}
-                        sx={{ '&:nth-of-type(odd)': { bgcolor: 'action.hover' } }}
-                      >
-                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          <Typography variant="caption" color="text.secondary">{load.date}</Typography>
-                        </TableCell>
-                        <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                          <Typography variant="body2" fontWeight={600}>{load.origin} → {load.dest}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">{load.miles}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">${(load.rate || 0).toLocaleString()}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            fontWeight={700}
-                            sx={{ color: (load.net || 0) > 0 ? 'success.main' : 'error.main' }}
-                          >
-                            {(load.net || 0) >= 0 ? '+' : ''}${(load.net || 0).toLocaleString()}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="caption" color="text.secondary">{load.broker}</Typography>
-                        </TableCell>
-                        <TableCell>
-                          <ScoreIcon score={load.score} />
-                        </TableCell>
-                      </TableRow>
+                      <tr key={load.id} style={{ backgroundColor: idx % 2 === 1 ? 'var(--ion-color-light)' : 'transparent' }}>
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{load.date}</td>
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontWeight: 600 }}>{load.origin} → {load.dest}</td>
+                        <td style={tdStyle}>{load.miles}</td>
+                        <td style={tdStyle}>${(load.rate || 0).toLocaleString()}</td>
+                        <td style={{ ...tdStyle, fontWeight: 700, color: (load.net || 0) > 0 ? '#2e7d32' : '#d32f2f' }}>
+                          {(load.net || 0) >= 0 ? '+' : ''}${(load.net || 0).toLocaleString()}
+                        </td>
+                        <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{load.broker}</td>
+                        <td style={tdStyle}><ScoreIcon score={load.score} /></td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Card>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
         </>
       )}
-    </Box>
+    </div>
   );
 }

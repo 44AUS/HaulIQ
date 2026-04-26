@@ -1,20 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, TextField, InputAdornment, Button, Avatar,
-  Chip, Table, TableHead, TableBody, TableRow, TableCell,
-  IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-  Divider, CircularProgress, Select, MenuItem, FormControl, InputLabel, Skeleton,
-} from '@mui/material';
+import { IonModal, IonSpinner } from '@ionic/react';
 import { adminApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
 
 const PLANS = ['basic', 'pro', 'elite', 'admin'];
 
-const rolePlanColor = { carrier: 'primary', broker: 'info', admin: 'secondary' };
-const planColor = (p) => p === 'elite' ? 'secondary' : p === 'pro' ? 'success' : p === 'admin' ? 'error' : 'default';
+const ROLE_BADGE = { carrier: { border: 'var(--ion-color-primary)', color: 'var(--ion-color-primary)' }, broker: { border: '#0288d1', color: '#0288d1' }, admin: { border: '#7b1fa2', color: '#7b1fa2' } };
+const PLAN_BG = { elite: '#7b1fa2', pro: '#2e7d32', admin: '#d32f2f', basic: 'var(--ion-color-medium)' };
 
-function PlanDialog({ user, onClose, onSaved }) {
+function Avatar({ name, src, size = 32 }) {
+  const initials = (name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  return (
+    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: '#1565c0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.38, fontWeight: 700, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+      {src ? <img src={src} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+    </div>
+  );
+}
+
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4 }} />;
+}
+
+function PlanModal({ user, onClose, onSaved }) {
   const [plan, setPlan] = useState(user.plan || 'basic');
   const [saving, setSaving] = useState(false);
 
@@ -31,30 +43,30 @@ function PlanDialog({ user, onClose, onSaved }) {
   }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        Change Plan — {user.name}
-        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <FormControl fullWidth size="small" sx={{ mt: 1 }}>
-          <InputLabel>Plan</InputLabel>
-          <Select value={plan} label="Plan" onChange={e => setPlan(e.target.value)}>
-            {PLANS.map(p => <MenuItem key={p} value={p} sx={{ textTransform: 'capitalize' }}>{p}</MenuItem>)}
-          </Select>
-        </FormControl>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button onClick={onClose} variant="outlined" fullWidth>Cancel</Button>
-        <Button onClick={handleSave} variant="contained" fullWidth disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '360px', '--height': 'auto', '--border-radius': '12px', '--z-index': '20001' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Change Plan — {user.name}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 20 }} /></button>
+        </div>
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 }}>Plan</label>
+          <select value={plan} onChange={e => setPlan(e.target.value)} style={{ ...inputStyle, padding: '7px 12px' }}>
+            {PLANS.map(p => <option key={p} value={p} style={{ textTransform: 'capitalize' }}>{p}</option>)}
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '8px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>Cancel</button>
+          <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: '8px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
-function UserDetailDialog({ user, onClose, onUpdate, onDeleted }) {
+function UserDetailModal({ user, onClose, onUpdate, onDeleted }) {
   const [planOpen, setPlanOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [actioning, setActioning] = useState(false);
@@ -63,120 +75,95 @@ function UserDetailDialog({ user, onClose, onUpdate, onDeleted }) {
   async function toggleSuspend() {
     setActioning(true);
     try {
-      if (user.is_active) {
-        await adminApi.suspend(user.id);
-        onUpdate({ ...user, is_active: false });
-      } else {
-        await adminApi.activate(user.id);
-        onUpdate({ ...user, is_active: true });
-      }
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setActioning(false);
-    }
+      if (user.is_active) { await adminApi.suspend(user.id); onUpdate({ ...user, is_active: false }); }
+      else { await adminApi.activate(user.id); onUpdate({ ...user, is_active: true }); }
+    } catch (e) { alert(e.message); }
+    finally { setActioning(false); }
   }
 
   async function handleDelete() {
     setDeleting(true);
-    try {
-      await adminApi.deleteUser(user.id);
-      onDeleted(user.id);
-      onClose();
-    } catch (e) {
-      alert(e.message);
-      setDeleting(false);
-    }
+    try { await adminApi.deleteUser(user.id); onDeleted(user.id); onClose(); }
+    catch (e) { alert(e.message); setDeleting(false); }
   }
+
+  const rows = [
+    ['Role', user.role], ['Plan', user.plan || '—'], ['Status', user.is_active ? 'Active' : 'Suspended'],
+    ['Company', user.company || '—'], ['MC Number', user.mc_number || '—'], ['State', user.business_state || '—'],
+    ['Member Since', user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'],
+  ];
 
   return (
     <>
-      <Dialog open onClose={onClose} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          User Details
-          <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, pb: 2, mb: 2, borderBottom: 1, borderColor: 'divider' }}>
-            <Avatar sx={{ width: 48, height: 48, bgcolor: 'primary.dark', fontWeight: 700, fontSize: 16 }}>
-              {(user.name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle1" fontWeight={700}>{user.name}</Typography>
-              <Typography variant="body2" color="text.secondary">{user.email}</Typography>
-            </Box>
-          </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {[
-              ['Role', user.role],
-              ['Plan', user.plan || '—'],
-              ['Status', user.is_active ? 'Active' : 'Suspended'],
-              ['Company', user.company || '—'],
-              ['MC Number', user.mc_number || '—'],
-              ['State', user.business_state || '—'],
-              ['Member Since', user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'],
-            ].map(([k, v], i, arr) => (
-              <Box key={k}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">{k}</Typography>
-                  <Typography variant="body2" fontWeight={600} sx={{ textTransform: 'capitalize' }}>{v}</Typography>
-                </Box>
-                {i < arr.length - 1 && <Divider sx={{ mt: 1.5 }} />}
-              </Box>
-            ))}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1, flexWrap: 'wrap' }}>
-          <Button variant="outlined" fullWidth onClick={() => setPlanOpen(true)}>Change Plan</Button>
-          <Button
-            variant="contained"
-            color={user.is_active ? 'error' : 'success'}
-            fullWidth
-            onClick={toggleSuspend}
-            disabled={actioning}
-          >
-            {actioning ? '…' : user.is_active ? 'Suspend' : 'Reactivate'}
-          </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            fullWidth
-            startIcon={<IonIcon name="trash-outline" />}
-            onClick={() => setConfirmDelete(true)}
-          >
-            Delete User
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '400px', '--height': 'auto', '--max-height': '90vh', '--border-radius': '12px' }}>
+        <div style={{ backgroundColor: 'var(--ion-card-background)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>User Details</span>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 20 }} /></button>
+          </div>
+          <div style={{ padding: 20, overflowY: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingBottom: 16, marginBottom: 16, borderBottom: '1px solid var(--ion-border-color)' }}>
+              <Avatar name={user.name} src={user.avatar_url} size={48} />
+              <div>
+                <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>{user.name}</p>
+                <span style={{ fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>{user.email}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {rows.map(([k, v], i) => (
+                <div key={k}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>{k}</span>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--ion-text-color)' }}>{v}</span>
+                  </div>
+                  {i < rows.length - 1 && <div style={{ borderTop: '1px solid var(--ion-border-color)', marginTop: 12 }} />}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ padding: '14px 20px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button onClick={() => setPlanOpen(true)} style={{ width: '100%', padding: '8px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.875rem', fontFamily: 'inherit', cursor: 'pointer' }}>Change Plan</button>
+            <button onClick={toggleSuspend} disabled={actioning} style={{ width: '100%', padding: '8px', backgroundColor: user.is_active ? '#d32f2f' : '#2e7d32', color: '#fff', border: 'none', borderRadius: 6, cursor: actioning ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: actioning ? 0.7 : 1 }}>
+              {actioning ? '…' : user.is_active ? 'Suspend' : 'Reactivate'}
+            </button>
+            <button onClick={() => setConfirmDelete(true)} style={{ width: '100%', padding: '8px', border: '1px solid #d32f2f', borderRadius: 6, backgroundColor: 'transparent', color: '#d32f2f', fontSize: '0.875rem', fontFamily: 'inherit', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <IonIcon name="trash-outline" style={{ fontSize: 14 }} /> Delete User
+            </button>
+          </div>
+        </div>
+      </IonModal>
 
-      {/* Delete confirmation */}
       {confirmDelete && (
-        <Dialog open onClose={() => setConfirmDelete(false)} maxWidth="xs" fullWidth>
-          <DialogTitle>Delete User?</DialogTitle>
-          <DialogContent>
-            <Typography variant="body2">
+        <IonModal isOpen onDidDismiss={() => setConfirmDelete(false)} style={{ '--width': '360px', '--height': 'auto', '--border-radius': '12px', '--z-index': '20001' }}>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+            <p style={{ margin: '0 0 8px', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Delete User?</p>
+            <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
               Permanently delete <strong>{user.name}</strong> ({user.email})? This cannot be undone.
-            </Typography>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-            <Button variant="outlined" fullWidth onClick={() => setConfirmDelete(false)}>Cancel</Button>
-            <Button variant="contained" color="error" fullWidth onClick={handleDelete} disabled={deleting}>
-              {deleting ? 'Deleting…' : 'Delete'}
-            </Button>
-          </DialogActions>
-        </Dialog>
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setConfirmDelete(false)} style={{ flex: 1, padding: '8px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.875rem', fontFamily: 'inherit', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={handleDelete} disabled={deleting} style={{ flex: 1, padding: '8px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, cursor: deleting ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: deleting ? 0.7 : 1 }}>
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </IonModal>
       )}
 
       {planOpen && (
-        <PlanDialog
-          user={user}
-          onClose={() => setPlanOpen(false)}
-          onSaved={updated => { onUpdate(updated); setPlanOpen(false); }}
-        />
+        <PlanModal user={user} onClose={() => setPlanOpen(false)} onSaved={updated => { onUpdate(updated); setPlanOpen(false); }} />
       )}
     </>
   );
 }
+
+const filterBtnStyle = (active) => ({
+  padding: '5px 12px', fontSize: '0.78rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer', borderRadius: 6,
+  backgroundColor: active ? 'var(--ion-color-primary)' : 'transparent',
+  color: active ? '#fff' : 'var(--ion-color-primary)',
+  border: '1px solid var(--ion-color-primary)',
+  textTransform: 'capitalize',
+});
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -220,211 +207,135 @@ export default function AdminUsers() {
 
   async function quickSuspend(u) {
     setActioning(a => ({ ...a, [u.id]: true }));
-    try {
-      await adminApi.suspend(u.id);
-      updateUser({ ...u, is_active: false });
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setActioning(a => ({ ...a, [u.id]: false }));
-    }
+    try { await adminApi.suspend(u.id); updateUser({ ...u, is_active: false }); }
+    catch (e) { alert(e.message); }
+    finally { setActioning(a => ({ ...a, [u.id]: false })); }
   }
 
   async function quickActivate(u) {
     setActioning(a => ({ ...a, [u.id]: true }));
-    try {
-      await adminApi.activate(u.id);
-      updateUser({ ...u, is_active: true });
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setActioning(a => ({ ...a, [u.id]: false }));
-    }
+    try { await adminApi.activate(u.id); updateUser({ ...u, is_active: true }); }
+    catch (e) { alert(e.message); }
+    finally { setActioning(a => ({ ...a, [u.id]: false })); }
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <IonIcon name="people-outline" color="primary" />
-            <Typography variant="h5" fontWeight={700}>User Management</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">{total} total users</Typography>
-        </Box>
-      </Box>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <IonIcon name="people-outline" style={{ color: 'var(--ion-color-primary)' }} />
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>User Management</h2>
+        </div>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{total} total users</p>
+      </div>
 
       {/* Filters */}
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          size="small"
-          placeholder="Search by name, email, company…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 18 }} /></InputAdornment> }}
-          sx={{ flex: 1, minWidth: 200 }}
-        />
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <IonIcon name="search-outline" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, email, company…"
+            style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px 9px 34px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', color: 'var(--ion-text-color)', fontSize: '0.875rem', outline: 'none', fontFamily: 'inherit' }} />
+        </div>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {['all', 'carrier', 'broker', 'admin'].map(r => (
-            <Button
-              key={r}
-              size="small"
-              variant={roleFilter === r ? 'contained' : 'outlined'}
-              onClick={() => setRoleFilter(r)}
-              sx={{ textTransform: 'capitalize', minWidth: 64 }}
-            >
-              {r}
-            </Button>
+            <button key={r} onClick={() => setRoleFilter(r)} style={filterBtnStyle(roleFilter === r)}>{r}</button>
           ))}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        </div>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {['all', ...PLANS].map(p => (
-            <Button
-              key={p}
-              size="small"
-              variant={planFilter === p ? 'contained' : 'outlined'}
-              color={p === 'all' ? 'primary' : p === 'elite' ? 'secondary' : p === 'pro' ? 'success' : 'primary'}
-              onClick={() => setPlanFilter(p)}
-              sx={{ textTransform: 'capitalize', minWidth: 56 }}
-            >
-              {p}
-            </Button>
+            <button key={p} onClick={() => setPlanFilter(p)} style={filterBtnStyle(planFilter === p)}>{p}</button>
           ))}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Table */}
-      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  {[...Array(7)].map((_, i) => (
-                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {[...Array(8)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[160, 80, 80, 80, 100, 80, 80].map((w, j) => (
-                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead><tr>{[...Array(7)].map((_, i) => <th key={i} style={thStyle}><SkeletonBox width={80} height={14} /></th>)}</tr></thead>
+              <tbody>{[...Array(8)].map((_, i) => <tr key={i}>{[160,80,80,80,100,80,80].map((w,j) => <td key={j} style={tdStyle}><SkeletonBox width={w} height={14} /></td>)}</tr>)}</tbody>
+            </table>
+          </div>
         ) : users.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography color="text.secondary">No users found.</Typography>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <p style={{ margin: 0, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No users found.</p>
+          </div>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['User', 'Role', 'Plan', 'Status', 'Company', 'Joined', 'Actions'].map(h => (
-                    <TableCell
-                      key={h}
-                      sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main', whiteSpace: 'nowrap' }}
-                    >
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map(u => (
-                  <TableRow key={u.id} hover>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar
-                          src={u.avatar_url || undefined}
-                          sx={{ width: 32, height: 32, bgcolor: 'primary.dark', fontSize: 12, fontWeight: 700 }}
-                        >
-                          {(u.name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="body2" fontWeight={600}>{u.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">{u.email}</Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={u.role}
-                        size="small"
-                        color={rolePlanColor[u.role] || 'default'}
-                        variant="outlined"
-                        sx={{ textTransform: 'capitalize', fontSize: 11 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {u.plan ? (
-                        <Chip
-                          label={u.plan}
-                          size="small"
-                          color={planColor(u.plan)}
-                          variant={u.plan === 'basic' ? 'outlined' : 'filled'}
-                          sx={{ textTransform: 'capitalize', fontSize: 11 }}
-                        />
-                      ) : (
-                        <Typography variant="caption" color="text.disabled">—</Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={u.is_active ? 'Active' : 'Suspended'}
-                        size="small"
-                        color={u.is_active ? 'success' : 'error'}
-                        sx={{ fontSize: 11 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>{u.company || '—'}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>
-                        {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 0.25 }}>
-                        {actioning[u.id] ? (
-                          <CircularProgress size={16} sx={{ mx: 0.5 }} />
-                        ) : !u.is_active ? (
-                          <IconButton size="small" title="Reactivate" onClick={() => quickActivate(u)} sx={{ '&:hover': { color: 'success.main' } }}>
-                            <IonIcon name="checkmark-circle-outline" sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        ) : (
-                          <IconButton size="small" title="Suspend" onClick={() => quickSuspend(u)} sx={{ '&:hover': { color: 'error.main' } }}>
-                            <IonIcon name="person-remove-outline" sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        )}
-                        <IconButton size="small" onClick={() => setSelectedUser(u)}>
-                          <IonIcon name="ellipsis-horizontal-outline" sx={{ fontSize: 16 }} />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['User', 'Role', 'Plan', 'Status', 'Company', 'Joined', 'Actions'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {users.map(u => {
+                  const roleBadge = ROLE_BADGE[u.role] || { border: 'var(--ion-border-color)', color: 'var(--ion-color-medium)' };
+                  const planBg = PLAN_BG[u.plan] || 'var(--ion-color-medium)';
+                  return (
+                    <tr key={u.id}>
+                      <td style={tdStyle}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Avatar name={u.name} src={u.avatar_url} size={32} />
+                          <div>
+                            <span style={{ display: 'block', fontWeight: 600, fontSize: '0.82rem' }}>{u.name}</span>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{u.email}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td style={tdStyle}>
+                        <span style={{ display: 'inline-block', border: `1px solid ${roleBadge.border}`, color: roleBadge.color, borderRadius: 12, padding: '2px 8px', fontSize: 11, fontWeight: 600, textTransform: 'capitalize' }}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td style={tdStyle}>
+                        {u.plan
+                          ? <span style={{ display: 'inline-block', backgroundColor: planBg, color: '#fff', borderRadius: 12, padding: '2px 8px', fontSize: 11, fontWeight: 600, textTransform: 'capitalize' }}>{u.plan}</span>
+                          : <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>—</span>
+                        }
+                      </td>
+                      <td style={tdStyle}>
+                        <span style={{ display: 'inline-block', backgroundColor: u.is_active ? '#2e7d32' : '#d32f2f', color: '#fff', borderRadius: 12, padding: '2px 8px', fontSize: 11, fontWeight: 600 }}>
+                          {u.is_active ? 'Active' : 'Suspended'}
+                        </span>
+                      </td>
+                      <td style={tdStyle}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{u.company || '—'}</span></td>
+                      <td style={tdStyle}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</span></td>
+                      <td style={tdStyle}>
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          {actioning[u.id] ? (
+                            <IonSpinner name="crescent" style={{ width: 16, height: 16, margin: '0 4px' }} />
+                          ) : !u.is_active ? (
+                            <button title="Reactivate" onClick={() => quickActivate(u)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                              <IonIcon name="checkmark-circle-outline" style={{ fontSize: 16 }} />
+                            </button>
+                          ) : (
+                            <button title="Suspend" onClick={() => quickSuspend(u)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                              <IonIcon name="person-remove-outline" style={{ fontSize: 16 }} />
+                            </button>
+                          )}
+                          <button onClick={() => setSelectedUser(u)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                            <IonIcon name="ellipsis-horizontal-outline" style={{ fontSize: 16 }} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
+      </div>
 
       {selectedUser && (
-        <UserDetailDialog
+        <UserDetailModal
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
-          onUpdate={updated => { updateUser(updated); }}
+          onUpdate={updateUser}
           onDeleted={removeUser}
         />
       )}
-    </Box>
+    </div>
   );
 }

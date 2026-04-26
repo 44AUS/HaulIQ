@@ -1,11 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import {
-  Box, Typography, Avatar, Button, IconButton, Chip,
-  TextField, Grid, CircularProgress, LinearProgress, Paper,
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeMode } from '../../context/ThemeContext';
 import { brokersApi, blocksApi, authApi, networkApi } from '../../services/api';
 import { adaptBroker, adaptReview } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -21,28 +18,36 @@ function formatPhone(raw) {
 function StarInput({ value, onChange, size = 24 }) {
   const [hover, setHover] = useState(0);
   return (
-    <Box sx={{ display: 'flex', gap: 0.5 }}>
+    <div style={{ display: 'flex', gap: 4 }}>
       {[1, 2, 3, 4, 5].map(i => (
-        <IconButton key={i} size="small" type="button"
+        <button key={i} type="button"
           onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(0)}
-          onClick={() => onChange(i)} sx={{ p: 0.25 }}>
-          {(hover || value) >= i
-            ? <IonIcon name="star" sx={{ fontSize: size, color: '#FFC107' }} />
-            : <IonIcon name="star-outline" sx={{ fontSize: size, color: 'text.disabled' }} />}
-        </IconButton>
+          onClick={() => onChange(i)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}>
+          <IonIcon name={(hover || value) >= i ? 'star' : 'star-outline'} style={{ fontSize: size, color: (hover || value) >= i ? '#FFC107' : 'var(--ion-color-medium)' }} />
+        </button>
       ))}
-    </Box>
+    </div>
+  );
+}
+
+function MiniBar({ value, max = 5 }) {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  return (
+    <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+      <div style={{ width: `${pct}%`, height: '100%', backgroundColor: 'var(--ion-color-primary)', borderRadius: 3 }} />
+    </div>
   );
 }
 
 function SubRating({ label, value }) {
   if (!value) return null;
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ width: 112, flexShrink: 0 }}>{label}</Typography>
-      <LinearProgress variant="determinate" value={(value / 5) * 100} sx={{ flex: 1, height: 6, borderRadius: 3 }} />
-      <Typography variant="caption" color="text.secondary">{value}/5</Typography>
-    </Box>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', width: 112, flexShrink: 0 }}>{label}</span>
+      <MiniBar value={parseFloat(value)} />
+      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{value}/5</span>
+    </div>
   );
 }
 
@@ -64,18 +69,43 @@ function resizeToDataUrl(file, size = 256) {
 }
 
 const BADGE_MAP = {
-  elite:    { label: 'Elite Partner', color: 'info',    icon: 'flash-outline' },
-  trusted:  { label: 'Trusted',       color: 'primary', icon: 'shield-outline' },
-  verified: { label: 'Verified',      color: 'primary', icon: 'shield-checkmark-outline' },
-  warning:  { label: 'Warning',       color: 'error',   icon: 'warning-outline' },
+  elite:    { label: 'Elite Partner', color: '#53b1fd',  icon: 'flash-outline' },
+  trusted:  { label: 'Trusted',       color: 'var(--ion-color-primary)', icon: 'shield-outline' },
+  verified: { label: 'Verified',      color: 'var(--ion-color-primary)', icon: 'shield-checkmark-outline' },
+  warning:  { label: 'Warning',       color: 'var(--ion-color-danger)', icon: 'warning-outline' },
 };
+
+const cardStyle = {
+  backgroundColor: 'var(--ion-card-background)',
+  borderRadius: 8,
+  overflow: 'hidden',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+};
+
+const inputStyle = {
+  width: '100%', boxSizing: 'border-box',
+  backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))',
+  border: '1px solid var(--ion-border-color)', borderRadius: 6,
+  color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px',
+  outline: 'none', fontFamily: 'inherit',
+};
+
+function InfoRow({ label, value }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
+      <div>
+        <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', lineHeight: 1.3 }}>{label}</div>
+        {value && <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{value}</div>}
+      </div>
+    </div>
+  );
+}
 
 export default function BrokerProfile() {
   const { brokerId } = useParams();
   const [searchParams] = useSearchParams();
   const { user, updateUser } = useAuth();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const { isDark } = useThemeMode();
   const activeTab = searchParams.get('tab') || 'overview';
   const photoRef = useRef();
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -177,13 +207,15 @@ export default function BrokerProfile() {
   };
 
   if (loadingBroker) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>
+      <IonSpinner name="crescent" />
+    </div>
   );
   if (brokerError || !broker) return (
-    <Box sx={{ textAlign: 'center', py: 10 }}>
-      <Typography color="text.secondary">{brokerError || 'Broker not found.'}</Typography>
-      <Button component={Link} to="/carrier/loads" variant="text" sx={{ mt: 1 }}>Back to Load Board</Button>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '64px 0' }}>
+      <p style={{ color: 'var(--ion-color-medium)' }}>{brokerError || 'Broker not found.'}</p>
+      <Link to="/carrier/loads" style={{ color: 'var(--ion-color-primary)', fontSize: '0.875rem' }}>Back to Load Board</Link>
+    </div>
   );
 
   const isOwner = user?.id === broker.user_id;
@@ -202,359 +234,304 @@ export default function BrokerProfile() {
   const wwaCount = reviews.filter(r => r.wouldWorkAgain === true).length;
   const wwaPct = reviews.length ? Math.round(wwaCount / reviews.length * 100) : null;
 
-  const cardSx = {
-    bgcolor: 'background.paper',
-    borderRadius: '8px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
-  };
-
-  const InfoRow = ({ label, value }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.3 }}>{label}</Typography>
-        {value && <Typography variant="body2" fontWeight={600} noWrap>{value}</Typography>}
-      </Box>
-    </Box>
-  );
-
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', px: { xs: 2, sm: 3, lg: 4 }, py: 2 }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 24px 16px' }}>
 
-      {/* ── Overview Tab ── */}
+      {/* Overview Tab */}
       {activeTab === 'overview' && (
-      <Box sx={{ py: 2, display: 'flex', gap: 3, alignItems: 'flex-start', flexWrap: 'wrap', mb: 3 }}>
+        <div style={{ paddingTop: 16, display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: 24 }}>
 
-        {/* Left: Photo */}
-        <Box sx={{ flexShrink: 0, position: 'relative' }}>
-          <Box
-            onClick={isOwner ? () => !photoUploading && photoRef.current.click() : undefined}
-            sx={{
-              width: 400, height: 400,
-              borderRadius: '10px', overflow: 'hidden',
-              bgcolor: isDark ? '#2a2a2a' : '#e8e8e8',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: isOwner ? 'pointer' : 'default', position: 'relative',
-              ...(isOwner && { '&:hover .cam-overlay': { opacity: 1 } }),
-            }}
-          >
-            {photoUrl
-              ? <img src={photoUrl} alt={broker.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <Typography sx={{ fontSize: '5rem', fontWeight: 300, color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)' }}>
-                  {broker.name?.charAt(0) || '?'}
-                </Typography>
-            }
-            {isOwner && (
-              <Box className="cam-overlay" sx={{ position: 'absolute', inset: 0, bgcolor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
-                {photoUploading ? <CircularProgress size={28} sx={{ color: '#fff' }} /> : <IonIcon name="camera-outline" sx={{ color: '#fff', fontSize: 28 }} />}
-              </Box>
-            )}
-          </Box>
-          {isOwner && (
-            <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
-          )}
-        </Box>
-
-        {/* Right: Info cards */}
-        <Box sx={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 2 }}>
-
-          {/* Broker Info */}
-          <Box sx={cardSx}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="subtitle1" fontWeight={700}>Broker Info</Typography>
-                {badge && (
-                  <Chip icon={<IonIcon name={badge.icon} sx={{ fontSize: 14 }} />} label={badge.label}
-                    size="small" color={badge.color} variant="outlined" />
-                )}
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <IonIcon name="star" sx={{ color: '#FFC107', fontSize: 15 }} />
-                <Typography variant="body2" fontWeight={700}>{broker.rating || '—'}</Typography>
-                <Typography variant="caption" color="text.secondary">({reviews.length} reviews)</Typography>
-              </Box>
-            </Box>
-            <Box>
-              <InfoRow label="Name" value={broker.name} />
-              {broker.mc    && <InfoRow label="MC Number"    value={broker.mc} />}
-              {broker.phone && <InfoRow label="Phone"        value={formatPhone(broker.phone)} />}
-              <InfoRow label="Role" value="Broker" />
-              <InfoRow label="Avg Rate/Mile" value={`$${broker.avgRate}/mi`} />
-              {broker.paySpeed && <InfoRow label="Pay Speed" value={broker.paySpeed} />}
-              {avgPaymentDays && (
-                <InfoRow label={`Carrier-Verified Pay Avg (${allPaymentDays.length} reports)`}
-                  value={`${avgPaymentDays} days avg`} />
-              )}
-              {broker.vetting_status && broker.vetting_status !== 'pending' && (
-                <InfoRow label="Status"
-                  value={broker.vetting_status === 'verified' ? '✓ Verified'
-                    : broker.vetting_status === 'flagged' ? '⚠ Flagged' : '⏳ Under Review'}
-                />
-              )}
-              {broker.warns > 0 && <InfoRow label="Warning Flags" value={`${broker.warns} active`} />}
-            </Box>
-          </Box>
-
-          {/* Actions */}
-          {!isOwner && (
-            <Box sx={cardSx}>
-              <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle1" fontWeight={700}>Actions</Typography>
-              </Box>
-              <Box sx={{ px: 2.5, py: 2, display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
-                {user?.role === 'carrier' && !networkState.loading && (
-                  networkState.status === 'accepted' ? (
-                    <Chip icon={<IonIcon name="checkmark-outline" />} label="Connected" size="small" color="primary" variant="outlined" />
-                  ) : networkState.status === 'pending' ? (
-                    <Chip label="Request Sent" size="small" color="warning" variant="outlined" />
-                  ) : (
-                    <Button variant="outlined" size="small"
-                      startIcon={networkConnecting ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="person-add-outline" />}
-                      onClick={handleConnect} disabled={networkConnecting}>
-                      Connect
-                    </Button>
-                  )
-                )}
-                {user?.role === 'carrier' && !submitted && canReview?.can_review && (
-                  <Button variant="contained" size="small" startIcon={<IonIcon name="star" />} onClick={() => setShowForm(s => !s)}>
-                    Write a Review
-                  </Button>
-                )}
-                {user?.role === 'carrier' && !submitted && canReview && !canReview.can_review && (
-                  <Chip label={canReview.reason || 'Review unavailable'} size="small" variant="outlined" />
-                )}
-                {submitted && <Chip icon={<IonIcon name="checkmark-circle" />} label="Review submitted" color="success" size="small" />}
-                <Button
-                  variant="outlined"
-                  color={isBlocked ? 'error' : 'inherit'}
-                  size="small"
-                  startIcon={blockLoading ? <CircularProgress size={14} color="inherit" /> : isBlocked ? <IonIcon name="shield-outline" /> : <IonIcon name="ban-outline" />}
-                  onClick={handleToggleBlock} disabled={blockLoading}
-                >
-                  {isBlocked ? 'Unblock' : 'Block'}
-                </Button>
-              </Box>
-            </Box>
-          )}
-
-          {/* Rating Breakdown */}
-          {reviews.length > 0 && (
-            <Box sx={cardSx}>
-              <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-                <Typography variant="subtitle1" fontWeight={700}>Rating Breakdown</Typography>
-              </Box>
-              <Box sx={{ px: 2.5, py: 2, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-                <SubRating label="Communication"  value={avgComm} />
-                <SubRating label="Load Accuracy"  value={avgAcc} />
-                {wwaPct !== null && (
-                  <Box sx={{ pt: 0.5 }}>
-                    <Chip
-                      icon={<IonIcon name="thumbs-up-outline" />}
-                      label={`${wwaPct}% would work again`}
-                      size="small"
-                      color={wwaPct >= 80 ? 'success' : wwaPct >= 60 ? 'warning' : 'error'}
-                      variant="outlined"
-                    />
-                  </Box>
-                )}
-                {/* Star distribution */}
-                <Box sx={{ pt: 1 }}>
-                  {[5,4,3,2,1].map(star => {
-                    const count = reviews.filter(r => r.rating === star).length;
-                    const pct = reviews.length ? Math.round(count / reviews.length * 100) : 0;
-                    return (
-                      <Box key={star} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.75 }}>
-                        <Box sx={{ display: 'flex', gap: 0.25, width: 60 }}>
-                          {[1,2,3,4,5].map(i => (
-                            i <= star
-                              ? <IonIcon name="star" key={i} sx={{ fontSize: 11, color: '#FFC107' }} />
-                              : <IonIcon name="star-outline" key={i} sx={{ fontSize: 11, color: 'text.disabled' }} />
-                          ))}
-                        </Box>
-                        <LinearProgress variant="determinate" value={pct} sx={{ flex: 1, height: 7, borderRadius: 4 }} />
-                        <Typography variant="caption" color="text.secondary" sx={{ width: 20, textAlign: 'right' }}>{count}</Typography>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </Box>
-            </Box>
-          )}
-        </Box>
-      </Box>
-      )}
-
-      {/* ── Reviews Tab ── */}
-      {activeTab === 'reviews' && (
-      <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
-
-        {/* Write a review action */}
-        {!isOwner && user?.role === 'carrier' && !submitted && !showForm && canReview?.can_review && (
-          <Button variant="contained" size="small" startIcon={<IonIcon name="star" />} onClick={() => setShowForm(true)} sx={{ alignSelf: 'flex-start' }}>
-            Write a Review
-          </Button>
-        )}
-        {submitted && <Chip icon={<IonIcon name="checkmark-circle" />} label="Review submitted" color="success" size="small" sx={{ alignSelf: 'flex-start' }} />}
-
-        {/* Review Form */}
-        {showForm && (
-          <Box sx={{ ...cardSx, borderColor: 'primary.main' }}>
-            <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-              <Typography variant="subtitle1" fontWeight={700}>Your Review of {broker.name}</Typography>
-            </Box>
-            <Box sx={{ px: 2.5, py: 2.5, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-              <Box>
-                <Typography variant="body2" fontWeight={600} mb={1}>Overall Rating *</Typography>
-                <StarInput value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} size={28} />
-              </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" fontWeight={600} mb={1}>Communication</Typography>
-                  <StarInput value={form.communication} onChange={v => setForm(f => ({ ...f, communication: v }))} size={22} />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" fontWeight={600} mb={1}>Load Accuracy</Typography>
-                  <StarInput value={form.accuracy} onChange={v => setForm(f => ({ ...f, accuracy: v }))} size={22} />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField label="Actual payment received in (days)" size="small" fullWidth type="number"
-                    inputProps={{ min: 1, max: 180 }} placeholder="e.g. 21"
-                    value={form.paymentDays} onChange={e => setForm(f => ({ ...f, paymentDays: e.target.value }))}
-                    helperText="Helps verify pay speed for other drivers" />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" fontWeight={600} mb={1}>Would you work with them again?</Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button variant={form.wouldWorkAgain === true ? 'contained' : 'outlined'} size="small"
-                      startIcon={<IonIcon name="thumbs-up-outline" />}
-                      onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))}>Yes</Button>
-                    <Button variant={form.wouldWorkAgain === false ? 'contained' : 'outlined'}
-                      color={form.wouldWorkAgain === false ? 'error' : 'inherit'} size="small"
-                      startIcon={<IonIcon name="thumbs-down-outline" />}
-                      onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))}>No</Button>
-                  </Box>
-                </Grid>
-              </Grid>
-              <TextField label="Your experience" size="small" fullWidth multiline rows={3}
-                placeholder="Tell other drivers about your experience with this broker..."
-                value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} />
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
-                <Button variant="text" size="small" onClick={() => setShowForm(false)}>Cancel</Button>
-                <Button variant="contained" size="small" onClick={handleSubmitReview} disabled={form.rating === 0}>Submit Review</Button>
-              </Box>
-            </Box>
-          </Box>
-        )}
-
-        {/* Reviews list */}
-        <Box sx={cardSx}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="subtitle1" fontWeight={700}>Carrier Reviews</Typography>
-            <Typography variant="caption" color="text.disabled">{reviews.length}</Typography>
-          </Box>
-          {loadingReviews ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress size={24} /></Box>
-          ) : reviews.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 6 }}>
-              <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
-              <Typography variant="body2" color="text.secondary">No reviews yet. Be the first to review this broker.</Typography>
-            </Box>
-          ) : (
-            <Box>
-              {reviews.map((review, idx) => (
-                <Box key={review.id} sx={{ px: 2.5, py: 2, borderBottom: idx < reviews.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 1.5 }}>
-                    <Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-                        <Avatar sx={{ width: 28, height: 28, bgcolor: 'action.selected', fontSize: 12, fontWeight: 700 }}>
-                          {review.isAnonymous ? '?' : review.carrierName.charAt(0)}
-                        </Avatar>
-                        <Typography variant="body2" fontWeight={600}>
-                          {review.isAnonymous ? 'Anonymous Driver' : review.carrierName}
-                        </Typography>
-                        {review.wouldWorkAgain === true  && <Chip label="✓ Would work again"    size="small" color="success" variant="outlined" />}
-                        {review.wouldWorkAgain === false && <Chip label="✗ Would not work again" size="small" color="error"   variant="outlined" />}
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        {[1,2,3,4,5].map(n => (
-                          n <= review.rating
-                            ? <IonIcon name="star" key={n} sx={{ fontSize: 13, color: '#FFC107' }} />
-                            : <IonIcon name="star-outline" key={n} sx={{ fontSize: 13, color: 'text.disabled' }} />
-                        ))}
-                        <Typography variant="caption" fontWeight={700}>{review.rating}.0</Typography>
-                        <Typography variant="caption" color="text.secondary">· {new Date(review.createdAt).toLocaleDateString()}</Typography>
-                      </Box>
-                    </Box>
-                    {review.paymentDays && (
-                      <Paper variant="outlined" sx={{ px: 2, py: 1, textAlign: 'center',
-                        borderColor: review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main' }}>
-                        <Typography variant="caption" color="text.secondary" display="block">Paid in</Typography>
-                        <Typography variant="body2" fontWeight={700}
-                          color={review.paymentDays <= 21 ? 'primary.main' : review.paymentDays <= 35 ? 'warning.main' : 'error.main'}>
-                          {review.paymentDays} days
-                        </Typography>
-                      </Paper>
-                    )}
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: review.comment ? 1.5 : 0 }}>
-                    <SubRating label="Communication" value={review.communication} />
-                    <SubRating label="Load Accuracy" value={review.accuracy} />
-                  </Box>
-                  {review.comment && (
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>{review.comment}</Typography>
-                  )}
-                </Box>
-              ))}
-            </Box>
-          )}
-        </Box>
-
-      </Box>
-      )}
-
-      {/* ── Pay Speed Tab ── */}
-      {activeTab === 'pay_speed' && (
-      <Box sx={{ py: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box sx={{ ...cardSx, borderColor: paySpeedVerified ? 'primary.main' : 'divider', bgcolor: paySpeedVerified ? (isDark ? 'rgba(21,101,192,0.08)' : 'rgba(21,101,192,0.04)') : (isDark ? 'rgba(255,255,255,0.03)' : 'background.paper') }}>
-          <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <IonIcon name="time-outline" sx={{ color: paySpeedVerified ? 'primary.main' : 'text.secondary' }} />
-            <Typography variant="subtitle1" fontWeight={700}>Pay Speed</Typography>
-            {paySpeedVerified
-              ? <Chip label="✓ Carrier-Verified" size="small" color="primary" variant="outlined" />
-              : <Chip label="Self-Reported" size="small" variant="outlined" />
-            }
-          </Box>
-          <Box sx={{ px: 2.5, py: 2 }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="caption" color="text.secondary">Broker self-reported</Typography>
-                <Typography variant="body2" fontWeight={700} color={broker.paySpeed === 'Quick-Pay' ? 'primary.main' : 'text.primary'}>
-                  {broker.paySpeed}
-                </Typography>
-              </Grid>
-              {avgPaymentDays && (
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" color="text.secondary">Carrier-reported avg ({allPaymentDays.length} reports)</Typography>
-                  <Typography variant="body2" fontWeight={700}
-                    color={avgPaymentDays <= 21 ? 'primary.main' : avgPaymentDays <= 35 ? 'warning.main' : 'error.main'}>
-                    {avgPaymentDays} days avg
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1.5, lineHeight: 1.6 }}>
-              {paySpeedVerified
-                ? `Pay speed is calculated from ${allPaymentDays.length} carriers who reported their actual payment time.`
-                : 'Pay speed is self-declared by the broker. It will be verified once 3+ carriers report in reviews.'
+          {/* Left: Photo */}
+          <div style={{ flexShrink: 0, position: 'relative' }}>
+            <div
+              onClick={isOwner ? () => !photoUploading && photoRef.current.click() : undefined}
+              style={{ width: 400, height: 400, borderRadius: 10, overflow: 'hidden', backgroundColor: isDark ? '#2a2a2a' : '#e8e8e8', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isOwner ? 'pointer' : 'default', position: 'relative' }}
+            >
+              {photoUrl
+                ? <img src={photoUrl} alt={broker.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: '5rem', fontWeight: 300, color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)' }}>{broker.name?.charAt(0) || '?'}</span>
               }
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+              {isOwner && (
+                <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                  onMouseLeave={e => e.currentTarget.style.opacity = 0}>
+                  {photoUploading ? <IonSpinner name="crescent" style={{ color: '#fff' }} /> : <IonIcon name="camera-outline" style={{ color: '#fff', fontSize: 28 }} />}
+                </div>
+              )}
+            </div>
+            {isOwner && <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />}
+          </div>
+
+          {/* Right: Info cards */}
+          <div style={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* Broker Info */}
+            <div style={cardStyle}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Broker Info</span>
+                  {badge && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: badge.color, border: `1px solid ${badge.color}`, borderRadius: 10, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 600 }}>
+                      <IonIcon name={badge.icon} style={{ fontSize: 12 }} /> {badge.label}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <IonIcon name="star" style={{ color: '#FFC107', fontSize: 14 }} />
+                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{broker.rating || '—'}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>({reviews.length} reviews)</span>
+                </div>
+              </div>
+              <div>
+                <InfoRow label="Name" value={broker.name} />
+                {broker.mc    && <InfoRow label="MC Number"    value={broker.mc} />}
+                {broker.phone && <InfoRow label="Phone"        value={formatPhone(broker.phone)} />}
+                <InfoRow label="Role" value="Broker" />
+                <InfoRow label="Avg Rate/Mile" value={`$${broker.avgRate}/mi`} />
+                {broker.paySpeed && <InfoRow label="Pay Speed" value={broker.paySpeed} />}
+                {avgPaymentDays && <InfoRow label={`Carrier-Verified Pay Avg (${allPaymentDays.length} reports)`} value={`${avgPaymentDays} days avg`} />}
+                {broker.vetting_status && broker.vetting_status !== 'pending' && (
+                  <InfoRow label="Status"
+                    value={broker.vetting_status === 'verified' ? '✓ Verified'
+                      : broker.vetting_status === 'flagged' ? '⚠ Flagged' : '⏳ Under Review'}
+                  />
+                )}
+                {broker.warns > 0 && <InfoRow label="Warning Flags" value={`${broker.warns} active`} />}
+              </div>
+            </div>
+
+            {/* Actions */}
+            {!isOwner && (
+              <div style={cardStyle}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Actions</span>
+                </div>
+                <div style={{ padding: '16px 20px', display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  {user?.role === 'carrier' && !networkState.loading && (
+                    networkState.status === 'accepted' ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--ion-color-primary)', border: '1px solid var(--ion-color-primary)', borderRadius: 10, padding: '2px 10px', fontSize: '0.75rem', fontWeight: 600 }}>
+                        <IonIcon name="checkmark-outline" style={{ fontSize: 13 }} /> Connected
+                      </span>
+                    ) : networkState.status === 'pending' ? (
+                      <span style={{ color: 'var(--ion-color-warning)', border: '1px solid var(--ion-color-warning)', borderRadius: 10, padding: '2px 10px', fontSize: '0.75rem', fontWeight: 600 }}>Request Sent</span>
+                    ) : (
+                      <button onClick={handleConnect} disabled={networkConnecting} style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--ion-color-primary)', color: 'var(--ion-color-primary)', background: 'none', borderRadius: 6, padding: '6px 12px', cursor: networkConnecting ? 'default' : 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.825rem' }}>
+                        {networkConnecting ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name="person-add-outline" style={{ fontSize: 14 }} />}
+                        Connect
+                      </button>
+                    )
+                  )}
+                  {user?.role === 'carrier' && !submitted && canReview?.can_review && (
+                    <button onClick={() => setShowForm(s => !s)} style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.825rem' }}>
+                      <IonIcon name="star" style={{ fontSize: 14 }} /> Write a Review
+                    </button>
+                  )}
+                  {user?.role === 'carrier' && !submitted && canReview && !canReview.can_review && (
+                    <span style={{ color: 'var(--ion-color-medium)', border: '1px solid var(--ion-border-color)', borderRadius: 10, padding: '2px 10px', fontSize: '0.72rem', fontWeight: 600 }}>{canReview.reason || 'Review unavailable'}</span>
+                  )}
+                  {submitted && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#2dd36f', border: '1px solid rgba(45,211,111,0.4)', borderRadius: 10, padding: '2px 10px', fontSize: '0.72rem', fontWeight: 600 }}>
+                      <IonIcon name="checkmark-circle" style={{ fontSize: 12 }} /> Review submitted
+                    </span>
+                  )}
+                  <button onClick={handleToggleBlock} disabled={blockLoading} style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${isBlocked ? 'var(--ion-color-danger)' : 'var(--ion-border-color)'}`, color: isBlocked ? 'var(--ion-color-danger)' : 'var(--ion-color-medium)', background: 'none', borderRadius: 6, padding: '6px 12px', cursor: blockLoading ? 'default' : 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.825rem' }}>
+                    {blockLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name={isBlocked ? 'shield-outline' : 'ban-outline'} style={{ fontSize: 14 }} />}
+                    {isBlocked ? 'Unblock' : 'Block'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Rating Breakdown */}
+            {reviews.length > 0 && (
+              <div style={cardStyle}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Rating Breakdown</span>
+                </div>
+                <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <SubRating label="Communication" value={avgComm} />
+                  <SubRating label="Load Accuracy" value={avgAcc} />
+                  {wwaPct !== null && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: wwaPct >= 80 ? '#2dd36f' : wwaPct >= 60 ? 'var(--ion-color-warning)' : 'var(--ion-color-danger)', border: `1px solid ${wwaPct >= 80 ? 'rgba(45,211,111,0.4)' : wwaPct >= 60 ? 'rgba(255,196,9,0.4)' : 'rgba(235,68,90,0.4)'}`, borderRadius: 10, padding: '2px 10px', fontSize: '0.72rem', fontWeight: 600, alignSelf: 'flex-start' }}>
+                      <IonIcon name="thumbs-up-outline" style={{ fontSize: 12 }} /> {wwaPct}% would work again
+                    </span>
+                  )}
+                  <div style={{ paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {[5,4,3,2,1].map(star => {
+                      const count = reviews.filter(r => r.rating === star).length;
+                      const pct = reviews.length ? Math.round(count / reviews.length * 100) : 0;
+                      return (
+                        <div key={star} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ display: 'flex', gap: 2, width: 60 }}>
+                            {[1,2,3,4,5].map(i => <IonIcon key={i} name={i <= star ? 'star' : 'star-outline'} style={{ fontSize: 10, color: i <= star ? '#FFC107' : 'var(--ion-color-medium)' }} />)}
+                          </div>
+                          <MiniBar value={pct} max={100} />
+                          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', width: 16, textAlign: 'right' }}>{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
-    </Box>
+      {/* Reviews Tab */}
+      {activeTab === 'reviews' && (
+        <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {!isOwner && user?.role === 'carrier' && !submitted && !showForm && canReview?.can_review && (
+            <button onClick={() => setShowForm(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', alignSelf: 'flex-start' }}>
+              <IonIcon name="star" style={{ fontSize: 14 }} /> Write a Review
+            </button>
+          )}
+          {submitted && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#2dd36f', border: '1px solid rgba(45,211,111,0.4)', borderRadius: 10, padding: '3px 12px', fontSize: '0.75rem', fontWeight: 600, alignSelf: 'flex-start' }}>
+              <IonIcon name="checkmark-circle" style={{ fontSize: 14 }} /> Review submitted
+            </span>
+          )}
+
+          {/* Review Form */}
+          {showForm && (
+            <div style={{ ...cardStyle, border: '1px solid var(--ion-color-primary)' }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Your Review of {broker.name}</span>
+              </div>
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 8 }}>Overall Rating *</div>
+                  <StarInput value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} size={28} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 8 }}>Communication</div>
+                    <StarInput value={form.communication} onChange={v => setForm(f => ({ ...f, communication: v }))} size={22} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 8 }}>Load Accuracy</div>
+                    <StarInput value={form.accuracy} onChange={v => setForm(f => ({ ...f, accuracy: v }))} size={22} />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--ion-color-medium)', marginBottom: 4, fontWeight: 500 }}>Actual payment received in (days)</label>
+                    <input type="number" min={1} max={180} placeholder="e.g. 21" value={form.paymentDays} onChange={e => setForm(f => ({ ...f, paymentDays: e.target.value }))} style={inputStyle} />
+                    <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginTop: 3 }}>Helps verify pay speed for other drivers</div>
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 8 }}>Would you work with them again?</div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button type="button" onClick={() => setForm(f => ({ ...f, wouldWorkAgain: true }))} style={{ display: 'flex', alignItems: 'center', gap: 5, border: '1px solid var(--ion-color-primary)', backgroundColor: form.wouldWorkAgain === true ? 'var(--ion-color-primary)' : 'transparent', color: form.wouldWorkAgain === true ? '#fff' : 'var(--ion-color-primary)', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.8rem' }}>
+                        <IonIcon name="thumbs-up-outline" style={{ fontSize: 14 }} /> Yes
+                      </button>
+                      <button type="button" onClick={() => setForm(f => ({ ...f, wouldWorkAgain: false }))} style={{ display: 'flex', alignItems: 'center', gap: 5, border: `1px solid ${form.wouldWorkAgain === false ? 'var(--ion-color-danger)' : 'var(--ion-border-color)'}`, backgroundColor: form.wouldWorkAgain === false ? 'var(--ion-color-danger)' : 'transparent', color: form.wouldWorkAgain === false ? '#fff' : 'var(--ion-color-medium)', borderRadius: 6, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.8rem' }}>
+                        <IonIcon name="thumbs-down-outline" style={{ fontSize: 14 }} /> No
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--ion-color-medium)', marginBottom: 4, fontWeight: 500 }}>Your experience</label>
+                  <textarea rows={3} placeholder="Tell other drivers about your experience with this broker..." value={form.comment} onChange={e => setForm(f => ({ ...f, comment: e.target.value }))} style={{ ...inputStyle, resize: 'vertical' }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <button type="button" onClick={() => setShowForm(false)} style={{ background: 'none', border: '1px solid var(--ion-border-color)', color: 'var(--ion-text-color)', borderRadius: 6, padding: '7px 14px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit', fontSize: '0.875rem' }}>Cancel</button>
+                  <button type="button" onClick={handleSubmitReview} disabled={form.rating === 0} style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', cursor: form.rating === 0 ? 'default' : 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.875rem', opacity: form.rating === 0 ? 0.5 : 1 }}>Submit Review</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Reviews list */}
+          <div style={cardStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Carrier Reviews</span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{reviews.length}</span>
+            </div>
+            {loadingReviews ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><IonSpinner name="crescent" style={{ width: 24, height: 24 }} /></div>
+            ) : reviews.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+                <IonIcon name="chatbubble-outline" style={{ fontSize: 36, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No reviews yet. Be the first to review this broker.</p>
+              </div>
+            ) : (
+              <div>
+                {reviews.map((review, idx) => (
+                  <div key={review.id} style={{ padding: '16px 20px', borderBottom: idx < reviews.length - 1 ? '1px solid var(--ion-border-color)' : 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 12 }}>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>
+                            {review.isAnonymous ? '?' : review.carrierName?.charAt(0)}
+                          </div>
+                          <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>
+                            {review.isAnonymous ? 'Anonymous Driver' : review.carrierName}
+                          </span>
+                          {review.wouldWorkAgain === true  && <span style={{ color: '#2dd36f', border: '1px solid rgba(45,211,111,0.4)', borderRadius: 10, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600 }}>✓ Would work again</span>}
+                          {review.wouldWorkAgain === false && <span style={{ color: 'var(--ion-color-danger)', border: '1px solid rgba(235,68,90,0.4)', borderRadius: 10, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 600 }}>✗ Would not work again</span>}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          {[1,2,3,4,5].map(n => <IonIcon key={n} name={n <= review.rating ? 'star' : 'star-outline'} style={{ fontSize: 12, color: n <= review.rating ? '#FFC107' : 'var(--ion-color-medium)' }} />)}
+                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>{review.rating}.0</span>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>· {new Date(review.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      {review.paymentDays && (
+                        <div style={{ padding: '8px 16px', textAlign: 'center', border: `1px solid ${review.paymentDays <= 21 ? 'var(--ion-color-primary)' : review.paymentDays <= 35 ? 'var(--ion-color-warning)' : 'var(--ion-color-danger)'}`, borderRadius: 6 }}>
+                          <div style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)' }}>Paid in</div>
+                          <div style={{ fontWeight: 700, fontSize: '0.875rem', color: review.paymentDays <= 21 ? 'var(--ion-color-primary)' : review.paymentDays <= 35 ? 'var(--ion-color-warning)' : 'var(--ion-color-danger)' }}>{review.paymentDays} days</div>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: review.comment ? 12 : 0 }}>
+                      <SubRating label="Communication" value={review.communication} />
+                      <SubRating label="Load Accuracy" value={review.accuracy} />
+                    </div>
+                    {review.comment && <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)', lineHeight: 1.6 }}>{review.comment}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Pay Speed Tab */}
+      {activeTab === 'pay_speed' && (
+        <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ ...cardStyle, border: `1px solid ${paySpeedVerified ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, backgroundColor: paySpeedVerified ? (isDark ? 'rgba(21,101,192,0.08)' : 'rgba(21,101,192,0.04)') : 'var(--ion-card-background)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <IonIcon name="time-outline" style={{ color: paySpeedVerified ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }} />
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>Pay Speed</span>
+              <span style={{ color: paySpeedVerified ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', border: `1px solid ${paySpeedVerified ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, borderRadius: 10, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 600 }}>
+                {paySpeedVerified ? '✓ Carrier-Verified' : 'Self-Reported'}
+              </span>
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginBottom: 2 }}>Broker self-reported</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem', color: broker.paySpeed === 'Quick-Pay' ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>{broker.paySpeed}</div>
+                </div>
+                {avgPaymentDays && (
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginBottom: 2 }}>Carrier-reported avg ({allPaymentDays.length} reports)</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.875rem', color: avgPaymentDays <= 21 ? 'var(--ion-color-primary)' : avgPaymentDays <= 35 ? 'var(--ion-color-warning)' : 'var(--ion-color-danger)' }}>{avgPaymentDays} days avg</div>
+                  </div>
+                )}
+              </div>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--ion-color-medium)', lineHeight: 1.6 }}>
+                {paySpeedVerified
+                  ? `Pay speed is calculated from ${allPaymentDays.length} carriers who reported their actual payment time.`
+                  : 'Pay speed is self-declared by the broker. It will be verified once 3+ carriers report in reviews.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
   );
 }

@@ -1,14 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Box, Typography, Chip, CircularProgress, IconButton, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  useTheme,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
-
-// ── Tab definitions ───────────────────────────────────────────────────────────
 const TABS = [
   { key: 'all',      label: 'ALL' },
   { key: 'pending',  label: 'PENDING' },
@@ -17,7 +11,6 @@ const TABS = [
   { key: 'voided',   label: 'VOIDED' },
 ];
 
-// Map backend status → tab key
 const STATUS_TAB = {
   pending:  'pending',
   escrowed: 'pending',
@@ -26,7 +19,6 @@ const STATUS_TAB = {
   refunded: 'voided',
 };
 
-// Badge colors matching app palette
 const TAB_CHIP = {
   pending:  { label: 'Pending',   bg: '#ffce00', text: '#000' },
   escrowed: { label: 'In Escrow', bg: '#2a7fff', text: '#fff' },
@@ -35,7 +27,6 @@ const TAB_CHIP = {
   refunded: { label: 'Voided',    bg: '#757575', text: '#fff' },
 };
 
-// Left accent bar color per status
 const STATUS_BAR = {
   pending:  '#ffce00',
   escrowed: '#2a7fff',
@@ -43,6 +34,9 @@ const STATUS_BAR = {
   failed:   '#eb445a',
   refunded: '#616161',
 };
+
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
 
 const fmt = (n) =>
   n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
@@ -56,9 +50,6 @@ const fmtDate = (s) => {
 };
 
 export default function CarrierPayments() {
-  const theme  = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
   const [payments,  setPayments]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [spinning,  setSpinning]  = useState(false);
@@ -81,155 +72,125 @@ export default function CarrierPayments() {
 
   const tabCounts = useMemo(() => {
     const c = { all: payments.length };
-    TABS.slice(1).forEach(t => {
-      c[t.key] = payments.filter(p => STATUS_TAB[p.status] === t.key).length;
-    });
+    TABS.slice(1).forEach(t => { c[t.key] = payments.filter(p => STATUS_TAB[p.status] === t.key).length; });
     return c;
   }, [payments]);
 
-  // Summary stats
-  const pending   = payments.filter(p => p.status === 'pending' || p.status === 'escrowed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
-  const paid      = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.carrier_amount || 0), 0);
-  const pastDue   = payments.filter(p => p.status === 'failed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
-
-  const activeFg   = isDark ? '#fff' : '#000';
-  const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
+  const pending = payments.filter(p => p.status === 'pending' || p.status === 'escrowed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+  const paid    = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+  const pastDue = payments.filter(p => p.status === 'failed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
-      {/* ── Top bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Payments</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-            Freight payments for your completed loads
-          </Typography>
-        </Box>
-        {/* Summary pills */}
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-          {[
-            { label: 'Awaiting', value: fmt(pending),  color: '#ffce00', text: '#000' },
-            { label: 'Paid Out', value: fmt(paid),     color: '#2dd36f', text: '#fff' },
-            { label: 'Past Due', value: fmt(pastDue),  color: '#eb445a', text: '#fff' },
-          ].map(({ label, value, color, text }) => (
-            <Box key={label} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', borderRadius: '8px', px: 2, py: 0.75, minWidth: 80 }}>
-              <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, color }}>{value}</Typography>
-              <Typography sx={{ fontSize: '0.62rem', color: 'text.disabled', fontWeight: 600, letterSpacing: '0.04em' }}>{label.toUpperCase()}</Typography>
-            </Box>
-          ))}
-        </Box>
-      </Box>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 style={{ margin: '0 0 2px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>Payments</h2>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>Freight payments for your completed loads</p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            {[
+              { label: 'Awaiting', value: fmt(pending), color: '#ffce00' },
+              { label: 'Paid Out', value: fmt(paid),    color: '#2dd36f' },
+              { label: 'Past Due', value: fmt(pastDue), color: '#eb445a' },
+            ].map(({ label, value, color }) => (
+              <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'var(--ion-color-light)', borderRadius: 8, padding: '6px 16px', minWidth: 80 }}>
+                <span style={{ fontSize: '0.95rem', fontWeight: 800, color }}>{value}</span>
+                <span style={{ fontSize: '0.62rem', color: 'var(--ion-color-medium)', fontWeight: 600, letterSpacing: '0.04em' }}>{label.toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      {/* ── Tab bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, overflowX: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
-        {TABS.map(tab => {
-          const isActive = activeTab === tab.key;
-          const count    = tabCounts[tab.key] ?? 0;
-          return (
-            <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 2.75, cursor: 'pointer', flexShrink: 0,
-                borderBottom: isActive ? '2px solid' : '2px solid transparent',
-                borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent',
-                color: isActive ? activeFg : inactiveFg,
-                opacity: isActive ? 1 : 0.6,
-                '&:hover': { opacity: 1, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                transition: 'opacity 0.15s, background-color 0.15s',
+        {/* Tab bar */}
+        <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflowX: 'auto' }}>
+          {TABS.map(tab => {
+            const isActive = activeTab === tab.key;
+            const count    = tabCounts[tab.key] ?? 0;
+            return (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '11px 24px', cursor: 'pointer', flexShrink: 0, background: 'none',
+                border: 'none', borderBottom: isActive ? '2px solid var(--ion-text-color)' : '2px solid transparent',
+                color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', fontFamily: 'inherit',
               }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
-              <Box sx={{ bgcolor: 'background.default', borderRadius: '4px', px: 0.6, py: 0.15, minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</Typography>
-              </Box>
-            </Box>
-          );
-        })}
-        <Box sx={{ flex: 1 }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
-          <Tooltip title="Refresh">
-            <IconButton size="small" onClick={() => fetchData(true)} sx={{ color: 'text.secondary' }}>
-              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+                <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
+                <span style={{ backgroundColor: isActive ? 'var(--ion-color-primary)' : 'var(--ion-color-light)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: isActive ? '#fff' : 'var(--ion-color-medium)', lineHeight: 1.4 }}>{count}</span>
+                </span>
+              </button>
+            );
+          })}
+          <div style={{ flex: 1 }} />
+          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
+            <button
+              title="Refresh"
+              onClick={() => fetchData(true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+            >
+              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </button>
+          </div>
+        </div>
 
-      {/* ── Table ── */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : tabItems.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-            <Typography variant="body2" color="text.secondary">No payments in this category</Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table size="small" sx={{ minWidth: 700 }}>
-              <TableHead>
-                <TableRow sx={{ '& .MuiTableCell-root': { fontWeight: '400 !important', color: `${isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important` } }}>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 200 }}>Route</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 110 }}>Load Rate</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 120 }}>Your Earnings</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 90  }}>Escrowed</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 90  }}>Paid Out</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, width: 120, minWidth: 120 }}>Status</TableCell>
-                  <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 32, minWidth: 32 }} />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tabItems.map((p) => {
-                  const chip     = TAB_CHIP[p.status] || { label: p.status, bg: '#9e9e9e', text: '#fff' };
-                  const barColor = STATUS_BAR[p.status] || '#9e9e9e';
-                  return (
-                    <TableRow
-                      key={p.id}
-                      sx={{
-                        height: 64,
-                        '& td': { py: 0, borderBottom: 0 },
-                        '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
-                        '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                      }}
-                    >
-                      {/* Route — with accent bar */}
-                      <TableCell sx={{ pl: 0, position: 'relative', minWidth: 200 }}>
-                        <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
-                        <Box sx={{ pl: 2 }}>
-                          <Typography variant="body2" fontWeight={600} sx={{ whiteSpace: 'nowrap' }}>
-                            {p.load_origin || '—'} → {p.load_destination || '—'}
-                          </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">{fmt(p.amount)}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={700} color="success.main">{fmt(p.carrier_amount)}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ width: 120, minWidth: 120 }}>
-                        <Chip label={chip.label} size="small" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text }} />
-                      </TableCell>
-                      <TableCell sx={{ width: 32, minWidth: 32, pr: 1 }}>
-                        <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled', display: 'block' }} />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Box>
+        {/* Table */}
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+              <IonSpinner name="crescent" />
+            </div>
+          ) : tabItems.length === 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+              <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No payments in this category</span>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Route</th>
+                    <th style={thStyle}>Load Rate</th>
+                    <th style={thStyle}>Your Earnings</th>
+                    <th style={thStyle}>Escrowed</th>
+                    <th style={thStyle}>Paid Out</th>
+                    <th style={thStyle}>Status</th>
+                    <th style={thStyle}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tabItems.map(p => {
+                    const chip     = TAB_CHIP[p.status] || { label: p.status, bg: '#9e9e9e', text: '#fff' };
+                    const barColor = STATUS_BAR[p.status] || '#9e9e9e';
+                    return (
+                      <tr key={p.id} style={{ height: 64 }}>
+                        <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
+                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                          <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{p.load_origin || '—'} → {p.load_destination || '—'}</span>
+                        </td>
+                        <td style={{ ...tdStyle, color: 'var(--ion-color-medium)' }}>{fmt(p.amount)}</td>
+                        <td style={{ ...tdStyle, fontWeight: 700, color: '#2e7d32' }}>{fmt(p.carrier_amount)}</td>
+                        <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</td>
+                        <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</td>
+                        <td style={{ ...tdStyle, width: 120, minWidth: 120 }}>
+                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.text }}>
+                            {chip.label}
+                          </span>
+                        </td>
+                        <td style={{ ...tdStyle, width: 32, minWidth: 32, paddingRight: 8 }}>
+                          <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', display: 'block' }} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
-    </Box>
-    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </Box>
+      </div>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </div>
   );
 }

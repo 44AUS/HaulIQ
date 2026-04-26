@@ -1,13 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Button, Paper, Chip, IconButton, Alert,
-  CircularProgress, Divider, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField,
-} from '@mui/material';
+import { IonSpinner, IonModal } from '@ionic/react';
 import { loadTemplatesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
+
+function Badge({ label, color }) {
+  const colors = {
+    success: { border: '#2e7d32', color: '#2e7d32' },
+    info:    { border: '#0288d1', color: '#0288d1' },
+    default: { border: 'var(--ion-border-color)', color: 'var(--ion-color-medium)' },
+  };
+  const c = colors[color] || colors.default;
+  return (
+    <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: 10, fontSize: 11, fontWeight: 600, border: `1px solid ${c.border}`, color: c.color }}>
+      {label}
+    </span>
+  );
+}
 
 export default function LoadTemplates() {
   const navigate = useNavigate();
@@ -15,8 +28,7 @@ export default function LoadTemplates() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Rename dialog
-  const [renameDialog, setRenameDialog] = useState(null); // { id, name }
+  const [renameDialog, setRenameDialog] = useState(null);
   const [renameSaving, setRenameSaving] = useState(false);
 
   useEffect(() => {
@@ -36,130 +48,107 @@ export default function LoadTemplates() {
     if (!renameDialog) return;
     setRenameSaving(true);
     loadTemplatesApi.update(renameDialog.id, { name: renameDialog.name })
-      .then(updated => {
-        setTemplates(prev => prev.map(t => t.id === updated.id ? updated : t));
-        setRenameDialog(null);
-      })
+      .then(updated => { setTemplates(prev => prev.map(t => t.id === updated.id ? updated : t)); setRenameDialog(null); })
       .catch(() => {})
       .finally(() => setRenameSaving(false));
   };
 
-  const handleUseTemplate = (t) => {
-    navigate('/broker/post', { state: { template: t } });
-  };
+  const handleUseTemplate = (t) => navigate('/broker/post', { state: { template: t } });
 
   return (
-    <Box sx={{ maxWidth: 720, mx: 'auto' }}>
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IonIcon name="layers-outline" color="primary" /> Load Templates
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Re-post recurring lanes in seconds — no re-entry needed.
-          </Typography>
-        </Box>
-        <Button variant="contained" onClick={() => navigate('/broker/post')}>
+    <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <div>
+          <h2 style={{ margin: '0 0 4px', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <IonIcon name="layers-outline" style={{ color: 'var(--ion-color-primary)' }} /> Load Templates
+          </h2>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Re-post recurring lanes in seconds — no re-entry needed.</p>
+        </div>
+        <button onClick={() => navigate('/broker/post')} style={{ padding: '8px 16px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600 }}>
           Post New Load
-        </Button>
-      </Box>
+        </button>
+      </div>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
-      ) : templates.length === 0 ? (
-        <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
-          <IonIcon name="layers-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
-          <Typography variant="h6" fontWeight={600} gutterBottom>No templates yet</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            When posting a load, click "Save as Template" to add it here.
-          </Typography>
-          <Button variant="outlined" onClick={() => navigate('/broker/post')}>Post a Load</Button>
-        </Paper>
-      ) : (
-        <Paper variant="outlined">
-          {templates.map((t, i) => (
-            <Box key={t.id}>
-              {i > 0 && <Divider />}
-              <Box sx={{ px: 2.5, py: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                <Box sx={{ flex: 1, minWidth: 200 }}>
-                  <Typography variant="subtitle2" fontWeight={700}>{t.name}</Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-                    {t.origin} → {t.destination}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.75, mt: 0.75, flexWrap: 'wrap' }}>
-                    <Chip label={`$${(t.rate || 0).toLocaleString()}`} size="small" color="success" variant="outlined" />
-                    <Chip label={`${t.miles} mi`} size="small" variant="outlined" />
-                    {t.load_type && <Chip label={t.load_type} size="small" variant="outlined" />}
-                    {t.times_used > 0 && (
-                      <Chip label={`Used ${t.times_used}×`} size="small" variant="outlined" color="info" />
-                    )}
-                  </Box>
-                </Box>
-
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    startIcon={<IonIcon name="reload-outline" />}
-                    onClick={() => handleUseTemplate(t)}
-                  >
-                    Re-post
-                  </Button>
-                  <IconButton
-                    size="small"
-                    onClick={() => setRenameDialog({ id: t.id, name: t.name })}
-                    title="Rename"
-                    sx={{ color: 'text.secondary' }}
-                  >
-                    <IonIcon name="create-outline" fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleDelete(t.id)}
-                    sx={{ color: 'text.disabled', '&:hover': { color: 'error.main' } }}
-                  >
-                    <IonIcon name="trash-outline" fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-            </Box>
-          ))}
-        </Paper>
+      {error && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
       )}
 
-      <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 2, textAlign: 'center' }}>
-        Up to 50 templates. Save from any load post.
-      </Typography>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}><IonSpinner name="crescent" /></div>
+      ) : templates.length === 0 ? (
+        <div style={{ ...cardStyle, padding: '48px 0', textAlign: 'center' }}>
+          <IonIcon name="layers-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+          <p style={{ margin: '0 0 4px', fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>No templates yet</p>
+          <p style={{ margin: '0 0 24px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>When posting a load, click "Save as Template" to add it here.</p>
+          <button onClick={() => navigate('/broker/post')} style={{ padding: '8px 16px', border: '1px solid var(--ion-border-color)', borderRadius: 6, background: 'none', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
+            Post a Load
+          </button>
+        </div>
+      ) : (
+        <div style={cardStyle}>
+          {templates.map((t, i) => (
+            <div key={t.id}>
+              {i > 0 && <div style={{ borderTop: '1px solid var(--ion-border-color)' }} />}
+              <div style={{ padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block' }}>{t.name}</span>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--ion-color-medium)', display: 'block', marginTop: 2 }}>{t.origin} → {t.destination}</span>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                    <Badge label={`$${(t.rate || 0).toLocaleString()}`} color="success" />
+                    <Badge label={`${t.miles} mi`} color="default" />
+                    {t.load_type && <Badge label={t.load_type} color="default" />}
+                    {t.times_used > 0 && <Badge label={`Used ${t.times_used}×`} color="info" />}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                  <button onClick={() => handleUseTemplate(t)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600 }}>
+                    <IonIcon name="reload-outline" style={{ fontSize: 14 }} /> Re-post
+                  </button>
+                  <button onClick={() => setRenameDialog({ id: t.id, name: t.name })} title="Rename" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                    <IonIcon name="create-outline" style={{ fontSize: 16 }} />
+                  </button>
+                  <button onClick={() => handleDelete(t.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                    <IonIcon name="trash-outline" style={{ fontSize: 16 }} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {/* Rename dialog */}
-      <Dialog open={!!renameDialog} onClose={() => setRenameDialog(null)} maxWidth="xs" fullWidth>
-        <DialogTitle>Rename Template</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            size="small"
-            label="Template Name"
-            value={renameDialog?.name || ''}
-            onChange={e => setRenameDialog(d => ({ ...d, name: e.target.value }))}
-            sx={{ mt: 1 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRenameDialog(null)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleRename}
-            disabled={renameSaving || !renameDialog?.name?.trim()}
-          >
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+      <p style={{ textAlign: 'center', marginTop: 16, fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+        Up to 50 templates. Save from any load post.
+      </p>
+
+      {/* Rename modal */}
+      {renameDialog && (
+        <IonModal isOpen onDidDismiss={() => setRenameDialog(null)} style={{ '--width': '360px', '--height': 'auto', '--border-radius': '12px' }}>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Rename Template</span>
+              <button onClick={() => setRenameDialog(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+                <IonIcon name="close-outline" style={{ fontSize: 20 }} />
+              </button>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Template Name</label>
+              <input
+                style={inputStyle}
+                autoFocus
+                value={renameDialog.name}
+                onChange={e => setRenameDialog(d => ({ ...d, name: e.target.value }))}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setRenameDialog(null)} style={{ flex: 1, padding: '8px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>Cancel</button>
+              <button onClick={handleRename} disabled={renameSaving || !renameDialog.name?.trim()} style={{ flex: 1, padding: '8px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: (renameSaving || !renameDialog.name?.trim()) ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: (renameSaving || !renameDialog.name?.trim()) ? 0.7 : 1 }}>
+                Save
+              </button>
+            </div>
+          </div>
+        </IonModal>
+      )}
+    </div>
   );
 }

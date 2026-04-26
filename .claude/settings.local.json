@@ -24,7 +24,8 @@
       "Bash(python3 -c ' *)",
       "Bash(grep -v \"^[^:]+:[0-9]+:\\\\s*//\")",
       "Bash(grep -E \"^\\(Box|Button|Card|Dialog|Drawer|Table|TextField|Chip|Paper|Modal|Menu|List|Typography|AppBar|Tooltip|IconButton|MenuItem|Select|Badge|Popover|Avatar|Divider|CircularProgress|LinearProgress|Snackbar|Alert|Tab|Tabs|Switch|Radio|Checkbox|FormControl|FormLabel|InputLabel|Grid|Stack|Container|CssBaseline|ListItem|ListItemButton|ListItemIcon|ListItemText|TableBody|TableCell|TableContainer|TableHead|TableRow|FormHelperText|OutlinedInput|Input|InputAdornment|Collapse\\)$\")",
-      "Bash(npx cap *)"
+      "Bash(npx cap *)",
+      "Bash(npm uninstall *)"
     ]
   }
 }

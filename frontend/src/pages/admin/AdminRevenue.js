@@ -1,146 +1,122 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box, Typography, Card, CardContent,
-  Table, TableHead, TableBody, TableRow, TableCell,
-  LinearProgress, Skeleton,
-} from '@mui/material';
 import { adminApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
+
+function SkeletonBox({ height }) {
+  return <div style={{ height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4, marginBottom: 8 }} />;
+}
 
 export default function AdminRevenue() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminApi.revenue()
-      .then(setData)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    adminApi.revenue().then(setData).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
-      ))}
-    </Box>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {[...Array(5)].map((_, i) => <SkeletonBox key={i} height={72} />)}
+    </div>
   );
 
   if (!data) return (
-    <Box sx={{ textAlign: 'center', py: 10 }}>
-      <Typography color="text.secondary">Failed to load revenue data.</Typography>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+      <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>Failed to load revenue data.</span>
+    </div>
   );
 
   const { total_mrr = 0, arr = 0, breakdown = [] } = data;
   const totalSubs = breakdown.reduce((s, p) => s + p.subscribers, 0);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* Header */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <IonIcon name="cash-outline" color="primary" />
-          <Typography variant="h5" fontWeight={700}>Revenue Analytics</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">Subscription revenue breakdown by plan</Typography>
-      </Box>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <IonIcon name="cash-outline" style={{ color: 'var(--ion-color-primary)' }} />
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Revenue Analytics</h2>
+        </div>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Subscription revenue breakdown by plan</p>
+      </div>
 
       {/* KPIs */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-        gap: 2,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
         {[
           { label: 'Monthly MRR',        value: `$${(total_mrr / 1000).toFixed(1)}K` },
           { label: 'ARR (projected)',     value: `$${(arr / 1000).toFixed(1)}K` },
           { label: 'Active Subscribers', value: totalSubs.toLocaleString() },
           { label: 'Avg Rev / Sub',      value: totalSubs > 0 ? `$${(total_mrr / totalSubs).toFixed(2)}` : '—' },
         ].map(({ label, value }) => (
-          <Card variant="outlined" key={label}>
-            <CardContent>
-              <Typography variant="body2" color="text.secondary" mb={0.5}>{label}</Typography>
-              <Typography variant="h4" fontWeight={800}>{value}</Typography>
-            </CardContent>
-          </Card>
+          <div key={label} style={{ ...cardStyle, padding: 16 }}>
+            <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+            <p style={{ margin: 0, fontSize: '1.6rem', fontWeight: 800, color: 'var(--ion-text-color)' }}>{value}</p>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {/* Revenue by plan table */}
-      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
-        <Box sx={{ px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="subtitle1" fontWeight={700}>Revenue by Plan</Typography>
-        </Box>
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Revenue by Plan</span>
+        </div>
         {breakdown.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography color="text.secondary">No subscription data yet.</Typography>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <p style={{ margin: 0, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No subscription data yet.</p>
+          </div>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['Plan', 'Subscribers', 'Price', 'MRR', 'MRR Share'].map(h => (
-                    <TableCell
-                      key={h}
-                      sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main' }}
-                    >
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['Plan', 'Subscribers', 'Price', 'MRR', 'MRR Share'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
                 {breakdown.map(p => (
-                  <TableRow key={p.plan} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600}>{p.plan}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="text.secondary">{p.subscribers.toLocaleString()}</Typography>
-                    </TableCell>
-                    <TableCell>
+                  <tr key={p.plan}>
+                    <td style={tdStyle}><span style={{ fontWeight: 600 }}>{p.plan}</span></td>
+                    <td style={tdStyle}><span style={{ color: 'var(--ion-color-medium)' }}>{p.subscribers.toLocaleString()}</span></td>
+                    <td style={tdStyle}>
                       {p.price === 0
-                        ? <Typography variant="body2" color="text.disabled">Free</Typography>
-                        : <Typography variant="body2" color="text.secondary">${p.price}/mo</Typography>
+                        ? <span style={{ color: 'var(--ion-color-medium)' }}>Free</span>
+                        : <span style={{ color: 'var(--ion-color-medium)' }}>${p.price}/mo</span>
                       }
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td style={tdStyle}>
                       {p.mrr === 0
-                        ? <Typography variant="body2" color="text.disabled">$0</Typography>
-                        : <Typography variant="body2" fontWeight={700}>${p.mrr.toLocaleString()}</Typography>
+                        ? <span style={{ color: 'var(--ion-color-medium)' }}>$0</span>
+                        : <span style={{ fontWeight: 700 }}>${p.mrr.toLocaleString()}</span>
                       }
-                    </TableCell>
-                    <TableCell sx={{ minWidth: 140 }}>
+                    </td>
+                    <td style={{ ...tdStyle, minWidth: 160 }}>
                       {total_mrr > 0 && p.mrr > 0 && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <LinearProgress
-                            variant="determinate"
-                            value={parseFloat((p.mrr / total_mrr * 100).toFixed(0))}
-                            sx={{ flex: 1, height: 6, borderRadius: 3 }}
-                          />
-                          <Typography variant="caption" color="text.secondary" sx={{ width: 32, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: 'var(--ion-color-light)', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${(p.mrr / total_mrr * 100).toFixed(0)}%`, borderRadius: 3, backgroundColor: 'var(--ion-color-primary)' }} />
+                          </div>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', width: 32, flexShrink: 0 }}>
                             {(p.mrr / total_mrr * 100).toFixed(0)}%
-                          </Typography>
-                        </Box>
+                          </span>
+                        </div>
                       )}
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  <TableCell><Typography variant="body2" fontWeight={700}>Total</Typography></TableCell>
-                  <TableCell><Typography variant="body2" fontWeight={700}>{totalSubs.toLocaleString()}</Typography></TableCell>
-                  <TableCell><Typography variant="body2" color="text.secondary">—</Typography></TableCell>
-                  <TableCell><Typography variant="body2" fontWeight={800} color="primary.main">${total_mrr.toLocaleString()}</Typography></TableCell>
-                  <TableCell><Typography variant="body2" color="text.secondary">100%</Typography></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Box>
+                <tr style={{ backgroundColor: 'var(--ion-color-light)' }}>
+                  <td style={tdStyle}><span style={{ fontWeight: 700 }}>Total</span></td>
+                  <td style={tdStyle}><span style={{ fontWeight: 700 }}>{totalSubs.toLocaleString()}</span></td>
+                  <td style={tdStyle}><span style={{ color: 'var(--ion-color-medium)' }}>—</span></td>
+                  <td style={tdStyle}><span style={{ fontWeight: 800, color: 'var(--ion-color-primary)' }}>${total_mrr.toLocaleString()}</span></td>
+                  <td style={tdStyle}><span style={{ color: 'var(--ion-color-medium)' }}>100%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
-    </Box>
+      </div>
+    </div>
   );
 }

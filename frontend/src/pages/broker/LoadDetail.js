@@ -1,15 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { IonSpinner, IonModal } from '@ionic/react';
 import { loadsApi, bidsApi, bookingsApi, loadTemplatesApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
-import {
-  Box, Typography, Button, Card, CardContent, Grid, Chip, CircularProgress,
-  Paper, Alert, Divider, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-} from '@mui/material';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import DocumentPanel from '../../components/documents/DocumentPanel';
 import IonIcon from '../../components/IonIcon';
-
 
 const LIBRARIES = ['places'];
 
@@ -40,7 +36,11 @@ const CARRIER_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="
   <circle cx="12" cy="12" r="13" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="2"/>
 </svg>`;
 
-// ─── Hero map component ────────────────────────────────────────────────────────
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
+
+// ─── Hero map ─────────────────────────────────────────────────────────────────
 function LoadHeroMap({ load, carrierLocation }) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
@@ -67,7 +67,6 @@ function LoadHeroMap({ load, carrierLocation }) {
       (result, status) => {
         if (status === 'OK') {
           setDirections(result);
-          // Fit bounds to route + carrier if present
           setTimeout(() => {
             const map = mapRef.current;
             if (!map) return;
@@ -102,14 +101,14 @@ function LoadHeroMap({ load, carrierLocation }) {
 
   if (!isLoaded) {
     return (
-      <Box sx={{ height: 420, bgcolor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress size={28} sx={{ color: '#22c55e' }} />
-      </Box>
+      <div style={{ height: 420, backgroundColor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <IonSpinner name="crescent" style={{ color: '#22c55e' }} />
+      </div>
     );
   }
 
   return (
-    <Box sx={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <GoogleMap
         mapContainerStyle={{ height: 420, width: '100%' }}
         options={MAP_OPTIONS}
@@ -125,178 +124,142 @@ function LoadHeroMap({ load, carrierLocation }) {
             }}
           />
         )}
-        {/* A marker — pickup */}
         {directions && (
-          <Marker
-            position={directions.routes[0].legs[0].start_location}
-            icon={aIcon}
-            title={load.origin}
-          />
+          <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} title={load.origin} />
         )}
-        {/* B marker — delivery */}
         {directions && (
-          <Marker
-            position={directions.routes[0].legs[0].end_location}
-            icon={bIcon}
-            title={load.dest}
-          />
+          <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} title={load.dest} />
         )}
-        {/* Carrier live location */}
         {carrierLocation?.lat && carrierLocation?.lng && (
-          <Marker
-            position={{ lat: carrierLocation.lat, lng: carrierLocation.lng }}
-            icon={carrierIcon}
-            title="Carrier location"
-          />
+          <Marker position={{ lat: carrierLocation.lat, lng: carrierLocation.lng }} icon={carrierIcon} title="Carrier location" />
         )}
       </GoogleMap>
 
       {/* Route overlay */}
-      <Box sx={{
-        position: 'absolute', bottom: 12, left: 12, right: 12,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        pointerEvents: 'none',
-      }}>
-        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{load.origin}</Typography>
-          </Box>
-        </Paper>
-        <Box sx={{ flex: 1, mx: 1, height: 1, bgcolor: 'rgba(34,197,94,0.3)', borderStyle: 'dashed' }} />
-        <Paper sx={{ px: 1.5, py: 0.75, bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(239,68,68,0.3)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#ef4444' }} />
-            <Typography variant="caption" fontWeight={600} sx={{ color: '#e5e7eb' }}>{load.dest}</Typography>
-          </Box>
-        </Paper>
-      </Box>
+      <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
+        <div style={{ padding: '6px 12px', backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e5e7eb' }}>{load.origin}</span>
+          </span>
+        </div>
+        <div style={{ flex: 1, margin: '0 8px', height: 1, backgroundColor: 'rgba(34,197,94,0.3)', borderTop: '1px dashed rgba(34,197,94,0.3)' }} />
+        <div style={{ padding: '6px 12px', backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#e5e7eb' }}>{load.dest}</span>
+          </span>
+        </div>
+      </div>
 
       {/* Carrier badge */}
       {carrierLocation?.lat && (
-        <Box sx={{
-          position: 'absolute', top: 12, right: 12,
-          display: 'flex', alignItems: 'center', gap: 0.75,
-          bgcolor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(245,158,11,0.4)', borderRadius: 1.5, px: 1.25, py: 0.75,
-        }}>
-          <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: '#f59e0b', animation: 'pulse 2s infinite' }} />
-          <Typography variant="caption" fontWeight={600} sx={{ color: '#fbbf24' }}>Carrier On Route</Typography>
-        </Box>
+        <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', alignItems: 'center', gap: 6, backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 6, padding: '6px 10px' }}>
+          <span style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} />
+          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#fbbf24' }}>Carrier On Route</span>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
 
-// ─── Stepper ───────────────────────────────────────────────────────────────────
+// ─── Stepper ──────────────────────────────────────────────────────────────────
 const STEPS = [
-  { key: 'posted',     label: 'Posted',     icon: <IonIcon name="location-outline" sx={{ fontSize: 16 }} /> },
-  { key: 'booked',     label: 'Booked',     icon: <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} /> },
-  { key: 'in_transit', label: 'In Transit', icon: <IonIcon name="navigate-outline" sx={{ fontSize: 16 }} /> },
-  { key: 'delivered',  label: 'Delivered',  icon: <IonIcon name="car-sport-outline" sx={{ fontSize: 16 }} /> },
+  { key: 'posted',     label: 'Posted',     iconName: 'location-outline' },
+  { key: 'booked',     label: 'Booked',     iconName: 'checkmark-circle' },
+  { key: 'in_transit', label: 'In Transit', iconName: 'navigate-outline' },
+  { key: 'delivered',  label: 'Delivered',  iconName: 'car-sport-outline' },
 ];
 
 function stepIndex(loadStatus, bookingStatus) {
   if (bookingStatus === 'completed') return 3;
   if (bookingStatus === 'in_transit') return 2;
   if (bookingStatus === 'approved' || bookingStatus === 'pending') return 1;
-  if (loadStatus === 'filled') return 3; // fallback
+  if (loadStatus === 'filled') return 3;
   return 0;
 }
 
 function LoadStepper({ load, bookingStatus }) {
   const active = stepIndex(load.status, bookingStatus);
   const CIRCLE = 32;
+  const pct = (active / (STEPS.length - 1)) * 100;
 
   return (
-    <Box sx={{ py: 1.5 }}>
-      {/* Circles row — line lives here so it's always centered on the circles */}
-      <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', mb: 1 }}>
+    <div style={{ padding: '12px 0' }}>
+      {/* Circles row */}
+      <div style={{ display: 'flex', alignItems: 'center', position: 'relative', marginBottom: 8 }}>
         {/* Background track */}
-        <Box sx={{
-          position: 'absolute',
-          top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
-          height: 3, bgcolor: 'action.selected', borderRadius: 2,
-          transform: 'translateY(-50%)',
-        }} />
+        <div style={{ position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2, height: 3, backgroundColor: 'var(--ion-color-light)', borderRadius: 2, transform: 'translateY(-50%)' }} />
         {/* Filled progress */}
-        <Box sx={{
-          position: 'absolute',
-          top: '50%', left: CIRCLE / 2, right: CIRCLE / 2,
-          height: 3, borderRadius: 2,
-          transform: 'translateY(-50%)',
-          '&::after': {
-            content: '""', position: 'absolute', top: 0, left: 0, height: '100%',
-            width: `${(active / (STEPS.length - 1)) * 100}%`,
-            bgcolor: 'primary.main', borderRadius: 2,
-            transition: 'width 0.5s ease',
-          },
-        }} />
-
+        <div style={{ position: 'absolute', top: '50%', left: CIRCLE / 2, right: CIRCLE / 2, height: 3, borderRadius: 2, transform: 'translateY(-50%)', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, backgroundColor: 'var(--ion-color-primary)', borderRadius: 2, transition: 'width 0.5s ease' }} />
+        </div>
         {STEPS.map((step, i) => {
           const done    = i < active;
           const current = i === active;
           return (
-            <Box key={step.key} sx={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
-              <Box sx={{
+            <div key={step.key} style={{ flex: 1, display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{
                 width: CIRCLE, height: CIRCLE, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: done ? 'primary.main' : current ? 'primary.main' : 'background.paper',
-                border: '2.5px solid',
-                borderColor: done || current ? 'primary.main' : 'action.disabled',
-                color: done || current ? '#fff' : 'text.disabled',
+                backgroundColor: done || current ? 'var(--ion-color-primary)' : 'var(--ion-card-background)',
+                border: `2.5px solid ${done || current ? 'var(--ion-color-primary)' : 'var(--ion-color-light)'}`,
+                color: done || current ? '#fff' : 'var(--ion-color-medium)',
+                boxShadow: current ? '0 0 0 5px rgba(var(--ion-color-primary-rgb),0.15)' : 'none',
                 transition: 'all 0.3s ease',
-                boxShadow: current ? '0 0 0 5px rgba(25,118,210,0.15)' : 'none',
               }}>
                 {done
-                  ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16 }} />
+                  ? <IonIcon name="checkmark-circle" style={{ fontSize: 16 }} />
                   : current
-                    ? step.icon
-                    : <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'action.disabled' }} />
+                    ? <IonIcon name={step.iconName} style={{ fontSize: 16 }} />
+                    : <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-medium)', display: 'inline-block' }} />
                 }
-              </Box>
-            </Box>
+              </div>
+            </div>
           );
         })}
-      </Box>
-
-      {/* Labels row — separate so they never affect circle alignment */}
-      <Box sx={{ display: 'flex' }}>
+      </div>
+      {/* Labels row */}
+      <div style={{ display: 'flex' }}>
         {STEPS.map((step, i) => {
           const done    = i < active;
           const current = i === active;
           return (
-            <Box key={step.key} sx={{ flex: 1, textAlign: 'center' }}>
-              <Typography variant="caption" sx={{
+            <div key={step.key} style={{ flex: 1, textAlign: 'center' }}>
+              <span style={{
                 fontSize: '0.7rem',
                 fontWeight: current ? 700 : done ? 500 : 400,
-                color: current ? 'primary.main' : done ? 'text.primary' : 'text.disabled',
-                letterSpacing: current ? 0.3 : 0,
+                color: current ? 'var(--ion-color-primary)' : done ? 'var(--ion-text-color)' : 'var(--ion-color-medium)',
               }}>
                 {step.label}
-              </Typography>
-            </Box>
+              </span>
+            </div>
           );
         })}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 
-// ─── Bid chips ─────────────────────────────────────────────────────────────────
+// ─── Bid status badge ─────────────────────────────────────────────────────────
+const BID_STATUS = {
+  pending:   { bg: 'rgba(237,108,2,0.12)',  color: '#ed6c02', label: 'Pending' },
+  accepted:  { bg: 'rgba(46,125,50,0.12)',  color: '#2e7d32', label: 'Accepted' },
+  rejected:  { bg: 'rgba(211,47,47,0.12)',  color: '#d32f2f', label: 'Rejected' },
+  countered: { bg: 'rgba(2,136,209,0.12)',  color: '#0288d1', label: 'Countered' },
+  withdrawn: { bg: 'rgba(117,117,117,0.12)', color: '#757575', label: 'Withdrawn' },
+};
+
 function bidStatusChip(status) {
-  const map = {
-    pending:   { label: 'Pending',   color: 'warning' },
-    accepted:  { label: 'Accepted',  color: 'success' },
-    rejected:  { label: 'Rejected',  color: 'error' },
-    countered: { label: 'Countered', color: 'info' },
-    withdrawn: { label: 'Withdrawn', color: 'default' },
-  };
-  const cfg = map[status] || map.pending;
-  return <Chip label={cfg.label} color={cfg.color} size="small" />;
+  const s = BID_STATUS[status] || BID_STATUS.pending;
+  return (
+    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: s.bg, color: s.color }}>
+      {s.label}
+    </span>
+  );
 }
 
-// ─── Main page ─────────────────────────────────────────────────────────────────
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function BrokerLoadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -305,7 +268,7 @@ export default function BrokerLoadDetail() {
 
   const [load, setLoad]           = useState(null);
   const [bids, setBids]           = useState([]);
-  const [bookingData, setBooking] = useState(null); // { booking, location }
+  const [bookingData, setBooking] = useState(null);
   const [loading, setLoading]     = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError]         = useState(null);
@@ -379,16 +342,20 @@ export default function BrokerLoadDetail() {
   };
 
   if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-      <CircularProgress />
-    </Box>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>
+      <IonSpinner name="crescent" />
+    </div>
   );
 
   if (error || !load) return (
-    <Box sx={{ textAlign: 'center', py: 8 }}>
-      <Alert severity="error" sx={{ mb: 2, maxWidth: 400, mx: 'auto' }}>{error || 'Load not found'}</Alert>
-      <Button variant="outlined" onClick={() => navigate(-1)}>Go back</Button>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '64px 0' }}>
+      <div style={{ marginBottom: 16, padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem', maxWidth: 400, margin: '0 auto 16px' }}>
+        {error || 'Load not found'}
+      </div>
+      <button onClick={() => navigate(-1)} style={{ padding: '8px 16px', border: '1px solid var(--ion-border-color)', borderRadius: 6, background: 'none', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
+        Go back
+      </button>
+    </div>
   );
 
   const booking = bookingData?.booking || null;
@@ -397,262 +364,258 @@ export default function BrokerLoadDetail() {
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-      {/* ── Full-bleed map — bleeds to edges and top ── */}
-      <Box sx={{ mx: { xs: -2, sm: -3, lg: -4 }, mt: { xs: -2, sm: -3, lg: -4 }, mb: 3, overflow: 'hidden', position: 'relative' }}>
+      {/* Full-bleed map */}
+      <div style={{ margin: '-16px -16px 24px', overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} carrierLocation={carrierLocation} />
 
-        {/* Floating back button over the map */}
-        <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
-          <Button
-            startIcon={<IonIcon name="arrow-back-outline" />}
+        {/* Floating back button */}
+        <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+          <button
             onClick={() => navigate(-1)}
-            sx={{
-              bgcolor: 'rgba(255,255,255,0.92)',
-              backdropFilter: 'blur(8px)',
-              color: 'text.primary',
-              fontWeight: 600,
-              fontSize: '0.8rem',
-              px: 1.75,
-              py: 0.75,
-              borderRadius: 2,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-              border: '1px solid rgba(0,0,0,0.08)',
-              '&:hover': { bgcolor: 'rgba(255,255,255,1)' },
-            }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit', color: '#1a1a1a', boxShadow: '0 2px 8px rgba(0,0,0,0.18)' }}
           >
-            {fromLabel}
-          </Button>
-        </Box>
-      </Box>
+            <IonIcon name="arrow-back-outline" style={{ fontSize: 16 }} /> {fromLabel}
+          </button>
+        </div>
+      </div>
 
-      {/* ── Two-column content ── */}
-      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', lg: 'row' } }}>
+      {/* Two-column content */}
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
-        {/* ── LEFT: Trip info ── */}
-        <Card sx={{ flex: '0 0 550px', minWidth: 0 }}>
-          <CardContent sx={{ pt: 2.5 }}>
+        {/* LEFT: Trip info */}
+        <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, maxWidth: '100%' }}>
+          <div style={{ padding: '20px 20px 16px' }}>
             <LoadStepper load={load} bookingStatus={bookingStatus} />
-            <Divider sx={{ my: 2 }} />
+
+            <div style={{ borderTop: '1px solid var(--ion-border-color)', margin: '16px 0' }} />
 
             {/* Load headline */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5, mb: 2.5 }}>
-              <Box>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.25 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 2 }}>
                   Load #{load.id.slice(0, 8).toUpperCase()}
                   {booking && <> · Carrier: <strong>{booking.carrier_name}</strong>{booking.carrier_mc ? ` (MC-${booking.carrier_mc})` : ''}</>}
-                </Typography>
-                <Typography variant="h6" fontWeight={700}>{load.origin} → {load.dest}</Typography>
-                <Typography variant="body2" color="text.secondary">{load.type} · {load.miles} mi · Pickup {load.pickup}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
-                {load.status === 'active' && <Chip label="Active" color="success" size="small" />}
-                {load.status === 'filled' && <Chip label="Filled" color="info" size="small" />}
-                {load.status === 'expired' && <Chip label="Expired" color="error" size="small" />}
+                </span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'block' }}>{load.origin} → {load.dest}</span>
+                <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', display: 'block' }}>{load.type} · {load.miles} mi · Pickup {load.pickup}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                {load.status === 'active' && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: 'rgba(46,125,50,0.12)', color: '#2e7d32' }}>Active</span>}
+                {load.status === 'filled' && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: 'rgba(2,136,209,0.12)', color: '#0288d1' }}>Filled</span>}
+                {load.status === 'expired' && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: 'rgba(211,47,47,0.12)', color: '#d32f2f' }}>Expired</span>}
                 {bookingStatus === 'in_transit' && (
-                  <Chip
-                    icon={<IonIcon name="ellipse" sx={{ fontSize: '10px !important', color: '#f59e0b !important' }} />}
-                    label="In Transit" size="small"
-                    sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
-                  />
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} /> In Transit
+                  </span>
                 )}
-                {bookingStatus === 'completed' && <Chip label="Delivered" color="success" size="small" variant="outlined" />}
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<IonIcon name="layers-outline" sx={{ fontSize: 14 }} />}
+                {bookingStatus === 'completed' && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, border: '1px solid #2e7d32', color: '#2e7d32' }}>Delivered</span>}
+                <button
                   onClick={() => { setTemplateDialog(true); setTemplateName(`${load.origin} → ${load.dest}`); setTemplateSaved(false); }}
-                  sx={{ fontSize: '0.72rem', py: 0.35 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', border: '1px solid var(--ion-border-color)', borderRadius: 6, background: 'none', cursor: 'pointer', fontSize: '0.72rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}
                 >
-                  {templateSaved ? 'Saved!' : 'Save as Template'}
-                </Button>
-              </Box>
-            </Box>
+                  <IonIcon name="layers-outline" style={{ fontSize: 12 }} /> {templateSaved ? 'Saved!' : 'Save as Template'}
+                </button>
+              </div>
+            </div>
 
             {/* Stats */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5, pt: 0.5 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, borderTop: '1px solid var(--ion-border-color)', borderBottom: '1px solid var(--ion-border-color)', padding: '12px 0' }}>
               {[
-                { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}`,    color: 'text.primary' },
-                { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}/mi`, color: 'text.primary' },
-                { label: 'Views',    value: load.viewCount || 0,                          color: 'text.primary' },
-                { label: 'Bids',     value: bids.length,                                  color: bids.length > 0 ? 'warning.main' : 'text.primary' },
-              ].map(({ label, value, color }, idx, arr) => (
-                <Box
-                  key={label}
-                  sx={{
-                    flex: 1,
-                    textAlign: 'center',
-                    borderRight: idx < arr.length - 1 ? '1px solid' : 'none',
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-                  <Typography variant="subtitle1" fontWeight={700} sx={{ color, lineHeight: 1.3, mt: 0.25 }}>{value}</Typography>
-                </Box>
+                { label: 'Rate',     value: `$${(load.rate || 0).toLocaleString()}` },
+                { label: 'Per Mile', value: `$${(load.ratePerMile || 0).toFixed(2)}/mi` },
+                { label: 'Views',    value: load.viewCount || 0 },
+                { label: 'Bids',     value: bids.length, highlight: bids.length > 0 },
+              ].map(({ label, value, highlight }, idx, arr) => (
+                <div key={label} style={{ flex: 1, textAlign: 'center', borderRight: idx < arr.length - 1 ? '1px solid var(--ion-border-color)' : 'none' }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{label}</span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: highlight ? '#ed6c02' : 'var(--ion-text-color)', display: 'block', marginTop: 2 }}>{value}</span>
+                </div>
               ))}
-            </Box>
+            </div>
 
             {/* Pickup / Delivery */}
-            <Grid container spacing={2}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
                 { label: 'Pickup',   addr: load.pickupAddress || load.origin,   city: load.pickupAddress ? load.origin : null,   date: load.pickup,   dot: '#22c55e' },
                 { label: 'Delivery', addr: load.deliveryAddress || load.dest,   city: load.deliveryAddress ? load.dest : null,   date: load.delivery, dot: '#ef4444' },
               ].map(({ label, addr, city, date, dot }) => (
-                <Grid item xs={12} key={label}>
-                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start' }}>
-                    <Box sx={{ mt: 0.5, width: 10, height: 10, borderRadius: '50%', bgcolor: dot, flexShrink: 0 }} />
-                    <Box>
-                      <Typography variant="caption" color="text.secondary">{label}</Typography>
-                      <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.3 }}>{addr}</Typography>
-                      {city && <Typography variant="caption" color="text.secondary" display="block">{city}</Typography>}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.25 }}>
-                        <IonIcon name="calendar-outline" sx={{ fontSize: 11, color: 'text.disabled' }} />
-                        <Typography variant="caption" color="text.disabled">{date}</Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                </Grid>
+                <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <span style={{ marginTop: 4, width: 10, height: 10, borderRadius: '50%', backgroundColor: dot, flexShrink: 0, display: 'inline-block' }} />
+                  <div>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{label}</span>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)', display: 'block' }}>{addr}</span>
+                    {city && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>{city}</span>}
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                      <IonIcon name="calendar-outline" style={{ fontSize: 11, color: 'var(--ion-color-medium)' }} />
+                      <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{date}</span>
+                    </span>
+                  </div>
+                </div>
               ))}
-            </Grid>
+            </div>
 
             {/* Carrier location link */}
             {carrierLocation && (
-              <Box sx={{ mt: 2 }}>
-                <Divider sx={{ mb: 1.5 }} />
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#f59e0b' }} />
-                    <Typography variant="caption" color="text.secondary">Last location update · {booking?.carrier_name}</Typography>
-                  </Box>
+              <div style={{ marginTop: 16 }}>
+                <div style={{ borderTop: '1px solid var(--ion-border-color)', marginBottom: 12 }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} />
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Last location update · {booking?.carrier_name}</span>
+                  </span>
                   {booking && (
-                    <Button component={Link} to={`/broker/track/${booking.id}`} variant="text" size="small"
-                      startIcon={<IonIcon name="navigate-outline" sx={{ fontSize: 14 }} />} sx={{ py: 0 }}>
-                      Full Tracking
-                    </Button>
+                    <Link
+                      to={`/broker/track/${booking.id}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--ion-color-primary)', textDecoration: 'none', fontSize: '0.82rem' }}
+                    >
+                      <IonIcon name="navigate-outline" style={{ fontSize: 14 }} /> Full Tracking
+                    </Link>
                   )}
-                </Box>
-              </Box>
+                </div>
+              </div>
             )}
 
             {load.notes && (
-              <Paper variant="outlined" sx={{ p: 1.5, mt: 2, borderRadius: 2 }}>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>Notes</Typography>
-                <Typography variant="body2">{load.notes}</Typography>
-              </Paper>
+              <div style={{ marginTop: 16, padding: '12px', border: '1px solid var(--ion-border-color)', borderRadius: 8 }}>
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 4 }}>Notes</span>
+                <span style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{load.notes}</span>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* ── RIGHT: Bids + Documents ── */}
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* RIGHT: Bids + Documents */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Bids */}
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
-                <IonIcon name="people-outline" color="primary" />
-                <Typography variant="subtitle1" fontWeight={600}>Bids</Typography>
-                {pendingBids.length > 0 && <Chip label={`${pendingBids.length} pending`} size="small" color="warning" />}
-              </Box>
+          <div style={cardStyle}>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <IonIcon name="people-outline" style={{ color: 'var(--ion-color-primary)' }} />
+                <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Bids</span>
+                {pendingBids.length > 0 && (
+                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: 'rgba(237,108,2,0.12)', color: '#ed6c02' }}>
+                    {pendingBids.length} pending
+                  </span>
+                )}
+              </div>
               {bids.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 4 }}>No bids yet</Typography>
+                <p style={{ textAlign: 'center', padding: '32px 0', color: 'var(--ion-color-medium)', fontSize: '0.875rem', margin: 0 }}>No bids yet</p>
               ) : (
-                <Stack spacing={1.5}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {bids.map(bid => (
-                    <Paper key={bid.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5, flexWrap: 'wrap' }}>
-                            <Typography component={Link} to={`/c/${bid.carrier_id?.slice(0,8)}`} state={{ carrierId: bid.carrier_id }} variant="body2" fontWeight={600}
-                              sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                    <div key={bid.id} style={{ padding: 16, border: '1px solid var(--ion-border-color)', borderRadius: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                            <Link
+                              to={`/c/${bid.carrier_id?.slice(0, 8)}`}
+                              state={{ carrierId: bid.carrier_id }}
+                              style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-color-primary)', textDecoration: 'none' }}
+                            >
                               {bid.carrier_name || 'Carrier'}
-                            </Typography>
-                            {bid.carrier_mc && <Typography variant="caption" color="text.secondary">MC-{bid.carrier_mc}</Typography>}
+                            </Link>
+                            {bid.carrier_mc && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>MC-{bid.carrier_mc}</span>}
                             {bidStatusChip(bid.status)}
-                          </Box>
-                          <Typography variant="h6" fontWeight={700} color="primary.main">${(bid.amount || 0).toLocaleString()}</Typography>
+                          </div>
+                          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-primary)', display: 'block' }}>${(bid.amount || 0).toLocaleString()}</span>
                           {bid.note && (
-                            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block', mt: 0.5 }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontStyle: 'italic', display: 'block', marginTop: 4 }}>
                               "{bid.note}"
-                            </Typography>
+                            </span>
                           )}
                           {bid.counter_amount && (
-                            <Typography variant="caption" color="info.main" sx={{ display: 'block', mt: 0.5 }}>
+                            <span style={{ fontSize: '0.72rem', color: '#0288d1', display: 'block', marginTop: 4 }}>
                               Counter offer: ${bid.counter_amount.toLocaleString()}{bid.counter_note && ` — ${bid.counter_note}`}
-                            </Typography>
+                            </span>
                           )}
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-                          <Button component={Link} to="/broker/messages" variant="text" size="small" sx={{ minWidth: 0, px: 1 }} title="Message carrier">
-                            <IonIcon name="chatbubble-outline" sx={{ fontSize: 16 }} />
-                          </Button>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                          <Link to="/broker/messages" title="Message carrier" style={{ display: 'flex', alignItems: 'center', padding: 4, color: 'var(--ion-color-medium)', textDecoration: 'none' }}>
+                            <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} />
+                          </Link>
                           {bid.status === 'pending' && load.status === 'active' && (
                             <>
-                              <Button size="small" variant="outlined" color="success" onClick={() => handleAcceptBid(bid.id)} disabled={!!actionLoading}
-                                startIcon={actionLoading === bid.id ? <CircularProgress size={12} color="inherit" /> : <IonIcon name="checkmark-circle" />}>
+                              <button
+                                onClick={() => handleAcceptBid(bid.id)}
+                                disabled={!!actionLoading}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '5px 10px', border: '1px solid #2e7d32', borderRadius: 6, background: 'none', cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontFamily: 'inherit', color: '#2e7d32', opacity: actionLoading ? 0.6 : 1 }}
+                              >
+                                {actionLoading === bid.id ? <IonSpinner name="crescent" style={{ width: 12, height: 12 }} /> : <IonIcon name="checkmark-circle" style={{ fontSize: 14 }} />}
                                 Accept
-                              </Button>
-                              <Button size="small" variant="outlined" color="error" onClick={() => handleRejectBid(bid.id)} disabled={!!actionLoading}
-                                startIcon={actionLoading === bid.id + '_reject' ? <CircularProgress size={12} color="inherit" /> : <IonIcon name="close-circle-outline" />}>
+                              </button>
+                              <button
+                                onClick={() => handleRejectBid(bid.id)}
+                                disabled={!!actionLoading}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '5px 10px', border: '1px solid #d32f2f', borderRadius: 6, background: 'none', cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: '0.8rem', fontFamily: 'inherit', color: '#d32f2f', opacity: actionLoading ? 0.6 : 1 }}
+                              >
+                                {actionLoading === bid.id + '_reject' ? <IonSpinner name="crescent" style={{ width: 12, height: 12 }} /> : <IonIcon name="close-circle-outline" style={{ fontSize: 14 }} />}
                                 Reject
-                              </Button>
+                              </button>
                             </>
                           )}
-                        </Box>
-                      </Box>
-                    </Paper>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                </Stack>
+                </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Documents */}
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
-                <IonIcon name="document-text-outline" color="primary" fontSize="small" />
-                <Typography variant="subtitle1" fontWeight={600}>Documents & Load Messages</Typography>
-              </Box>
+          <div style={cardStyle}>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <IonIcon name="document-text-outline" style={{ color: 'var(--ion-color-primary)' }} />
+                <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Documents & Load Messages</span>
+              </div>
               <DocumentPanel loadId={id} />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      {/* Save as Template dialog */}
-      <Dialog open={templateDialog} onClose={() => setTemplateDialog(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IonIcon name="layers-outline" color="primary" fontSize="small" /> Save as Template
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Give this lane a name so you can re-post it instantly next time.
-          </Typography>
-          <TextField
-            autoFocus
-            fullWidth
-            size="small"
-            label="Template Name"
-            value={templateName}
-            onChange={e => setTemplateName(e.target.value)}
-            placeholder="e.g. Chicago → Atlanta weekly"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTemplateDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveTemplate}
-            disabled={templateSaving || !templateName.trim()}
-            startIcon={templateSaving ? <CircularProgress size={14} color="inherit" /> : null}
-          >
-            Save Template
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+      {/* Save as Template modal */}
+      {templateDialog && (
+        <IonModal isOpen onDidDismiss={() => setTemplateDialog(false)} style={{ '--width': '400px', '--height': 'auto', '--border-radius': '12px' }}>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <IonIcon name="layers-outline" style={{ color: 'var(--ion-color-primary)' }} />
+              <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Save as Template</span>
+            </div>
+            <p style={{ margin: '0 0 16px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+              Give this lane a name so you can re-post it instantly next time.
+            </p>
+            <div style={{ marginBottom: 20 }}>
+              <label style={labelStyle}>Template Name</label>
+              <input
+                autoFocus
+                style={inputStyle}
+                value={templateName}
+                onChange={e => setTemplateName(e.target.value)}
+                placeholder="e.g. Chicago → Atlanta weekly"
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setTemplateDialog(false)} style={{ flex: 1, padding: '8px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveTemplate}
+                disabled={templateSaving || !templateName.trim()}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: (templateSaving || !templateName.trim()) ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: (templateSaving || !templateName.trim()) ? 0.7 : 1 }}
+              >
+                {templateSaving && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
+                Save Template
+              </button>
+            </div>
+          </div>
+        </IonModal>
+      )}
+    </div>
   );
 }

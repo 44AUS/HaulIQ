@@ -1,21 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  Paper, Chip, Typography, Box, Button, IconButton, Tooltip, Stack,
-  CircularProgress
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { rateConfirmationApi } from '../../services/api';
 import IonIcon from '../IonIcon';
 
-
 const TMS_LABEL = {
-  dispatched:   { label: 'Dispatched',   color: 'info' },
-  picked_up:    { label: 'Picked Up',    color: 'primary' },
-  in_transit:   { label: 'In Transit',   color: 'primary' },
-  delivered:    { label: 'Delivered',    color: 'success' },
-  pod_received: { label: 'POD Received', color: 'success' },
+  dispatched:   { label: 'Dispatched',   bg: '#0288d1', color: '#fff' },
+  picked_up:    { label: 'Picked Up',    bg: 'var(--ion-color-primary)', color: '#fff' },
+  in_transit:   { label: 'In Transit',   bg: 'var(--ion-color-primary)', color: '#fff' },
+  delivered:    { label: 'Delivered',    bg: '#2e7d32', color: '#fff' },
+  pod_received: { label: 'POD Received', bg: '#2e7d32', color: '#fff' },
 };
+
+const STATUS_STYLES = {
+  warning: { border: '1px solid #ed6c02', color: '#ed6c02', bg: 'transparent' },
+  info:    { border: '1px solid #0288d1', color: '#0288d1', bg: 'transparent' },
+  success: { border: '1px solid #2e7d32', color: '#2e7d32', bg: 'transparent' },
+  default: { border: '1px solid var(--ion-border-color)', color: 'var(--ion-color-medium)', bg: 'transparent' },
+};
+
+function StatusChip({ label, styleKey }) {
+  const s = STATUS_STYLES[styleKey] || STATUS_STYLES.default;
+  return (
+    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, border: s.border, color: s.color, backgroundColor: s.bg, fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+      {label}
+    </span>
+  );
+}
+
+function TmsBadge({ tms }) {
+  return (
+    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, backgroundColor: tms.bg, color: tms.color, fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+      {tms.label}
+    </span>
+  );
+}
 
 function nextActionLabel(row) {
   if (!row.tms_status && row.booking_status === 'approved') return { label: 'Assign Driver', color: 'warning' };
@@ -26,6 +45,9 @@ function nextActionLabel(row) {
   if (row.tms_status === 'pod_received') return { label: 'Completed',         color: 'success' };
   return { label: row.booking_status, color: 'default' };
 }
+
+const thStyle = { fontWeight: 700, fontSize: 12, padding: '10px 12px', textAlign: 'left', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
 
 export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }) {
   const navigate = useNavigate();
@@ -44,143 +66,137 @@ export default function DispatcherTable({ rows, loading, onDispatch, onMarkPOD }
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-        <CircularProgress />
-      </Box>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
+        <IonSpinner name="crescent" />
+      </div>
     );
   }
 
   if (!rows.length) {
     return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <IonIcon name="car-sport-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-        <Typography color="text.secondary">No active shipments to dispatch.</Typography>
-      </Box>
+      <div style={{ textAlign: 'center', padding: '64px 0' }}>
+        <IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 8 }} />
+        <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No active shipments to dispatch.</span>
+      </div>
     );
   }
 
   return (
-    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ bgcolor: 'action.hover' }}>
+    <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, overflow: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 800 }}>
+        <thead>
+          <tr>
             {['Route', 'Carrier', 'Driver', 'Pickup Date', 'Rate', 'TMS Status', 'Next Action', 'Last Note', ''].map(h => (
-              <TableCell key={h} sx={{ fontWeight: 700, fontSize: 12, py: 1.5 }}>{h}</TableCell>
+              <th key={h} style={thStyle}>{h}</th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody>
           {rows.map(row => {
             const next = nextActionLabel(row);
             const tms  = row.tms_status ? TMS_LABEL[row.tms_status] : null;
             return (
-              <TableRow key={row.booking_id} hover>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: 180 }}>
+              <tr key={row.booking_id} style={{ backgroundColor: 'var(--ion-card-background)' }}>
+                <td style={tdStyle}>
+                  <span style={{ fontWeight: 600, display: 'block', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {row.origin} → {row.destination}
-                  </Typography>
-                </TableCell>
+                  </span>
+                </td>
 
-                <TableCell>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 130 }}>
+                <td style={tdStyle}>
+                  <span style={{ display: 'block', maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {row.carrier_name || '—'}
-                  </Typography>
+                  </span>
                   {row.carrier_mc && (
-                    <Typography variant="caption" color="text.secondary">MC# {row.carrier_mc}</Typography>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>MC# {row.carrier_mc}</span>
                   )}
-                </TableCell>
+                </td>
 
-                <TableCell>
+                <td style={tdStyle}>
                   {row.driver_name ? (
-                    <Stack direction="row" alignItems="center" spacing={0.5}>
-                      <IonIcon name="person-outline" sx={{ fontSize: 14, color: 'text.secondary' }} />
-                      <Box>
-                        <Typography variant="body2" noWrap sx={{ maxWidth: 110 }}>{row.driver_name}</Typography>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <IonIcon name="person-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+                      <div>
+                        <span style={{ display: 'block', maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{row.driver_name}</span>
                         {row.driver_phone && (
-                          <Typography variant="caption" color="text.secondary">{row.driver_phone}</Typography>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{row.driver_phone}</span>
                         )}
-                      </Box>
-                    </Stack>
+                      </div>
+                    </div>
                   ) : (
-                    <Typography variant="caption" color="text.disabled">Not assigned</Typography>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Not assigned</span>
                   )}
-                </TableCell>
+                </td>
 
-                <TableCell>
-                  <Typography variant="body2">
-                    {row.pickup_date ? new Date(row.pickup_date).toLocaleDateString() : '—'}
-                  </Typography>
-                </TableCell>
+                <td style={tdStyle}>
+                  {row.pickup_date ? new Date(row.pickup_date).toLocaleDateString() : '—'}
+                </td>
 
-                <TableCell>
-                  <Typography variant="body2" fontWeight={600}>
-                    ${(row.rate || 0).toLocaleString()}
-                  </Typography>
-                </TableCell>
+                <td style={tdStyle}>
+                  <span style={{ fontWeight: 600 }}>${(row.rate || 0).toLocaleString()}</span>
+                </td>
 
-                <TableCell>
+                <td style={tdStyle}>
                   {tms ? (
-                    <Chip label={tms.label} color={tms.color} size="small" variant="outlined" />
+                    <TmsBadge tms={tms} />
                   ) : (
-                    <Chip label="Not Dispatched" size="small" sx={{ bgcolor: 'action.disabledBackground' }} />
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, backgroundColor: 'var(--ion-color-light)', color: 'var(--ion-color-medium)', fontSize: '0.72rem', fontWeight: 600 }}>
+                      Not Dispatched
+                    </span>
                   )}
-                </TableCell>
+                </td>
 
-                <TableCell>
+                <td style={tdStyle}>
                   {next.label === 'Assign Driver' ? (
-                    <Button size="small" variant="outlined" color="warning" onClick={() => onDispatch(row)}>
+                    <button onClick={() => onDispatch(row)} style={{ padding: '4px 10px', border: '1px solid #ed6c02', color: '#ed6c02', backgroundColor: 'transparent', borderRadius: 6, fontSize: '0.78rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer' }}>
                       Assign Driver
-                    </Button>
+                    </button>
                   ) : next.label === 'Mark POD' ? (
-                    <Button size="small" variant="outlined" color="success" onClick={() => onMarkPOD(row)}>
+                    <button onClick={() => onMarkPOD(row)} style={{ padding: '4px 10px', border: '1px solid #2e7d32', color: '#2e7d32', backgroundColor: 'transparent', borderRadius: 6, fontSize: '0.78rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer' }}>
                       Mark POD
-                    </Button>
+                    </button>
                   ) : (
-                    <Chip label={next.label} color={next.color} size="small" />
+                    <StatusChip label={next.label} styleKey={next.color} />
                   )}
-                </TableCell>
+                </td>
 
-                <TableCell>
+                <td style={tdStyle}>
                   {row.last_check_call ? (
-                    <Tooltip title={row.last_check_call}>
-                      <Typography variant="caption" color="text.secondary" noWrap sx={{ maxWidth: 120, display: 'block' }}>
-                        {row.last_check_call}
-                      </Typography>
-                    </Tooltip>
+                    <span title={row.last_check_call} style={{ display: 'block', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+                      {row.last_check_call}
+                    </span>
                   ) : (
-                    <Typography variant="caption" color="text.disabled">—</Typography>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>—</span>
                   )}
-                </TableCell>
+                </td>
 
-                <TableCell align="right">
-                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                    <Tooltip title="Rate Confirmation PDF">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRateCon(row.booking_id)}
-                        disabled={pdfLoading === row.booking_id}
-                      >
-                        {pdfLoading === row.booking_id
-                          ? <CircularProgress size={14} />
-                          : <IonIcon name="document-outline" fontSize="small" />
-                        }
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Open Dispatch Detail">
-                      <IconButton
-                        size="small"
-                        onClick={() => navigate(`/broker/dispatch/${row.booking_id}`)}
-                      >
-                        <IonIcon name="open-outline" fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                </TableCell>
-              </TableRow>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+                    <button
+                      title="Rate Confirmation PDF"
+                      onClick={() => handleRateCon(row.booking_id)}
+                      disabled={pdfLoading === row.booking_id}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                    >
+                      {pdfLoading === row.booking_id
+                        ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} />
+                        : <IonIcon name="document-outline" style={{ fontSize: 16 }} />
+                      }
+                    </button>
+                    <button
+                      title="Open Dispatch Detail"
+                      onClick={() => navigate(`/broker/dispatch/${row.booking_id}`)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                    >
+                      <IonIcon name="open-outline" style={{ fontSize: 16 }} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
             );
           })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 }

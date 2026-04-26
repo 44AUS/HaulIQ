@@ -1,12 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, IconButton, Button,
-  Divider, Paper, Tooltip,
-} from '@mui/material';
 import { useThemeMode } from '../../context/ThemeContext';
 import { authApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
-
 
 const PRESET_COLORS = [
   '#0D1B2A', '#1565C0', '#1B5E20', '#4A148C',
@@ -29,154 +24,117 @@ export default function BrandingSettings({ embedded = false }) {
 
   const handleReset = () => persistColor(null);
 
+  const cardStyle = {
+    backgroundColor: 'var(--ion-card-background)',
+    border: '1px solid var(--ion-border-color)',
+    borderRadius: 8,
+    marginBottom: 24,
+    overflow: 'hidden',
+  };
+
   return (
-    <Box sx={{ maxWidth: 640 }}>
-      {/* Back header — hidden when embedded as a tab */}
+    <div style={{ maxWidth: 640 }}>
       {!embedded && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-          <IconButton size="small" onClick={() => navigate('/preferences')}>
-            <IonIcon name="arrow-back-outline" fontSize="small" />
-          </IconButton>
-          <Typography variant="h5" fontWeight={700}>Branding</Typography>
-        </Box>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+          <button onClick={() => navigate('/preferences')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', display: 'flex', alignItems: 'center', padding: 4, borderRadius: 4 }}>
+            <IonIcon name="arrow-back-outline" style={{ fontSize: 20 }} />
+          </button>
+          <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>Branding</h2>
+        </div>
       )}
 
-      <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600, mb: 1, display: 'block' }}>
+      <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 600, color: 'var(--ion-color-medium)', marginBottom: 8 }}>
         Design Elements
-      </Typography>
+      </div>
 
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        {/* Logo/Icon row (mock) */}
-        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '14px !important', cursor: 'default' }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: 'action.hover', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <IonIcon name="color-palette-outline" sx={{ fontSize: 18, color: 'text.disabled' }} />
-          </Box>
-          <Typography variant="body2" fontWeight={600} sx={{ flex: 1 }}>Logo / Icon</Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" color="text.disabled">Coming soon</Typography>
-            <IonIcon name="chevron-forward-outline" sx={{ color: 'text.disabled', fontSize: 18 }} />
-          </Box>
-        </CardContent>
+      <div style={cardStyle}>
+        {/* Logo row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <IonIcon name="color-palette-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+          </div>
+          <span style={{ flex: 1, fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Logo / Icon</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Coming soon</span>
+            <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+          </div>
+        </div>
 
-        <Divider />
+        <div style={{ borderTop: '1px solid var(--ion-border-color)' }} />
 
-        {/* Primary Color row */}
-        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: '14px !important' }}>
-          <Box
-            sx={{
-              width: 36, height: 36, borderRadius: '50%', bgcolor: currentColor,
-              border: '2px solid', borderColor: 'divider', flexShrink: 0,
-              overflow: 'hidden', position: 'relative', cursor: 'pointer',
-            }}
-          >
-            <input
-              type="color"
-              value={currentColor}
-              onChange={e => persistColor(e.target.value)}
-              style={{ position: 'absolute', inset: 0, width: '200%', height: '200%', opacity: 0, cursor: 'pointer', border: 'none' }}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" fontWeight={600}>Primary Color</Typography>
-            <Typography variant="caption" color="text.secondary">Navigation bar color</Typography>
-          </Box>
-          <Typography variant="caption" color="text.disabled" sx={{ fontFamily: 'monospace', mr: 1 }}>
-            {currentColor.toUpperCase()}
-          </Typography>
-        </CardContent>
-      </Card>
+        {/* Primary color row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 20px' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer' }}>
+            <input type="color" value={currentColor} onChange={e => persistColor(e.target.value)} style={{ position: 'absolute', inset: 0, width: '200%', height: '200%', opacity: 0, cursor: 'pointer', border: 'none' }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Primary Color</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Navigation bar color</div>
+          </div>
+          <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--ion-color-medium)', marginRight: 4 }}>{currentColor.toUpperCase()}</span>
+        </div>
+      </div>
 
       {/* Color picker + presets */}
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2 }}>Color Picker</Typography>
+      <div style={cardStyle}>
+        <div style={{ padding: 20 }}>
+          <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 16 }}>Color Picker</div>
 
-          {/* Full color picker */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-            <Box
-              sx={{
-                width: 64, height: 64, borderRadius: 2, bgcolor: currentColor,
-                border: '2px solid', borderColor: 'divider', flexShrink: 0,
-                overflow: 'hidden', position: 'relative', cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              }}
-            >
-              <input
-                type="color"
-                value={currentColor}
-                onChange={e => persistColor(e.target.value)}
-                style={{ position: 'absolute', inset: '-10px', width: 'calc(100% + 20px)', height: 'calc(100% + 20px)', opacity: 0, cursor: 'pointer', border: 'none' }}
-              />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>Pick any color</Typography>
-              <Typography variant="caption" color="text.secondary">
-                Click the swatch to open the color picker — changes apply instantly
-              </Typography>
-              <Typography variant="caption" color="text.disabled" display="block" sx={{ fontFamily: 'monospace', mt: 0.5, fontSize: '0.8rem' }}>
-                {currentColor.toUpperCase()}
-              </Typography>
-            </Box>
-          </Box>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+            <div style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+              <input type="color" value={currentColor} onChange={e => persistColor(e.target.value)} style={{ position: 'absolute', inset: '-10px', width: 'calc(100% + 20px)', height: 'calc(100% + 20px)', opacity: 0, cursor: 'pointer', border: 'none' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 4 }}>Pick any color</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Click the swatch to open the color picker — changes apply instantly</div>
+              <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--ion-color-medium)', marginTop: 4 }}>{currentColor.toUpperCase()}</div>
+            </div>
+          </div>
 
-          {/* Preset swatches */}
-          <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Presets
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+          <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, color: 'var(--ion-color-medium)', marginBottom: 8 }}>Presets</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
             {PRESET_COLORS.map(color => (
-              <Tooltip key={color} title={color} placement="top">
-                <Box
-                  onClick={() => persistColor(color)}
-                  sx={{
-                    width: 32, height: 32, borderRadius: 1.5, bgcolor: color, cursor: 'pointer',
-                    border: '2px solid',
-                    borderColor: currentColor === color ? 'primary.main' : 'transparent',
-                    outline: currentColor === color ? '2px solid' : 'none',
-                    outlineColor: 'primary.main',
-                    outlineOffset: 1,
-                    transition: 'transform 0.1s',
-                    '&:hover': { transform: 'scale(1.15)' },
-                  }}
-                />
-              </Tooltip>
+              <div
+                key={color}
+                title={color}
+                onClick={() => persistColor(color)}
+                style={{
+                  width: 32, height: 32, borderRadius: 6, backgroundColor: color, cursor: 'pointer',
+                  border: `2px solid ${currentColor === color ? 'var(--ion-color-primary)' : 'transparent'}`,
+                  outline: currentColor === color ? '2px solid var(--ion-color-primary)' : 'none',
+                  outlineOffset: 1,
+                  transition: 'transform 0.1s',
+                }}
+              />
             ))}
-          </Box>
+          </div>
 
-          {/* Live preview */}
-          <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Live Preview
-          </Typography>
-          <Paper
-            variant="outlined"
-            sx={{ overflow: 'hidden', borderRadius: 2, display: 'flex', height: 56 }}
-          >
-            <Box sx={{ bgcolor: currentColor, display: 'flex', alignItems: 'center', px: 1.5, gap: 1, minWidth: 180 }}>
+          <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, color: 'var(--ion-color-medium)', marginBottom: 8 }}>Live Preview</div>
+          <div style={{ overflow: 'hidden', borderRadius: 8, border: '1px solid var(--ion-border-color)', display: 'flex', height: 56 }}>
+            <div style={{ backgroundColor: currentColor, display: 'flex', alignItems: 'center', padding: '0 12px', gap: 8, minWidth: 180 }}>
               {[1, 2, 3, 4].map(i => (
-                <Box key={i} sx={{ width: 28, height: 6, borderRadius: 1, bgcolor: 'rgba(255,255,255,0.35)' }} />
+                <div key={i} style={{ width: 28, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.35)' }} />
               ))}
-            </Box>
-            <Box sx={{ flex: 1, bgcolor: 'background.default', p: 1.5, display: 'flex', flexDirection: 'column', gap: 0.75, justifyContent: 'center' }}>
-              <Box sx={{ width: '55%', height: 5, borderRadius: 1, bgcolor: 'action.hover' }} />
-              <Box sx={{ width: '35%', height: 5, borderRadius: 1, bgcolor: 'action.hover' }} />
-            </Box>
-          </Paper>
-        </CardContent>
-      </Card>
+            </div>
+            <div style={{ flex: 1, backgroundColor: 'var(--ion-background-color)', padding: 12, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
+              <div style={{ width: '55%', height: 5, borderRadius: 3, backgroundColor: 'var(--ion-color-light)' }} />
+              <div style={{ width: '35%', height: 5, borderRadius: 3, backgroundColor: 'var(--ion-color-light)' }} />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Reset */}
-      <Button
-        variant="outlined"
-        startIcon={<IonIcon name="reload-outline" />}
+      <button
         onClick={handleReset}
-        color="inherit"
+        style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', color: 'var(--ion-text-color)', fontWeight: 600, fontSize: '0.875rem', fontFamily: 'inherit' }}
       >
+        <IonIcon name="reload-outline" style={{ fontSize: 16 }} />
         Reset to Default
-      </Button>
+      </button>
 
-      <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 2 }}>
+      <p style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 12 }}>
         Changes apply instantly to the navigation bar and are saved in your browser.
-      </Typography>
-    </Box>
+      </p>
+    </div>
   );
 }

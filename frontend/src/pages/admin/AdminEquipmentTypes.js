@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Button, IconButton, Switch, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, Alert, Skeleton, Paper, Tooltip, Chip,
-  FormControl, InputLabel, Select, MenuItem,
-} from '@mui/material';
+import { IonModal } from '@ionic/react';
 import { equipmentTypesApi, equipmentClassesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
-function TypeDialog({ open, type, onClose, onSaved }) {
+function SkeletonBox({ height }) {
+  return <div style={{ height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4, marginBottom: 8 }} />;
+}
+
+function TypeModal({ open, type, onClose, onSaved }) {
   const editing = Boolean(type?.id);
   const [name, setName] = useState('');
   const [abbreviation, setAbbreviation] = useState('');
@@ -18,18 +21,11 @@ function TypeDialog({ open, type, onClose, onSaved }) {
   const [classes, setClasses] = useState([]);
 
   useEffect(() => {
-    equipmentClassesApi.adminList()
-      .then(setClasses)
-      .catch(() => {});
+    equipmentClassesApi.adminList().then(setClasses).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (open) {
-      setName(type?.name || '');
-      setAbbreviation(type?.abbreviation || '');
-      setClassId(type?.class_id || '');
-      setError(null);
-    }
+    if (open) { setName(type?.name || ''); setAbbreviation(type?.abbreviation || ''); setClassId(type?.class_id || ''); setError(null); }
   }, [open, type]);
 
   const handleSave = async () => {
@@ -38,11 +34,7 @@ function TypeDialog({ open, type, onClose, onSaved }) {
     setError(null);
     try {
       const payload = { name: name.trim(), abbreviation: abbreviation.trim() || null, class_id: classId || null };
-      if (editing) {
-        await equipmentTypesApi.adminUpdate(type.id, payload);
-      } else {
-        await equipmentTypesApi.adminCreate(payload);
-      }
+      editing ? await equipmentTypesApi.adminUpdate(type.id, payload) : await equipmentTypesApi.adminCreate(payload);
       onSaved();
       onClose();
     } catch (e) {
@@ -53,48 +45,37 @@ function TypeDialog({ open, type, onClose, onSaved }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>{editing ? 'Edit Equipment Type' : 'New Equipment Type'}</DialogTitle>
-      <DialogContent dividers>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          {error && <Alert severity="error">{error}</Alert>}
-          <TextField
-            label="Name"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            fullWidth size="small" required
-            placeholder="e.g. Dry Van"
-          />
-          <TextField
-            label="Abbreviation"
-            value={abbreviation}
-            onChange={e => setAbbreviation(e.target.value)}
-            size="small"
-            placeholder="e.g. DV"
-            inputProps={{ maxLength: 20 }}
-          />
-          <FormControl fullWidth size="small">
-            <InputLabel>Equipment Class (optional)</InputLabel>
-            <Select
-              value={classId}
-              label="Equipment Class (optional)"
-              onChange={e => setClassId(e.target.value)}
-            >
-              <MenuItem value=""><em>No class</em></MenuItem>
-              {classes.map(c => (
-                <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={saving}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained" disabled={saving}>
-          {saving ? 'Saving…' : editing ? 'Save Changes' : 'Create'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <IonModal isOpen={open} onDidDismiss={onClose} style={{ '--width': '420px', '--height': 'auto', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', padding: 24 }}>
+        <p style={{ margin: '0 0 16px', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>
+          {editing ? 'Edit Equipment Type' : 'New Equipment Type'}
+        </p>
+        {error && <div style={{ marginBottom: 12, padding: '8px 12px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.82rem' }}>{error}</div>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+          <div>
+            <label style={labelStyle}>Name *</label>
+            <input style={inputStyle} value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Dry Van" />
+          </div>
+          <div>
+            <label style={labelStyle}>Abbreviation</label>
+            <input style={inputStyle} value={abbreviation} onChange={e => setAbbreviation(e.target.value)} placeholder="e.g. DV" maxLength={20} />
+          </div>
+          <div>
+            <label style={labelStyle}>Equipment Class (optional)</label>
+            <select style={{ ...inputStyle, padding: '7px 12px' }} value={classId} onChange={e => setClassId(e.target.value)}>
+              <option value="">No class</option>
+              {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <button onClick={onClose} disabled={saving} style={{ padding: '7px 14px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>Cancel</button>
+          <button onClick={handleSave} disabled={saving} style={{ padding: '7px 14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Saving…' : editing ? 'Save Changes' : 'Create'}
+          </button>
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
@@ -120,111 +101,84 @@ export default function AdminEquipmentTypes() {
 
   const handleDelete = async (type) => {
     if (!window.confirm(`Delete "${type.name}"? This cannot be undone.`)) return;
-    try {
-      await equipmentTypesApi.adminDelete(type.id);
-      load();
-    } catch (e) {
-      alert(e.message || 'Delete failed');
-    }
+    try { await equipmentTypesApi.adminDelete(type.id); load(); }
+    catch (e) { alert(e.message || 'Delete failed'); }
   };
 
   const handleToggle = async (type) => {
-    try {
-      await equipmentTypesApi.adminUpdate(type.id, { is_active: !type.is_active });
-      load();
-    } catch (e) {
-      alert(e.message || 'Update failed');
-    }
+    try { await equipmentTypesApi.adminUpdate(type.id, { is_active: !type.is_active }); load(); }
+    catch (e) { alert(e.message || 'Update failed'); }
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={700}>Equipment Types</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Manage equipment types used across truck postings and load postings
-          </Typography>
-        </Box>
-        <Button variant="contained" startIcon={<IonIcon name="add-outline" />} onClick={handleNew}>
-          Add Type
-        </Button>
-      </Box>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h2 style={{ margin: '0 0 4px', fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Equipment Types</h2>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Manage equipment types used across truck postings and load postings</p>
+        </div>
+        <button onClick={handleNew} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer' }}>
+          <IonIcon name="add-outline" style={{ fontSize: 16 }} /> Add Type
+        </button>
+      </div>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && <div style={{ marginBottom: 16, padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>}
 
-      <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {[1, 2, 3, 4].map(i => <Skeleton key={i} height={52} sx={{ borderRadius: 1 }} />)}
-          </Box>
+          <div style={{ padding: 16 }}>{[1,2,3,4].map(i => <SkeletonBox key={i} height={52} />)}</div>
         ) : types.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8, color: 'text.secondary' }}>
-            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, mb: 1, opacity: 0.3 }} />
-            <Typography>No equipment types yet.</Typography>
-            <Button onClick={handleNew} startIcon={<IonIcon name="add-outline" />} sx={{ mt: 2 }}>Add First Type</Button>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '64px 0' }}>
+            <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 8px', opacity: 0.4 }} />
+            <p style={{ margin: '0 0 12px', color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No equipment types yet.</p>
+            <button onClick={handleNew} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.82rem', fontFamily: 'inherit', cursor: 'pointer' }}>
+              <IonIcon name="add-outline" /> Add First Type
+            </button>
+          </div>
         ) : (
-          <Box>
-            {/* Header */}
-            <Box sx={{ display: 'flex', alignItems: 'center', px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>Name</Typography>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 60, textTransform: 'uppercase', letterSpacing: 0.5 }}>Abbr.</Typography>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 120, textTransform: 'uppercase', letterSpacing: 0.5 }}>Class</Typography>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ width: 80, textTransform: 'uppercase', letterSpacing: 0.5 }}>Status</Typography>
-              <Box sx={{ width: 80 }} />
-            </Box>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)' }}>
+              <span style={{ flex: 1, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)' }}>Name</span>
+              <span style={{ width: 60, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)' }}>Abbr.</span>
+              <span style={{ width: 120, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)' }}>Class</span>
+              <span style={{ width: 80, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)' }}>Status</span>
+              <span style={{ width: 100 }} />
+            </div>
             {types.map((type, i) => (
-              <Box
-                key={type.id}
-                sx={{
-                  display: 'flex', alignItems: 'center', px: 2.5, py: 1.5,
-                  borderBottom: i < types.length - 1 ? 1 : 0, borderColor: 'divider',
-                  opacity: type.is_active ? 1 : 0.5,
-                  '&:hover': { bgcolor: 'action.hover' },
-                }}
-              >
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <IonIcon name="car-sport-outline" sx={{ fontSize: 16, color: 'text.secondary' }} />
-                  <Typography variant="body2" fontWeight={600}>{type.name}</Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ width: 60 }}>{type.abbreviation || '—'}</Typography>
-                <Box sx={{ width: 120 }}>
+              <div key={type.id} style={{ display: 'flex', alignItems: 'center', padding: '12px 20px', borderBottom: i < types.length - 1 ? '1px solid var(--ion-border-color)' : 'none', opacity: type.is_active ? 1 : 0.5 }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <IonIcon name="car-sport-outline" style={{ fontSize: 16, color: 'var(--ion-color-medium)' }} />
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{type.name}</span>
+                </div>
+                <span style={{ width: 60, fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>{type.abbreviation || '—'}</span>
+                <div style={{ width: 120 }}>
                   {type.class_name
-                    ? <Chip label={type.class_name} size="small" color="primary" variant="outlined" sx={{ fontSize: '0.65rem', height: 20 }} />
-                    : <Typography variant="caption" color="text.disabled">—</Typography>}
-                </Box>
-                <Box sx={{ width: 80 }}>
-                  <Chip
-                    label={type.is_active ? 'Active' : 'Hidden'}
-                    size="small"
-                    color={type.is_active ? 'success' : 'default'}
-                    sx={{ fontSize: '0.7rem' }}
-                  />
-                </Box>
-                <Box sx={{ width: 80, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                  <Tooltip title={type.is_active ? 'Hide' : 'Show'}>
-                    <Switch size="small" checked={type.is_active} onChange={() => handleToggle(type)} />
-                  </Tooltip>
-                  <Tooltip title="Edit">
-                    <IconButton size="small" onClick={() => handleEdit(type)}><IonIcon name="create-outline" fontSize="small" /></IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton size="small" color="error" onClick={() => handleDelete(type)}><IonIcon name="trash-outline" fontSize="small" /></IconButton>
-                  </Tooltip>
-                </Box>
-              </Box>
+                    ? <span style={{ display: 'inline-block', border: '1px solid var(--ion-color-primary)', color: 'var(--ion-color-primary)', borderRadius: 10, padding: '1px 8px', fontSize: '0.65rem', fontWeight: 600 }}>{type.class_name}</span>
+                    : <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>—</span>}
+                </div>
+                <div style={{ width: 80 }}>
+                  <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: '0.7rem', fontWeight: 600, backgroundColor: type.is_active ? '#2e7d32' : 'var(--ion-color-medium)', color: '#fff' }}>
+                    {type.is_active ? 'Active' : 'Hidden'}
+                  </span>
+                </div>
+                <div style={{ width: 100, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                  <label title={type.is_active ? 'Hide' : 'Show'} style={{ cursor: 'pointer' }}>
+                    <input type="checkbox" checked={type.is_active} onChange={() => handleToggle(type)} style={{ accentColor: 'var(--ion-color-primary)', width: 16, height: 16, cursor: 'pointer' }} />
+                  </label>
+                  <button title="Edit" onClick={() => handleEdit(type)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                    <IonIcon name="create-outline" style={{ fontSize: 16 }} />
+                  </button>
+                  <button title="Delete" onClick={() => handleDelete(type)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                    <IonIcon name="trash-outline" style={{ fontSize: 16 }} />
+                  </button>
+                </div>
+              </div>
             ))}
-          </Box>
+          </div>
         )}
-      </Paper>
+      </div>
 
-      <TypeDialog
-        open={dialogOpen}
-        type={editingType}
-        onClose={() => setDialogOpen(false)}
-        onSaved={load}
-      />
-    </Box>
+      <TypeModal open={dialogOpen} type={editingType} onClose={() => setDialogOpen(false)} onSaved={load} />
+    </div>
   );
 }

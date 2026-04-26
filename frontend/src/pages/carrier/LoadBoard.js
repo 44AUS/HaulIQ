@@ -1,16 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, TextField, Select, MenuItem, FormControl, InputLabel,
-  InputAdornment, IconButton, Button,
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Avatar, OutlinedInput, Checkbox, ListItemText,
-  useTheme, Drawer, Tooltip, CircularProgress,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
-
 
 const SORT_OPTIONS = [
   { value: 'profit', label: 'Highest Net Profit' },
@@ -45,29 +38,13 @@ const TABS = [
   { key: 'hot',         label: 'HOT ONLY' },
 ];
 
-// ─── Table header cell ─────────────────────────────────────────────────────────
-const TH = ({ children, sx: sxProp }) => (
-  <TableCell
-    sx={theme => ({
-      fontSize: '0.78rem',
-      fontWeight: '400 !important',
-      textTransform: 'none !important',
-      color: `${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important`,
-      bgcolor: 'action.hover',
-      whiteSpace: 'nowrap',
-      py: 1.25,
-      ...sxProp,
-    })}
-  >
-    {children}
-  </TableCell>
-);
+const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 400, color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', height: 64, verticalAlign: 'middle' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
+const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 
-// ─── Table view ────────────────────────────────────────────────────────────────
 function TableView({ loads, equipmentTypes }) {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const [savedIds, setSavedIds] = useState(() => new Set(loads.filter(l => l.saved).map(l => l.id)));
 
   const handleSave = (e, load) => {
@@ -82,349 +59,256 @@ function TableView({ loads, equipmentTypes }) {
   equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
 
   const PROFIT_BAR = { green: '#2dd36f', yellow: '#ffce00', red: '#eb445a' };
+  const PROFIT_COLOR = { green: '#2e7d32', yellow: '#ed6c02', red: '#d32f2f' };
 
   if (!loads.length) return null;
   return (
-    <TableContainer sx={{ overflowX: 'auto' }}>
-      <Table size="small" sx={{ minWidth: 900 }}>
-        <TableHead>
-          <TableRow>
-            <TH sx={{ width: 80, minWidth: 80 }}>Age</TH>
-            <TH sx={{ minWidth: 100 }}>Broker</TH>
-            <TH sx={{ minWidth: 90 }}>Pickup</TH>
-            <TH sx={{ minWidth: 80 }}>Rate</TH>
-            <TH sx={{ minWidth: 70 }}>Trip</TH>
-            <TH sx={{ minWidth: 180 }}>Lane</TH>
-            <TH sx={{ minWidth: 70 }}>DH-O</TH>
-            <TH sx={{ minWidth: 90 }}>Delivery</TH>
-            <TH sx={{ minWidth: 90 }}>Equipment</TH>
-            <TH sx={{ minWidth: 90 }}>Net Profit</TH>
-            <TH sx={{ width: 60 }}></TH>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
+        <thead>
+          <tr>
+            <th style={{ ...thStyle, width: 80, minWidth: 80 }}>Age</th>
+            <th style={{ ...thStyle, minWidth: 100 }}>Broker</th>
+            <th style={{ ...thStyle, minWidth: 90 }}>Pickup</th>
+            <th style={{ ...thStyle, minWidth: 80 }}>Rate</th>
+            <th style={{ ...thStyle, minWidth: 70 }}>Trip</th>
+            <th style={{ ...thStyle, minWidth: 180 }}>Lane</th>
+            <th style={{ ...thStyle, minWidth: 70 }}>DH-O</th>
+            <th style={{ ...thStyle, minWidth: 90 }}>Delivery</th>
+            <th style={{ ...thStyle, minWidth: 90 }}>Equipment</th>
+            <th style={{ ...thStyle, minWidth: 90 }}>Net Profit</th>
+            <th style={{ ...thStyle, width: 60 }}></th>
+          </tr>
+        </thead>
+        <tbody>
           {loads.map(load => {
             const isSaved    = savedIds.has(load.id);
             const originCity = load.origin || '—';
             const destCity   = load.dest   || '—';
             const abbr       = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
             const barColor   = PROFIT_BAR[load.profitScore] || '#9e9e9e';
+            const netColor   = PROFIT_COLOR[load.profitScore] || 'var(--ion-text-color)';
             const equipParts = [
               abbr,
               load.weight || null,
               load.trailerLength ? `${load.trailerLength} ft` : null,
               load.loadSize === 'partial' ? 'LTL' : 'FTL',
             ].filter(Boolean);
+            const initials = load.broker?.name?.split(' ').map(w => w[0]).join('').slice(0, 2) || '?';
 
             return (
-              <TableRow key={load.id}
-                onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })}
-                sx={{
-                  cursor: 'pointer',
-                  height: 64,
-                  '& td': { py: 0, borderBottom: 0 },
-                  '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
-                  '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                }}>
+              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} style={{ cursor: 'pointer', height: 64 }}>
+                <td style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{load.posted}</span>
+                </td>
 
-                {/* Age */}
-                <TableCell sx={{ width: 80, minWidth: 80 }}>
-                  <Typography variant="caption" color="text.secondary" noWrap>{load.posted}</Typography>
-                </TableCell>
-
-                {/* Broker */}
-                <TableCell sx={{ minWidth: 100 }}>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 100 }}>
                   {load.broker ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                      <Avatar sx={{ width: 24, height: 24, fontSize: '0.58rem', fontWeight: 700, bgcolor: 'primary.main', flexShrink: 0 }}>
-                        {load.broker.name?.split(' ').map(w => w[0]).join('').slice(0, 2)}
-                      </Avatar>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.3 }}>
-                          {load.broker.name}
-                        </Typography>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#fff' }}>{initials}</span>
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>{load.broker.name}</span>
                         {load.broker.rating > 0 && (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                            <IonIcon name="star" sx={{ fontSize: 9, color: 'warning.main' }} />
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
-                              {load.broker.rating?.toFixed(1)}
-                            </Typography>
-                          </Box>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <IonIcon name="star" style={{ fontSize: 9, color: '#ed6c02' }} />
+                            <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)' }}>{load.broker.rating?.toFixed(1)}</span>
+                          </span>
                         )}
-                      </Box>
-                    </Box>
-                  ) : <Typography variant="caption" color="text.disabled">—</Typography>}
-                </TableCell>
+                      </div>
+                    </div>
+                  ) : <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>—</span>}
+                </td>
 
-                {/* Pickup */}
-                <TableCell sx={{ minWidth: 90 }}>
-                  <Typography variant="caption" fontWeight={600} noWrap>{load.pickup}</Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.pickup}</span>
+                </td>
 
-                {/* Rate */}
-                <TableCell sx={{ minWidth: 80 }}>
-                  <Typography variant="body2" fontWeight={700} noWrap>${load.rate?.toLocaleString()}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap display="block">
-                    ${load.ratePerMile}/mi
-                  </Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>${load.rate?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>${load.ratePerMile}/mi</span>
+                </td>
 
-                {/* Trip */}
-                <TableCell sx={{ minWidth: 70 }}>
-                  <Typography variant="body2" fontWeight={600} noWrap>{load.miles} mi</Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.miles} mi</span>
+                </td>
 
-                {/* Lane — accent bar + icon track */}
-                <TableCell sx={{ pl: 0, position: 'relative', minWidth: 180 }}>
-                  <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
-                  <Box sx={{ pl: 2, display: 'flex', alignItems: 'stretch', gap: 1 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 0.25, pb: 0.25 }}>
-                      <IonIcon name="ellipse" sx={{ fontSize: 8, color: 'primary.main', flexShrink: 0 }} />
-                      <Box sx={{ width: '1.5px', flex: 1, bgcolor: 'divider', my: '2px' }} />
-                      <IonIcon name="square-outline" sx={{ fontSize: 8, color: 'text.secondary', flexShrink: 0 }} />
-                    </Box>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="caption" fontWeight={700} noWrap display="block" sx={{ lineHeight: 1.6 }}>{originCity}</Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ lineHeight: 1.6 }}>{destCity}</Typography>
-                    </Box>
-                  </Box>
-                </TableCell>
+                {/* Lane — accent bar */}
+                <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 180 }}>
+                  <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                  <div style={{ paddingLeft: 16, display: 'flex', alignItems: 'stretch', gap: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, paddingBottom: 2 }}>
+                      <IonIcon name="ellipse" style={{ fontSize: 8, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+                      <div style={{ width: 1.5, flex: 1, backgroundColor: 'var(--ion-border-color)', margin: '2px 0' }} />
+                      <IonIcon name="square-outline" style={{ fontSize: 8, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{originCity}</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{destCity}</span>
+                    </div>
+                  </div>
+                </td>
 
-                {/* DH-O */}
-                <TableCell sx={{ minWidth: 70 }}>
-                  <Typography variant="caption" fontWeight={600} noWrap>
-                    {load.deadhead > 0 ? `${load.deadhead} mi` : '—'}
-                  </Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.deadhead > 0 ? `${load.deadhead} mi` : '—'}</span>
+                </td>
 
-                {/* Delivery */}
-                <TableCell sx={{ minWidth: 90 }}>
-                  <Typography variant="caption" fontWeight={600} noWrap>{load.delivery}</Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.delivery}</span>
+                </td>
 
-                {/* Equipment */}
-                <TableCell sx={{ minWidth: 90 }}>
-                  <Typography variant="caption" fontWeight={700} noWrap display="block">{abbr}</Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap display="block" sx={{ fontSize: '0.6rem' }}>
-                    {equipParts.slice(1).join(' · ')}
-                  </Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>{abbr}</span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>{equipParts.slice(1).join(' · ')}</span>
+                </td>
 
-                {/* Net Profit */}
-                <TableCell sx={{ minWidth: 90 }}>
-                  <Typography variant="body2" fontWeight={700} noWrap
-                    color={load.profitScore === 'green' ? 'success.main' : load.profitScore === 'red' ? 'error.main' : 'warning.main'}>
-                    ${load.netProfit?.toLocaleString()}
-                  </Typography>
-                </TableCell>
+                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
+                </td>
 
-                {/* Bookmark + Chevron */}
-                <TableCell sx={{ width: 60, pr: 0.5 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <IconButton size="small" onClick={e => handleSave(e, load)}
-                      sx={{ color: isSaved ? 'primary.main' : 'text.disabled' }}>
-                      {isSaved ? <IonIcon name="bookmark" sx={{ fontSize: 15 }} /> : <IonIcon name="bookmark-outline" sx={{ fontSize: 15 }} />}
-                    </IconButton>
-                    <IonIcon name="chevron-forward-outline" sx={{ fontSize: 18, color: 'text.disabled' }} />
-                  </Box>
-                </TableCell>
-              </TableRow>
+                <td style={{ ...tdStyle, width: 60, paddingRight: 6 }} onClick={e => e.stopPropagation()}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <button onClick={e => handleSave(e, load)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isSaved ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                      <IonIcon name={isSaved ? 'bookmark' : 'bookmark-outline'} style={{ fontSize: 15 }} />
+                    </button>
+                    <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+                  </div>
+                </td>
+              </tr>
             );
           })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 }
 
-// ─── Filter Drawer ─────────────────────────────────────────────────────────────
 function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTypes }) {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      PaperProps={{ sx: { width: 300, bgcolor: isDark ? '#1a1a1a' : '#fff', borderRadius: 0 } }}
-    >
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <>
+      {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1000 }} />}
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 300, backgroundColor: 'var(--ion-card-background)', zIndex: 1001, transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.2)' }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="subtitle1" fontWeight={700} sx={{ fontSize: '1.05rem' }}>Filter</Typography>
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <Button size="small" onClick={onClear} sx={{ color: 'error.main', fontWeight: 700, minWidth: 0, px: 0.5, fontSize: '0.8rem' }}>CLEAR</Button>
-            <Button size="small" variant="contained" onClick={onApply} sx={{ bgcolor: '#4CAF50', '&:hover': { bgcolor: '#388E3C' }, fontWeight: 700, px: 2, fontSize: '0.8rem', minWidth: 0 }}>APPLY</Button>
-          </Box>
-        </Box>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+          <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={onClear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>CLEAR</button>
+            <button onClick={onApply} style={{ padding: '4px 16px', backgroundColor: '#4CAF50', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>APPLY</button>
+          </div>
+        </div>
 
-        {/* Body */}
-        <Box sx={{ flex: 1, overflowY: 'auto', py: 1 }}>
-
+        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
           {/* Origin */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Origin
-            </Typography>
-            <TextField fullWidth size="small" placeholder="e.g. Chicago, IL" value={pf.origin}
-              onChange={e => setPF('origin', e.target.value)}
-              sx={{ mb: 1 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
-                endAdornment: pf.origin ? (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setPF('origin', '')}><IonIcon name="close-outline" sx={{ fontSize: 12 }} /></IconButton>
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
-            <FormControl fullWidth size="small">
-              <InputLabel>Deadhead to pickup</InputLabel>
-              <Select value={pf.originDeadhead} label="Deadhead to pickup" onChange={e => setPF('originDeadhead', e.target.value)}>
-                {DEADHEAD_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Box>
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Origin</span>
+            <div style={{ position: 'relative', marginBottom: 8 }}>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><IonIcon name="search-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)' }} /></span>
+              <input style={{ ...inputStyle, paddingLeft: 32, paddingRight: pf.origin ? 32 : 12 }} placeholder="e.g. Chicago, IL" value={pf.origin} onChange={e => setPF('origin', e.target.value)} />
+              {pf.origin && <button onClick={() => setPF('origin', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 12, color: 'var(--ion-color-medium)' }} /></button>}
+            </div>
+            <select style={inputStyle} value={pf.originDeadhead} onChange={e => setPF('originDeadhead', e.target.value)}>
+              {DEADHEAD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
 
           {/* Destination */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Destination
-            </Typography>
-            <TextField fullWidth size="small" placeholder="e.g. Atlanta, GA" value={pf.dest}
-              onChange={e => setPF('dest', e.target.value)}
-              sx={{ mb: 1 }}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 14, color: 'text.disabled' }} /></InputAdornment>,
-                endAdornment: pf.dest ? (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setPF('dest', '')}><IonIcon name="close-outline" sx={{ fontSize: 12 }} /></IconButton>
-                  </InputAdornment>
-                ) : null,
-              }}
-            />
-            <FormControl fullWidth size="small">
-              <InputLabel>Deadhead from delivery</InputLabel>
-              <Select value={pf.destDeadhead} label="Deadhead from delivery" onChange={e => setPF('destDeadhead', e.target.value)}>
-                {DEADHEAD_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Box>
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Destination</span>
+            <div style={{ position: 'relative', marginBottom: 8 }}>
+              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><IonIcon name="search-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)' }} /></span>
+              <input style={{ ...inputStyle, paddingLeft: 32, paddingRight: pf.dest ? 32 : 12 }} placeholder="e.g. Atlanta, GA" value={pf.dest} onChange={e => setPF('dest', e.target.value)} />
+              {pf.dest && <button onClick={() => setPF('dest', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 12, color: 'var(--ion-color-medium)' }} /></button>}
+            </div>
+            <select style={inputStyle} value={pf.destDeadhead} onChange={e => setPF('destDeadhead', e.target.value)}>
+              {DEADHEAD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
 
-          {/* Equipment */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Equipment
-            </Typography>
-            <FormControl fullWidth size="small">
-              <InputLabel>Equipment Types</InputLabel>
-              <Select multiple value={pf.equipTypes}
-                onChange={e => setPF('equipTypes', e.target.value)}
-                input={<OutlinedInput label="Equipment Types" />}
-                renderValue={sel =>
-                  sel.length === 0 ? 'All Types'
-                  : sel.length === 1 ? sel[0]
-                  : `${sel.length} types selected`
-                }>
-                {equipmentTypes.map(t => (
-                  <MenuItem key={t.id} value={t.name}>
-                    <Checkbox checked={pf.equipTypes.includes(t.name)} size="small" sx={{ py: 0.25 }} />
-                    <ListItemText primary={t.name} primaryTypographyProps={{ variant: 'body2' }} />
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+          {/* Equipment Types */}
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Equipment Types</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {equipmentTypes.map(t => (
+                <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>
+                  <input
+                    type="checkbox"
+                    checked={pf.equipTypes.includes(t.name)}
+                    onChange={e => setPF('equipTypes', e.target.checked ? [...pf.equipTypes, t.name] : pf.equipTypes.filter(x => x !== t.name))}
+                    style={{ width: 14, height: 14 }}
+                  />
+                  {t.name}
+                </label>
+              ))}
+            </div>
+          </div>
 
           {/* Load Size */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Load Size
-            </Typography>
-            <FormControl fullWidth size="small">
-              <Select value={pf.loadSize} displayEmpty onChange={e => setPF('loadSize', e.target.value)}>
-                <MenuItem value="">Full &amp; Partial</MenuItem>
-                <MenuItem value="full">Full Truckload (FTL)</MenuItem>
-                <MenuItem value="partial">Partial Truckload (LTL)</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Load Size</span>
+            <select style={inputStyle} value={pf.loadSize} onChange={e => setPF('loadSize', e.target.value)}>
+              <option value="">Full &amp; Partial</option>
+              <option value="full">Full Truckload (FTL)</option>
+              <option value="partial">Partial Truckload (LTL)</option>
+            </select>
+          </div>
 
-          {/* Weight */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Max Weight
-            </Typography>
-            <TextField fullWidth size="small" type="number" placeholder="45000"
-              value={pf.maxWeight} onChange={e => setPF('maxWeight', e.target.value)}
-              InputProps={{ endAdornment: <InputAdornment position="end"><Typography variant="caption" color="text.disabled">lbs</Typography></InputAdornment> }}
-              inputProps={{ min: 0 }}
-            />
-          </Box>
+          {/* Max Weight */}
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Max Weight</span>
+            <div style={{ position: 'relative' }}>
+              <input style={{ ...inputStyle, paddingRight: 36 }} type="number" min={0} placeholder="45000" value={pf.maxWeight} onChange={e => setPF('maxWeight', e.target.value)} />
+              <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>lbs</span>
+            </div>
+          </div>
 
           {/* Trailer Length */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Trailer Length
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <TextField size="small" type="number" placeholder="Min" value={pf.minLength}
-                onChange={e => setPF('minLength', e.target.value)}
-                InputProps={{ endAdornment: <InputAdornment position="end"><Typography variant="caption" color="text.disabled">ft</Typography></InputAdornment> }}
-                inputProps={{ min: 0 }} sx={{ flex: 1 }} />
-              <TextField size="small" type="number" placeholder="Max" value={pf.maxLength}
-                onChange={e => setPF('maxLength', e.target.value)}
-                InputProps={{ endAdornment: <InputAdornment position="end"><Typography variant="caption" color="text.disabled">ft</Typography></InputAdornment> }}
-                inputProps={{ min: 0 }} sx={{ flex: 1 }} />
-            </Box>
-          </Box>
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Trailer Length</span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input style={{ ...inputStyle, paddingRight: 28 }} type="number" min={0} placeholder="Min" value={pf.minLength} onChange={e => setPF('minLength', e.target.value)} />
+                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>ft</span>
+              </div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <input style={{ ...inputStyle, paddingRight: 28 }} type="number" min={0} placeholder="Max" value={pf.maxLength} onChange={e => setPF('maxLength', e.target.value)} />
+                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>ft</span>
+              </div>
+            </div>
+          </div>
 
           {/* Pickup Date */}
-          <Box sx={{ px: 2.5, py: 1.25, borderBottom: 1, borderColor: 'divider' }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Pickup Date
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <TextField size="small" type="date" value={pf.dateFrom}
-                onChange={e => setPF('dateFrom', e.target.value)}
-                InputLabelProps={{ shrink: true }} inputProps={{ style: { fontSize: 12 } }} sx={{ flex: 1 }} />
-              <TextField size="small" type="date" value={pf.dateTo}
-                onChange={e => setPF('dateTo', e.target.value)}
-                InputLabelProps={{ shrink: true }} inputProps={{ style: { fontSize: 12 } }} sx={{ flex: 1 }} />
-            </Box>
-          </Box>
+          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={sectionLabel}>Pickup Date</span>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input style={{ ...inputStyle, flex: 1, fontSize: 12 }} type="date" value={pf.dateFrom} onChange={e => setPF('dateFrom', e.target.value)} />
+              <input style={{ ...inputStyle, flex: 1, fontSize: 12 }} type="date" value={pf.dateTo} onChange={e => setPF('dateTo', e.target.value)} />
+            </div>
+          </div>
 
           {/* Sort By */}
-          <Box sx={{ px: 2.5, py: 1.25 }}>
-            <Typography variant="caption" fontWeight={600} sx={{ display: 'block', mb: 0.75, color: 'text.secondary', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Sort By
-            </Typography>
-            <FormControl fullWidth size="small">
-              <Select value={pf.sort} onChange={e => setPF('sort', e.target.value)}>
-                {SORT_OPTIONS.map(o => <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Box>
-
-        </Box>
-      </Box>
-    </Drawer>
+          <div style={{ padding: '10px 20px' }}>
+            <span style={sectionLabel}>Sort By</span>
+            <select style={inputStyle} value={pf.sort} onChange={e => setPF('sort', e.target.value)}>
+              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
-// ─── Main LoadBoard ────────────────────────────────────────────────────────────
 export default function LoadBoard() {
-  const [pf, setPF_state] = useState(INIT);
+  const [pf, setPF_state]             = useState(INIT);
   const [appliedFilters, setAppliedFilters] = useState(INIT);
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const [loads, setLoads] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [apiError, setApiError] = useState(null);
+  const [loads, setLoads]             = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [apiError, setApiError]       = useState(null);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
-  const [activeTab, setActiveTab] = useState('all');
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [spinning, setSpinning] = useState(false);
+  const [activeTab, setActiveTab]     = useState('all');
+  const [filterOpen, setFilterOpen]   = useState(false);
+  const [spinning, setSpinning]       = useState(false);
   const autoTimer = useRef(null);
 
   const setPF = (key, val) => setPF_state(f => ({ ...f, [key]: val }));
@@ -492,93 +376,78 @@ export default function LoadBoard() {
     hot:         loads.filter(l => l.hot).length,
   }), [loads]);
 
-  const tabBorder  = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-  const activeFg   = isDark ? '#fff' : '#000';
-  const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
-
   return (
     <>
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
-        {/* ── Top bar ── */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, bgcolor: 'background.paper', flexShrink: 0, borderRadius: '6px 6px 0 0' }}>
-          <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Load Board</Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
+          <div>
+            <h2 style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>Load Board</h2>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
               {loading ? 'Loading…' : `${tabLoads.length} loads available`}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Button
-              size="small"
-              startIcon={<IonIcon name="funnel-outline" sx={{ fontSize: 16 }} />}
-              onClick={() => setFilterOpen(true)}
-              sx={{
-                fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-                color: hasActive ? 'primary.main' : 'text.secondary',
-                border: '1px solid',
-                borderColor: hasActive ? 'primary.main' : tabBorder,
-                borderRadius: 1, px: 1.5, py: 0.5, textTransform: 'uppercase',
-                '&:hover': { bgcolor: 'action.hover' },
-              }}>
-              Filter
-            </Button>
-          </Box>
-        </Box>
+            </p>
+          </div>
+          <button
+            onClick={() => setFilterOpen(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', border: `1px solid ${hasActive ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, borderRadius: 4, backgroundColor: 'transparent', color: hasActive ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}
+          >
+            <IonIcon name="funnel-outline" style={{ fontSize: 16 }} /> Filter
+          </button>
+        </div>
 
-        {/* ── Tab bar ── */}
-        <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, overflowX: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+        {/* Tab bar */}
+        <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflowX: 'auto' }}>
           {TABS.map(tab => {
             const isActive = activeTab === tab.key;
             const count    = tabCounts[tab.key] ?? 0;
             return (
-              <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 2.75, cursor: 'pointer', flexShrink: 0, borderBottom: isActive ? '2px solid' : '2px solid transparent', borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent', color: isActive ? activeFg : inactiveFg, opacity: isActive ? 1 : 0.6, '&:hover': { opacity: 1, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }, transition: 'opacity 0.15s, background-color 0.15s' }}>
-                <Typography sx={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
-                <Box sx={{ bgcolor: 'background.default', borderRadius: '4px', px: 0.6, py: 0.15, minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</Typography>
-                </Box>
-              </Box>
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 24px', cursor: 'pointer', flexShrink: 0, border: 'none', borderBottom: isActive ? '2px solid var(--ion-text-color)' : '2px solid transparent', backgroundColor: 'transparent', color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', opacity: isActive ? 1 : 0.6, fontFamily: 'inherit', transition: 'opacity 0.15s' }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
+                <span style={{ backgroundColor: 'var(--ion-color-primary)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</span>
+                </span>
+              </button>
             );
           })}
-          <Box sx={{ flex: 1 }} />
-          <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
-            <Tooltip title="Refresh">
-              <IconButton size="small" onClick={refresh} sx={{ color: 'text.secondary' }}>
-                <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
+          <div style={{ flex: 1 }} />
+          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
+            <button title="Refresh" onClick={refresh} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, borderRadius: 4, display: 'flex' }}>
+              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </button>
+          </div>
+        </div>
 
-        {/* ── Content ── */}
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
+        {/* Content */}
+        <div style={{ flex: 1, overflow: 'auto' }}>
           {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-              <CircularProgress size={28} />
-            </Box>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+              <IonSpinner name="crescent" />
+            </div>
           ) : apiError ? (
-            <Box sx={{ border: '1px solid', borderColor: 'error.main', borderRadius: 2, m: 2, p: 4, textAlign: 'center' }}>
-              <Typography color="error" gutterBottom>{apiError}</Typography>
-              <Button onClick={() => fetchLoads(appliedFilters)}>Retry</Button>
-            </Box>
+            <div style={{ border: '1px solid #d32f2f', borderRadius: 8, margin: 16, padding: 32, textAlign: 'center' }}>
+              <p style={{ margin: '0 0 12px', color: '#d32f2f' }}>{apiError}</p>
+              <button onClick={() => fetchLoads(appliedFilters)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontFamily: 'inherit', fontSize: '0.875rem' }}>Retry</button>
+            </div>
           ) : tabLoads.length === 0 ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-              <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
-              <Typography variant="body2" color="text.secondary">No loads match your filters</Typography>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 8 }}>
+              <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No loads match your filters</p>
               {hasActive && (
-                <Button variant="text" size="small" onClick={() => { setPF_state(INIT); fetchLoads(INIT); }}>
+                <button onClick={() => { setPF_state(INIT); fetchLoads(INIT); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontFamily: 'inherit', fontSize: '0.875rem' }}>
                   Clear filters
-                </Button>
+                </button>
               )}
-            </Box>
+            </div>
           ) : (
             <TableView loads={tabLoads} equipmentTypes={equipmentTypes} />
           )}
-        </Box>
+        </div>
 
-      </Box>
+      </div>
 
       <FilterDrawer
         open={filterOpen}
@@ -589,7 +458,7 @@ export default function LoadBoard() {
         onClear={() => { setPF_state(INIT); fetchLoads(INIT); setFilterOpen(false); }}
         equipmentTypes={equipmentTypes}
       />
-    </Box>
+    </div>
     <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </>
   );

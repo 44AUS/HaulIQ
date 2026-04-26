@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, TextField, Button, Alert,
-  Grid, Divider, CircularProgress,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import IonIcon from '../../components/IonIcon';
-
 
 const fmtDate = (iso) => {
   if (!iso) return '—';
@@ -16,30 +12,27 @@ const fmtDate = (iso) => {
   return new Date(utc).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-// ── Overview Tab ──────────────────────────────────────────────────────────────
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+
 function OverviewTab() {
   const { user, updateUser } = useAuth();
-
   const [form, setForm] = useState({
-    company:          user?.company          || '',
-    mc:               user?.mc               || '',
-    dot:              user?.dot              || '',
-    business_address: user?.business_address || '',
-    business_city:    user?.business_city    || '',
-    business_state:   user?.business_state   || '',
-    business_zip:     user?.business_zip     || '',
+    company: user?.company || '', mc: user?.mc || '', dot: user?.dot || '',
+    business_address: user?.business_address || '', business_city: user?.business_city || '',
+    business_state: user?.business_state || '', business_zip: user?.business_zip || '',
     business_country: user?.business_country || '',
   });
-  const [status,  setStatus]  = useState(null);
-  const [saving,  setSaving]  = useState(false);
+  const [status, setStatus] = useState(null);
+  const [saving, setSaving]  = useState(false);
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
   const handleAddressSelect = (place) => {
     if (!place?.address_components) return;
     const get = (type) => place.address_components.find(c => c.types.includes(type))?.long_name || '';
-    const streetNum  = get('street_number');
-    const route      = get('route');
+    const streetNum = get('street_number');
+    const route = get('route');
     setForm(f => ({
       ...f,
       business_address: [streetNum, route].filter(Boolean).join(' ') || place.formatted_address || '',
@@ -55,128 +48,90 @@ function OverviewTab() {
     setSaving(true); setStatus(null);
     try {
       const updated = await authApi.update({
-        company:          form.company    || undefined,
-        mc_number:        form.mc         || undefined,
-        dot_number:       form.dot        || undefined,
-        business_address: form.business_address || undefined,
-        business_city:    form.business_city    || undefined,
-        business_state:   form.business_state   || undefined,
-        business_zip:     form.business_zip     || undefined,
+        company: form.company || undefined, mc_number: form.mc || undefined, dot_number: form.dot || undefined,
+        business_address: form.business_address || undefined, business_city: form.business_city || undefined,
+        business_state: form.business_state || undefined, business_zip: form.business_zip || undefined,
         business_country: form.business_country || undefined,
       });
-      updateUser({
-        company:          updated.company || null,
-        mc:               updated.mc_number  || null,
-        dot:              updated.dot_number || null,
-        business_address: updated.business_address || null,
-        business_city:    updated.business_city    || null,
-        business_state:   updated.business_state   || null,
-        business_zip:     updated.business_zip     || null,
-        business_country: updated.business_country || null,
-      });
+      updateUser({ company: updated.company || null, mc: updated.mc_number || null, dot: updated.dot_number || null,
+        business_address: updated.business_address || null, business_city: updated.business_city || null,
+        business_state: updated.business_state || null, business_zip: updated.business_zip || null,
+        business_country: updated.business_country || null });
       setStatus({ type: 'success', msg: 'Business information saved.' });
     } catch (err) {
       setStatus({ type: 'error', msg: err.message || 'Failed to save.' });
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
+  const Field = ({ label, fieldKey, placeholder }) => (
+    <div>
+      <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--ion-color-medium)', marginBottom: 4, fontWeight: 500 }}>{label}</label>
+      <input value={form[fieldKey]} onChange={set(fieldKey)} placeholder={placeholder || ''} style={inputStyle} />
+    </div>
+  );
+
   return (
-    <Box sx={{ maxWidth: 640, mx: 'auto', py: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {status && <Alert severity={status.type === 'success' ? 'success' : 'error'} onClose={() => setStatus(null)}>{status.msg}</Alert>}
+    <div style={{ maxWidth: 640, margin: '0 auto', paddingTop: 24, paddingBottom: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {status && (
+        <div style={{ padding: '10px 16px', borderRadius: 6, backgroundColor: status.type === 'success' ? 'rgba(45,211,111,0.1)' : 'rgba(248,113,113,0.1)', border: `1px solid ${status.type === 'success' ? 'rgba(45,211,111,0.3)' : 'rgba(248,113,113,0.3)'}`, color: status.type === 'success' ? '#2dd36f' : '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '0.875rem' }}>{status.msg}</span>
+          <button onClick={() => setStatus(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}><IonIcon name="close-outline" style={{ fontSize: 16 }} /></button>
+        </div>
+      )}
 
-      {/* Business Info */}
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
-            <IonIcon name="business-outline" color="primary" />
-            <Typography variant="subtitle1" fontWeight={700}>Business Information</Typography>
-          </Box>
-          <Box component="form" onSubmit={handleSave}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Company Name"
-                  size="small"
-                  fullWidth
-                  value={form.company}
-                  onChange={set('company')}
-                  InputProps={{ startAdornment: <IonIcon name="business-outline" sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
-                />
-              </Grid>
+      <div style={cardStyle}>
+        <div style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <IonIcon name="business-outline" style={{ color: 'var(--ion-color-primary)' }} />
+            <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Business Information</span>
+          </div>
+          <form onSubmit={handleSave}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <Field label="Company Name" fieldKey="company" />
               {user?.role === 'carrier' && (
-                <>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="MC Number"
-                      size="small"
-                      fullWidth
-                      placeholder="MC-000000"
-                      value={form.mc}
-                      onChange={set('mc')}
-                      InputProps={{ startAdornment: <IonIcon name="car-sport-outline" sx={{ fontSize: 16, mr: 0.5, color: 'text.disabled' }} /> }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="DOT Number"
-                      size="small"
-                      fullWidth
-                      placeholder="DOT-000000"
-                      value={form.dot}
-                      onChange={set('dot')}
-                    />
-                  </Grid>
-                </>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  <Field label="MC Number" fieldKey="mc" placeholder="MC-000000" />
+                  <Field label="DOT Number" fieldKey="dot" placeholder="DOT-000000" />
+                </div>
               )}
-            </Grid>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 3, mb: 2 }}>
-              <IonIcon name="location-outline" color="primary" sx={{ fontSize: 18 }} />
-              <Typography variant="subtitle2" fontWeight={700}>Business Address</Typography>
-            </Box>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 8 }}>
+                <IonIcon name="location-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 18 }} />
+                <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Business Address</span>
+              </div>
 
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <AddressAutocomplete
-                  value={form.business_address}
-                  onChange={(val) => setForm(f => ({ ...f, business_address: val }))}
-                  onSelect={handleAddressSelect}
-                  label="Street Address"
-                  size="small"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField label="City" size="small" fullWidth value={form.business_city} onChange={set('business_city')} />
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <TextField label="State" size="small" fullWidth value={form.business_state} onChange={set('business_state')} />
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <TextField label="ZIP" size="small" fullWidth value={form.business_zip} onChange={set('business_zip')} />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField label="Country" size="small" fullWidth value={form.business_country} onChange={set('business_country')} />
-              </Grid>
-            </Grid>
+              <AddressAutocomplete
+                value={form.business_address}
+                onChange={(val) => setForm(f => ({ ...f, business_address: val }))}
+                onSelect={handleAddressSelect}
+                label="Street Address"
+                size="small"
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Field label="City" fieldKey="business_city" />
+                <Field label="State" fieldKey="business_state" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Field label="ZIP" fieldKey="business_zip" />
+                <Field label="Country" fieldKey="business_country" />
+              </div>
 
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
-              <Button type="submit" variant="contained" disabled={saving} startIcon={saving ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="save-outline" />}>
-                {saving ? 'Saving…' : 'Save Changes'}
-              </Button>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
+                <button type="submit" disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '9px 20px', cursor: saving ? 'default' : 'pointer', fontWeight: 700, fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
+                  {saving ? <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} /> : <IonIcon name="save-outline" style={{ fontSize: 16 }} />}
+                  {saving ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Metadata Tab ──────────────────────────────────────────────────────────────
 function MetadataTab() {
   const { user } = useAuth();
-
   const rows = [
     { label: 'Company Name',     value: user?.company },
     { label: 'MC Number',        value: user?.mc },
@@ -194,36 +149,35 @@ function MetadataTab() {
   ];
 
   return (
-    <Box sx={{ maxWidth: 640, mx: 'auto', py: 3 }}>
-      <Card variant="outlined">
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={700} mb={2.5}>Business Metadata</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <div style={{ maxWidth: 640, margin: '0 auto', paddingTop: 24, paddingBottom: 24 }}>
+      <div style={cardStyle}>
+        <div style={{ padding: 24 }}>
+          <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', marginBottom: 20 }}>Business Metadata</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {rows.map(({ label, value }, i) => (
-              <Box key={label}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>{label}</Typography>
-                  <Typography variant="body2" fontWeight={600} sx={{ textAlign: 'right', wordBreak: 'break-all', textTransform: 'capitalize' }}>{value || '—'}</Typography>
-                </Box>
-                {i < rows.length - 1 && <Divider sx={{ mt: 1.5 }} />}
-              </Box>
+              <div key={label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', flexShrink: 0 }}>{label}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', textAlign: 'right', wordBreak: 'break-all', textTransform: 'capitalize' }}>{value || '—'}</span>
+                </div>
+                {i < rows.length - 1 && <div style={{ borderTop: '1px solid var(--ion-border-color)', marginTop: 12 }} />}
+              </div>
             ))}
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-// ── Root ───────────────────────────────────────────────────────────────────────
 export default function ManageBusiness() {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
 
   return (
-    <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, py: 1 }}>
-      {activeTab === 'overview'  && <OverviewTab />}
-      {activeTab === 'metadata'  && <MetadataTab />}
-    </Box>
+    <div style={{ padding: '8px 24px' }}>
+      {activeTab === 'overview' && <OverviewTab />}
+      {activeTab === 'metadata' && <MetadataTab />}
+    </div>
   );
 }

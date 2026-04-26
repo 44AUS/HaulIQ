@@ -1,31 +1,26 @@
 import { useState, useEffect } from 'react';
-import {
-  Box, Typography, Card, CardContent, Chip, CircularProgress,
-  Alert, Table, TableHead, TableBody, TableRow, TableCell, Button,
-  TextField, MenuItem, Skeleton,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
 
-const STATUS_COLOR = {
-  pending:  'warning',
-  escrowed: 'info',
-  released: 'success',
-  refunded: 'default',
-  failed:   'error',
-};
-
-const STATUS_LABEL = {
-  pending:  'Pending',
-  escrowed: 'In Escrow',
-  released: 'Released',
-  refunded: 'Refunded',
-  failed:   'Failed',
+const STATUS_BADGE = {
+  pending:  { bg: '#e65100', color: '#fff', label: 'Pending' },
+  escrowed: { bg: '#0288d1', color: '#fff', label: 'In Escrow' },
+  released: { bg: '#2e7d32', color: '#fff', label: 'Released' },
+  refunded: { bg: 'var(--ion-color-medium)', color: '#fff', label: 'Refunded' },
+  failed:   { bg: '#d32f2f', color: '#fff', label: 'Failed' },
 };
 
 const fmt = (n) => n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
 const fmtDate = (s) => s ? new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4 }} />;
+}
 
 export default function AdminPayments() {
   const [payments, setPayments] = useState([]);
@@ -37,8 +32,7 @@ export default function AdminPayments() {
     setLoading(true);
     setError(null);
     try {
-      const data = await freightPaymentsApi.adminList();
-      setPayments(data);
+      setPayments(await freightPaymentsApi.adminList());
     } catch (e) {
       setError(e.message);
     } finally {
@@ -49,161 +43,111 @@ export default function AdminPayments() {
   useEffect(() => { load(); }, []);
 
   const filtered = statusFilter === 'all' ? payments : payments.filter(p => p.status === statusFilter);
-
   const totalVolume   = payments.reduce((s, p) => s + (p.amount || 0), 0);
   const totalFees     = payments.filter(p => ['escrowed','released'].includes(p.status)).reduce((s, p) => s + (p.fee_amount || 0), 0);
   const inEscrow      = payments.filter(p => p.status === 'escrowed').reduce((s, p) => s + (p.amount || 0), 0);
   const totalReleased = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.amount || 0), 0);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <IonIcon name="card-outline" color="primary" />
-            <Typography variant="h5" fontWeight={700}>Freight Payments</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">All escrow payments across the platform</Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="refresh-outline" />}
-          onClick={load}
-          disabled={loading}
-          size="small"
-        >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <IonIcon name="card-outline" style={{ color: 'var(--ion-color-primary)' }} />
+            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Freight Payments</h2>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>All escrow payments across the platform</p>
+        </div>
+        <button onClick={load} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.82rem', fontFamily: 'inherit', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+          {loading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name="refresh-outline" style={{ fontSize: 14 }} />}
           Refresh
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Stats */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
-        gap: 2,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
         {[
-          { label: 'Total Volume',     value: fmt(totalVolume),   color: 'text.primary' },
-          { label: 'In Escrow',        value: fmt(inEscrow),      color: 'info.main' },
-          { label: 'Released',         value: fmt(totalReleased), color: 'success.main' },
-          { label: 'Platform Revenue', value: fmt(totalFees),     color: 'primary.main' },
+          { label: 'Total Volume',     value: fmt(totalVolume),   color: 'var(--ion-text-color)' },
+          { label: 'In Escrow',        value: fmt(inEscrow),      color: '#0288d1' },
+          { label: 'Released',         value: fmt(totalReleased), color: '#2e7d32' },
+          { label: 'Platform Revenue', value: fmt(totalFees),     color: 'var(--ion-color-primary)' },
         ].map(({ label, value, color }) => (
-          <Card variant="outlined" key={label}>
-            <CardContent sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h6" fontWeight={800} color={color}>{value}</Typography>
-              <Typography variant="caption" color="text.secondary">{label}</Typography>
-            </CardContent>
-          </Card>
+          <div key={label} style={{ ...cardStyle, textAlign: 'center', padding: 16 }}>
+            <p style={{ margin: '0 0 4px', fontSize: '1.1rem', fontWeight: 800, color }}>{value}</p>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {/* Filter */}
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          select
-          size="small"
-          label="Status"
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 160 }}
-        >
-          <MenuItem value="all">All</MenuItem>
-          <MenuItem value="pending">Pending</MenuItem>
-          <MenuItem value="escrowed">In Escrow</MenuItem>
-          <MenuItem value="released">Released</MenuItem>
-          <MenuItem value="failed">Failed</MenuItem>
-          <MenuItem value="refunded">Refunded</MenuItem>
-        </TextField>
-        <Typography variant="body2" color="text.secondary">
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600 }}>Status</label>
+          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ padding: '7px 12px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', color: 'var(--ion-text-color)', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', minWidth: 160 }}>
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="escrowed">In Escrow</option>
+            <option value="released">Released</option>
+            <option value="failed">Failed</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', alignSelf: 'flex-end', paddingBottom: 7 }}>
           {filtered.length} payment{filtered.length !== 1 ? 's' : ''}
-        </Typography>
-      </Box>
+        </span>
+      </div>
 
       {/* Table */}
-      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  {[...Array(8)].map((_, i) => (
-                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {[...Array(8)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[140, 100, 100, 80, 80, 80, 80, 80].map((w, j) => (
-                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead><tr>{[...Array(8)].map((_, i) => <th key={i} style={thStyle}><SkeletonBox width={80} height={14} /></th>)}</tr></thead>
+              <tbody>{[...Array(8)].map((_, i) => <tr key={i}>{[140,100,100,80,80,80,80,80].map((w,j) => <td key={j} style={tdStyle}><SkeletonBox width={w} height={14} /></td>)}</tr>)}</tbody>
+            </table>
+          </div>
         ) : error ? (
-          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
+          <div style={{ margin: 16, padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
         ) : filtered.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="body2" color="text.secondary">No payments found.</Typography>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '64px 0' }}>
+            <p style={{ margin: 0, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No payments found.</p>
+          </div>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['Route', 'Broker', 'Carrier', 'Amount', 'Fee', 'Carrier Gets', 'Status', 'Date'].map((h, i) => (
-                    <TableCell key={i} sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'text.secondary' }}>
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filtered.map(p => (
-                  <TableRow key={p.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={600} noWrap>
-                        {p.load_origin || '—'} → {p.load_destination || '—'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap>{p.broker_name || '—'}</Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap>{p.broker_email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap>{p.carrier_name || '—'}</Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap>{p.carrier_email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={700}>{fmt(p.amount)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="primary.main" fontWeight={600}>{fmt(p.fee_amount)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" color="success.main">{fmt(p.carrier_amount)}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={STATUS_LABEL[p.status] || p.status}
-                        size="small"
-                        color={STATUS_COLOR[p.status] || 'default'}
-                        sx={{ fontSize: 11 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>{fmtDate(p.created_at)}</Typography>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['Route', 'Broker', 'Carrier', 'Amount', 'Fee', 'Carrier Gets', 'Status', 'Date'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
+                {filtered.map(p => {
+                  const badge = STATUS_BADGE[p.status];
+                  return (
+                    <tr key={p.id}>
+                      <td style={tdStyle}><span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{p.load_origin || '—'} → {p.load_destination || '—'}</span></td>
+                      <td style={tdStyle}>
+                        <span style={{ display: 'block', whiteSpace: 'nowrap' }}>{p.broker_name || '—'}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{p.broker_email}</span>
+                      </td>
+                      <td style={tdStyle}>
+                        <span style={{ display: 'block', whiteSpace: 'nowrap' }}>{p.carrier_name || '—'}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{p.carrier_email}</span>
+                      </td>
+                      <td style={tdStyle}><span style={{ fontWeight: 700 }}>{fmt(p.amount)}</span></td>
+                      <td style={tdStyle}><span style={{ fontWeight: 600, color: 'var(--ion-color-primary)' }}>{fmt(p.fee_amount)}</span></td>
+                      <td style={tdStyle}><span style={{ color: '#2e7d32' }}>{fmt(p.carrier_amount)}</span></td>
+                      <td style={tdStyle}>
+                        {badge && <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, backgroundColor: badge.bg, color: badge.color }}>{badge.label}</span>}
+                      </td>
+                      <td style={tdStyle}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.created_at)}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
-    </Box>
+      </div>
+    </div>
   );
 }

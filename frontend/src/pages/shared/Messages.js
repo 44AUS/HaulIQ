@@ -1,25 +1,13 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import { LayoutContext } from '../../components/layout/DashboardLayout';
-import {
-  Box, Typography, List, ListItemButton, ListItemAvatar, ListItemText,
-  Avatar, IconButton, TextField, CircularProgress, Button, Paper,
-} from '@mui/material';
-import Tooltip from '@mui/material/Tooltip';
+import { IonSpinner, IonModal } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Chip from '@mui/material/Chip';
 import IonIcon from '../../components/IonIcon';
 
-
 function parseSpecial(body) {
-  try {
-    const obj = JSON.parse(body);
-    if (obj.__type) return obj;
-  } catch {}
+  try { const obj = JSON.parse(body); if (obj.__type) return obj; } catch {}
   return null;
 }
 
@@ -35,35 +23,36 @@ function getPreview(body) {
 function UserAvatar({ name, src, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   return (
-    <Avatar src={src || undefined} sx={{ width: size, height: size, bgcolor: 'primary.dark', fontSize: size < 30 ? 11 : 13, fontWeight: 700, flexShrink: 0 }}>
-      {!src && initials}
-    </Avatar>
+    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size < 30 ? 11 : 13, fontWeight: 700, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
+      {src ? <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
+    </div>
   );
 }
 
+const DOC_TYPE_COLORS = {
+  BOL: { bg: 'rgba(21,101,192,0.12)', color: '#1565C0' },
+  POD: { bg: 'rgba(45,211,111,0.12)', color: '#2dd36f' },
+  receipt: { bg: 'rgba(255,196,9,0.12)', color: '#ffc409' },
+  rate_confirmation: { bg: 'rgba(83,177,253,0.12)', color: '#53b1fd' },
+  other: { bg: 'rgba(0,0,0,0.07)', color: 'var(--ion-color-medium)' },
+};
+
 function LocationRequestCard({ data, isMe, onShare }) {
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 1.5, maxWidth: '75%', ml: isMe ? 'auto' : 0,
-        bgcolor: isMe ? 'primary.dark' : 'background.paper',
-        borderColor: isMe ? 'primary.main' : 'divider', borderRadius: 2,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <IonIcon name="navigate-outline" sx={{ fontSize: 14, color: 'primary.light' }} />
-        <Typography variant="body2" fontWeight={600} color="text.primary">Location Requested</Typography>
-      </Box>
-      <Typography variant="caption" display="block" sx={{ mb: 1.5, color: isMe ? 'rgba(255,255,255,0.75)' : 'text.secondary' }}>
+    <div style={{ padding: 12, maxWidth: '75%', marginLeft: isMe ? 'auto' : 0, backgroundColor: isMe ? 'var(--ion-color-primary)' : 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <IonIcon name="navigate-outline" style={{ fontSize: 13, color: '#93c5fd' }} />
+        <span style={{ fontWeight: 600, fontSize: '0.875rem', color: isMe ? '#fff' : 'var(--ion-text-color)' }}>Location Requested</span>
+      </div>
+      <p style={{ margin: '0 0 10px', fontSize: '0.75rem', color: isMe ? 'rgba(255,255,255,0.75)' : 'var(--ion-color-medium)' }}>
         {isMe ? 'You asked the carrier to share their location.' : 'The broker is asking for your current location.'}
-      </Typography>
+      </p>
       {!isMe && (
-        <Button variant="contained" size="small" fullWidth startIcon={<IonIcon name="location-outline" />} onClick={() => onShare(data.booking_id)} sx={{ fontSize: 11 }}>
-          Share My Location
-        </Button>
+        <button onClick={() => onShare(data.booking_id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit' }}>
+          <IonIcon name="location-outline" style={{ fontSize: 13 }} /> Share My Location
+        </button>
       )}
-    </Paper>
+    </div>
   );
 }
 
@@ -71,69 +60,48 @@ function LocationShareCard({ data, isMe }) {
   const city = data.city || 'Unknown location';
   const name = isMe ? 'You are' : `${data.carrier_name || 'Carrier'} is`;
   return (
-    <Paper
-      variant="outlined"
-      sx={{
-        p: 1.5, maxWidth: '75%', ml: isMe ? 'auto' : 0,
-        bgcolor: isMe ? 'rgba(46,125,50,0.12)' : 'background.paper',
-        borderColor: isMe ? 'success.main' : 'divider', borderRadius: 2,
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <IonIcon name="location-outline" sx={{ fontSize: 14, color: 'success.main' }} />
-        <Typography variant="body2" fontWeight={600} color="text.primary">Location Shared</Typography>
-      </Box>
-      <Typography variant="body2" sx={{ mb: 1.5 }}>
-        <Box component="span" color="text.primary" fontWeight={500}>{name} currently near </Box>
-        <Box component="span" color="success.main" fontWeight={700}>{city}</Box>
-      </Typography>
+    <div style={{ padding: 12, maxWidth: '75%', marginLeft: isMe ? 'auto' : 0, backgroundColor: isMe ? 'rgba(46,125,50,0.12)' : 'var(--ion-card-background)', border: `1px solid ${isMe ? '#2dd36f' : 'var(--ion-border-color)'}`, borderRadius: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+        <IonIcon name="location-outline" style={{ fontSize: 13, color: '#2dd36f' }} />
+        <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Location Shared</span>
+      </div>
+      <p style={{ margin: '0 0 10px', fontSize: '0.875rem' }}>
+        <span style={{ color: 'var(--ion-text-color)', fontWeight: 500 }}>{name} currently near </span>
+        <span style={{ color: '#2dd36f', fontWeight: 700 }}>{city}</span>
+      </p>
       {data.lat && data.lng && (
-        <Button
-          component={Link}
-          to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
-          variant="contained" size="small" fullWidth startIcon={<IonIcon name="location-outline" />} color="success" sx={{ fontSize: 11 }}
-        >
-          View Map
-        </Button>
+        <Link to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: '#2dd36f', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none' }}>
+          <IonIcon name="location-outline" style={{ fontSize: 13 }} /> View Map
+        </Link>
       )}
-    </Paper>
+    </div>
   );
 }
 
-const DOC_TYPE_COLOR = {
-  BOL: 'primary', POD: 'success', receipt: 'warning',
-  rate_confirmation: 'info', other: 'default',
-};
-
 function DocUploadCard({ data, isMe, onView, isDeleted }) {
   const label = (data.doc_type || 'other').replace('_', ' ').toUpperCase();
+  const docColor = DOC_TYPE_COLORS[data.doc_type] || DOC_TYPE_COLORS.other;
   return (
-    <Paper variant="outlined" sx={{
-      p: 1.5, width: 220, ml: isMe ? 'auto' : 0,
-      bgcolor: isDeleted ? 'action.disabledBackground' : isMe ? 'primary.dark' : 'background.paper',
-      borderColor: isDeleted ? 'error.main' : isMe ? 'primary.main' : 'divider', borderRadius: 2,
-      opacity: isDeleted ? 0.75 : 1,
-    }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-        <IonIcon name="document-text-outline" sx={{ fontSize: 14, color: isDeleted ? 'error.main' : 'primary.light' }} />
-        <Typography variant="body2" fontWeight={600} color={isDeleted ? 'error.main' : 'text.primary'}>
+    <div style={{ padding: 12, width: 220, marginLeft: isMe ? 'auto' : 0, backgroundColor: isDeleted ? 'rgba(0,0,0,0.06)' : isMe ? 'var(--ion-color-primary)' : 'var(--ion-card-background)', border: `1px solid ${isDeleted ? 'var(--ion-color-danger)' : isMe ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, borderRadius: 8, opacity: isDeleted ? 0.75 : 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <IonIcon name="document-text-outline" style={{ fontSize: 13, color: isDeleted ? 'var(--ion-color-danger)' : '#93c5fd' }} />
+        <span style={{ fontWeight: 600, fontSize: '0.875rem', color: isDeleted ? 'var(--ion-color-danger)' : isMe ? '#fff' : 'var(--ion-text-color)' }}>
           {isDeleted ? 'Document Deleted' : 'Document Uploaded'}
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-        <Chip label={label} size="small" color={isDeleted ? 'error' : DOC_TYPE_COLOR[data.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
-        {data.page_count > 1 && <Typography variant="caption" color="text.secondary">{data.page_count} pages</Typography>}
-      </Box>
-      <Typography variant="body2" color={isDeleted ? 'text.disabled' : 'text.primary'} sx={{ mb: 1, fontWeight: 500, textDecoration: isDeleted ? 'line-through' : 'none' }} noWrap>{data.file_name}</Typography>
-      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
-        {data.uploader_name} · {data.uploader_role}
-      </Typography>
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+        <span style={{ backgroundColor: isDeleted ? 'rgba(235,68,90,0.12)' : docColor.bg, color: isDeleted ? 'var(--ion-color-danger)' : docColor.color, borderRadius: 8, padding: '1px 6px', fontSize: '0.65rem', fontWeight: 700 }}>{label}</span>
+        {data.page_count > 1 && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{data.page_count} pages</span>}
+      </div>
+      <div style={{ fontWeight: 500, fontSize: '0.875rem', color: isDeleted ? 'var(--ion-color-medium)' : isMe ? '#fff' : 'var(--ion-text-color)', textDecoration: isDeleted ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{data.file_name}</div>
+      <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>{data.uploader_name} · {data.uploader_role}</div>
       {!isDeleted && (
-        <Button variant="contained" size="small" fullWidth startIcon={<IonIcon name="document-text-outline" />} onClick={onView} sx={{ fontSize: 11 }}>
-          View Document
-        </Button>
+        <button onClick={onView} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: isMe ? 'rgba(255,255,255,0.2)' : 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit' }}>
+          <IonIcon name="document-text-outline" style={{ fontSize: 12 }} /> View Document
+        </button>
       )}
-    </Paper>
+    </div>
   );
 }
 
@@ -141,125 +109,102 @@ function DocViewer({ doc, onClose }) {
   const [page, setPage] = useState(0);
   if (!doc) return null;
   return (
-    <Dialog open onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.5 }}>
-        <Chip label={(doc.doc_type || 'other').replace('_', ' ').toUpperCase()} size="small"
-          color={DOC_TYPE_COLOR[doc.doc_type] || 'default'} />
-        <Typography variant="subtitle2" fontWeight={600} sx={{ flex: 1 }} noWrap>{doc.file_name}</Typography>
-        {doc.page_count > 1 && (
-          <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0 }}>{page + 1} / {doc.page_count}</Typography>
-        )}
-        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
-        <Box sx={{ position: 'relative', bgcolor: '#111' }}>
-          <Box component="img" src={doc.pages[page]}
-            sx={{ width: '100%', display: 'block', maxHeight: '72vh', objectFit: 'contain' }} />
+    <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '720px', '--height': 'auto', '--max-height': '90vh', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '1px 6px', borderRadius: 8, backgroundColor: (DOC_TYPE_COLORS[doc.doc_type] || DOC_TYPE_COLORS.other).bg, color: (DOC_TYPE_COLORS[doc.doc_type] || DOC_TYPE_COLORS.other).color }}>
+            {(doc.doc_type || 'other').replace('_', ' ').toUpperCase()}
+          </span>
+          <span style={{ fontWeight: 600, fontSize: '0.875rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{doc.file_name}</span>
+          {doc.page_count > 1 && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', flexShrink: 0 }}>{page + 1} / {doc.page_count}</span>}
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
+            <IonIcon name="close-outline" style={{ fontSize: 18 }} />
+          </button>
+        </div>
+        <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#111', position: 'relative' }}>
+          <img src={doc.pages[page]} alt="" style={{ width: '100%', display: 'block', maxHeight: '72vh', objectFit: 'contain' }} />
           {doc.page_count > 1 && (
-            <Box sx={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 1 }}>
-              <IconButton size="small" disabled={page === 0} onClick={() => setPage(p => p - 1)}
-                sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                <IonIcon name="chevron-back-outline" />
-              </IconButton>
-              <IconButton size="small" disabled={page >= doc.page_count - 1} onClick={() => setPage(p => p + 1)}
-                sx={{ bgcolor: 'rgba(0,0,0,0.6)', color: '#fff', '&:hover': { bgcolor: 'rgba(0,0,0,0.85)' }, '&:disabled': { bgcolor: 'rgba(0,0,0,0.3)', color: 'rgba(255,255,255,0.3)' } }}>
-                <IonIcon name="chevron-forward-outline" />
-              </IconButton>
-            </Box>
+            <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8 }}>
+              {[
+                { disabled: page === 0, onClick: () => setPage(p => p - 1), icon: 'chevron-back-outline' },
+                { disabled: page >= doc.page_count - 1, onClick: () => setPage(p => p + 1), icon: 'chevron-forward-outline' },
+              ].map((btn, i) => (
+                <button key={i} disabled={btn.disabled} onClick={btn.onClick} style={{ background: btn.disabled ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)', border: 'none', cursor: btn.disabled ? 'default' : 'pointer', color: btn.disabled ? 'rgba(255,255,255,0.3)' : '#fff', borderRadius: 6, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IonIcon name={btn.icon} style={{ fontSize: 16 }} />
+                </button>
+              ))}
+            </div>
           )}
-        </Box>
-        <Box sx={{ px: 2, py: 1.25 }}>
-          <Typography variant="caption" color="text.secondary">
+        </div>
+        <div style={{ padding: '8px 16px', borderTop: '1px solid var(--ion-border-color)' }}>
+          <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>
             Uploaded by <strong>{doc.uploader_name}</strong> ({doc.uploader_role})
-          </Typography>
-        </Box>
-      </DialogContent>
-    </Dialog>
+          </span>
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
 function LoadDocsModal({ loadId, onClose, onView }) {
   const [docs, setDocs] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
-
   useEffect(() => {
     if (!loadId) return;
     setLoadingDocs(true);
-    documentsApi.list(loadId)
-      .then(d => setDocs(Array.isArray(d) ? d : []))
-      .catch(() => setDocs([]))
-      .finally(() => setLoadingDocs(false));
+    documentsApi.list(loadId).then(d => setDocs(Array.isArray(d) ? d : [])).catch(() => setDocs([])).finally(() => setLoadingDocs(false));
   }, [loadId]);
-
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1.5 }}>
-        <IonIcon name="folder-open-outline" sx={{ fontSize: 18, color: 'primary.main' }} />
-        <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
-          Load Documents
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ mr: 1 }}>
-          Load #{String(loadId).slice(0, 8)}
-        </Typography>
-        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ pb: 2 }}>
-        {loadingDocs ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : docs.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <IonIcon name="document-text-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
-            <Typography variant="body2" color="text.secondary">No documents uploaded for this load yet.</Typography>
-          </Box>
-        ) : (
-          <List disablePadding>
-            {docs.map(doc => {
-              const label = (doc.doc_type || 'other').replace('_', ' ').toUpperCase();
-              return (
-                <Box key={doc.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: 1, borderColor: 'divider' }}>
-                  <IonIcon name="document-text-outline" sx={{ fontSize: 22, color: 'primary.light', flexShrink: 0 }} />
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="body2" fontWeight={600} noWrap>{doc.file_name}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
-                      <Chip label={label} size="small" color={DOC_TYPE_COLOR[doc.doc_type] || 'default'} sx={{ fontSize: 9, height: 18 }} />
-                      <Typography variant="caption" color="text.secondary">{doc.uploader_name}</Typography>
-                    </Box>
-                  </Box>
-                  <Button size="small" variant="outlined" onClick={() => onView(doc)} sx={{ flexShrink: 0, fontSize: 11 }}>
-                    View
-                  </Button>
-                </Box>
-              );
-            })}
-          </List>
-        )}
-      </DialogContent>
-    </Dialog>
+    <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '500px', '--height': 'auto', '--max-height': '80vh', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <IonIcon name="folder-open-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)' }} />
+          <span style={{ fontWeight: 700, fontSize: '0.875rem', flex: 1, color: 'var(--ion-text-color)' }}>Load Documents</span>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginRight: 8 }}>Load #{String(loadId).slice(0, 8)}</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
+            <IonIcon name="close-outline" style={{ fontSize: 18 }} />
+          </button>
+        </div>
+        <div style={{ padding: '8px 16px 16px', overflowY: 'auto' }}>
+          {loadingDocs ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}><IonSpinner name="crescent" style={{ width: 24, height: 24 }} /></div>
+          ) : docs.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '32px 0' }}>
+              <IonIcon name="document-text-outline" style={{ fontSize: 36, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 8px' }} />
+              <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No documents uploaded for this load yet.</p>
+            </div>
+          ) : docs.map(doc => {
+            const label = (doc.doc_type || 'other').replace('_', ' ').toUpperCase();
+            const dc = DOC_TYPE_COLORS[doc.doc_type] || DOC_TYPE_COLORS.other;
+            return (
+              <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--ion-border-color)' }}>
+                <IonIcon name="document-text-outline" style={{ fontSize: 20, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.file_name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '1px 6px', borderRadius: 8, backgroundColor: dc.bg, color: dc.color }}>{label}</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{doc.uploader_name}</span>
+                  </div>
+                </div>
+                <button onClick={() => onView(doc)} style={{ border: '1px solid var(--ion-border-color)', background: 'none', color: 'var(--ion-text-color)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'inherit' }}>View</button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
 function TypingIndicator() {
   return (
     <>
-      <style>{`
-        @keyframes typingBounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
-      `}</style>
-      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, mt: 0.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.5, py: 1, borderRadius: '16px 16px 16px 4px', bgcolor: 'action.hover', width: 'fit-content' }}>
-          {[0, 1, 2].map(i => (
-            <Box key={i} sx={{
-              width: 7, height: 7, borderRadius: '50%', bgcolor: 'text.secondary',
-              animation: 'typingBounce 1.2s ease-in-out infinite',
-              animationDelay: `${i * 0.2}s`,
-            }} />
-          ))}
-        </Box>
-      </Box>
+      <style>{`@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:0.5}30%{transform:translateY(-5px);opacity:1}}`}</style>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '8px 12px', borderRadius: '16px 16px 16px 4px', backgroundColor: 'rgba(0,0,0,0.07)' }}>
+          {[0, 1, 2].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', backgroundColor: 'var(--ion-color-medium)', animation: 'typingBounce 1.2s ease-in-out infinite', animationDelay: `${i * 0.2}s` }} />)}
+        </div>
+      </div>
     </>
   );
 }
@@ -268,33 +213,21 @@ function getPresenceInfo(isoString) {
   if (!isoString) return null;
   const diffMs = Date.now() - new Date(isoString).getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  const diffHr = Math.floor(diffMs / 3600000);
-  if (diffMin < 5) return { label: 'Active now', color: '#44b700' };
-  if (diffMin < 60) return { label: `Active ${diffMin}m ago`, color: '#44b700' };
-  if (diffHr < 24) return { label: `Active ${diffHr}h ago`, color: '#bdbdbd' };
+  const diffHr  = Math.floor(diffMs / 3600000);
+  if (diffMin < 5)  return { label: 'Active now',              color: '#44b700' };
+  if (diffMin < 60) return { label: `Active ${diffMin}m ago`,  color: '#44b700' };
+  if (diffHr < 24)  return { label: `Active ${diffHr}h ago`,   color: '#bdbdbd' };
   const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 1) return { label: 'Active yesterday', color: '#bdbdbd' };
+  if (diffDays === 1) return { label: 'Active yesterday',      color: '#bdbdbd' };
   return { label: `Active ${diffDays}d ago`, color: '#bdbdbd' };
 }
 
-function PresenceDot({ lastActiveAt, size = 10, withLabel = false }) {
+function PresenceDot({ lastActiveAt, size = 10 }) {
   const info = getPresenceInfo(lastActiveAt);
   if (!info) return null;
   const isActive = info.color === '#44b700';
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-      <Box sx={{
-        width: size, height: size, borderRadius: '50%',
-        bgcolor: info.color,
-        boxShadow: isActive ? `0 0 0 2px #fff, 0 0 0 3px ${info.color}` : 'none',
-        flexShrink: 0,
-      }} />
-      {withLabel && (
-        <Typography variant="caption" sx={{ fontSize: 11, color: isActive ? 'success.main' : 'text.disabled', fontWeight: isActive ? 600 : 400 }}>
-          {info.label}
-        </Typography>
-      )}
-    </Box>
+    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: info.color, boxShadow: isActive ? `0 0 0 2px var(--ion-card-background), 0 0 0 3px ${info.color}` : 'none', flexShrink: 0 }} />
   );
 }
 
@@ -321,14 +254,12 @@ export default function Messages() {
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
   const [loadDocs, setLoadDocs] = useState(null);
 
-  // Ping presence every 30s while on this page
   useEffect(() => {
     messagesApi.presence().catch(() => {});
     const interval = setInterval(() => messagesApi.presence().catch(() => {}), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Pre-select conversation from search navigation (?conv=<id>)
   useEffect(() => {
     const convId = searchParams.get('conv');
     if (convId && conversations.length > 0) {
@@ -408,35 +339,27 @@ export default function Messages() {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [activeMessages.length]);
 
-  // Fetch docs for the active load so deleted docs can be detected
   const activeConvoForDocs = conversations.find(c => c.id === activeConvoId);
   useEffect(() => {
     const loadId = activeConvoForDocs?.load_id;
     if (!loadId) { setLoadDocs(null); return; }
     setLoadDocs(null);
-    documentsApi.list(loadId)
-      .then(docs => setLoadDocs(Array.isArray(docs) ? docs : []))
-      .catch(() => setLoadDocs([]));
+    documentsApi.list(loadId).then(docs => setLoadDocs(Array.isArray(docs) ? docs : [])).catch(() => setLoadDocs([]));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConvoForDocs?.load_id]);
 
-  // Poll for other user typing status
   useEffect(() => {
     if (!activeConvoId) return;
     const poll = setInterval(() => {
-      messagesApi.typingStatus(activeConvoId)
-        .then(d => setOtherIsTyping(!!d?.is_typing))
-        .catch(() => {});
-      messagesApi.conversation(activeConvoId)
-        .then(data => {
-          const incoming = data.messages || (Array.isArray(data) ? data : []);
-          setActiveMessages(prev => {
-            if (incoming.length !== prev.length) return incoming;
-            const changed = incoming.some((m, i) => m.is_read !== prev[i]?.is_read);
-            return changed ? incoming : prev;
-          });
-        })
-        .catch(() => {});
+      messagesApi.typingStatus(activeConvoId).then(d => setOtherIsTyping(!!d?.is_typing)).catch(() => {});
+      messagesApi.conversation(activeConvoId).then(data => {
+        const incoming = data.messages || (Array.isArray(data) ? data : []);
+        setActiveMessages(prev => {
+          if (incoming.length !== prev.length) return incoming;
+          const changed = incoming.some((m, i) => m.is_read !== prev[i]?.is_read);
+          return changed ? incoming : prev;
+        });
+      }).catch(() => {});
     }, 3000);
     return () => clearInterval(poll);
   }, [activeConvoId]);
@@ -456,10 +379,10 @@ export default function Messages() {
     if (!convo) return null;
     return String(senderId) === String(convo.carrier_id) ? convo.carrier_avatar_url : convo.broker_avatar_url;
   };
-  const getProfileLink = (party) => party?.role === 'carrier' ? `/c/${party.id?.slice(0,8)}` : `/b/${party.id?.slice(0,8)}`;
-  const getConvoLabel = (c) => String(c.carrier_id) === String(user?.id) ? (c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`) : (c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`);
-  const getLastMsg = (c) => { const msgs = c.messages || []; return msgs[msgs.length - 1] || null; };
-  const hasUnread = (c) => (c.messages || []).some(m => m.sender_id !== user?.id && !m.is_read);
+  const getProfileLink  = (party) => party?.role === 'carrier' ? `/c/${party.id?.slice(0,8)}` : `/b/${party.id?.slice(0,8)}`;
+  const getConvoLabel   = (c) => String(c.carrier_id) === String(user?.id) ? (c.broker_name || `Broker ${String(c.broker_id || '').slice(0, 8)}`) : (c.carrier_name || `Carrier ${String(c.carrier_id || '').slice(0, 8)}`);
+  const getLastMsg      = (c) => { const msgs = c.messages || []; return msgs[msgs.length - 1] || null; };
+  const hasUnread       = (c) => (c.messages || []).some(m => m.sender_id !== user?.id && !m.is_read);
 
   const handleViewDoc = async (data) => {
     try {
@@ -507,375 +430,294 @@ export default function Messages() {
 
   const otherParty = getOtherParty(activeConvo);
 
+  const renderConvo = (c) => {
+    const lastMsg = getLastMsg(c);
+    const unread  = hasUnread(c);
+    const label   = getConvoLabel(c);
+    const otherRole   = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+    const otherId     = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+    const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
+    return (
+      <div key={c.id} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: activeConvoId === c.id ? 'rgba(0,0,0,0.06)' : 'transparent', cursor: 'pointer' }}
+        onMouseEnter={e => { if (activeConvoId !== c.id) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'; }}
+        onMouseLeave={e => { if (activeConvoId !== c.id) e.currentTarget.style.backgroundColor = 'transparent'; }}>
+        <div onClick={() => setActiveConvoId(c.id)} style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '10px 12px 10px 16px', gap: 10 }}>
+          <div style={{ position: 'relative', width: 34, height: 34, flexShrink: 0 }}>
+            <Link to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
+              <UserAvatar name={label} src={otherAvatar} size={34} />
+            </Link>
+            {c.other_last_active_at && (
+              <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
+                <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
+              </div>
+            )}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              {unread && <div style={{ width: 7, height: 7, backgroundColor: 'var(--ion-color-primary)', borderRadius: '50%', flexShrink: 0 }} />}
+              {c.is_blocked_by_me && <IonIcon name="ban-outline" style={{ fontSize: 10, color: 'var(--ion-color-danger)' }} />}
+              <span style={{ fontSize: '0.875rem', fontWeight: unread ? 700 : c.load_id ? 600 : 500, color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {c.load_id ? `LOAD #${c.load_id.slice(0, 8).toUpperCase()}` : label}
+              </span>
+            </div>
+            {c.load_id && <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>}
+            {lastMsg && <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getPreview(lastMsg.body)}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const loadConvos   = conversations.filter(c => c.load_id);
+  const directConvos = conversations.filter(c => !c.load_id);
+
   return (
     <>
-    <Paper
-      variant="outlined"
-      sx={{
-        position: 'fixed',
-        top: '60px',
-        left: drawerWidth,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        overflow: 'hidden',
-        bgcolor: 'background.paper',
-        borderRadius: 0,
-        border: 'none',
-        zIndex: 1,
-      }}
-    >
-      {/* ── Conversation list panel ── */}
-      <Box
-        sx={{
-          width: { xs: '100%', md: 300 },
-          flexShrink: 0,
-          borderRight: 1,
-          borderColor: 'divider',
-          display: { xs: activeConvoId ? 'none' : 'flex', md: 'flex' },
-          flexDirection: 'column',
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ px: 2, py: 1.75, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IonIcon name="chatbubble-outline" sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
-          <Typography variant="subtitle1" fontWeight={700} sx={{ flex: 1 }}>Message Center</Typography>
-        </Box>
+      <div style={{ position: 'fixed', top: 60, left: drawerWidth, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', zIndex: 1 }}>
 
-        {/* New Message button — hidden for drivers (they only message their carrier) */}
-        {user?.role !== 'driver' && (
-          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
-            <Button
-              fullWidth variant="contained" size="small" startIcon={<IonIcon name="create-outline" />}
-              onClick={() => setComposing(v => !v)}
-              sx={{ fontWeight: 700, letterSpacing: 0.5, fontSize: '0.78rem' }}
-            >
-              New Message
-            </Button>
-          </Box>
-        )}
+        {/* Conversation list */}
+        <div style={{ width: 300, flexShrink: 0, borderRight: '1px solid var(--ion-border-color)', display: activeConvoId ? 'none' : 'flex', flexDirection: 'column' }}
+          className="messages-sidebar">
+          <style>{`@media(min-width:768px){.messages-sidebar{display:flex!important}}`}</style>
 
-        {/* Compose panel */}
-        {composing && (
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', p: 1.5, bgcolor: 'action.hover' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="caption" fontWeight={600} sx={{ flex: 1 }}>New Message</Typography>
-              <IconButton size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
-                <IonIcon name="close-outline" sx={{ fontSize: 14 }} />
-              </IconButton>
-            </Box>
-            <TextField
-              size="small" fullWidth placeholder="Search your network..." value={networkQuery}
-              onChange={e => setNetworkQuery(e.target.value)} autoFocus
-              InputProps={{ startAdornment: <IonIcon name="search-outline" sx={{ fontSize: 14, mr: 0.5, color: 'text.disabled' }} /> }}
-              sx={{ mb: 1, '& .MuiInputBase-input': { fontSize: 12 } }}
-            />
-            {filteredNetwork.length === 0 ? (
-              <Typography variant="caption" color="text.disabled" sx={{ px: 0.5 }}>
-                {network.length === 0 ? 'No connections yet.' : 'No matches.'}
-              </Typography>
-            ) : (
-              <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
-                {filteredNetwork.map(contact => (
-                  <ListItemButton key={contact.user_id} dense onClick={() => handleStartDirect(contact)} sx={{ borderRadius: 1 }}>
-                    <ListItemAvatar sx={{ minWidth: 36 }}><UserAvatar name={contact.name} src={contact.avatar_url} size={28} /></ListItemAvatar>
-                    <ListItemText
-                      primary={<Typography variant="caption" fontWeight={600}>{contact.name}</Typography>}
-                      secondary={contact.company ? <Typography variant="caption" color="text.secondary">{contact.company}</Typography> : null}
-                    />
-                  </ListItemButton>
-                ))}
-              </Box>
-            )}
-          </Box>
-        )}
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <IonIcon name="chatbubble-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+            <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: 'var(--ion-text-color)' }}>Message Center</span>
+          </div>
 
-        {/* Conversations list */}
-        <Box sx={{ flex: 1, overflowY: 'auto' }}>
-          {loading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <CircularProgress size={24} />
-            </Box>
-          ) : conversations.length === 0 ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', px: 3, textAlign: 'center' }}>
-              <IonIcon name="chatbubble-outline" sx={{ fontSize: 36, color: 'text.disabled', mb: 1.5 }} />
-              <Typography variant="body2" color="text.secondary">No conversations yet</Typography>
-              {user?.role === 'driver' && user?.carrier_id ? (
-                <Button
-                  variant="contained" size="small" sx={{ mt: 1.5, fontWeight: 700 }}
-                  onClick={() => {
+          {user?.role !== 'driver' && (
+            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <button onClick={() => setComposing(v => !v)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 0', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
+                <IonIcon name="create-outline" style={{ fontSize: 14 }} /> New Message
+              </button>
+            </div>
+          )}
+
+          {composing && (
+            <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: 12, backgroundColor: 'rgba(0,0,0,0.03)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: 600, flex: 1, color: 'var(--ion-text-color)' }}>New Message</span>
+                <button onClick={() => { setComposing(false); setNetworkQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
+                  <IonIcon name="close-outline" style={{ fontSize: 14 }} />
+                </button>
+              </div>
+              <div style={{ position: 'relative', marginBottom: 8 }}>
+                <IonIcon name="search-outline" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
+                <input autoFocus placeholder="Search your network..." value={networkQuery} onChange={e => setNetworkQuery(e.target.value)}
+                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.78rem', padding: '6px 8px 6px 26px', outline: 'none', fontFamily: 'inherit' }} />
+              </div>
+              {filteredNetwork.length === 0 ? (
+                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', padding: '0 4px' }}>{network.length === 0 ? 'No connections yet.' : 'No matches.'}</span>
+              ) : (
+                <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+                  {filteredNetwork.map(contact => (
+                    <div key={contact.user_id} onClick={() => handleStartDirect(contact)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
+                      <UserAvatar name={contact.name} src={contact.avatar_url} size={28} />
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{contact.name}</div>
+                        {contact.company && <div style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)' }}>{contact.company}</div>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {loading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><IonSpinner name="crescent" style={{ width: 24, height: 24 }} /></div>
+            ) : conversations.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '0 24px', textAlign: 'center' }}>
+                <IonIcon name="chatbubble-outline" style={{ fontSize: 36, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
+                <p style={{ margin: '0 0 8px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No conversations yet</p>
+                {user?.role === 'driver' && user?.carrier_id ? (
+                  <button onClick={() => {
                     messagesApi.direct(user.carrier_id)
                       .then(convo => { setConversations([convo]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
                       .catch(() => {});
-                  }}
-                >
-                  Message your carrier
-                </Button>
-              ) : (
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>Use New Message to start one</Typography>
-              )}
-            </Box>
-          ) : (() => {
-            const loadConvos = conversations.filter(c => c.load_id);
-            const directConvos = conversations.filter(c => !c.load_id);
-            const renderConvo = (c) => {
-              const lastMsg = getLastMsg(c);
-              const unread = hasUnread(c);
-              const label = getConvoLabel(c);
-              const otherRole = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-              const otherId = otherRole === 'broker' ? c.broker_id : c.carrier_id;
-              const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
-              return (
-                <Box
-                  key={c.id}
-                  sx={{
-                    display: 'flex', alignItems: 'center', borderBottom: 1, borderColor: 'divider',
-                    bgcolor: activeConvoId === c.id ? 'action.selected' : 'transparent',
-                    '&:hover': { bgcolor: 'action.hover' },
-                  }}
-                >
-                  <ListItemButton onClick={() => setActiveConvoId(c.id)} sx={{ flex: 1, py: 1.5, pr: 0.5 }}>
-                    <ListItemAvatar sx={{ minWidth: 42 }}>
-                      <Box sx={{ position: 'relative', width: 34, height: 34 }}>
-                        <Box component={Link} to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
-                          <UserAvatar name={label} src={otherAvatar} size={34} />
-                        </Box>
-                        {c.other_last_active_at && (
-                          <Box sx={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid', borderColor: 'background.paper', borderRadius: '50%' }}>
-                            <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
-                          </Box>
-                        )}
-                      </Box>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          {unread && <Box sx={{ width: 7, height: 7, bgcolor: 'primary.main', borderRadius: '50%', flexShrink: 0 }} />}
-                          {c.is_blocked_by_me && <IonIcon name="ban-outline" sx={{ fontSize: 10, color: 'error.main' }} />}
-                          {c.load_id
-                            ? <Typography variant="body2" fontWeight={unread ? 700 : 600} noWrap color="text.primary">LOAD #{c.load_id.slice(0, 8).toUpperCase()}</Typography>
-                            : <Typography variant="body2" fontWeight={unread ? 700 : 500} noWrap color="text.primary">{label}</Typography>
-                          }
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          {c.load_id && <Typography variant="caption" color="text.secondary" display="block" noWrap>{label}</Typography>}
-                          {lastMsg && <Typography variant="caption" color="text.disabled" display="block" noWrap>{getPreview(lastMsg.body)}</Typography>}
-                        </Box>
-                      }
-                      secondaryTypographyProps={{ component: 'div' }}
-                    />
-                  </ListItemButton>
-                </Box>
-              );
-            };
-            return (
-              <List disablePadding>
+                  }} style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.825rem', marginTop: 4 }}>
+                    Message your carrier
+                  </button>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Use New Message to start one</span>
+                )}
+              </div>
+            ) : (
+              <>
                 {loadConvos.length > 0 && (
                   <>
-                    <Box sx={{ px: 2, py: 0.75, bgcolor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                        Load Conversations
-                      </Typography>
-                    </Box>
+                    <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Load Conversations</span>
+                    </div>
                     {loadConvos.map(renderConvo)}
                   </>
                 )}
                 {directConvos.length > 0 && (
                   <>
-                    <Box sx={{ px: 2, py: 0.75, bgcolor: 'action.hover', borderBottom: 1, borderColor: 'divider' }}>
-                      <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                        Direct Messages
-                      </Typography>
-                    </Box>
+                    <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Direct Messages</span>
+                    </div>
                     {directConvos.map(renderConvo)}
                   </>
                 )}
-              </List>
-            );
-          })()}
-        </Box>
-      </Box>
+              </>
+            )}
+          </div>
+        </div>
 
-      {/* ── Chat area ── */}
-      {activeConvo ? (
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          {/* Chat header */}
-          <Box sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <IconButton size="small" onClick={() => setActiveConvoId(null)} sx={{ display: { md: 'none' } }}>
-              <IonIcon name="arrow-back-outline" fontSize="small" />
-            </IconButton>
-            {otherParty && (
-              <Box component={Link} to={getProfileLink(otherParty)} sx={{ flexShrink: 0, position: 'relative' }}>
-                <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
-                {activeConvo.other_last_active_at && (
-                  <Box sx={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid', borderColor: 'background.paper', borderRadius: '50%' }}>
-                    <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={10} />
-                  </Box>
+        {/* Chat area */}
+        {activeConvo ? (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            {/* Chat header */}
+            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button onClick={() => setActiveConvoId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}
+                className="messages-back-btn">
+                <style>{`@media(min-width:768px){.messages-back-btn{display:none!important}}`}</style>
+                <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} />
+              </button>
+              {otherParty && (
+                <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none' }}>
+                  <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
+                  {activeConvo.other_last_active_at && (
+                    <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
+                      <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={10} />
+                    </div>
+                  )}
+                </Link>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {otherParty ? (
+                  <Link to={getProfileLink(otherParty)} style={{ textDecoration: 'none', color: 'var(--ion-text-color)', fontWeight: 700, fontSize: '0.875rem', display: 'block' }}>{otherParty.name}</Link>
+                ) : (
+                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{getConvoLabel(activeConvo)}</span>
                 )}
-              </Box>
-            )}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              {otherParty ? (
-                <Typography component={Link} to={getProfileLink(otherParty)} variant="body2" fontWeight={700}
-                  sx={{ textDecoration: 'none', color: 'text.primary', '&:hover': { color: 'primary.main' } }}>
-                  {otherParty.name}
-                </Typography>
-              ) : (
-                <Typography variant="body2" fontWeight={700}>{getConvoLabel(activeConvo)}</Typography>
+                {activeConvo.other_last_active_at && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{getPresenceInfo(activeConvo.other_last_active_at)?.label}</span>
+                )}
+              </div>
+              {user?.role === 'broker' && activeConvo.active_booking_id && (
+                <Link to={`/broker/track/${activeConvo.active_booking_id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, border: '1px solid #2dd36f', color: '#2dd36f', background: 'none', borderRadius: 6, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
+                  <IonIcon name="navigate-outline" style={{ fontSize: 13 }} /> Locate Load
+                </Link>
               )}
-              {activeConvo.other_last_active_at && (
-                <Typography variant="caption" color="text.secondary" display="block">
-                  {getPresenceInfo(activeConvo.other_last_active_at)?.label}
-                </Typography>
+              {activeConvo.load_id && (
+                <Link to={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load" onClick={e => e.stopPropagation()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', flexShrink: 0 }}>
+                  <IonIcon name="car-sport-outline" style={{ fontSize: 17 }} />
+                </Link>
               )}
-            </Box>
-            {user?.role === 'broker' && activeConvo.active_booking_id && (
-              <Button component={Link} to={`/broker/track/${activeConvo.active_booking_id}`}
-                variant="outlined" size="small" color="success" startIcon={<IonIcon name="navigate-outline" />} sx={{ fontSize: 11, flexShrink: 0 }}>
-                Locate Load
-              </Button>
-            )}
-            {activeConvo.load_id && (
-              <Tooltip title="View load" placement="bottom">
-                <IconButton
-                  component={Link}
-                  to={`/${user?.role}/loads/${activeConvo.load_id}`}
-                  size="small"
-                  sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
-                  onClick={e => e.stopPropagation()}
-                >
-                  <IonIcon name="car-sport-outline" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            {activeConvo.load_id && (
-              <Tooltip title="View load documents" placement="bottom">
-                <IconButton
-                  size="small"
-                  sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'primary.main' } }}
-                  onClick={() => setDocsModalLoadId(activeConvo.load_id)}
-                >
-                  <IonIcon name="folder-open-outline" sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-            )}
-            <IconButton
-              size="small" disabled={deletingId === activeConvoId}
-              title="Delete conversation"
-              sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'error.main' } }}
-              onClick={(e) => handleDeleteConvo(e, activeConvoId)}
-            >
-              <IonIcon name="trash-outline" sx={{ fontSize: 18 }} />
-            </IconButton>
-            {otherParty && (
-              <IconButton size="small" onClick={() => handleToggleBlock(otherParty.id)} disabled={blockLoading}
-                title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'}
-                sx={{ flexShrink: 0, color: activeConvo.is_blocked_by_me ? 'error.main' : 'text.disabled', '&:hover': { color: 'error.main' } }}>
-                {blockLoading ? <CircularProgress size={14} color="inherit" /> : activeConvo.is_blocked_by_me ? <IonIcon name="shield-outline" sx={{ fontSize: 18 }} /> : <IonIcon name="ban-outline" sx={{ fontSize: 18 }} />}
-              </IconButton>
-            )}
-          </Box>
+              {activeConvo.load_id && (
+                <button title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
+                  <IonIcon name="folder-open-outline" style={{ fontSize: 17 }} />
+                </button>
+              )}
+              <button title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
+                <IonIcon name="trash-outline" style={{ fontSize: 17 }} />
+              </button>
+              {otherParty && (
+                <button onClick={() => handleToggleBlock(otherParty.id)} disabled={blockLoading} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: activeConvo.is_blocked_by_me ? 'var(--ion-color-danger)' : 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
+                  {blockLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name={activeConvo.is_blocked_by_me ? 'shield-outline' : 'ban-outline'} style={{ fontSize: 17 }} />}
+                </button>
+              )}
+            </div>
 
-          {/* Blocked notice */}
-          {activeConvo.is_blocked_by_me && (
-            <Box sx={{ mx: 2, mt: 1.5, px: 2, py: 1, borderRadius: 2, bgcolor: 'error.dark', border: 1, borderColor: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
-              <IonIcon name="ban-outline" sx={{ fontSize: 14, color: 'error.light' }} />
-              <Typography variant="caption" color="error.light">You have blocked this user. They can no longer message you.</Typography>
-            </Box>
-          )}
+            {activeConvo.is_blocked_by_me && (
+              <div style={{ margin: '12px 16px 0', padding: '8px 16px', borderRadius: 8, backgroundColor: 'rgba(235,68,90,0.15)', border: '1px solid var(--ion-color-danger)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <IonIcon name="ban-outline" style={{ fontSize: 13, color: 'var(--ion-color-danger)' }} />
+                <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-danger)' }}>You have blocked this user. They can no longer message you.</span>
+              </div>
+            )}
 
-          {/* Messages */}
-          <Box sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {activeMessages.map(msg => {
-              const isMe = msg.sender_id === user?.id;
-              const special = parseSpecial(msg.body);
-              const senderName = getSenderName(msg.sender_id, activeConvo);
-              const senderAvatar = getSenderAvatar(msg.sender_id, activeConvo);
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {activeMessages.map(msg => {
+                const isMe = msg.sender_id === user?.id;
+                const special = parseSpecial(msg.body);
+                const senderName   = getSenderName(msg.sender_id, activeConvo);
+                const senderAvatar = getSenderAvatar(msg.sender_id, activeConvo);
 
-              if (special?.__type === 'location_request') return (
-                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  {sharingLocation === special.booking_id
-                    ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><CircularProgress size={13} /><Typography variant="caption" color="text.secondary">Getting your location…</Typography></Box>
-                    : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />
-                  }
-                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                </Box>
-              );
-
-              if (special?.__type === 'doc_upload') {
-                const isDocDeleted = loadDocs !== null && !loadDocs.some(d => String(d.id) === String(special.doc_id));
-                return (
-                  <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                if (special?.__type === 'location_request') return (
+                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
                     {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                    <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />
+                    {sharingLocation === special.booking_id
+                      ? <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IonSpinner name="crescent" style={{ width: 13, height: 13 }} /><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Getting your location…</span></div>
+                      : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />}
                     {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  </Box>
+                  </div>
                 );
-              }
 
-              if (special?.__type === 'location_share') return (
-                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  <LocationShareCard data={special} isMe={isMe} />
-                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                </Box>
-              );
+                if (special?.__type === 'doc_upload') {
+                  const isDocDeleted = loadDocs !== null && !loadDocs.some(d => String(d.id) === String(special.doc_id));
+                  return (
+                    <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                      {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                      <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />
+                      {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                    </div>
+                  );
+                }
 
-              return (
-                <Box key={msg.id} sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                  {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  <Box sx={{ maxWidth: '72%', px: 2, py: 1.25, borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px', bgcolor: isMe ? 'primary.main' : 'action.hover' }}>
-                    <Typography variant="body2" sx={{ lineHeight: 1.5, color: isMe ? '#fff' : 'text.primary' }}>{msg.body}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5, justifyContent: 'flex-end' }}>
-                      <Typography variant="caption" sx={{ fontSize: 10, color: isMe ? 'rgba(255,255,255,0.6)' : 'text.disabled' }}>
-                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </Typography>
-                      {isMe && (msg.is_read ? <IonIcon name="checkmark-done-outline" sx={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }} /> : <IonIcon name="checkmark-outline" sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }} />)}
-                    </Box>
-                  </Box>
-                  {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                </Box>
-              );
-            })}
-            {otherIsTyping && <TypingIndicator />}
-            <div ref={messagesEndRef} />
-          </Box>
+                if (special?.__type === 'location_share') return (
+                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                    <LocationShareCard data={special} isMe={isMe} />
+                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                  </div>
+                );
 
-          {/* Input */}
-          <Box sx={{ p: 1.5, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 1 }}>
-            <TextField
-              fullWidth size="small" placeholder="Type a message..." value={input}
-              onChange={e => { setInput(e.target.value); if (activeConvoId) handleTyping(activeConvoId); }}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              disabled={activeConvo.is_blocked_by_me}
-            />
-            <IconButton color="primary" onClick={handleSend} disabled={!input.trim() || activeConvo.is_blocked_by_me}
-              sx={{ bgcolor: 'primary.main', color: '#fff', borderRadius: 2, '&:hover': { bgcolor: 'primary.dark' }, '&:disabled': { bgcolor: 'action.disabledBackground' } }}>
-              <IonIcon name="send-outline" fontSize="small" />
-            </IconButton>
-          </Box>
-        </Box>
-      ) : (
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <IonIcon name="chatbubble-outline" sx={{ fontSize: 44, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body2" color="text.secondary">Select a conversation</Typography>
-            <Typography variant="caption" color="text.disabled">or use New Message to start one</Typography>
-          </Box>
-        </Box>
+                return (
+                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                    <div style={{ maxWidth: '72%', padding: '10px 16px', borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px', backgroundColor: isMe ? 'var(--ion-color-primary)' : 'rgba(0,0,0,0.07)' }}>
+                      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: isMe ? '#fff' : 'var(--ion-text-color)' }}>{msg.body}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, justifyContent: 'flex-end' }}>
+                        <span style={{ fontSize: '0.625rem', color: isMe ? 'rgba(255,255,255,0.6)' : 'var(--ion-color-medium)' }}>
+                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        {isMe && <IonIcon name={msg.is_read ? 'checkmark-done-outline' : 'checkmark-outline'} style={{ fontSize: 11, color: msg.is_read ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.5)' }} />}
+                      </div>
+                    </div>
+                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
+                  </div>
+                );
+              })}
+              {otherIsTyping && <TypingIndicator />}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div style={{ padding: 12, borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8 }}>
+              <input
+                placeholder="Type a message..."
+                value={input}
+                onChange={e => { setInput(e.target.value); if (activeConvoId) handleTyping(activeConvoId); }}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                disabled={activeConvo.is_blocked_by_me}
+                style={{ flex: 1, backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' }}
+              />
+              <button onClick={handleSend} disabled={!input.trim() || activeConvo.is_blocked_by_me}
+                style={{ backgroundColor: !input.trim() || activeConvo.is_blocked_by_me ? 'rgba(0,0,0,0.12)' : 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, width: 40, height: 40, cursor: !input.trim() || activeConvo.is_blocked_by_me ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <IonIcon name="send-outline" style={{ fontSize: 16 }} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ flex: 1, alignItems: 'center', justifyContent: 'center', display: 'none' }} className="messages-empty">
+            <style>{`@media(min-width:768px){.messages-empty{display:flex!important}}`}</style>
+            <div style={{ textAlign: 'center' }}>
+              <IonIcon name="chatbubble-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
+              <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Select a conversation</p>
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>or use New Message to start one</span>
+            </div>
+          </div>
+        )}
+      </div>
+      {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
+      {docsModalLoadId && (
+        <LoadDocsModal loadId={docsModalLoadId} onClose={() => setDocsModalLoadId(null)} onView={(doc) => { setDocsModalLoadId(null); setViewerDoc(doc); }} />
       )}
-    </Paper>
-    {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
-    {docsModalLoadId && (
-      <LoadDocsModal
-        loadId={docsModalLoadId}
-        onClose={() => setDocsModalLoadId(null)}
-        onView={(doc) => { setDocsModalLoadId(null); setViewerDoc(doc); }}
-      />
-    )}
     </>
   );
 }

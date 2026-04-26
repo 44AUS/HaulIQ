@@ -1,5 +1,3 @@
-import { Box } from '@mui/material';
-
 // 7 solid-color wave bands stepping from dark → light blue.
 // Each wave uses a proper full-period sine bezier (crest + trough) for visible waviness.
 const WAVES = [
@@ -25,7 +23,7 @@ function wavePath(y, a) {
 
 export default function WaveBg() {
   return (
-    <Box sx={{ position: 'fixed', inset: 0, zIndex: 0, bgcolor: '#1565c0', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 0, backgroundColor: '#1565c0', overflow: 'hidden' }}>
       <svg
         viewBox="0 0 1440 900"
         preserveAspectRatio="none"
@@ -35,6 +33,6 @@ export default function WaveBg() {
           <path key={i} fill={w.color} d={wavePath(w.y, w.a)} />
         ))}
       </svg>
-    </Box>
+    </div>
   );
 }

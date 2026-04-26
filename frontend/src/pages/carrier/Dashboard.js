@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Box, Typography, Button, Card, CardContent, Grid
-} from '@mui/material';
-
-
-
-
-
-
-
 import { useAuth } from '../../context/AuthContext';
 import { loadsApi, analyticsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
@@ -17,37 +7,26 @@ import LoadCard from '../../components/carrier/LoadCard';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import IonIcon from '../../components/IonIcon';
 
-
-const StatCard = ({ icon, label, value, sub, color = 'primary' }) => {
-
-
-  return (
-    <Card>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box sx={{
-            width: 40, height: 40, borderRadius: 2,
-            bgcolor: 'action.hover',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <IonIcon name={icon} sx={{ fontSize: 20, color: 'primary.main' }} />
-          </Box>
-        </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem' }}>
-          {label}
-        </Typography>
-        <Typography variant="h4" fontWeight={800} sx={{ my: 0.5 }}>
-          {value}
-        </Typography>
-        {sub && (
-          <Typography variant="body2" color="text.secondary" fontSize="0.75rem">
-            {sub}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  );
+const cardStyle = {
+  backgroundColor: 'var(--ion-card-background)',
+  border: '1px solid var(--ion-border-color)',
+  borderRadius: 8,
 };
+
+const StatCard = ({ icon, label, value, sub }) => (
+  <div style={cardStyle}>
+    <div style={{ padding: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IonIcon name={icon} style={{ fontSize: 20, color: 'var(--ion-color-primary)' }} />
+        </div>
+      </div>
+      <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--ion-color-medium)' }}>{label}</div>
+      <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--ion-text-color)', margin: '4px 0' }}>{value}</div>
+      {sub && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{sub}</div>}
+    </div>
+  </div>
+);
 
 export default function CarrierDashboard() {
   const { user } = useAuth();
@@ -63,83 +42,54 @@ export default function CarrierDashboard() {
           .catch(() => setHotLoads([]));
       });
 
-    analyticsApi.summary()
-      .then(data => setSummary(data))
-      .catch(() => setSummary(null));
+    analyticsApi.summary().then(data => setSummary(data)).catch(() => setSummary(null));
   }, []);
 
   const weeklyData = (summary?.weekly_earnings || []).slice(-6);
   const chartData = weeklyData.map(w => ({ week: w.week_label, net: w.net }));
-
   const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : '—';
 
   return (
-    <Box>
+    <div>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-        <Box>
-          <Typography variant="h5" fontWeight={700}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+        <div>
+          <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>
             Good morning, {user?.name?.split(' ')[0]}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Here's your profit snapshot for today
-          </Typography>
-        </Box>
-        <Button
-          component={Link}
-          to="/carrier/loads"
-          variant="contained"
-          startIcon={<IonIcon name="car-sport-outline" />}
-        >
-          Browse Loads
-        </Button>
-      </Box>
+          </h2>
+          <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Here's your profit snapshot for today</p>
+        </div>
+        <Link to="/carrier/loads" style={{ display: 'flex', alignItems: 'center', gap: 8, backgroundColor: 'var(--ion-color-primary)', color: '#fff', textDecoration: 'none', borderRadius: 6, padding: '9px 16px', fontWeight: 700, fontSize: '0.875rem' }}>
+          <IonIcon name="car-sport-outline" style={{ fontSize: 18 }} /> Browse Loads
+        </Link>
+      </div>
 
       {/* Stats */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard icon="cash-outline" label="Total Net" value={fmt(summary?.total_net)} sub="All time" color="primary" />
-        </Box>
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard
-            icon="trending-up-outline"
-            label="Avg Rate/Mile"
-            value={summary?.avg_rate_per_mile ? `$${Number(summary.avg_rate_per_mile).toFixed(2)}` : '—'}
-            sub="All time"
-            color="blue"
-          />
-        </Box>
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard icon="cube-outline" label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" color="warning" />
-        </Box>
-        <Box sx={{ flex: '1 1 180px', minWidth: 0 }}>
-          <StatCard
-            icon="location-outline"
-            label="Avg Deadhead"
-            value={summary?.avg_deadhead_miles ? `${Math.round(summary.avg_deadhead_miles)} mi` : '—'}
-            sub="Per load"
-            color="primary"
-          />
-        </Box>
-      </Box>
+      <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+          <StatCard icon="cash-outline" label="Total Net" value={fmt(summary?.total_net)} sub="All time" />
+        </div>
+        <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+          <StatCard icon="trending-up-outline" label="Avg Rate/Mile" value={summary?.avg_rate_per_mile ? `$${Number(summary.avg_rate_per_mile).toFixed(2)}` : '—'} sub="All time" />
+        </div>
+        <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+          <StatCard icon="cube-outline" label="Loads Completed" value={summary?.total_loads ?? '—'} sub="All time" />
+        </div>
+        <div style={{ flex: '1 1 180px', minWidth: 0 }}>
+          <StatCard icon="location-outline" label="Avg Deadhead" value={summary?.avg_deadhead_miles ? `${Math.round(summary.avg_deadhead_miles)} mi` : '—'} sub="Per load" />
+        </div>
+      </div>
 
       {/* Earnings chart + Brain insight */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexDirection: { xs: 'column', md: 'row' } }}>
-        <Card sx={{ flex: 1, minWidth: 0 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600}>Earnings Trend</Typography>
-              <Button
-                component={Link}
-                to="/carrier/analytics"
-                variant="text"
-                size="small"
-                endIcon={<IonIcon name="arrow-forward-outline" />}
-                sx={{ fontSize: '0.75rem' }}
-              >
-                Full analytics
-              </Button>
-            </Box>
+      <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div style={{ ...cardStyle, flex: 1, minWidth: 0 }}>
+          <div style={{ padding: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Earnings Trend</span>
+              <Link to="/carrier/analytics" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: 'var(--ion-color-primary)', textDecoration: 'none' }}>
+                Full analytics <IonIcon name="arrow-forward-outline" style={{ fontSize: 14 }} />
+              </Link>
+            </div>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={180}>
                 <AreaChart data={chartData}>
@@ -150,82 +100,55 @@ export default function CarrierDashboard() {
                     </linearGradient>
                   </defs>
                   <XAxis dataKey="week" tick={{ fill: '#9e9e9e', fontSize: 10 }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 8, fontSize: 12 }}
-                    formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Net']}
-                  />
+                  <Tooltip contentStyle={{ background: '#1e1e1e', border: '1px solid #333', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Net']} />
                   <Area type="monotone" dataKey="net" stroke="#1565C0" strokeWidth={2} fill="url(#netGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Complete loads to see your earnings trend
-                </Typography>
-              </Box>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 180 }}>
+                <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Complete loads to see your earnings trend</span>
+              </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card sx={{ flex: 1, minWidth: 0, border: '1px solid', borderColor: 'primary.dark', display: 'flex', flexDirection: 'column' }}>
-          <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <IonIcon name="bulb-outline" sx={{ color: 'primary.main', fontSize: 20 }} />
-              <Typography variant="subtitle2" fontWeight={600}>Earnings Brain</Typography>
-            </Box>
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography variant="body2" color="text.secondary" textAlign="center">
-                Insights load on the Brain page
-              </Typography>
-            </Box>
-            <Button
-              component={Link}
-              to="/carrier/brain"
-              variant="contained"
-              endIcon={<IonIcon name="arrow-forward-outline" />}
-              fullWidth
-              sx={{ mt: 2 }}
-            >
-              See all insights
-            </Button>
-          </CardContent>
-        </Card>
-      </Box>
+        <div style={{ ...cardStyle, flex: 1, minWidth: 0, borderColor: 'var(--ion-color-primary-shade)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <IonIcon name="bulb-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 20 }} />
+              <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Earnings Brain</span>
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', textAlign: 'center' }}>Insights load on the Brain page</span>
+            </div>
+            <Link to="/carrier/brain" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'var(--ion-color-primary)', color: '#fff', textDecoration: 'none', borderRadius: 6, padding: '9px 0', fontWeight: 700, fontSize: '0.875rem', marginTop: 16 }}>
+              See all insights <IonIcon name="arrow-forward-outline" style={{ fontSize: 14 }} />
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* Hot Loads */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IonIcon name="flash-outline" sx={{ color: 'error.main' }} />
-          <Typography variant="subtitle1" fontWeight={600}>Hot Loads Right Now</Typography>
-        </Box>
-        <Button
-          component={Link}
-          to="/carrier/loads"
-          variant="text"
-          size="small"
-          endIcon={<IonIcon name="arrow-forward-outline" />}
-          sx={{ fontSize: '0.75rem' }}
-        >
-          View all
-        </Button>
-      </Box>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <IonIcon name="flash-outline" style={{ color: 'var(--ion-color-danger)' }} />
+          <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Hot Loads Right Now</span>
+        </div>
+        <Link to="/carrier/loads" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: 'var(--ion-color-primary)', textDecoration: 'none' }}>
+          View all <IonIcon name="arrow-forward-outline" style={{ fontSize: 14 }} />
+        </Link>
+      </div>
       {hotLoads.length === 0 ? (
-        <Card>
-          <CardContent sx={{ textAlign: 'center', py: 6 }}>
-            <Typography variant="body2" color="text.secondary">
-              No hot loads right now — check back soon
-            </Typography>
-          </CardContent>
-        </Card>
+        <div style={{ ...cardStyle, padding: '48px 24px', textAlign: 'center' }}>
+          <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No hot loads right now — check back soon</span>
+        </div>
       ) : (
-        <Grid container spacing={3}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24 }}>
           {hotLoads.map(load => (
-            <Grid item xs={12} sm={6} md={4} key={load.id}>
-              <LoadCard load={load} />
-            </Grid>
+            <LoadCard key={load.id} load={load} />
           ))}
-        </Grid>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

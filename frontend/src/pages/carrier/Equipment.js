@@ -1,16 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Box, Typography, Chip, CircularProgress, IconButton, Tooltip, Button,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, MenuItem, Select, FormControl, InputLabel, Alert, useTheme,
-} from '@mui/material';
+import { IonSpinner, IonModal } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
-
-// ── Tabs ──────────────────────────────────────────────────────────────────────
 const TABS = [
   { key: 'all',      label: 'ALL' },
   { key: 'active',   label: 'ACTIVE' },
@@ -19,9 +12,9 @@ const TABS = [
 ];
 
 const STATUS_CHIP = {
-  active:   { label: 'Active',   bg: '#2dd36f', text: '#fff' },
-  expired:  { label: 'Expired',  bg: '#eb445a', text: '#fff' },
-  inactive: { label: 'Inactive', bg: '#757575', text: '#fff' },
+  active:   { label: 'Active',   bg: '#2dd36f', color: '#fff' },
+  expired:  { label: 'Expired',  bg: '#eb445a', color: '#fff' },
+  inactive: { label: 'Inactive', bg: '#757575', color: '#fff' },
 };
 
 const STATUS_BAR = {
@@ -29,6 +22,11 @@ const STATUS_BAR = {
   expired:  '#eb445a',
   inactive: '#616161',
 };
+
+const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '0 12px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', height: 64, verticalAlign: 'middle' };
+const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '9px 12px', outline: 'none', fontFamily: 'inherit' };
+const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
 function deriveStatus(post) {
   if (!post.is_active) return 'inactive';
@@ -58,9 +56,6 @@ const emptyForm = (equipmentTypes) => ({
 });
 
 export default function Equipment() {
-  const theme  = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
   const [posts,          setPosts]          = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
@@ -108,16 +103,16 @@ export default function Equipment() {
   const openEdit = (post) => {
     setEditPost(post); setIsRepost(false);
     setForm({
-      equipment_type: post.equipment_type || equipmentTypes[0]?.name || '',
-      trailer_length: post.trailer_length ?? '',
-      weight_capacity: post.weight_capacity ?? '',
-      current_location: post.current_location || '',
-      preferred_origin: post.preferred_origin || '',
+      equipment_type:        post.equipment_type || equipmentTypes[0]?.name || '',
+      trailer_length:        post.trailer_length ?? '',
+      weight_capacity:       post.weight_capacity ?? '',
+      current_location:      post.current_location || '',
+      preferred_origin:      post.preferred_origin || '',
       preferred_destination: post.preferred_destination || '',
-      available_from: post.available_from || '',
-      available_to: post.available_to || '',
-      rate_expectation: post.rate_expectation ?? '',
-      notes: post.notes || '',
+      available_from:        post.available_from || '',
+      available_to:          post.available_to || '',
+      rate_expectation:      post.rate_expectation ?? '',
+      notes:                 post.notes || '',
     });
     setError(''); setDialogOpen(true);
   };
@@ -125,15 +120,16 @@ export default function Equipment() {
   const openRepost = (post) => {
     setEditPost(null); setIsRepost(true);
     setForm({
-      equipment_type: post.equipment_type || equipmentTypes[0]?.name || '',
-      trailer_length: post.trailer_length ?? '',
-      weight_capacity: post.weight_capacity ?? '',
-      current_location: post.current_location || '',
-      preferred_origin: post.preferred_origin || '',
+      equipment_type:        post.equipment_type || equipmentTypes[0]?.name || '',
+      trailer_length:        post.trailer_length ?? '',
+      weight_capacity:       post.weight_capacity ?? '',
+      current_location:      post.current_location || '',
+      preferred_origin:      post.preferred_origin || '',
       preferred_destination: post.preferred_destination || '',
-      available_from: '', available_to: '',
-      rate_expectation: post.rate_expectation ?? '',
-      notes: post.notes || '',
+      available_from:        '',
+      available_to:          '',
+      rate_expectation:      post.rate_expectation ?? '',
+      notes:                 post.notes || '',
     });
     setError(''); setDialogOpen(true);
   };
@@ -179,252 +175,268 @@ export default function Equipment() {
 
   const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
-  const activeFg   = isDark ? '#fff' : '#000';
-  const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
-
   return (
     <>
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
-      {/* ── Top bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 1.5, flexShrink: 0 }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>My Equipment</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+      {/* Top bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
+        <div>
+          <h2 style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>My Equipment</h2>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
             Post your available trucks so brokers can find and contact you.
-          </Typography>
-        </Box>
-      </Box>
+          </p>
+        </div>
+      </div>
 
-      {/* ── Tab bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, overflowX: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
+      {/* Tab bar */}
+      <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflowX: 'auto' }}>
         {TABS.map(tab => {
           const isActive = activeTab === tab.key;
           const count    = tabCounts[tab.key] ?? 0;
           return (
-            <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 2.75, cursor: 'pointer', flexShrink: 0,
-                borderBottom: isActive ? '2px solid' : '2px solid transparent',
-                borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent',
-                color: isActive ? activeFg : inactiveFg,
-                opacity: isActive ? 1 : 0.6,
-                '&:hover': { opacity: 1, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                transition: 'opacity 0.15s, background-color 0.15s',
-              }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
-              <Box sx={{ bgcolor: 'background.default', borderRadius: '4px', px: 0.6, py: 0.15, minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</Typography>
-              </Box>
-            </Box>
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 24px', cursor: 'pointer', flexShrink: 0, border: 'none', borderBottom: isActive ? '2px solid var(--ion-text-color)' : '2px solid transparent', backgroundColor: 'transparent', color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', opacity: isActive ? 1 : 0.6, fontFamily: 'inherit', transition: 'opacity 0.15s' }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
+              <span style={{ backgroundColor: 'var(--ion-color-primary)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</span>
+              </span>
+            </button>
           );
         })}
-        <Box sx={{ flex: 1 }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
-          <Tooltip title="Refresh">
-            <IconButton size="small" onClick={() => fetchPosts(true)} sx={{ color: 'text.secondary' }}>
-              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+        <div style={{ flex: 1 }} />
+        <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
+          <button title="Refresh" onClick={() => fetchPosts(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, borderRadius: 4, display: 'flex' }}>
+            <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+          </button>
+        </div>
+      </div>
 
-      {/* ── Table ── */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
+      {/* Table */}
+      <div style={{ flex: 1, overflow: 'auto' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-            <CircularProgress size={28} />
-          </Box>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+            <IonSpinner name="crescent" />
+          </div>
         ) : tabItems.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1.5 }}>
-            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
-            <Typography variant="body2" color="text.secondary">No trucks in this category.</Typography>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 12 }}>
+            <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No trucks in this category.</p>
             {activeTab === 'all' && (
-              <Button variant="outlined" startIcon={<IonIcon name="add-outline" />} onClick={openCreate} size="small">
-                Post Your First Truck
-              </Button>
+              <button onClick={openCreate} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600 }}>
+                <IonIcon name="add-outline" style={{ fontSize: 16 }} /> Post Your First Truck
+              </button>
             )}
-          </Box>
+          </div>
         ) : (
-          <TableContainer>
-            <Table size="small" sx={{ minWidth: 750 }}>
-              <TableHead>
-                <TableRow sx={{ '& .MuiTableCell-root': { fontWeight: '400 !important', color: `${isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important` } }}>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 150 }}>Equipment</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 160 }}>Location</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 200 }}>Available</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 160 }}>Preferred Lane</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 100 }}>Rate Exp.</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, width: 110, minWidth: 110 }}>Status</TableCell>
-                  <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 110, minWidth: 110 }} />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tabItems.map((post) => {
-                  const chip     = STATUS_CHIP[post._status] || { label: post._status, bg: '#9e9e9e', text: '#fff' };
-                  const barColor = STATUS_BAR[post._status]  || '#9e9e9e';
-                  return (
-                    <TableRow key={post.id} sx={{
-                      height: 64,
-                      '& td': { py: 0, borderBottom: 0 },
-                      '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
-                      '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                    }}>
-                      {/* Equipment — accent bar */}
-                      <TableCell sx={{ pl: 0, position: 'relative', minWidth: 150 }}>
-                        <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
-                        <Box sx={{ pl: 2 }}>
-                          <Typography variant="body2" fontWeight={600} noWrap>{post.equipment_type}</Typography>
-                          {(post.trailer_length || post.weight_capacity) && (
-                            <Typography variant="caption" color="text.disabled" display="block">
-                              {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${Number(post.weight_capacity).toLocaleString()} lbs`].filter(Boolean).join(' · ')}
-                            </Typography>
-                          )}
-                        </Box>
-                      </TableCell>
-
-                      <TableCell sx={{ minWidth: 160 }}>
-                        <Typography variant="body2" noWrap>{post.current_location || '—'}</Typography>
-                      </TableCell>
-
-                      <TableCell sx={{ minWidth: 200, whiteSpace: 'nowrap' }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {fmtDate(post.available_from)} — {fmtDate(post.available_to)}
-                        </Typography>
-                      </TableCell>
-
-                      <TableCell sx={{ minWidth: 160 }}>
-                        {post.preferred_origin || post.preferred_destination ? (
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            {[post.preferred_origin, post.preferred_destination].filter(Boolean).join(' → ')}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" color="text.disabled">—</Typography>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 750 }}>
+            <thead>
+              <tr>
+                <th style={{ ...thStyle, minWidth: 150 }}>Equipment</th>
+                <th style={{ ...thStyle, minWidth: 160 }}>Location</th>
+                <th style={{ ...thStyle, minWidth: 200 }}>Available</th>
+                <th style={{ ...thStyle, minWidth: 160 }}>Preferred Lane</th>
+                <th style={{ ...thStyle, minWidth: 100 }}>Rate Exp.</th>
+                <th style={{ ...thStyle, minWidth: 110, width: 110 }}>Status</th>
+                <th style={{ ...thStyle, minWidth: 110, width: 110 }} />
+              </tr>
+            </thead>
+            <tbody>
+              {tabItems.map((post) => {
+                const chip     = STATUS_CHIP[post._status] || { label: post._status, bg: '#9e9e9e', color: '#fff' };
+                const barColor = STATUS_BAR[post._status]  || '#9e9e9e';
+                return (
+                  <tr key={post.id} style={{ height: 64 }}>
+                    {/* Equipment — accent bar */}
+                    <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 150 }}>
+                      <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                      <div style={{ paddingLeft: 16 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.equipment_type}</div>
+                        {(post.trailer_length || post.weight_capacity) && (
+                          <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+                            {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${Number(post.weight_capacity).toLocaleString()} lbs`].filter(Boolean).join(' · ')}
+                          </div>
                         )}
-                      </TableCell>
+                      </div>
+                    </td>
 
-                      <TableCell sx={{ minWidth: 100 }}>
-                        <Typography variant="body2" fontWeight={600} color={post.rate_expectation ? 'success.main' : 'text.disabled'}>
-                          {post.rate_expectation ? `$${post.rate_expectation.toFixed(2)}/mi` : 'Negotiable'}
-                        </Typography>
-                      </TableCell>
+                    <td style={{ ...tdStyle, minWidth: 160 }}>
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 160 }}>{post.current_location || '—'}</span>
+                    </td>
 
-                      <TableCell sx={{ width: 110, minWidth: 110 }}>
-                        <Tooltip title={post.is_active ? 'Click to deactivate' : 'Click to activate'}>
-                          <Chip
-                            label={chip.label}
-                            size="small"
-                            onClick={e => handleToggleActive(e, post)}
-                            sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text, cursor: 'pointer' }}
-                          />
-                        </Tooltip>
-                      </TableCell>
+                    <td style={{ ...tdStyle, minWidth: 200, whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>
+                        {fmtDate(post.available_from)} — {fmtDate(post.available_to)}
+                      </span>
+                    </td>
 
-                      <TableCell sx={{ width: 110, minWidth: 110, pr: 1 }} onClick={e => e.stopPropagation()}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                          <Tooltip title="Repost with new dates">
-                            <IconButton size="small" onClick={() => openRepost(post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                              <IonIcon name="reload-outline" sx={{ fontSize: 15 }} />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Edit">
-                            <IconButton size="small" onClick={() => openEdit(post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                              <IonIcon name="create-outline" sx={{ fontSize: 15 }} />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title="Delete">
-                            <IconButton size="small" onClick={() => setDeleteId(post.id)} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' }, p: 0.5 }}>
-                              <IonIcon name="trash-outline" sx={{ fontSize: 15 }} />
-                            </IconButton>
-                          </Tooltip>
-                          <IonIcon name="chevron-forward-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    <td style={{ ...tdStyle, minWidth: 160 }}>
+                      {post.preferred_origin || post.preferred_destination ? (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 160 }}>
+                          {[post.preferred_origin, post.preferred_destination].filter(Boolean).join(' → ')}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>—</span>
+                      )}
+                    </td>
+
+                    <td style={{ ...tdStyle, minWidth: 100 }}>
+                      <span style={{ fontWeight: 600, color: post.rate_expectation ? '#2e7d32' : 'var(--ion-color-medium)' }}>
+                        {post.rate_expectation ? `$${post.rate_expectation.toFixed(2)}/mi` : 'Negotiable'}
+                      </span>
+                    </td>
+
+                    <td style={{ ...tdStyle, width: 110, minWidth: 110 }}>
+                      <span
+                        onClick={e => handleToggleActive(e, post)}
+                        title={post.is_active ? 'Click to deactivate' : 'Click to activate'}
+                        style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.color, cursor: 'pointer' }}
+                      >
+                        {chip.label}
+                      </span>
+                    </td>
+
+                    <td style={{ ...tdStyle, width: 110, minWidth: 110, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <button title="Repost with new dates" onClick={() => openRepost(post)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                          <IonIcon name="reload-outline" style={{ fontSize: 15 }} />
+                        </button>
+                        <button title="Edit" onClick={() => openEdit(post)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                          <IonIcon name="create-outline" style={{ fontSize: 15 }} />
+                        </button>
+                        <button title="Delete" onClick={() => setDeleteId(post.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                          <IonIcon name="trash-outline" style={{ fontSize: 15 }} />
+                        </button>
+                        <IonIcon name="chevron-forward-outline" style={{ fontSize: 16, color: 'var(--ion-color-medium)' }} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
-      </Box>
+      </div>
 
-      {/* ── Post Truck button ── */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5, flexShrink: 0 }}>
-        <Button variant="contained" startIcon={<IonIcon name="add-outline" sx={{ fontSize: 17 }} />} onClick={openCreate}
-          sx={{ bgcolor: 'primary.main', color: '#fff', '&:hover': { bgcolor: 'primary.dark' }, fontWeight: 700, px: 2.5, py: 0.9, borderRadius: '8px', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
-          Post Truck
-        </Button>
-      </Box>
+      {/* Post Truck button */}
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
+        <button onClick={openCreate} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon name="add-outline" style={{ fontSize: 17 }} /> Post Truck
+        </button>
+      </div>
 
-    </Box>
+    </div>
     <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </Box>
+    </div>
 
-    {/* ── Create / Edit / Repost Dialog ── */}
-    <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '14px' } }}>
-      <DialogTitle fontWeight={700}>
-        {isRepost ? 'Repost Truck — Update Dates' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}
-      </DialogTitle>
-      <DialogContent dividers>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          {error && <Alert severity="error">{error}</Alert>}
-          {isRepost && <Alert severity="info">Same equipment and specs pre-filled — just update your availability dates.</Alert>}
+    {/* Create / Edit / Repost Modal */}
+    <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '14px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+          <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>
+            {isRepost ? 'Repost Truck — Update Dates' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}
+          </h3>
+        </div>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {error && (
+            <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
+          )}
+          {isRepost && (
+            <div style={{ padding: '10px 14px', backgroundColor: 'rgba(2,136,209,0.08)', border: '1px solid rgba(2,136,209,0.3)', borderRadius: 6, color: '#0288d1', fontSize: '0.875rem' }}>
+              Same equipment and specs pre-filled — just update your availability dates.
+            </div>
+          )}
 
-          <FormControl fullWidth size="small">
-            <InputLabel>Equipment Type *</InputLabel>
-            <Select value={form.equipment_type || ''} label="Equipment Type *" onChange={setField('equipment_type')}>
-              {equipmentTypes.map(t => <MenuItem key={t.id} value={t.name}>{t.name}</MenuItem>)}
-            </Select>
-          </FormControl>
+          <div>
+            <label style={labelStyle}>Equipment Type *</label>
+            <select style={inputStyle} value={form.equipment_type || ''} onChange={setField('equipment_type')}>
+              {equipmentTypes.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+            </select>
+          </div>
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Trailer Length (ft)" type="number" size="small" fullWidth value={form.trailer_length} onChange={setField('trailer_length')} inputProps={{ min: 0 }} />
-            <TextField label="Weight Capacity (lbs)" type="number" size="small" fullWidth value={form.weight_capacity} onChange={setField('weight_capacity')} inputProps={{ min: 0 }} />
-          </Box>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Trailer Length (ft)</label>
+              <input style={inputStyle} type="number" min={0} value={form.trailer_length} onChange={setField('trailer_length')} />
+            </div>
+            <div>
+              <label style={labelStyle}>Weight Capacity (lbs)</label>
+              <input style={inputStyle} type="number" min={0} value={form.weight_capacity} onChange={setField('weight_capacity')} />
+            </div>
+          </div>
 
-          <AddressAutocomplete
-            label="Current Location *"
-            placeholder="e.g. Dallas, TX"
-            value={form.current_location}
-            onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
-          />
+          <div>
+            <label style={labelStyle}>Current Location *</label>
+            <AddressAutocomplete
+              placeholder="e.g. Dallas, TX"
+              value={form.current_location}
+              onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
+            />
+          </div>
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Preferred Origin" size="small" fullWidth value={form.preferred_origin} onChange={setField('preferred_origin')} />
-            <TextField label="Preferred Destination" size="small" fullWidth value={form.preferred_destination} onChange={setField('preferred_destination')} />
-          </Box>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Preferred Origin</label>
+              <input style={inputStyle} value={form.preferred_origin} onChange={setField('preferred_origin')} />
+            </div>
+            <div>
+              <label style={labelStyle}>Preferred Destination</label>
+              <input style={inputStyle} value={form.preferred_destination} onChange={setField('preferred_destination')} />
+            </div>
+          </div>
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Available From *" type="date" size="small" fullWidth required value={form.available_from} onChange={setField('available_from')} InputLabelProps={{ shrink: true }} />
-            <TextField label="Available To *" type="date" size="small" fullWidth required value={form.available_to} onChange={setField('available_to')} InputLabelProps={{ shrink: true }} />
-          </Box>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <label style={labelStyle}>Available From *</label>
+              <input style={inputStyle} type="date" required value={form.available_from} onChange={setField('available_from')} />
+            </div>
+            <div>
+              <label style={labelStyle}>Available To *</label>
+              <input style={inputStyle} type="date" required value={form.available_to} onChange={setField('available_to')} />
+            </div>
+          </div>
 
-          <TextField label="Rate Expectation ($/mile)" type="number" size="small" fullWidth value={form.rate_expectation} onChange={setField('rate_expectation')} inputProps={{ min: 0, step: 0.01 }} placeholder="Optional" />
-          <TextField label="Notes" multiline minRows={3} size="small" fullWidth value={form.notes} onChange={setField('notes')} placeholder="Any additional details..." />
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-        <Button variant="contained" onClick={handleSave} disabled={saving} sx={{ fontWeight: 700 }}>
-          {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          <div>
+            <label style={labelStyle}>Rate Expectation ($/mile)</label>
+            <input style={inputStyle} type="number" min={0} step={0.01} value={form.rate_expectation} onChange={setField('rate_expectation')} placeholder="Optional" />
+          </div>
 
-    {/* ── Delete Confirm ── */}
-    <Dialog open={Boolean(deleteId)} onClose={() => setDeleteId(null)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '14px' } }}>
-      <DialogTitle fontWeight={700}>Delete Truck Posting?</DialogTitle>
-      <DialogContent>
-        <Typography variant="body2" color="text.secondary">
+          <div>
+            <label style={labelStyle}>Notes</label>
+            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 72 }} rows={3} value={form.notes} onChange={setField('notes')} placeholder="Any additional details..." />
+          </div>
+        </div>
+        <div style={{ padding: '12px 24px 20px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
+          <button onClick={() => setDialogOpen(false)} style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 700, opacity: saving ? 0.7 : 1 }}>
+            {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
+            {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
+          </button>
+        </div>
+      </div>
+    </IonModal>
+
+    {/* Delete Confirm Modal */}
+    <IonModal isOpen={Boolean(deleteId)} onDidDismiss={() => setDeleteId(null)} style={{ '--width': '360px', '--border-radius': '14px' }}>
+      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Delete Truck Posting?</h3>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
           This will permanently remove this truck posting. Brokers will no longer be able to find it.
-        </Typography>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={() => setDeleteId(null)}>Cancel</Button>
-        <Button variant="contained" color="error" onClick={handleDelete} sx={{ fontWeight: 700 }}>Delete</Button>
-      </DialogActions>
-    </Dialog>
+        </p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button onClick={() => setDeleteId(null)} style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
+            Cancel
+          </button>
+          <button onClick={handleDelete} style={{ padding: '8px 16px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 700 }}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </IonModal>
     </>
   );
 }

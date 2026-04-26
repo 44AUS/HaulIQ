@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box, Typography, Card, CardContent, Chip, Skeleton, LinearProgress,
-} from '@mui/material';
 import { adminApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
-
 const PLAN_COLORS = { basic: '#455a64', pro: '#1565C0', elite: '#6a1b9a', admin: '#b71c1c' };
+
+const KPI_ICON_BG = {
+  success: '#2e7d32',
+  primary: 'var(--ion-color-primary)',
+  warning: '#e65100',
+  info:    '#0288d1',
+};
+
+const cardStyle = {
+  backgroundColor: 'var(--ion-card-background)',
+  border: '1px solid var(--ion-border-color)',
+  borderRadius: 8,
+  padding: '16px',
+};
+
+function SkeletonBox({ width, height, style }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4, ...style }} />;
+}
 
 export default function AdminOverview() {
   const [stats, setStats] = useState(null);
@@ -20,134 +34,110 @@ export default function AdminOverview() {
   }, []);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <Box>
-        <Skeleton variant="text" width={220} height={36} />
-        <Skeleton variant="text" width={300} height={20} />
-      </Box>
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-        gap: 2,
-      }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div>
+        <SkeletonBox width={220} height={28} style={{ marginBottom: 8 }} />
+        <SkeletonBox width={300} height={16} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
         {[...Array(8)].map((_, i) => (
-          <Card variant="outlined" key={i}>
-            <CardContent sx={{ py: 2 }}>
-              <Skeleton variant="rounded" width={34} height={34} sx={{ mb: 1.5, borderRadius: 1.5 }} />
-              <Skeleton variant="text" width="65%" height={16} />
-              <Skeleton variant="text" width="50%" height={40} />
-            </CardContent>
-          </Card>
+          <div key={i} style={cardStyle}>
+            <SkeletonBox width={34} height={34} style={{ marginBottom: 12, borderRadius: 6 }} />
+            <SkeletonBox width="65%" height={14} style={{ marginBottom: 8 }} />
+            <SkeletonBox width="50%" height={32} />
+          </div>
         ))}
-      </Box>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
         {[1, 2].map(i => (
-          <Card variant="outlined" key={i}>
-            <CardContent sx={{ p: 3 }}>
-              <Skeleton variant="text" width={220} height={24} sx={{ mb: 2.5 }} />
-              {[1, 2, 3].map(j => (
-                <Box key={j} sx={{ mb: 2 }}>
-                  <Skeleton variant="text" width="60%" height={16} sx={{ mb: 0.75 }} />
-                  <Skeleton variant="rounded" height={8} sx={{ borderRadius: 4 }} />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
+          <div key={i} style={{ ...cardStyle, padding: 24 }}>
+            <SkeletonBox width={220} height={20} style={{ marginBottom: 20 }} />
+            {[1, 2, 3].map(j => (
+              <div key={j} style={{ marginBottom: 16 }}>
+                <SkeletonBox width="60%" height={14} style={{ marginBottom: 6 }} />
+                <SkeletonBox width="100%" height={8} style={{ borderRadius: 4 }} />
+              </div>
+            ))}
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 
   if (!stats) return (
-    <Box sx={{ textAlign: 'center', py: 10 }}>
-      <Typography color="text.secondary">Failed to load stats.</Typography>
-    </Box>
+    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+      <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>Failed to load stats.</span>
+    </div>
   );
 
   const kpis = [
-    { icon: 'cash-outline',           label: 'Monthly MRR',        value: `$${(stats.mrr / 1000).toFixed(1)}K`,     color: 'success' },
-    { icon: 'trending-up-outline',    label: 'ARR',                value: `$${(stats.arr / 1000).toFixed(1)}K`,     color: 'success' },
-    { icon: 'people-outline',         label: 'Active Subscribers', value: stats.active_subscribers.toLocaleString(), color: 'primary' },
-    { icon: 'cube-outline',           label: 'Active Loads',       value: stats.active_loads.toLocaleString(),       color: 'warning' },
-    { icon: 'person-outline',         label: 'Total Users',        value: stats.total_users.toLocaleString(),        color: 'info'    },
-    { icon: 'car-outline',            label: 'Total Carriers',     value: stats.total_carriers.toLocaleString(),     color: 'primary' },
-    { icon: 'briefcase-outline',      label: 'Total Brokers',      value: stats.total_brokers.toLocaleString(),      color: 'info'    },
-    { icon: 'sparkles-outline',       label: 'New Users (30d)',     value: stats.new_users_30d.toLocaleString(),      color: 'success' },
+    { icon: 'cash-outline',        label: 'Monthly MRR',        value: `$${(stats.mrr / 1000).toFixed(1)}K`,      color: 'success' },
+    { icon: 'trending-up-outline', label: 'ARR',                value: `$${(stats.arr / 1000).toFixed(1)}K`,      color: 'success' },
+    { icon: 'people-outline',      label: 'Active Subscribers', value: stats.active_subscribers.toLocaleString(),  color: 'primary' },
+    { icon: 'cube-outline',        label: 'Active Loads',       value: stats.active_loads.toLocaleString(),        color: 'warning' },
+    { icon: 'person-outline',      label: 'Total Users',        value: stats.total_users.toLocaleString(),         color: 'info'    },
+    { icon: 'car-outline',         label: 'Total Carriers',     value: stats.total_carriers.toLocaleString(),      color: 'primary' },
+    { icon: 'briefcase-outline',   label: 'Total Brokers',      value: stats.total_brokers.toLocaleString(),       color: 'info'    },
+    { icon: 'sparkles-outline',    label: 'New Users (30d)',    value: stats.new_users_30d.toLocaleString(),       color: 'success' },
   ];
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <IonIcon name="shield-outline" color="primary" />
-            <Typography variant="h5" fontWeight={700}>Admin Dashboard</Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary">Platform overview — HaulIQ Operations</Typography>
-        </Box>
-        <Chip label="All systems operational" color="success" size="small" />
-      </Box>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <IonIcon name="shield-outline" style={{ color: 'var(--ion-color-primary)' }} />
+            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Admin Dashboard</h2>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Platform overview — HaulIQ Operations</p>
+        </div>
+        <span style={{ backgroundColor: '#2e7d32', color: '#fff', fontSize: '0.75rem', fontWeight: 600, padding: '3px 10px', borderRadius: 12 }}>
+          All systems operational
+        </span>
+      </div>
 
-      {/* KPI grid — 4 columns */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
-        gap: 2,
-      }}>
+      {/* KPI grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 16 }}>
         {kpis.map(({ icon, label, value, color }) => (
-          <Card variant="outlined" key={label}>
-            <CardContent sx={{ py: 2 }}>
-              <Box sx={{
-                width: 34, height: 34, borderRadius: 1.5, mb: 1.5,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: `${color}.main`,
-              }}>
-                <IonIcon name={icon} sx={{ fontSize: 18, color: '#fff' }} />
-              </Box>
-              <Typography variant="body2" color="text.secondary" mb={0.25}>{label}</Typography>
-              <Typography variant="h4" fontWeight={800}>{value}</Typography>
-            </CardContent>
-          </Card>
+          <div key={label} style={cardStyle}>
+            <div style={{ width: 34, height: 34, borderRadius: 6, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: KPI_ICON_BG[color] }}>
+              <IonIcon name={icon} style={{ fontSize: 18, color: '#fff' }} />
+            </div>
+            <p style={{ margin: '0 0 2px', fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 800, color: 'var(--ion-text-color)' }}>{value}</p>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {/* Plan distributions */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 3 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
         {[
           { title: 'Carrier Plan Distribution', data: stats.carrier_plan_distribution },
           { title: 'Broker Plan Distribution',  data: stats.broker_plan_distribution  },
         ].map(({ title, data }) => (
-          <Card variant="outlined" key={title}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={700} mb={2.5}>{title}</Typography>
-              {(!data || data.length === 0) ? (
-                <Typography variant="body2" color="text.disabled">No data yet</Typography>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {data.map(d => (
-                    <Box key={d.plan}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.75 }}>
-                        <Typography variant="body2" sx={{ textTransform: 'capitalize', fontWeight: 600 }}>{d.plan}</Typography>
-                        <Typography variant="body2" color="text.secondary">{d.count} users · {d.pct}%</Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={d.pct}
-                        sx={{
-                          height: 8, borderRadius: 4,
-                          bgcolor: 'action.hover',
-                          '& .MuiLinearProgress-bar': { bgcolor: PLAN_COLORS[d.plan] || 'primary.main', borderRadius: 4 },
-                        }}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+          <div key={title} style={{ ...cardStyle, padding: 24 }}>
+            <p style={{ margin: '0 0 20px', fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>{title}</p>
+            {(!data || data.length === 0) ? (
+              <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No data yet</span>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {data.map(d => (
+                  <div key={d.plan}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600, textTransform: 'capitalize', color: 'var(--ion-text-color)' }}>{d.plan}</span>
+                      <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{d.count} users · {d.pct}%</span>
+                    </div>
+                    <div style={{ height: 8, borderRadius: 4, backgroundColor: 'var(--ion-color-light)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${d.pct}%`, borderRadius: 4, backgroundColor: PLAN_COLORS[d.plan] || 'var(--ion-color-primary)' }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

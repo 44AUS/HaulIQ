@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Box, Typography, Card, CardContent, Chip, CircularProgress,
-  Avatar, IconButton, Dialog, DialogContent, DialogTitle, DialogActions,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TextField, InputAdornment, MenuItem, Select, FormControl, InputLabel,
-  Tooltip, Button, Skeleton,
-} from '@mui/material';
+import { IonSpinner, IonModal } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { documentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
-
 
 const DOC_TYPE_LABELS = {
   BOL: 'Bill of Lading',
@@ -21,87 +14,64 @@ const DOC_TYPE_LABELS = {
 };
 
 const DOC_TYPE_COLORS = {
-  BOL: 'primary',
-  POD: 'success',
-  receipt: 'warning',
-  rate_confirmation: 'info',
-  other: 'default',
+  BOL: { bg: 'rgba(21,101,192,0.12)', color: '#1565C0' },
+  POD: { bg: 'rgba(45,211,111,0.12)', color: '#2dd36f' },
+  receipt: { bg: 'rgba(255,196,9,0.12)', color: '#ffc409' },
+  rate_confirmation: { bg: 'rgba(83,177,253,0.12)', color: '#53b1fd' },
+  other: { bg: 'rgba(0,0,0,0.07)', color: 'var(--ion-color-medium)' },
 };
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const inputStyle = { boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
+
 function DocTypeChip({ type }) {
+  const c = DOC_TYPE_COLORS[type] || DOC_TYPE_COLORS.other;
   return (
-    <Chip
-      label={DOC_TYPE_LABELS[type] || type}
-      size="small"
-      color={DOC_TYPE_COLORS[type] || 'default'}
-      variant="outlined"
-    />
+    <span style={{ backgroundColor: c.bg, color: c.color, borderRadius: 10, padding: '2px 8px', fontSize: '0.7rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+      {DOC_TYPE_LABELS[type] || type}
+    </span>
   );
 }
 
 function DocViewer({ doc, open, onClose }) {
   const [page, setPage] = useState(0);
   const pages = doc?.pages || [];
-
   useEffect(() => { setPage(0); }, [doc]);
-
   if (!doc) return null;
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700}>{doc.file_name}</Typography>
-          <Typography variant="caption" color="text.secondary">
-            {doc.load_origin} → {doc.load_destination}
-          </Typography>
-        </Box>
-        <IconButton onClick={onClose} size="small"><IonIcon name="close-outline" /></IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ p: 0 }}>
-        {pages.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary">No preview available.</Typography>
-          </Box>
-        ) : (
-          <Box>
-            <Box sx={{ position: 'relative', bgcolor: 'action.selected' }}>
-              <img
-                src={pages[page]}
-                alt={`Page ${page + 1}`}
-                style={{ width: '100%', display: 'block', maxHeight: 600, objectFit: 'contain' }}
-              />
+    <IonModal isOpen={open} onDidDismiss={onClose} style={{ '--width': '720px', '--height': 'auto', '--max-height': '90vh', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>{doc.file_name}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{doc.load_origin} → {doc.load_destination}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+            <IonIcon name="close-outline" style={{ fontSize: 20 }} />
+          </button>
+        </div>
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          {pages.length === 0 ? (
+            <div style={{ padding: 48, textAlign: 'center', color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No preview available.</div>
+          ) : (
+            <div style={{ position: 'relative', backgroundColor: 'rgba(0,0,0,0.06)' }}>
+              <img src={pages[page]} alt={`Page ${page + 1}`} style={{ width: '100%', display: 'block', maxHeight: 600, objectFit: 'contain' }} />
               {pages.length > 1 && (
-                <Box sx={{
-                  position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
-                  display: 'flex', alignItems: 'center', gap: 1,
-                  bgcolor: 'rgba(0,0,0,0.55)', borderRadius: 3, px: 1.5, py: 0.5,
-                }}>
-                  <IconButton
-                    size="small"
-                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                    disabled={page === 0}
-                    sx={{ color: '#fff', p: 0.5 }}
-                  >
-                    <IonIcon name="chevron-back-outline" fontSize="small" />
-                  </IconButton>
-                  <Typography variant="caption" sx={{ color: '#fff', minWidth: 50, textAlign: 'center' }}>
-                    {page + 1} / {pages.length}
-                  </Typography>
-                  <IconButton
-                    size="small"
-                    onClick={() => setPage(p => Math.min(pages.length - 1, p + 1))}
-                    disabled={page === pages.length - 1}
-                    sx={{ color: '#fff', p: 0.5 }}
-                  >
-                    <IonIcon name="chevron-forward-outline" fontSize="small" />
-                  </IconButton>
-                </Box>
+                <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 8, backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: 20, padding: '4px 12px' }}>
+                  <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} style={{ background: 'none', border: 'none', cursor: page === 0 ? 'default' : 'pointer', color: '#fff', opacity: page === 0 ? 0.4 : 1, padding: 2, display: 'flex' }}>
+                    <IonIcon name="chevron-back-outline" style={{ fontSize: 16 }} />
+                  </button>
+                  <span style={{ color: '#fff', fontSize: '0.75rem', minWidth: 44, textAlign: 'center' }}>{page + 1} / {pages.length}</span>
+                  <button onClick={() => setPage(p => Math.min(pages.length - 1, p + 1))} disabled={page === pages.length - 1} style={{ background: 'none', border: 'none', cursor: page === pages.length - 1 ? 'default' : 'pointer', color: '#fff', opacity: page === pages.length - 1 ? 0.4 : 1, padding: 2, display: 'flex' }}>
+                    <IonIcon name="chevron-forward-outline" style={{ fontSize: 16 }} />
+                  </button>
+                </div>
               )}
-            </Box>
-          </Box>
-        )}
-      </DialogContent>
-    </Dialog>
+            </div>
+          )}
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
@@ -112,7 +82,7 @@ export default function Documents() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [viewing, setViewing] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null); // doc to delete
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -126,16 +96,12 @@ export default function Documents() {
     if (!confirmDelete) return;
     setDeleting(true);
     documentsApi.delete(confirmDelete.load_id, confirmDelete.id)
-      .then(() => {
-        setDocs(prev => prev.filter(d => d.id !== confirmDelete.id));
-        setConfirmDelete(null);
-      })
+      .then(() => { setDocs(prev => prev.filter(d => d.id !== confirmDelete.id)); setConfirmDelete(null); })
       .catch(() => {})
       .finally(() => setDeleting(false));
   };
 
-  const loadPath = (loadId) =>
-    user?.role === 'broker' ? `/broker/loads/${loadId}` : `/carrier/active`;
+  const loadPath = (loadId) => user?.role === 'broker' ? `/broker/loads/${loadId}` : `/carrier/active`;
 
   const filtered = docs.filter(d => {
     const matchSearch = !search ||
@@ -146,7 +112,6 @@ export default function Documents() {
     return matchSearch && matchType;
   });
 
-  // Group by load
   const byLoad = filtered.reduce((acc, doc) => {
     const key = doc.load_id;
     if (!acc[key]) acc[key] = { load_id: key, origin: doc.load_origin, destination: doc.load_destination, docs: [] };
@@ -156,182 +121,137 @@ export default function Documents() {
   const groups = Object.values(byLoad);
 
   if (loading) return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 2 }} />
+        <div key={i} style={{ height: 72, borderRadius: 8, backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', opacity: 0.5 }} />
       ))}
-    </Box>
+    </div>
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
-      <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-          <IonIcon name="folder-outline" sx={{ color: 'primary.main' }} />
-          <Typography variant="h5" fontWeight={700}>My Documents</Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          All documents you've uploaded, organized by load
-        </Typography>
-      </Box>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <IonIcon name="folder-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 22 }} />
+          <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>My Documents</h2>
+        </div>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>All documents you've uploaded, organized by load</p>
+      </div>
 
       {/* Filters */}
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <TextField
-          size="small"
-          placeholder="Search by filename or route…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          sx={{ minWidth: 260 }}
-          InputProps={{
-            startAdornment: <InputAdornment position="start"><IonIcon name="search-outline" sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment>,
-          }}
-        />
-        <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Document Type</InputLabel>
-          <Select value={typeFilter} label="Document Type" onChange={e => setTypeFilter(e.target.value)}>
-            <MenuItem value="all">All Types</MenuItem>
-            {Object.entries(DOC_TYPE_LABELS).map(([k, v]) => (
-              <MenuItem key={k} value={k}>{v}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            {filtered.length} document{filtered.length !== 1 ? 's' : ''} across {groups.length} load{groups.length !== 1 ? 's' : ''}
-          </Typography>
-        </Box>
-      </Box>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ position: 'relative', minWidth: 260 }}>
+          <IonIcon name="search-outline" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
+          <input
+            placeholder="Search by filename or route…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ ...inputStyle, width: '100%', paddingLeft: 32 }}
+          />
+        </div>
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ ...inputStyle, minWidth: 160 }}>
+          <option value="all">All Types</option>
+          {Object.entries(DOC_TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+        <span style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+          {filtered.length} document{filtered.length !== 1 ? 's' : ''} across {groups.length} load{groups.length !== 1 ? 's' : ''}
+        </span>
+      </div>
 
       {/* Content */}
       {groups.length === 0 ? (
-        <Card variant="outlined">
-          <CardContent sx={{ textAlign: 'center', py: 8 }}>
-            <IonIcon name="folder-outline" sx={{ fontSize: 48, color: 'text.disabled', mb: 1.5 }} />
-            <Typography variant="body1" fontWeight={600} color="text.secondary">
-              {search || typeFilter !== 'all' ? 'No documents match your filters' : 'No documents uploaded yet'}
-            </Typography>
-            <Typography variant="caption" color="text.disabled">
-              Documents you upload to loads will appear here
-            </Typography>
-          </CardContent>
-        </Card>
+        <div style={{ ...cardStyle, padding: '48px 24px', textAlign: 'center' }}>
+          <IonIcon name="folder-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)', display: 'block', margin: '0 auto 12px' }} />
+          <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--ion-color-medium)', marginBottom: 4 }}>
+            {search || typeFilter !== 'all' ? 'No documents match your filters' : 'No documents uploaded yet'}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>Documents you upload to loads will appear here</div>
+        </div>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {groups.map(group => (
-            <Card key={group.load_id} variant="outlined">
-              <CardContent sx={{ pb: '12px !important' }}>
+            <div key={group.load_id} style={cardStyle}>
+              <div style={{ padding: '16px 20px' }}>
                 {/* Load header */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Avatar sx={{ bgcolor: 'primary.main', width: 34, height: 34 }}>
-                      <IonIcon name="car-sport-outline" sx={{ fontSize: 18 }} />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" fontWeight={700}>
-                        {group.origin} → {group.destination}
-                      </Typography>
-                      <Typography variant="caption" color="text.disabled">
-                        Load ID: {group.load_id.slice(0, 8)}…
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Tooltip title="View load">
-                    <IconButton
-                      component={Link}
-                      to={loadPath(group.load_id)}
-                      state={{ from: 'Documents' }}
-                      size="small"
-                    >
-                      <IonIcon name="open-outline" sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 34, height: 34, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <IonIcon name="car-sport-outline" style={{ fontSize: 17, color: '#fff' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{group.origin} → {group.destination}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Load ID: {group.load_id.slice(0, 8)}…</div>
+                    </div>
+                  </div>
+                  <Link to={loadPath(group.load_id)} state={{ from: 'Documents' }} title="View load" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 6, border: '1px solid var(--ion-border-color)', color: 'var(--ion-color-medium)', textDecoration: 'none' }}>
+                    <IonIcon name="open-outline" style={{ fontSize: 15 }} />
+                  </Link>
+                </div>
 
                 {/* Documents table */}
-                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>File</TableCell>
-                        <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Type</TableCell>
-                        <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Pages</TableCell>
-                        <TableCell sx={{ fontWeight: 700, fontSize: '0.75rem' }}>Uploaded</TableCell>
-                        <TableCell sx={{ width: 72 }} />
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {group.docs.map(doc => (
-                        <TableRow
-                          key={doc.id}
-                          hover
-                          sx={{ cursor: 'pointer' }}
-                          onClick={() => setViewing(doc)}
-                        >
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <IonIcon name="document-text-outline" sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
-                              <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>{doc.file_name}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell><DocTypeChip type={doc.doc_type} /></TableCell>
-                          <TableCell>
-                            <Typography variant="body2" color="text.secondary">{doc.page_count}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(doc.created_at).toLocaleDateString()}
-                            </Typography>
-                          </TableCell>
-                          <TableCell onClick={e => e.stopPropagation()}>
-                            <Box sx={{ display: 'flex', gap: 0.5 }}>
-                              <Tooltip title="Preview">
-                                <IconButton size="small" onClick={() => setViewing(doc)}>
-                                  <IonIcon name="open-outline" sx={{ fontSize: 14 }} />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete">
-                                <IconButton size="small" color="error" onClick={() => setConfirmDelete(doc)}>
-                                  <IonIcon name="trash-outline" sx={{ fontSize: 14 }} />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
-                        </TableRow>
+                <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 6, overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}>
+                        <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.72rem', color: 'var(--ion-color-medium)', borderBottom: '1px solid var(--ion-border-color)' }}>File</th>
+                        <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.72rem', color: 'var(--ion-color-medium)', borderBottom: '1px solid var(--ion-border-color)' }}>Type</th>
+                        <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.72rem', color: 'var(--ion-color-medium)', borderBottom: '1px solid var(--ion-border-color)' }}>Pages</th>
+                        <th style={{ padding: '8px 12px', textAlign: 'left', fontWeight: 700, fontSize: '0.72rem', color: 'var(--ion-color-medium)', borderBottom: '1px solid var(--ion-border-color)' }}>Uploaded</th>
+                        <th style={{ padding: '8px 12px', width: 72, borderBottom: '1px solid var(--ion-border-color)' }} />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.docs.map((doc, idx) => (
+                        <tr key={doc.id} onClick={() => setViewing(doc)} style={{ cursor: 'pointer', borderTop: idx > 0 ? '1px solid var(--ion-border-color)' : undefined }}>
+                          <td style={{ padding: '10px 12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <IonIcon name="document-text-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+                              <span style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{doc.file_name}</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '10px 12px' }}><DocTypeChip type={doc.doc_type} /></td>
+                          <td style={{ padding: '10px 12px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{doc.page_count}</td>
+                          <td style={{ padding: '10px 12px', fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{new Date(doc.created_at).toLocaleDateString()}</td>
+                          <td style={{ padding: '10px 12px' }} onClick={e => e.stopPropagation()}>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <button title="Preview" onClick={() => setViewing(doc)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                                <IonIcon name="open-outline" style={{ fontSize: 14 }} />
+                              </button>
+                              <button title="Delete" onClick={() => setConfirmDelete(doc)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-danger)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                                <IonIcon name="trash-outline" style={{ fontSize: 14 }} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
                       ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </Card>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           ))}
-        </Box>
+        </div>
       )}
 
       <DocViewer doc={viewing} open={!!viewing} onClose={() => setViewing(null)} />
 
       {/* Delete confirmation */}
-      <Dialog open={!!confirmDelete} onClose={() => setConfirmDelete(null)} maxWidth="xs" fullWidth>
-        <DialogTitle>Delete Document?</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2">
-            Are you sure you want to delete <strong>{confirmDelete?.file_name}</strong>? This cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setConfirmDelete(null)} variant="outlined">Cancel</Button>
-          <Button
-            onClick={handleDelete}
-            variant="contained"
-            color="error"
-            disabled={deleting}
-            startIcon={deleting ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="trash-outline" />}
-          >
-            {deleting ? 'Deleting…' : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+      <IonModal isOpen={!!confirmDelete} onDidDismiss={() => setConfirmDelete(null)} style={{ '--width': '400px', '--height': 'auto', '--border-radius': '12px' }}>
+        <div style={{ padding: 24, backgroundColor: 'var(--ion-card-background)', borderRadius: 12 }}>
+          <h3 style={{ margin: '0 0 12px', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Delete Document?</h3>
+          <p style={{ margin: '0 0 20px', fontSize: '0.875rem', color: 'var(--ion-color-medium)', lineHeight: 1.6 }}>
+            Are you sure you want to delete <strong style={{ color: 'var(--ion-text-color)' }}>{confirmDelete?.file_name}</strong>? This cannot be undone.
+          </p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setConfirmDelete(null)} style={{ flex: 1, background: 'none', border: '1px solid var(--ion-border-color)', color: 'var(--ion-text-color)', borderRadius: 6, padding: '9px 0', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}>Cancel</button>
+            <button onClick={handleDelete} disabled={deleting} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: 'var(--ion-color-danger)', color: '#fff', border: 'none', borderRadius: 6, padding: '9px 0', cursor: deleting ? 'default' : 'pointer', fontWeight: 700, fontFamily: 'inherit', opacity: deleting ? 0.7 : 1 }}>
+              {deleting ? <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} /> : <IonIcon name="trash-outline" style={{ fontSize: 14 }} />}
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </IonModal>
+    </div>
   );
 }

@@ -1,9 +1,7 @@
 import { useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Paper } from '@mui/material';
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import IonIcon from '../../components/IonIcon';
-
 
 const LIBRARIES = ['places'];
 const MAP_OPTIONS = {
@@ -22,10 +20,7 @@ const MAP_OPTIONS = {
   ],
 };
 
-const CARRIER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-  <circle cx="12" cy="12" r="8" fill="#22c55e" stroke="#fff" stroke-width="3"/>
-  <circle cx="12" cy="12" r="12" fill="none" stroke="rgba(34,197,94,0.25)" stroke-width="2"/>
-</svg>`;
+const CARRIER_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#22c55e" stroke="#fff" stroke-width="3"/><circle cx="12" cy="12" r="12" fill="none" stroke="rgba(34,197,94,0.25)" stroke-width="2"/></svg>`;
 
 export default function MapView() {
   const { lat, lng, city, name } = useParams();
@@ -46,9 +41,9 @@ export default function MapView() {
 
   if (isNaN(parsedLat) || isNaN(parsedLng)) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <Typography color="text.secondary">Invalid location coordinates.</Typography>
-      </Box>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>
+        <span style={{ color: 'var(--ion-color-medium)' }}>Invalid location coordinates.</span>
+      </div>
     );
   }
 
@@ -60,49 +55,32 @@ export default function MapView() {
   } : undefined;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Button
-        variant="text"
-        startIcon={<IonIcon name="arrow-back-outline" />}
-        onClick={() => navigate(-1)}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        Back
-      </Button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontWeight: 600, fontSize: '0.875rem', fontFamily: 'inherit', alignSelf: 'flex-start', padding: '4px 0' }}>
+        <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} /> Back
+      </button>
 
-      <Paper variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box sx={{
-          width: 36, height: 36, borderRadius: '50%',
-          bgcolor: 'rgba(46,125,50,0.12)', border: 1, borderColor: 'success.main',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <IonIcon name="location-outline" sx={{ fontSize: 18, color: 'success.main' }} />
-        </Box>
-        <Box>
-          <Typography variant="body2" fontWeight={700}>{decodedName}</Typography>
-          {decodedCity && (
-            <Typography variant="caption" color="text.secondary">Currently near {decodedCity}</Typography>
-          )}
-        </Box>
-      </Paper>
+      <div style={{ padding: '12px 16px', border: '1px solid var(--ion-border-color)', borderRadius: 8, backgroundColor: 'var(--ion-card-background)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'rgba(46,125,50,0.12)', border: '1px solid #22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <IonIcon name="location-outline" style={{ fontSize: 18, color: '#22c55e' }} />
+        </div>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{decodedName}</div>
+          {decodedCity && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Currently near {decodedCity}</div>}
+        </div>
+      </div>
 
-      <Box sx={{ borderRadius: 2, overflow: 'hidden', border: 1, borderColor: 'divider', height: 'calc(100vh - 220px)', minHeight: 400 }}>
+      <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid var(--ion-border-color)', height: 'calc(100vh - 220px)', minHeight: 400 }}>
         {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ height: '100%', width: '100%' }}
-            center={center}
-            zoom={14}
-            options={MAP_OPTIONS}
-            onLoad={onMapLoad}
-          >
+          <GoogleMap mapContainerStyle={{ height: '100%', width: '100%' }} center={center} zoom={14} options={MAP_OPTIONS} onLoad={onMapLoad}>
             <Marker position={center} icon={carrierIcon} title={decodedName} />
           </GoogleMap>
         ) : (
-          <Box sx={{ height: '100%', bgcolor: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography color="text.secondary" variant="body2">Loading map…</Typography>
-          </Box>
+          <div style={{ height: '100%', backgroundColor: '#0d1117', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>Loading map…</span>
+          </div>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

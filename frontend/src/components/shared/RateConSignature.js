@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import {
-  Box, Typography, Button, Paper, Chip, CircularProgress, Alert, Divider,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { rateConfirmationApi } from '../../services/api';
 import IonIcon from '../IonIcon';
 
-
-// ─── Signature canvas ─────────────────────────────────────────────────────────
 function SignatureCanvas({ onReady }) {
   const canvasRef = useRef(null);
   const drawing   = useRef(false);
@@ -59,19 +55,8 @@ function SignatureCanvas({ onReady }) {
   };
 
   return (
-    <Box>
-      <Box
-        sx={{
-          border: '1.5px solid',
-          borderColor: 'divider',
-          borderRadius: 1.5,
-          bgcolor: 'background.paper',
-          overflow: 'hidden',
-          cursor: 'crosshair',
-          touchAction: 'none',
-          position: 'relative',
-        }}
-      >
+    <div>
+      <div style={{ border: '1.5px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'var(--ion-card-background)', overflow: 'hidden', cursor: 'crosshair', touchAction: 'none', position: 'relative' }}>
         <canvas
           ref={canvasRef}
           width={480}
@@ -86,32 +71,27 @@ function SignatureCanvas({ onReady }) {
           onTouchEnd={stopDraw}
         />
         {isEmpty && (
-          <Box sx={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            pointerEvents: 'none',
-          }}>
-            <Typography variant="body2" color="text.disabled" sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <IonIcon name="pencil-outline" fontSize="small" /> Draw your signature here
-            </Typography>
-          </Box>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <IonIcon name="pencil-outline" style={{ fontSize: 16 }} /> Draw your signature here
+            </span>
+          </div>
         )}
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.75 }}>
-        <Button size="small" onClick={clear} sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+        <button onClick={clear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', fontSize: '0.75rem', fontFamily: 'inherit', padding: '4px 8px' }}>
           Clear
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 export default function RateConSignature({ bookingId, role }) {
-  const [status, setStatus]   = useState(null);   // sign-status response
+  const [status, setStatus]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
-  const [sigData, setSigData] = useState(null);   // canvas data URL
+  const [sigData, setSigData] = useState(null);
   const [error, setError]     = useState(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [showPad, setShowPad] = useState(false);
@@ -152,80 +132,81 @@ export default function RateConSignature({ bookingId, role }) {
   const fullySigned   = status?.fully_signed;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5 }}>
+    <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: 20, backgroundColor: 'var(--ion-card-background)' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="subtitle2" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-          <IonIcon name="pencil-outline" fontSize="small" color="primary" /> Rate Confirmation Signatures
-        </Typography>
-        <Button
-          size="small"
-          variant="outlined"
-          startIcon={pdfLoading ? <CircularProgress size={13} /> : <IonIcon name="document-outline" />}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+        <span style={{ fontWeight: 700, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: 6, color: 'var(--ion-text-color)' }}>
+          <IonIcon name="pencil-outline" style={{ fontSize: 16, color: 'var(--ion-color-primary)' }} /> Rate Confirmation Signatures
+        </span>
+        <button
           onClick={handleDownload}
           disabled={pdfLoading}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.82rem', fontFamily: 'inherit', cursor: pdfLoading ? 'not-allowed' : 'pointer', opacity: pdfLoading ? 0.6 : 1 }}
         >
+          {pdfLoading ? <IonSpinner name="crescent" style={{ width: 13, height: 13 }} /> : <IonIcon name="document-outline" style={{ fontSize: 14 }} />}
           Download PDF
-        </Button>
-      </Box>
+        </button>
+      </div>
 
-      {/* Status row */}
-      <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5, flexWrap: 'wrap' }}>
-        <SignBadge label="Broker" signed={brokerSigned} name={status?.broker_signed_name} at={status?.broker_signed_at} />
+      {/* Signature status */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+        <SignBadge label="Broker"  signed={brokerSigned}  name={status?.broker_signed_name}  at={status?.broker_signed_at} />
         <SignBadge label="Carrier" signed={carrierSigned} name={status?.carrier_signed_name} at={status?.carrier_signed_at} />
         {fullySigned && (
-          <Chip
-            icon={<IonIcon name="checkmark-circle" />}
-            label="Fully Executed"
-            color="success"
-            size="small"
-            variant="outlined"
-          />
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, border: '1px solid #2e7d32', color: '#2e7d32', borderRadius: 12, padding: '2px 10px', fontSize: '0.78rem', fontWeight: 600 }}>
+            <IonIcon name="checkmark-circle" style={{ fontSize: 14 }} /> Fully Executed
+          </span>
         )}
-      </Box>
+      </div>
 
-      {error && <Alert severity="error" sx={{ mb: 1.5 }} onClose={() => setError(null)}>{error}</Alert>}
+      {error && (
+        <div style={{ backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, padding: '8px 12px', marginBottom: 14, fontSize: '0.82rem', color: '#d32f2f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {error}
+          <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', padding: 0 }}>×</button>
+        </div>
+      )}
 
-      {/* Sign action */}
       {!alreadySigned && !showPad && (
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<IonIcon name="pencil-outline" />}
+        <button
           onClick={() => setShowPad(true)}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer' }}
         >
-          Sign Rate Confirmation
-        </Button>
+          <IonIcon name="pencil-outline" style={{ fontSize: 14 }} /> Sign Rate Confirmation
+        </button>
       )}
 
       {!alreadySigned && showPad && (
-        <Box>
-          <Divider sx={{ mb: 1.5 }} />
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+        <div>
+          <div style={{ borderTop: '1px solid var(--ion-border-color)', marginBottom: 12 }} />
+          <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 8 }}>
             By signing below you agree to the terms of this rate confirmation.
-          </Typography>
+          </span>
           <SignatureCanvas onReady={setSigData} />
-          <Box sx={{ display: 'flex', gap: 1, mt: 1.5 }}>
-            <Button size="small" onClick={() => { setShowPad(false); setSigData(null); }}>Cancel</Button>
-            <Button
-              size="small"
-              variant="contained"
-              disabled={!sigData || signing}
-              onClick={handleSign}
-              endIcon={signing ? <CircularProgress size={13} color="inherit" /> : null}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button
+              onClick={() => { setShowPad(false); setSigData(null); }}
+              style={{ padding: '7px 14px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}
             >
+              Cancel
+            </button>
+            <button
+              onClick={handleSign}
+              disabled={!sigData || signing}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600, cursor: (!sigData || signing) ? 'not-allowed' : 'pointer', opacity: (!sigData || signing) ? 0.6 : 1 }}
+            >
+              {signing && <IonSpinner name="crescent" style={{ width: 13, height: 13, color: '#fff' }} />}
               Submit Signature
-            </Button>
-          </Box>
-        </Box>
+            </button>
+          </div>
+        </div>
       )}
 
       {alreadySigned && (
-        <Typography variant="caption" color="success.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <IonIcon name="checkmark-circle" sx={{ fontSize: 14 }} /> You have signed this rate confirmation.
-        </Typography>
+        <span style={{ fontSize: '0.78rem', color: '#2e7d32', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <IonIcon name="checkmark-circle" style={{ fontSize: 14 }} /> You have signed this rate confirmation.
+        </span>
       )}
-    </Paper>
+    </div>
   );
 }
 
@@ -235,25 +216,21 @@ function SignBadge({ label, signed, name, at }) {
     return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       {signed
-        ? <IonIcon name="checkmark-circle" sx={{ fontSize: 16, color: 'success.main' }} />
-        : <IonIcon name="hourglass-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />}
-      <Box>
-        <Typography variant="caption" fontWeight={600} color={signed ? 'success.main' : 'text.disabled'}>
-          {label}
-        </Typography>
+        ? <IonIcon name="checkmark-circle" style={{ fontSize: 16, color: '#2e7d32' }} />
+        : <IonIcon name="hourglass-outline" style={{ fontSize: 16, color: 'var(--ion-color-medium)' }} />}
+      <div>
+        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: signed ? '#2e7d32' : 'var(--ion-color-medium)', display: 'block' }}>{label}</span>
         {signed && name && (
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ lineHeight: 1.2 }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', lineHeight: 1.2 }}>
             {name}{at ? ` · ${fmtDate(at)}` : ''}
-          </Typography>
+          </span>
         )}
         {!signed && (
-          <Typography variant="caption" color="text.disabled" display="block" sx={{ lineHeight: 1.2 }}>
-            Pending
-          </Typography>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', lineHeight: 1.2 }}>Pending</span>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

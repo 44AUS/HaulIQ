@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box, Typography, Card, Chip, Button,
-  Table, TableHead, TableBody, TableRow, TableCell,
-  IconButton, CircularProgress, Alert, Skeleton, Dialog,
-  DialogTitle, DialogContent, DialogActions,
-} from '@mui/material';
+import { IonModal, IonSpinner } from '@ionic/react';
 import { contactApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
 
-function MessageDialog({ msg, onClose, onMarkRead, onDelete }) {
+function SkeletonBox({ width, height }) {
+  return <div style={{ width, height, backgroundColor: 'var(--ion-color-light)', borderRadius: 4 }} />;
+}
+
+function MessageModal({ msg, onClose, onMarkRead, onDelete }) {
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
@@ -19,32 +21,46 @@ function MessageDialog({ msg, onClose, onMarkRead, onDelete }) {
   }
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography variant="subtitle1" fontWeight={700}>{msg.subject}</Typography>
-          <Typography variant="caption" color="text.secondary">{msg.name} · {msg.email}</Typography>
-        </Box>
-        <IconButton size="small" onClick={onClose}><IonIcon name="close-outline" fontSize="small" /></IconButton>
-      </DialogTitle>
-      <DialogContent>
-        <Typography variant="caption" color="text.disabled" display="block" sx={{ mb: 2 }}>
-          {new Date(msg.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
-        </Typography>
-        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>{msg.message}</Typography>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-        {!msg.read && (
-          <Button variant="outlined" startIcon={<IonIcon name="mail-open-outline" />} onClick={() => { onMarkRead(msg.id); onClose(); }}>
-            Mark as Read
-          </Button>
-        )}
-        <Button variant="outlined" color="error" startIcon={<IonIcon name="trash-outline" />} onClick={handleDelete} disabled={deleting}>
-          {deleting ? 'Deleting…' : 'Delete'}
-        </Button>
-        <Button variant="contained" onClick={onClose}>Close</Button>
-      </DialogActions>
-    </Dialog>
+    <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '520px', '--height': 'auto', '--max-height': '90vh', '--border-radius': '12px' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div>
+            <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>{msg.subject}</p>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{msg.name} · {msg.email}</span>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
+            <IonIcon name="close-outline" style={{ fontSize: 20 }} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 16 }}>
+            {new Date(msg.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+          </span>
+          <p style={{ margin: 0, fontSize: '0.875rem', whiteSpace: 'pre-wrap', lineHeight: 1.8, color: 'var(--ion-text-color)' }}>{msg.message}</p>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '16px 20px', borderTop: '1px solid var(--ion-border-color)' }}>
+          {!msg.read && (
+            <button onClick={() => { onMarkRead(msg.id); onClose(); }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.82rem', fontFamily: 'inherit', cursor: 'pointer' }}>
+              <IonIcon name="mail-open-outline" style={{ fontSize: 14 }} /> Mark as Read
+            </button>
+          )}
+          <button onClick={handleDelete} disabled={deleting}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid #d32f2f', borderRadius: 6, backgroundColor: 'transparent', color: '#d32f2f', fontSize: '0.82rem', fontFamily: 'inherit', cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.6 : 1 }}>
+            <IonIcon name="trash-outline" style={{ fontSize: 14 }} /> {deleting ? 'Deleting…' : 'Delete'}
+          </button>
+          <button onClick={onClose}
+            style={{ padding: '7px 14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600, cursor: 'pointer' }}>
+            Close
+          </button>
+        </div>
+      </div>
+    </IonModal>
   );
 }
 
@@ -59,8 +75,7 @@ export default function AdminContacts() {
     setLoading(true);
     setError(null);
     try {
-      const data = await contactApi.list();
-      setMessages(data);
+      setMessages(await contactApi.list());
     } catch (e) {
       setError(e.message);
     } finally {
@@ -94,151 +109,108 @@ export default function AdminContacts() {
   const unread = messages.filter(m => !m.read).length;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-            <IonIcon name="mail-outline" color="primary" />
-            <Typography variant="h5" fontWeight={700}>Contact Messages</Typography>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <IonIcon name="mail-outline" style={{ color: 'var(--ion-color-primary)' }} />
+            <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Contact Messages</h2>
             {unread > 0 && (
-              <Chip label={`${unread} unread`} size="small" color="primary" sx={{ fontSize: 11 }} />
+              <span style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12 }}>{unread} unread</span>
             )}
-          </Box>
-          <Typography variant="body2" color="text.secondary">{messages.length} total message{messages.length !== 1 ? 's' : ''}</Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <IonIcon name="refresh-outline" />}
-          onClick={load}
-          disabled={loading}
-        >
+          </div>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{messages.length} total message{messages.length !== 1 ? 's' : ''}</p>
+        </div>
+        <button onClick={load} disabled={loading}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.82rem', fontFamily: 'inherit', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
+          {loading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name="refresh-outline" style={{ fontSize: 14 }} />}
           Refresh
-        </Button>
-      </Box>
+        </button>
+      </div>
 
       {/* Stats */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 2 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {[
-          { label: 'Total',   value: messages.length,                         color: 'text.primary' },
-          { label: 'Unread',  value: unread,                                   color: 'primary.main' },
-          { label: 'Read',    value: messages.filter(m => m.read).length,      color: 'success.main' },
+          { label: 'Total',  value: messages.length,                     color: 'var(--ion-text-color)' },
+          { label: 'Unread', value: unread,                               color: 'var(--ion-color-primary)' },
+          { label: 'Read',   value: messages.filter(m => m.read).length, color: '#2e7d32' },
         ].map(({ label, value, color }) => (
-          <Card variant="outlined" key={label}>
-            <Box sx={{ textAlign: 'center', py: 2 }}>
-              <Typography variant="h4" fontWeight={800} color={color}>{value}</Typography>
-              <Typography variant="body2" color="text.secondary" mt={0.5}>{label}</Typography>
-            </Box>
-          </Card>
+          <div key={label} style={{ ...cardStyle, textAlign: 'center', padding: 16 }}>
+            <p style={{ margin: '0 0 4px', fontSize: '1.75rem', fontWeight: 800, color }}>{value}</p>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>{label}</p>
+          </div>
         ))}
-      </Box>
+      </div>
 
       {/* Table */}
-      <Card variant="outlined" sx={{ overflow: 'hidden' }}>
+      <div style={{ ...cardStyle, overflow: 'hidden' }}>
         {loading ? (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  {[...Array(6)].map((_, i) => (
-                    <TableCell key={i}><Skeleton variant="text" width={80} height={16} /></TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {[...Array(6)].map((_, i) => (
-                  <TableRow key={i}>
-                    {[120, 160, 140, 80, 90, 70].map((w, j) => (
-                      <TableCell key={j}><Skeleton variant="text" width={w} height={18} /></TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead><tr>{[...Array(6)].map((_, i) => <th key={i} style={thStyle}><SkeletonBox width={80} height={14} /></th>)}</tr></thead>
+              <tbody>{[...Array(6)].map((_, i) => <tr key={i}>{[120, 160, 140, 80, 90, 70].map((w, j) => <td key={j} style={tdStyle}><SkeletonBox width={w} height={14} /></td>)}</tr>)}</tbody>
+            </table>
+          </div>
         ) : error ? (
-          <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>
+          <div style={{ margin: 16, padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
         ) : messages.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="body2" color="text.secondary">No contact messages yet.</Typography>
-          </Box>
+          <div style={{ textAlign: 'center', padding: '64px 0' }}>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No contact messages yet.</p>
+          </div>
         ) : (
-          <Box sx={{ overflowX: 'auto' }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'action.hover' }}>
-                  {['Name', 'Email', 'Subject', 'Status', 'Received', ''].map((h, i) => (
-                    <TableCell key={i} sx={{ fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.5, color: 'secondary.main', whiteSpace: 'nowrap' }}>
-                      {h}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>{['Name', 'Email', 'Subject', 'Status', 'Received', ''].map((h, i) => <th key={i} style={thStyle}>{h}</th>)}</tr>
+              </thead>
+              <tbody>
                 {messages.map(m => (
-                  <TableRow
-                    key={m.id}
-                    hover
-                    onClick={() => { setSelected(m); if (!m.read) handleMarkRead(m.id); }}
-                    sx={{ cursor: 'pointer', bgcolor: m.read ? 'transparent' : 'action.hover' }}
-                  >
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={m.read ? 400 : 700}>{m.name}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary">{m.email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>{m.subject}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={m.read ? 'Read' : 'Unread'}
-                        size="small"
-                        color={m.read ? 'default' : 'primary'}
-                        variant={m.read ? 'outlined' : 'filled'}
-                        sx={{ fontSize: 11 }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption" color="text.secondary" noWrap>
+                  <tr key={m.id} onClick={() => { setSelected(m); if (!m.read) handleMarkRead(m.id); }}
+                    style={{ cursor: 'pointer', backgroundColor: m.read ? 'transparent' : 'rgba(var(--ion-color-primary-rgb), 0.04)' }}>
+                    <td style={tdStyle}><span style={{ fontWeight: m.read ? 400 : 700 }}>{m.name}</span></td>
+                    <td style={tdStyle}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{m.email}</span></td>
+                    <td style={tdStyle}><span style={{ display: 'block', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.subject}</span></td>
+                    <td style={tdStyle}>
+                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 600, border: m.read ? '1px solid var(--ion-border-color)' : 'none', backgroundColor: m.read ? 'transparent' : 'var(--ion-color-primary)', color: m.read ? 'var(--ion-color-medium)' : '#fff' }}>
+                        {m.read ? 'Read' : 'Unread'}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>
                         {new Date(m.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right" onClick={e => e.stopPropagation()}>
-                      <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+                      </span>
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }} onClick={e => e.stopPropagation()}>
+                      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                         {!m.read && (
-                          <IconButton size="small" title="Mark as read" onClick={() => handleMarkRead(m.id)}
-                            sx={{ '&:hover': { color: 'primary.main' } }}>
-                            <IonIcon name="mail-open-outline" sx={{ fontSize: 15 }} />
-                          </IconButton>
+                          <button title="Mark as read" onClick={() => handleMarkRead(m.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                            <IonIcon name="mail-open-outline" style={{ fontSize: 15 }} />
+                          </button>
                         )}
-                        <IconButton size="small" title="Delete" onClick={() => handleDelete(m.id)}
-                          disabled={deleting === m.id}
-                          sx={{ '&:hover': { color: 'error.main' } }}>
-                          {deleting === m.id
-                            ? <CircularProgress size={14} color="inherit" />
-                            : <IonIcon name="trash-outline" sx={{ fontSize: 15 }} />}
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                        <button title="Delete" onClick={() => handleDelete(m.id)} disabled={deleting === m.id}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 4 }}>
+                          {deleting === m.id ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name="trash-outline" style={{ fontSize: 15 }} />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
-          </Box>
+              </tbody>
+            </table>
+          </div>
         )}
-      </Card>
+      </div>
 
       {selected && (
-        <MessageDialog
+        <MessageModal
           msg={selected}
           onClose={() => setSelected(null)}
           onMarkRead={handleMarkRead}
           onDelete={handleDelete}
         />
       )}
-    </Box>
+    </div>
   );
 }

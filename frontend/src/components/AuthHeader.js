@@ -1,56 +1,36 @@
 import React from 'react';
-import { Box, IconButton, Select, MenuItem } from '@mui/material';
 import IonIcon from './IonIcon';
-
 
 export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
-      <Box
-        component="img"
-        src="/urload-logo.png"
-        alt="Urload"
-        sx={{ height: 38, filter: 'brightness(0) invert(1)' }}
-      />
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-        <Select
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+      <img src="/urload-logo.png" alt="Urload" style={{ height: 38, filter: 'brightness(0) invert(1)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <select
           value={lang}
           onChange={e => setLang(e.target.value)}
-          size="small"
-          sx={{
-            height: 32,
-            color: 'rgba(255,255,255,0.85)',
-            fontSize: '0.78rem',
-            fontWeight: 600,
-            '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.22)' },
-            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.45)' },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.45)' },
-            '& .MuiSvgIcon-root': { color: 'rgba(255,255,255,0.6)' },
-            '& .MuiSelect-select': { py: 0, px: 1.25, lineHeight: '32px' },
+          style={{
+            height: 32, color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', fontWeight: 600,
+            background: 'transparent', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 6,
+            padding: '0 10px', cursor: 'pointer', outline: 'none',
           }}
         >
-          <MenuItem value="en" sx={{ fontSize: '0.82rem' }}>English</MenuItem>
-          <MenuItem value="es" sx={{ fontSize: '0.82rem' }}>Español</MenuItem>
-          <MenuItem value="fr" sx={{ fontSize: '0.82rem' }}>Français</MenuItem>
-        </Select>
-
-        <IconButton
+          <option value="en" style={{ color: '#000' }}>English</option>
+          <option value="es" style={{ color: '#000' }}>Español</option>
+          <option value="fr" style={{ color: '#000' }}>Français</option>
+        </select>
+        <button
           onClick={toggleMode}
-          size="small"
-          sx={{
-            color: 'rgba(255,255,255,0.85)',
-            width: 32, height: 32,
-            border: '1px solid rgba(255,255,255,0.22)',
-            borderRadius: '6px',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.45)' },
+          style={{
+            color: 'rgba(255,255,255,0.85)', width: 32, height: 32,
+            border: '1px solid rgba(255,255,255,0.22)', borderRadius: 6,
+            background: 'transparent', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
-          {mode === 'dark'
-            ? <IonIcon name="moon-outline" sx={{ fontSize: 16 }} />
-            : <IonIcon name="sunny-outline" sx={{ fontSize: 16 }} />
-          }
-        </IconButton>
-      </Box>
-    </Box>
+          <IonIcon name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} style={{ fontSize: 16 }} />
+        </button>
+      </div>
+    </div>
   );
 }

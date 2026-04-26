@@ -1,13 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, Chip, CircularProgress, IconButton, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TextField, InputAdornment, useTheme,
-} from '@mui/material';
+import { IonSpinner } from '@ionic/react';
 import { truckPostsApi, equipmentTypesApi, messagesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
-
 
 const TABS = [
   { key: 'all',       label: 'ALL' },
@@ -42,10 +37,11 @@ const fmtDate = (s) => {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
+const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
+
 export default function TruckBoard() {
-  const navigate  = useNavigate();
-  const theme     = useTheme();
-  const isDark    = theme.palette.mode === 'dark';
+  const navigate = useNavigate();
 
   const [posts,           setPosts]           = useState([]);
   const [loading,         setLoading]         = useState(true);
@@ -103,206 +99,169 @@ export default function TruckBoard() {
     return c;
   }, [enriched]);
 
-  const activeFg   = isDark ? '#fff' : '#000';
-  const inactiveFg = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.45)';
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: '4px 6px' }}>
-    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', bgcolor: 'background.paper', borderRadius: '6px', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
-      {/* ── Top bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, px: 3, py: 1.5, flexShrink: 0, flexWrap: 'wrap' }}>
-        <Box>
-          <Typography variant="h6" fontWeight={700} sx={{ letterSpacing: '-0.01em' }}>Available Trucks</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
-            Browse carrier capacity and reach out directly.
-          </Typography>
-        </Box>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '12px 24px', flexShrink: 0, flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ margin: '0 0 2px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>Available Trucks</h2>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>Browse carrier capacity and reach out directly.</p>
+          </div>
 
-        {/* Filters */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-          <TextField
-            placeholder="Search location…"
-            size="small"
-            value={locationSearch}
-            onChange={handleLocationChange}
-            sx={{ width: 200 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <IonIcon name="search-outline" sx={{ fontSize: 16, color: 'text.disabled' }} />
-                </InputAdornment>
-              ),
-              sx: { fontSize: '0.82rem' },
-            }}
-          />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
-            <Chip
-              label="All"
-              size="small"
-              onClick={() => setEquipmentFilter('')}
-              variant={equipmentFilter === '' ? 'filled' : 'outlined'}
-              color={equipmentFilter === '' ? 'primary' : 'default'}
-              sx={{ fontWeight: 600, fontSize: '0.72rem', cursor: 'pointer' }}
-            />
-            {equipmentTypes.map(t => (
-              <Chip
-                key={t.id}
-                label={t.name}
-                size="small"
-                onClick={() => setEquipmentFilter(t.name)}
-                variant={equipmentFilter === t.name ? 'filled' : 'outlined'}
-                color={equipmentFilter === t.name ? 'primary' : 'default'}
-                sx={{ fontWeight: 600, fontSize: '0.72rem', cursor: 'pointer' }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ position: 'relative' }}>
+              <IonIcon name="search-outline" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--ion-color-medium)' }} />
+              <input
+                placeholder="Search location…"
+                value={locationSearch}
+                onChange={handleLocationChange}
+                style={{ width: 200, padding: '7px 12px 7px 32px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', color: 'var(--ion-text-color)', fontSize: '0.82rem', outline: 'none', fontFamily: 'inherit' }}
               />
-            ))}
-          </Box>
-        </Box>
-      </Box>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {[{ id: '', name: 'All' }, ...equipmentTypes].map(t => (
+                <button
+                  key={t.id || 'all'}
+                  onClick={() => setEquipmentFilter(t.id === '' ? '' : t.name)}
+                  style={{ padding: '3px 10px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer', border: `1px solid ${(t.id === '' ? equipmentFilter === '' : equipmentFilter === t.name) ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, backgroundColor: (t.id === '' ? equipmentFilter === '' : equipmentFilter === t.name) ? 'var(--ion-color-primary)' : 'transparent', color: (t.id === '' ? equipmentFilter === '' : equipmentFilter === t.name) ? '#fff' : 'var(--ion-text-color)' }}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-      {/* ── Tab bar ── */}
-      <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', flexShrink: 0, overflowX: 'auto', '&::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
-        {TABS.map(tab => {
-          const isActive = activeTab === tab.key;
-          const count    = tabCounts[tab.key] ?? 0;
-          return (
-            <Box key={tab.key} onClick={() => setActiveTab(tab.key)}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 3, py: 2.75, cursor: 'pointer', flexShrink: 0,
-                borderBottom: isActive ? '2px solid' : '2px solid transparent',
-                borderColor: isActive ? (isDark ? '#fff' : '#000') : 'transparent',
-                color: isActive ? activeFg : inactiveFg,
-                opacity: isActive ? 1 : 0.6,
-                '&:hover': { opacity: 1, bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                transition: 'opacity 0.15s, background-color 0.15s',
+        {/* Tab bar */}
+        <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflowX: 'auto' }}>
+          {TABS.map(tab => {
+            const isActive = activeTab === tab.key;
+            const count    = tabCounts[tab.key] ?? 0;
+            return (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '11px 24px', cursor: 'pointer', flexShrink: 0, background: 'none',
+                border: 'none', borderBottom: isActive ? '2px solid var(--ion-text-color)' : '2px solid transparent',
+                color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', fontFamily: 'inherit',
               }}>
-              <Typography sx={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</Typography>
-              <Box sx={{ bgcolor: 'background.default', borderRadius: '4px', px: 0.6, py: 0.15, minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 }}>{count}</Typography>
-              </Box>
-            </Box>
-          );
-        })}
-        <Box sx={{ flex: 1 }} />
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
-          <Tooltip title="Refresh">
-            <IconButton size="small" onClick={() => fetchPosts(equipmentFilter, locationSearch, true)} sx={{ color: 'text.secondary' }}>
-              <IonIcon name="refresh-outline" sx={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+                <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
+                <span style={{ backgroundColor: isActive ? 'var(--ion-color-primary)' : 'var(--ion-color-light)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: isActive ? '#fff' : 'var(--ion-color-medium)', lineHeight: 1.4 }}>{count}</span>
+                </span>
+              </button>
+            );
+          })}
+          <div style={{ flex: 1 }} />
+          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
+            <button
+              title="Refresh"
+              onClick={() => fetchPosts(equipmentFilter, locationSearch, true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+            >
+              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </button>
+          </div>
+        </div>
 
-      {/* ── Table ── */}
-      <Box sx={{ flex: 1, overflow: 'auto' }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : tabItems.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 1 }}>
-            <IonIcon name="car-sport-outline" sx={{ fontSize: 40, color: 'text.disabled' }} />
-            <Typography variant="body2" color="text.secondary">
-              {equipmentFilter || locationSearch ? 'No trucks match your filters.' : 'No trucks in this category.'}
-            </Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table size="small" sx={{ minWidth: 700 }}>
-              <TableHead>
-                <TableRow sx={{ '& .MuiTableCell-root': { fontWeight: '400 !important', color: `${isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.5)'} !important` } }}>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 180 }}>Carrier</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 140 }}>Equipment</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 160 }}>Location</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 180 }}>Available</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 120 }}>Preferred Lane</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, minWidth: 100 }}>Rate Exp.</TableCell>
-                  <TableCell sx={{ fontSize: '0.78rem', bgcolor: 'action.hover', py: 1.25, width: 110, minWidth: 110 }}>Status</TableCell>
-                  <TableCell sx={{ bgcolor: 'action.hover', py: 1.25, width: 48, minWidth: 48 }} />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tabItems.map((post) => {
-                  const chip     = STATUS_CHIP[post._status] || { label: post._status, bg: '#9e9e9e', text: '#fff' };
-                  const barColor = STATUS_BAR[post._status] || '#9e9e9e';
-                  return (
-                    <TableRow
-                      key={post.id}
-                      sx={{
-                        height: 64,
-                        cursor: 'default',
-                        '& td': { py: 0, borderBottom: 0 },
-                        '& td:not(:nth-of-type(1))': { borderBottom: '1px solid', borderBottomColor: 'divider' },
-                        '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' },
-                      }}
-                    >
-                      {/* Carrier — accent bar */}
-                      <TableCell sx={{ pl: 0, position: 'relative', minWidth: 180 }}>
-                        <Box sx={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, bgcolor: barColor, borderRadius: '0 2px 2px 0' }} />
-                        <Box sx={{ pl: 2 }}>
-                          <Typography variant="body2" fontWeight={600} noWrap>{post.carrier_name || 'Carrier'}</Typography>
+        {/* Table */}
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
+              <IonSpinner name="crescent" />
+            </div>
+          ) : tabItems.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 8 }}>
+              <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
+              <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+                {equipmentFilter || locationSearch ? 'No trucks match your filters.' : 'No trucks in this category.'}
+              </span>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
+                <thead>
+                  <tr>
+                    {['Carrier', 'Equipment', 'Location', 'Available', 'Preferred Lane', 'Rate Exp.', 'Status', ''].map(h => (
+                      <th key={h} style={thStyle}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tabItems.map(post => {
+                    const chip     = STATUS_CHIP[post._status] || { label: post._status, bg: '#9e9e9e', text: '#fff' };
+                    const barColor = STATUS_BAR[post._status] || '#9e9e9e';
+                    return (
+                      <tr key={post.id} style={{ height: 64 }}>
+                        {/* Carrier — accent bar */}
+                        <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 180 }}>
+                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                          <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.carrier_name || 'Carrier'}</span>
                           {post.carrier_company && (
-                            <Typography variant="caption" color="text.secondary" noWrap display="block">{post.carrier_company}</Typography>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.carrier_company}</span>
                           )}
-                        </Box>
-                      </TableCell>
+                        </td>
 
-                      <TableCell sx={{ minWidth: 140 }}>
-                        <Typography variant="body2" color="text.secondary" noWrap>{post.equipment_type}</Typography>
-                        {(post.trailer_length || post.weight_capacity) && (
-                          <Typography variant="caption" color="text.disabled" display="block">
-                            {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${post.weight_capacity.toLocaleString()} lbs`].filter(Boolean).join(' · ')}
-                          </Typography>
-                        )}
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 140 }}>
+                          <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.equipment_type}</span>
+                          {(post.trailer_length || post.weight_capacity) && (
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>
+                              {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${post.weight_capacity.toLocaleString()} lbs`].filter(Boolean).join(' · ')}
+                            </span>
+                          )}
+                        </td>
 
-                      <TableCell sx={{ minWidth: 160 }}>
-                        <Typography variant="body2" noWrap>{post.current_location || '—'}</Typography>
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 160 }}>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{post.current_location || '—'}</span>
+                        </td>
 
-                      <TableCell sx={{ minWidth: 180, whiteSpace: 'nowrap' }}>
-                        <Typography variant="caption" color="text.secondary">
-                          {fmtDate(post.available_from)} — {fmtDate(post.available_to)}
-                        </Typography>
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 180, whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+                            {fmtDate(post.available_from)} — {fmtDate(post.available_to)}
+                          </span>
+                        </td>
 
-                      <TableCell sx={{ minWidth: 120 }}>
-                        {post.preferred_origin || post.preferred_destination ? (
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            {[post.preferred_origin, post.preferred_destination].filter(Boolean).join(' → ')}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" color="text.disabled">—</Typography>
-                        )}
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 120 }}>
+                          {post.preferred_origin || post.preferred_destination ? (
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                              {[post.preferred_origin, post.preferred_destination].filter(Boolean).join(' → ')}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>—</span>
+                          )}
+                        </td>
 
-                      <TableCell sx={{ minWidth: 100 }}>
-                        <Typography variant="body2" fontWeight={600} color={post.rate_expectation ? 'success.main' : 'text.disabled'}>
-                          {post.rate_expectation ? `$${post.rate_expectation.toFixed(2)}/mi` : 'Negotiable'}
-                        </Typography>
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 100 }}>
+                          <span style={{ fontWeight: 600, fontSize: '0.875rem', color: post.rate_expectation ? '#2e7d32' : 'var(--ion-color-medium)' }}>
+                            {post.rate_expectation ? `$${post.rate_expectation.toFixed(2)}/mi` : 'Negotiable'}
+                          </span>
+                        </td>
 
-                      <TableCell sx={{ width: 110, minWidth: 110 }}>
-                        <Chip label={chip.label} size="small" sx={{ fontSize: '0.68rem', height: 22, fontWeight: 600, borderRadius: '8px', bgcolor: chip.bg, color: chip.text }} />
-                      </TableCell>
+                        <td style={{ ...tdStyle, minWidth: 110 }}>
+                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.text }}>
+                            {chip.label}
+                          </span>
+                        </td>
 
-                      <TableCell sx={{ width: 48, minWidth: 48, pr: 1 }} onClick={e => e.stopPropagation()}>
-                        <Tooltip title="Contact carrier">
-                          <IconButton size="small" onClick={e => handleContact(e, post)} sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' }, p: 0.5 }}>
-                            <IonIcon name="chatbubble-outline" sx={{ fontSize: 16 }} />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Box>
-
-    </Box>
-    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-    </Box>
+                        <td style={{ ...tdStyle, width: 48 }} onClick={e => e.stopPropagation()}>
+                          <button
+                            title="Contact carrier"
+                            onClick={e => handleContact(e, post)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', alignItems: 'center', borderRadius: 4 }}
+                          >
+                            <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </div>
   );
 }
