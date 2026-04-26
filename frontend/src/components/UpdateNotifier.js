@@ -33,7 +33,7 @@ export default function UpdateNotifier() {
     <div style={{
       position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
       zIndex: 9999, width: 'min(calc(100% - 32px), 640px)',
-      borderTop: '3px solid #f97316', borderRadius: 8,
+      borderRadius: 8,
       backgroundColor: 'var(--ion-card-background)',
       boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
       display: 'flex', alignItems: 'center', padding: '10px 16px', gap: 12,
