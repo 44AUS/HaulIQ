@@ -146,8 +146,8 @@ export default function TruckBoard() {
                 color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', fontFamily: 'inherit',
               }}>
                 <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
-                <span style={{ backgroundColor: isActive ? 'var(--ion-color-primary)' : 'var(--ion-color-light)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: isActive ? '#fff' : 'var(--ion-color-medium)', lineHeight: 1.4 }}>{count}</span>
+                <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)', lineHeight: 1.4 }}>{count}</span>
                 </span>
               </button>
             );
