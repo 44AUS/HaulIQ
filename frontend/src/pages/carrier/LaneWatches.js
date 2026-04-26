@@ -30,16 +30,10 @@ const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'v
 const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
-function Toggle({ checked, onChange }) {
-  return (
-    <label style={{ position: 'relative', display: 'inline-block', width: 36, height: 20, flexShrink: 0, cursor: 'pointer' }}>
-      <input type="checkbox" checked={checked} onChange={onChange} style={{ opacity: 0, width: 0, height: 0 }} />
-      <span style={{ position: 'absolute', inset: 0, backgroundColor: checked ? '#2e7d32' : 'var(--ion-color-medium)', borderRadius: 20, transition: 'background 0.2s' }}>
-        <span style={{ position: 'absolute', width: 14, height: 14, borderRadius: '50%', backgroundColor: '#fff', top: 3, left: checked ? 19 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-      </span>
-    </label>
-  );
-}
+const STATUS_CHIP = {
+  active: { label: 'Active', bg: '#2dd36f', color: '#fff' },
+  paused: { label: 'Paused', bg: '#757575', color: '#fff' },
+};
 
 function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
   const [form, setForm] = useState(EMPTY_FORM);
@@ -321,16 +315,16 @@ export default function LaneWatches() {
                           </span>
                         </td>
 
-                        <td style={{ ...tdStyle, minWidth: 120 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Toggle checked={w.active} onChange={e => handleToggle(w.id, e.target.checked)} />
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                              <IonIcon name={w.active ? 'notifications-outline' : 'notifications-off-outline'} style={{ fontSize: 13, color: w.active ? '#2e7d32' : 'var(--ion-color-medium)' }} />
-                              <span style={{ fontSize: '0.75rem', color: w.active ? '#2e7d32' : 'var(--ion-color-medium)', fontWeight: 600 }}>
-                                {w.active ? 'Active' : 'Paused'}
-                              </span>
+                        <td style={{ ...tdStyle, minWidth: 100 }}>
+                          {(() => { const chip = STATUS_CHIP[w.active ? 'active' : 'paused']; return (
+                            <span
+                              onClick={e => { e.stopPropagation(); handleToggle(w.id, !w.active); }}
+                              title={w.active ? 'Click to pause' : 'Click to activate'}
+                              style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.color, cursor: 'pointer' }}
+                            >
+                              {chip.label}
                             </span>
-                          </div>
+                          ); })()}
                         </td>
 
                         <td style={{ ...tdStyle, width: 48 }}>
