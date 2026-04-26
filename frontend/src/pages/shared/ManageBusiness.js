@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { IonSpinner, IonToast, IonModal } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
