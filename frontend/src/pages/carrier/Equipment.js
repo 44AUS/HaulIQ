@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
   IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
-  IonSelectOption, IonTextarea, IonNote,
+  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton,
 } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentTypesApi } from '../../services/api';
@@ -70,6 +70,10 @@ export default function Equipment() {
   const [saving,         setSaving]         = useState(false);
   const [deleteId,       setDeleteId]       = useState(null);
   const [error,          setError]          = useState('');
+  const [dateModalOpen,  setDateModalOpen]  = useState(false);
+  const [activeDateTab,  setActiveDateTab]  = useState('from');
+  const [tempFrom,       setTempFrom]       = useState('');
+  const [tempTo,         setTempTo]         = useState('');
 
   const fetchPosts = useCallback((spinner = false) => {
     if (spinner) setSpinning(true); else setLoading(true);
@@ -176,6 +180,25 @@ export default function Equipment() {
   };
 
   const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.detail?.value ?? e.target?.value ?? '' }));
+
+  const openDatePicker = (tab) => {
+    setActiveDateTab(tab);
+    setTempFrom(form.available_from || '');
+    setTempTo(form.available_to || '');
+    setDateModalOpen(true);
+  };
+
+  const confirmDates = () => {
+    const strip = (v) => v ? (v.includes('T') ? v.split('T')[0] : v) : '';
+    setForm(f => ({ ...f, available_from: strip(tempFrom), available_to: strip(tempTo) }));
+    setDateModalOpen(false);
+  };
+
+  const fmtDateTime = (iso) => {
+    if (!iso) return 'Tap to select…';
+    const d = new Date(iso.includes('T') ? iso : iso + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
   return (
     <>
@@ -330,11 +353,75 @@ export default function Equipment() {
       </div>
 
     </div>
+    {/* Date / Time Picker Modal */}
+    <IonModal isOpen={dateModalOpen} onDidDismiss={() => setDateModalOpen(false)} className="date-picker-modal">
+      <IonHeader>
+        <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
+          <div slot="start" style={{ paddingLeft: 4 }}>
+            <button onClick={() => setDateModalOpen(false)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: 'var(--ion-text-color)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+            </button>
+          </div>
+          <IonTitle style={{ fontWeight: 700 }}>Select Dates</IonTitle>
+          <div slot="end" style={{ paddingRight: 4 }}>
+            <button onClick={confirmDates} style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: '#2dd36f' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(45,211,111,0.2)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+              <IonIcon name="checkmark-outline" style={{ fontSize: 24, pointerEvents: 'none' }} />
+            </button>
+          </div>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <IonSegment value={activeDateTab} onIonChange={e => setActiveDateTab(e.detail.value)} style={{ margin: '12px 16px' }}>
+          <IonSegmentButton value="from">
+            <IonLabel>
+              Available From
+              {tempFrom && <div style={{ fontSize: '0.65rem', marginTop: 2, opacity: 0.7 }}>{fmtDateTime(tempFrom)}</div>}
+            </IonLabel>
+          </IonSegmentButton>
+          <IonSegmentButton value="to">
+            <IonLabel>
+              Available To
+              {tempTo && <div style={{ fontSize: '0.65rem', marginTop: 2, opacity: 0.7 }}>{fmtDateTime(tempTo)}</div>}
+            </IonLabel>
+          </IonSegmentButton>
+        </IonSegment>
+
+        {activeDateTab === 'from' ? (
+          <IonDatetime
+            key="picker-from"
+            presentation="date-time"
+            value={tempFrom || undefined}
+            onIonChange={e => {
+              const v = Array.isArray(e.detail.value) ? e.detail.value[0] : e.detail.value;
+              setTempFrom(v);
+            }}
+            style={{ margin: '0 auto' }}
+          />
+        ) : (
+          <IonDatetime
+            key="picker-to"
+            presentation="date-time"
+            value={tempTo || undefined}
+            min={tempFrom ? tempFrom.split('T')[0] : undefined}
+            onIonChange={e => {
+              const v = Array.isArray(e.detail.value) ? e.detail.value[0] : e.detail.value;
+              setTempTo(v);
+            }}
+            style={{ margin: '0 auto' }}
+          />
+        )}
+      </IonContent>
+    </IonModal>
+
     <style>{`
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       .equipment-post-modal { --border-radius: 0px; }
       @media (min-width: 768px) {
         .equipment-post-modal { --width: 560px; --max-height: 90vh; }
+      }
+      .date-picker-modal { --border-radius: 0px; }
+      @media (min-width: 768px) {
+        .date-picker-modal { --width: 420px; --max-height: 90vh; }
       }
       .alert-radio-label, .alert-checkbox-label, .alert-radio-group button, .alert-button-inner {
         color: var(--ion-text-color) !important;
@@ -423,14 +510,24 @@ export default function Equipment() {
         </IonList>
 
         <IonList inset>
-          <IonItem>
+          <IonItem button detail={false} onClick={() => openDatePicker('from')}>
             <IonLabel position="stacked">Available From <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonInput type="date" value={form.available_from} onIonChange={setField('available_from')} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
+              <span style={{ fontSize: '1rem', color: form.available_from ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
+                {fmtDateTime(form.available_from)}
+              </span>
+              <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+            </div>
           </IonItem>
 
-          <IonItem>
+          <IonItem button detail={false} onClick={() => openDatePicker('to')}>
             <IonLabel position="stacked">Available To <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonInput type="date" value={form.available_to} onIonChange={setField('available_to')} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
+              <span style={{ fontSize: '1rem', color: form.available_to ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
+                {fmtDateTime(form.available_to)}
+              </span>
+              <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+            </div>
           </IonItem>
         </IonList>
 
