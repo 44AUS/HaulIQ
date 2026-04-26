@@ -4,8 +4,10 @@
   "private": true,
   "dependencies": {
     "@adyen/adyen-web": "^6.32.0",
+    "@capacitor/android": "^8.3.1",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
+    "@capacitor/ios": "^8.3.1",
     "@ionic/react": "^8.8.4",
     "@react-google-maps/api": "^2.20.8",
     "@stripe/react-stripe-js": "^6.1.0",
@@ -29,7 +31,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "sync": "npm run build && npx cap sync",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios"
   },
   "eslintConfig": {
     "extends": [
