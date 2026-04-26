@@ -345,7 +345,7 @@ export default function Equipment() {
     {/* Create / Edit / Repost Modal */}
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} className="equipment-post-modal">
       <IonHeader>
-        <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
+        <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
           <div slot="start" style={{ paddingLeft: 4 }}>
             <button
               onClick={() => setDialogOpen(false)}
