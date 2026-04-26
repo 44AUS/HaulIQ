@@ -330,11 +330,17 @@ export default function Equipment() {
       </div>
 
     </div>
-    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    <style>{`
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .equipment-post-modal { --border-radius: 0px; }
+      @media (min-width: 768px) {
+        .equipment-post-modal { --width: 560px; --max-height: 90vh; }
+      }
+    `}</style>
     </div>
 
     {/* Create / Edit / Repost Modal */}
-    <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '0px' }}>
+    <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} className="equipment-post-modal">
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
           <IonButtons slot="start">
