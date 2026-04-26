@@ -31,7 +31,7 @@
 
 /* ── Interactive element hover feedback ───────────────────────────────────── */
 
-/* Clickable table rows */
+/* Clickable table rows — background tint (no inline bg to fight) */
 tr[style*="cursor: pointer"],
 tr[style*="cursor:pointer"] {
   transition: background-color 0.12s;
@@ -41,26 +41,16 @@ tr[style*="cursor:pointer"]:hover {
   background-color: var(--ion-color-step-50, rgba(0,0,0,0.05)) !important;
 }
 
-/* Clickable card / list rows (direct-child divs with cursor pointer, not wrappers) */
-div[style*="cursor: pointer"],
-div[style*="cursor:pointer"] {
-  transition: background-color 0.14s;
-}
-div[style*="cursor: pointer"]:hover,
-div[style*="cursor:pointer"]:hover {
-  background-color: rgba(0,0,0,0.04);
-}
-.dark div[style*="cursor: pointer"]:hover,
-.dark div[style*="cursor:pointer"]:hover {
-  background-color: rgba(255,255,255,0.05);
-}
-
-/* Plain (non-Ionic) buttons */
+/* Nav tabs, page tabs, clickable divs/buttons — opacity (wins over inline styles) */
+div[style*="cursor: pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
+div[style*="cursor:pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
 button:not([disabled]):not([class*="ion-"]):not([class*="button-"]) {
-  transition: opacity 0.12s;
+  transition: opacity 0.13s !important;
 }
+div[style*="cursor: pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]):hover,
+div[style*="cursor:pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]):hover,
 button:not([disabled]):not([class*="ion-"]):not([class*="button-"]):hover {
-  opacity: 0.78;
+  opacity: 0.72 !important;
 }
 
 @layer base {
