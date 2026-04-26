@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { IonSpinner } from '@ionic/react';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
-import WaveBg from '../components/WaveBg';
 import IonIcon from '../components/IonIcon';
 
 const BRAND_MED = '#1976d2';
@@ -49,12 +48,12 @@ export default function Login() {
   };
 
   const isDark  = mode === 'dark';
-  const cardBg  = isDark ? '#111318' : '#ffffff';
-  const textPri = isDark ? '#fff' : '#111318';
-  const textSec = isDark ? '#8a8f9c' : '#6b7280';
-  const borderC = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.10)';
-  const fieldBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
-  const fieldBorder = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.16)';
+  const cardBg  = isDark ? 'rgba(8,18,35,0.72)' : 'rgba(255,255,255,0.88)';
+  const textPri = isDark ? '#e8f0fe' : '#111318';
+  const textSec = isDark ? '#7a8baa' : '#6b7280';
+  const borderC = isDark ? 'rgba(66,165,245,0.14)' : 'rgba(0,0,0,0.10)';
+  const fieldBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)';
+  const fieldBorder = isDark ? 'rgba(66,165,245,0.2)' : 'rgba(0,0,0,0.16)';
   const t = LABELS[lang];
 
   const inputStyle = {
@@ -66,14 +65,48 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-      <WaveBg />
+
+      {/* ── Background ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'linear-gradient(145deg, #020d1f 0%, #041529 40%, #051c38 70%, #030f22 100%)', overflow: 'hidden' }}>
+
+        {/* Map SVG layer */}
+        <img
+          src="/map_vector.svg"
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '110%', height: '110%', objectFit: 'cover',
+            filter: 'brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(195deg)',
+            opacity: 0.09,
+            pointerEvents: 'none', userSelect: 'none',
+          }}
+        />
+
+        {/* Primary blue radial glow — center */}
+        <div style={{ position: 'absolute', top: '38%', left: '50%', transform: 'translate(-50%, -50%)', width: 900, height: 900, borderRadius: '50%', background: 'radial-gradient(circle, rgba(25,118,210,0.28) 0%, rgba(13,71,161,0.12) 45%, transparent 70%)', pointerEvents: 'none' }} />
+
+        {/* Accent glow — top-right */}
+        <div style={{ position: 'absolute', top: -120, right: -120, width: 560, height: 560, borderRadius: '50%', background: 'radial-gradient(circle, rgba(66,165,245,0.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+        {/* Accent glow — bottom-left */}
+        <div style={{ position: 'absolute', bottom: -100, left: -100, width: 480, height: 480, borderRadius: '50%', background: 'radial-gradient(circle, rgba(21,101,192,0.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+        {/* Horizontal scan-line shimmer */}
+        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px)', pointerEvents: 'none' }} />
+
+        {/* Bottom vignette */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '35%', background: 'linear-gradient(to top, rgba(2,9,20,0.7) 0%, transparent 100%)', pointerEvents: 'none' }} />
+      </div>
+
       <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
           <div style={{ width: '100%', maxWidth: 500 }}>
 
             <AuthHeader lang={lang} setLang={handleLang} mode={mode} toggleMode={toggleMode} />
 
-            <div style={{ backgroundColor: cardBg, borderRadius: 12, border: `1px solid ${borderC}`, boxShadow: '0 24px 60px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: cardBg, backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderRadius: 14, border: `1px solid ${borderC}`, boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(66,165,245,0.08), inset 0 1px 0 rgba(255,255,255,0.06)' : '0 24px 60px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
               <div style={{ padding: '32px 32px 24px' }}>
                 <h2 style={{ margin: '0 0 4px', color: textPri, fontWeight: 800, fontSize: '1.25rem', lineHeight: 1.2 }}>{t.title}</h2>
                 <p style={{ margin: 0, color: textSec, fontSize: '0.875rem', lineHeight: 1.65 }}>{t.sub}</p>
