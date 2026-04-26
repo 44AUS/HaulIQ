@@ -207,15 +207,25 @@ function NotificationsPanel({ onClose, onCountChange }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <IonButton fill="clear" size="small" onClick={() => { setShowPrefs(false); setPrefs(loadPrefs()); }}>
-              <IonIcon name="arrow-back-outline" fontSize="small" />
-            </IonButton>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <button
+              onClick={() => { setShowPrefs(false); setPrefs(loadPrefs()); }}
+              style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <IonIcon name="arrow-back-outline" style={{ fontSize: 20, pointerEvents: 'none' }} />
+            </button>
             <span style={{ fontWeight: 700, fontSize: '1rem' }}>Notifications</span>
           </div>
-          <IonButton fill="clear" size="small" onClick={onClose}>
-            <IonIcon name="close-outline" fontSize="small" />
-          </IonButton>
+          <button
+            onClick={onClose}
+            style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <IonIcon name="close-outline" style={{ fontSize: 20, pointerEvents: 'none' }} />
+          </button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
           <div style={{ padding: '16px 20px 4px', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.06em', color: 'var(--ion-color-step-400)', textTransform: 'uppercase' }}>Preferences</div>
@@ -265,12 +275,22 @@ function NotificationsPanel({ onClose, onCountChange }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.15)', zIndex: 1 }}>
         <div style={{ paddingLeft: 8, fontWeight: 700, fontSize: '1rem' }}>Notifications</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <IonButton fill="clear" size="small" onClick={() => setShowPrefs(true)}>
-            <IonIcon name="funnel-outline" fontSize="small" />
-          </IonButton>
-          <IonButton fill="clear" size="small" onClick={onClose}>
-            <IonIcon name="close-outline" fontSize="small" />
-          </IonButton>
+          <button
+            onClick={() => setShowPrefs(true)}
+            style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <IonIcon name="funnel-outline" style={{ fontSize: 18, pointerEvents: 'none' }} />
+          </button>
+          <button
+            onClick={onClose}
+            style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <IonIcon name="close-outline" style={{ fontSize: 20, pointerEvents: 'none' }} />
+          </button>
         </div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -312,9 +332,11 @@ function NotificationsPanel({ onClose, onCountChange }) {
                 </div>
                 <button
                   onClick={e => { e.stopPropagation(); handleDelete(notif.id); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-danger)', padding: 4, flexShrink: 0 }}
+                  style={{ width: 32, height: 32, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-danger)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(235,68,90,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <IonIcon name="trash-outline" style={{ fontSize: '1rem' }} />
+                  <IonIcon name="trash-outline" style={{ fontSize: '1rem', pointerEvents: 'none' }} />
                 </button>
               </div>
             </div>
@@ -457,29 +479,42 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
         <IonHeader style={{ '--background': barColor }}>
           <IonToolbar style={toolbarStyle}>
             <IonButtons slot="start">
-              <IonButton fill="clear" onClick={() => navigate(-1)} style={{ '--color': '#fff' }}>
-                <IonIcon name="chevron-back-outline" style={{ fontSize: 26 }} />
-              </IonButton>
+              <button
+                onClick={() => navigate(-1)}
+                style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 4, transition: 'background-color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <IonIcon name="chevron-back-outline" style={{ fontSize: 26, pointerEvents: 'none' }} />
+              </button>
             </IonButtons>
             <span slot="start" style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', color: '#fff', marginLeft: 4 }}>
               {displayTitle}
             </span>
             <IonButtons slot="end">
               {config.messageMode ? (
-                <IonButton fill="clear" onClick={() => navigate(`/${user.role}/messages`)} style={{ '--color': 'rgba(255,255,255,0.8)' }}>
-                  <IonIcon name="chatbubble-outline" style={{ fontSize: 22 }} />
-                </IonButton>
+                <button
+                  onClick={() => navigate(`/${user.role}/messages`)}
+                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: 4, transition: 'background-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <IonIcon name="chatbubble-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+                </button>
               ) : (
-                <IonButton fill="clear" onClick={() => setNotifOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)' }}>
-                  <div style={{ position: 'relative' }}>
-                    <IonIcon name="notifications-outline" style={{ fontSize: 22 }} />
-                    {notifCount > 0 && (
-                      <IonBadge color="danger" style={{ position: 'absolute', top: -4, right: -4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8 }}>
-                        {notifCount > 9 ? '9+' : notifCount}
-                      </IonBadge>
-                    )}
-                  </div>
-                </IonButton>
+                <button
+                  onClick={() => setNotifOpen(true)}
+                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, position: 'relative', marginRight: 4, transition: 'background-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <IonIcon name="notifications-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+                  {notifCount > 0 && (
+                    <IonBadge color="danger" style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, pointerEvents: 'none' }}>
+                      {notifCount > 9 ? '9+' : notifCount}
+                    </IonBadge>
+                  )}
+                </button>
               )}
             </IonButtons>
           </IonToolbar>

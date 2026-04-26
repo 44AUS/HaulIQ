@@ -417,7 +417,7 @@ export default function LoadBoard() {
           })}
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-            <button title="Refresh" onClick={refresh} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 6, borderRadius: 4, display: 'flex' }}>
+            <button title="Refresh" onClick={refresh} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
               <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </button>
           </div>
