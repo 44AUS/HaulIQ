@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 
 const EFFECTIVE_DATE = 'April 1, 2026';
-const COMPANY = 'HaulIQ, Inc.';
+const COMPANY = 'Urload, Inc.';
 const EMAIL = 'legal@hauliq.com';
 
 function Section({ title, children }) {
@@ -56,16 +56,16 @@ export default function TermsOfService() {
 
         {/* Intro */}
         <div style={{ background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.18)', borderRadius: 12, padding: '18px 22px', marginBottom: 40, color: '#8b949e', fontSize: 14, lineHeight: 1.7 }}>
-          Please read these Terms of Service carefully before using HaulIQ. By accessing or using our platform, you agree to be bound by these terms. If you do not agree, do not use the Service.
+          Please read these Terms of Service carefully before using Urload. By accessing or using our platform, you agree to be bound by these terms. If you do not agree, do not use the Service.
         </div>
 
         <Section title="1. Acceptance of Terms">
-          <P>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you", or "your") and {COMPANY} ("HaulIQ", "we", "us", or "our"), governing your access to and use of the HaulIQ platform, including our website, web application, APIs, and related services (collectively, the "Service").</P>
+          <P>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you", or "your") and {COMPANY} ("Urload", "we", "us", or "our"), governing your access to and use of the Urload platform, including our website, web application, APIs, and related services (collectively, the "Service").</P>
           <P>By creating an account, accessing, or using any part of the Service, you represent that you are at least 18 years of age, have the legal authority to enter into this agreement, and agree to comply with these Terms and all applicable laws and regulations.</P>
         </Section>
 
         <Section title="2. Description of Service">
-          <P>HaulIQ is a freight technology platform that connects carriers and freight brokers. The Service includes, but is not limited to:</P>
+          <P>Urload is a freight technology platform that connects carriers and freight brokers. The Service includes, but is not limited to:</P>
           <UL items={[
             'A load board where brokers post freight loads and carriers search and book them',
             'Profit analysis tools including net profit estimates and rate-per-mile calculations',
@@ -75,17 +75,17 @@ export default function TermsOfService() {
             'Load tracking, booking management, and document storage',
             'Analytics dashboards for carriers and brokers',
           ]} />
-          <P>HaulIQ is a technology intermediary only. We do not broker freight, act as a motor carrier, or assume liability for the transportation of goods. All freight arrangements are made directly between carriers and brokers.</P>
+          <P>Urload is a technology intermediary only. We do not broker freight, act as a motor carrier, or assume liability for the transportation of goods. All freight arrangements are made directly between carriers and brokers.</P>
         </Section>
 
         <Section title="3. User Accounts">
           <P><strong style={{ color: '#e6edf3' }}>Registration.</strong> To access the Service, you must create an account and provide accurate, current, and complete information. You are responsible for maintaining the confidentiality of your credentials and for all activity that occurs under your account.</P>
-          <P><strong style={{ color: '#e6edf3' }}>Account Types.</strong> HaulIQ offers two primary account types: Carrier accounts (for motor carriers and owner-operators) and Broker accounts (for licensed freight brokers). You must accurately represent your role and hold any required licenses or operating authority.</P>
+          <P><strong style={{ color: '#e6edf3' }}>Account Types.</strong> Urload offers two primary account types: Carrier accounts (for motor carriers and owner-operators) and Broker accounts (for licensed freight brokers). You must accurately represent your role and hold any required licenses or operating authority.</P>
           <P><strong style={{ color: '#e6edf3' }}>Prohibited Accounts.</strong> You may not create an account if you have been previously suspended or banned from the Service, or if creating an account would violate any applicable law.</P>
         </Section>
 
         <Section title="4. Carrier Obligations">
-          <P>As a carrier using HaulIQ, you represent and warrant that:</P>
+          <P>As a carrier using Urload, you represent and warrant that:</P>
           <UL items={[
             'You hold a valid USDOT number and MC authority (where required) issued by the FMCSA',
             'You maintain all required insurance coverage, including minimum cargo and liability insurance',
@@ -97,25 +97,25 @@ export default function TermsOfService() {
         </Section>
 
         <Section title="5. Broker Obligations">
-          <P>As a broker using HaulIQ, you represent and warrant that:</P>
+          <P>As a broker using Urload, you represent and warrant that:</P>
           <UL items={[
             'You hold a valid freight broker license (MC authority) issued by the FMCSA',
             'All loads posted are legitimate freight shipments with accurate details',
             'You will pay carriers the agreed-upon rate within the agreed payment terms',
             'You will not post fraudulent, misleading, or duplicate loads',
             'You are authorized to post the freight on behalf of the shipper',
-            'You will not use HaulIQ to solicit carriers outside the platform to avoid fees',
+            'You will not use Urload to solicit carriers outside the platform to avoid fees',
           ]} />
         </Section>
 
         <Section title="6. Payments and Fees">
           <P><strong style={{ color: '#e6edf3' }}>Subscription Plans.</strong> Access to certain features requires a paid subscription. Subscription fees are billed in advance on a monthly basis and are non-refundable except as required by law.</P>
-          <P><strong style={{ color: '#e6edf3' }}>Freight Payments.</strong> HaulIQ offers an optional escrow-based freight payment service. When used, HaulIQ collects payment from the broker and releases funds to the carrier upon delivery confirmation, less a platform fee. HaulIQ is not responsible for disputes between carriers and brokers regarding payment outside of this service.</P>
+          <P><strong style={{ color: '#e6edf3' }}>Freight Payments.</strong> Urload offers an optional escrow-based freight payment service. When used, Urload collects payment from the broker and releases funds to the carrier upon delivery confirmation, less a platform fee. Urload is not responsible for disputes between carriers and brokers regarding payment outside of this service.</P>
           <P><strong style={{ color: '#e6edf3' }}>Price Changes.</strong> We reserve the right to change subscription pricing with 30 days' notice. Continued use after a price change constitutes acceptance of the new pricing.</P>
         </Section>
 
         <Section title="7. Reviews and Ratings">
-          <P>HaulIQ allows users to post reviews and ratings of brokers and carriers. By posting a review, you represent that it reflects your genuine experience and does not contain false, defamatory, or misleading information. HaulIQ reserves the right to remove reviews that violate these Terms or our community standards.</P>
+          <P>Urload allows users to post reviews and ratings of brokers and carriers. By posting a review, you represent that it reflects your genuine experience and does not contain false, defamatory, or misleading information. Urload reserves the right to remove reviews that violate these Terms or our community standards.</P>
           <P>You may not offer or accept compensation in exchange for reviews, or post reviews about your own business or a competitor's business.</P>
         </Section>
 
@@ -130,23 +130,23 @@ export default function TermsOfService() {
             'Interfere with or disrupt the integrity or performance of the Service',
             'Use the Service to send spam, unsolicited communications, or phishing attempts',
             'Reverse engineer, decompile, or attempt to extract source code from the Service',
-            'Engage in any conduct that could damage HaulIQ\'s reputation or business',
+            'Engage in any conduct that could damage Urload\'s reputation or business',
           ]} />
         </Section>
 
         <Section title="9. Intellectual Property">
-          <P>The Service and all content, features, and functionality (including but not limited to text, graphics, logos, software, and data compilations) are owned by HaulIQ or its licensors and are protected by copyright, trademark, and other intellectual property laws.</P>
+          <P>The Service and all content, features, and functionality (including but not limited to text, graphics, logos, software, and data compilations) are owned by Urload or its licensors and are protected by copyright, trademark, and other intellectual property laws.</P>
           <P>We grant you a limited, non-exclusive, non-transferable, revocable license to use the Service for its intended purpose in accordance with these Terms. You may not copy, modify, distribute, sell, or lease any part of the Service.</P>
         </Section>
 
         <Section title="10. Disclaimers and Limitation of Liability">
-          <P><strong style={{ color: '#e6edf3' }}>No Transportation Services.</strong> HaulIQ is a technology platform only. We are not a freight broker, motor carrier, or freight forwarder. We do not assume any liability for the transportation, loss, or damage of freight.</P>
+          <P><strong style={{ color: '#e6edf3' }}>No Transportation Services.</strong> Urload is a technology platform only. We are not a freight broker, motor carrier, or freight forwarder. We do not assume any liability for the transportation, loss, or damage of freight.</P>
           <P><strong style={{ color: '#e6edf3' }}>Service "As Is".</strong> THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.</P>
           <P><strong style={{ color: '#e6edf3' }}>Limitation of Liability.</strong> TO THE MAXIMUM EXTENT PERMITTED BY LAW, HAULIQ SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, ARISING FROM YOUR USE OF THE SERVICE. OUR TOTAL LIABILITY SHALL NOT EXCEED THE GREATER OF $100 OR THE AMOUNT YOU PAID US IN THE PAST 12 MONTHS.</P>
         </Section>
 
         <Section title="11. Indemnification">
-          <P>You agree to indemnify, defend, and hold harmless HaulIQ and its officers, directors, employees, and agents from any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising from: (a) your use of the Service; (b) your violation of these Terms; (c) your violation of any applicable law or third-party rights; or (d) any freight transaction you enter into through the Service.</P>
+          <P>You agree to indemnify, defend, and hold harmless Urload and its officers, directors, employees, and agents from any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising from: (a) your use of the Service; (b) your violation of these Terms; (c) your violation of any applicable law or third-party rights; or (d) any freight transaction you enter into through the Service.</P>
         </Section>
 
         <Section title="12. Termination">

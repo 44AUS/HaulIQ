@@ -8,8 +8,8 @@ const INTEGRATIONS = [
   { key: 'samsara',     name: 'Samsara',               category: 'Fleet & ELD',  description: 'Pull live vehicle locations, HOS logs, and driver data from Samsara.', initials: 'SA', color: '#FF6B35', available: false },
   { key: 'motive',      name: 'Motive (KeepTruckin)',  category: 'Fleet & ELD',  description: 'Sync ELD logs, IFTA reports, and driver hours from Motive.', initials: 'MO', color: '#0071CE', available: false },
   { key: 'dat',         name: 'DAT Load Board',        category: 'Load Boards',  description: 'Import and sync loads directly from your DAT account.', initials: 'DAT', color: '#E63946', available: false },
-  { key: 'truckstop',   name: 'Truckstop.com',         category: 'Load Boards',  description: 'Automatically pull available loads from Truckstop into HaulIQ.', initials: 'TS', color: '#1D3557', available: false },
-  { key: 'stripe',      name: 'Stripe',                category: 'Payments',     description: 'Already connected — HaulIQ uses Stripe to process all payments and payouts.', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/512px-Stripe_Logo%2C_revised_2016.svg.png', color: '#635BFF', available: true, connected: true, managed: true },
+  { key: 'truckstop',   name: 'Truckstop.com',         category: 'Load Boards',  description: 'Automatically pull available loads from Truckstop into Urload.', initials: 'TS', color: '#1D3557', available: false },
+  { key: 'stripe',      name: 'Stripe',                category: 'Payments',     description: 'Already connected — Urload uses Stripe to process all payments and payouts.', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Stripe_Logo%2C_revised_2016.svg/512px-Stripe_Logo%2C_revised_2016.svg.png', color: '#635BFF', available: true, connected: true, managed: true },
   { key: 'twilio',      name: 'Twilio',                category: 'Messaging',    description: 'Send automated SMS notifications to drivers and brokers via Twilio.', initials: 'TW', color: '#F22F46', available: false },
   { key: 'google_maps', name: 'Google Maps',           category: 'Mapping',      description: 'Already connected — powers live tracking, route planning, and map views.', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Google_Maps_icon_%282020%29.svg/418px-Google_Maps_icon_%282020%29.svg.png', color: '#4285F4', available: true, connected: true, managed: true },
   { key: 'mcleod',      name: 'McLeod Software',       category: 'TMS',          description: 'Integrate with McLeod LoadMaster or PowerBroker for advanced TMS workflows.', initials: 'ML', color: '#2D6A4F', available: false },
@@ -46,7 +46,7 @@ function IntegrationCard({ integration, onLearnMore }) {
       {/* Footer */}
       {integration.managed ? (
         <span style={{ backgroundColor: isDark ? 'rgba(45,211,111,0.12)' : 'rgba(45,211,111,0.1)', color: '#2dd36f', border: '1px solid rgba(45,211,111,0.25)', borderRadius: 10, padding: '3px 10px', fontSize: '0.7rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <IonIcon name="checkmark-circle" style={{ fontSize: 12 }} /> Managed by HaulIQ
+          <IonIcon name="checkmark-circle" style={{ fontSize: 12 }} /> Managed by Urload
         </span>
       ) : integration.available ? (
         <button onClick={() => onLearnMore(integration)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', background: 'none', border: '1px solid var(--ion-color-primary)', color: 'var(--ion-color-primary)', borderRadius: 6, padding: '8px 0', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 600, fontFamily: 'inherit' }}>
@@ -75,7 +75,7 @@ export default function Integrations() {
           <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.25rem', color: 'var(--ion-text-color)' }}>Integrations</h2>
         </div>
         <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
-          Connect HaulIQ with the tools you already use.
+          Connect Urload with the tools you already use.
           {connected > 0 && ` ${connected} integration${connected > 1 ? 's' : ''} connected.`}
         </p>
       </div>

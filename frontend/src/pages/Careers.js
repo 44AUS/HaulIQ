@@ -24,7 +24,7 @@ export default function Careers() {
             Help Us Build the Future<br />of Freight
           </h1>
           <p style={{ color: '#8b949e', fontSize: 16, maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-            HaulIQ is on a mission to help carriers earn more and brokers work smarter. We're building technology that actually matters in the real world of trucking.
+            Urload is on a mission to help carriers earn more and brokers work smarter. We're building technology that actually matters in the real world of trucking.
           </p>
         </div>
 

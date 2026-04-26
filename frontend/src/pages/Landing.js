@@ -804,7 +804,7 @@ function Footer() {
           {/* Logo + tagline */}
           <div className="sm:col-span-1">
             <div className="flex items-center mb-4">
-              <img src="/urload-logo.png" alt="HaulIQ" style={{ height: 32, width: 'auto' }} />
+              <img src="/urload-logo.png" alt="Urload" style={{ height: 32, width: 'auto' }} />
             </div>
             <p style={{ color: '#8b949e', fontSize: 13, lineHeight: 1.7 }}>
               The smarter load board. Built for carriers and brokers who mean business.
@@ -873,7 +873,7 @@ function Footer() {
         <div style={{ borderTop: '1px solid rgba(48,54,61,0.5)', paddingTop: 24, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img src="/urload-logo.png" alt="" style={{ height: 20, width: 'auto', opacity: 0.5 }} />
-            <span style={{ color: '#484f58', fontSize: 13 }}>© 2026 HaulIQ, Inc. All rights reserved.</span>
+            <span style={{ color: '#484f58', fontSize: 13 }}>© 2026 Urload, Inc. All rights reserved.</span>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>
             {[

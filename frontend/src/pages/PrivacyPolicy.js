@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 
 const EFFECTIVE_DATE = 'April 1, 2026';
-const COMPANY = 'HaulIQ, Inc.';
+const COMPANY = 'Urload, Inc.';
 const EMAIL = 'privacy@hauliq.com';
 
 function Section({ title, children }) {
@@ -56,11 +56,11 @@ export default function PrivacyPolicy() {
 
         {/* Intro */}
         <div style={{ background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.18)', borderRadius: 12, padding: '18px 22px', marginBottom: 40, color: '#8b949e', fontSize: 14, lineHeight: 1.7 }}>
-          Your privacy matters to us. This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information when you use the HaulIQ platform.
+          Your privacy matters to us. This Privacy Policy explains what information we collect, how we use it, and your rights regarding that information when you use the Urload platform.
         </div>
 
         <Section title="1. Who We Are">
-          <P>{COMPANY} ("HaulIQ", "we", "us", or "our") operates the HaulIQ freight technology platform. This Privacy Policy applies to all users of our website and web application (collectively, the "Service").</P>
+          <P>{COMPANY} ("Urload", "we", "us", or "our") operates the Urload freight technology platform. This Privacy Policy applies to all users of our website and web application (collectively, the "Service").</P>
           <P>For questions about this policy or to exercise your privacy rights, contact our privacy team at <a href={`mailto:${EMAIL}`} style={{ color: '#0ea5e9', textDecoration: 'none' }}>{EMAIL}</a>.</P>
         </Section>
 
@@ -114,9 +114,9 @@ export default function PrivacyPolicy() {
         <Section title="4. How We Share Your Information">
           <P><strong style={{ color: '#e6edf3' }}>With Other Users.</strong> Certain information is visible to other users as part of the Service's core functionality. Broker names, ratings, and company information are visible to carriers browsing loads. Carrier information (name, MC number, ratings) may be visible to brokers. Full pickup/delivery addresses are only shared after a load is booked.</P>
           <P><strong style={{ color: '#e6edf3' }}>With Service Providers.</strong> We share information with trusted third-party vendors who help us operate the Service, including cloud hosting providers, payment processors, email delivery services, analytics providers, and customer support tools. These providers are contractually obligated to protect your information.</P>
-          <P><strong style={{ color: '#e6edf3' }}>For Legal Reasons.</strong> We may disclose information if required by law, court order, or government authority, or when we believe disclosure is necessary to protect the rights, property, or safety of HaulIQ, our users, or the public.</P>
+          <P><strong style={{ color: '#e6edf3' }}>For Legal Reasons.</strong> We may disclose information if required by law, court order, or government authority, or when we believe disclosure is necessary to protect the rights, property, or safety of Urload, our users, or the public.</P>
           <P><strong style={{ color: '#e6edf3' }}>Business Transfers.</strong> In the event of a merger, acquisition, or sale of assets, user information may be transferred as part of that transaction. We will notify you of any such change.</P>
-          <P><strong style={{ color: '#e6edf3' }}>We Do Not Sell Your Data.</strong> HaulIQ does not sell, rent, or trade your personal information to third parties for their marketing purposes.</P>
+          <P><strong style={{ color: '#e6edf3' }}>We Do Not Sell Your Data.</strong> Urload does not sell, rent, or trade your personal information to third parties for their marketing purposes.</P>
         </Section>
 
         <Section title="5. Data Retention">

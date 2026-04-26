@@ -214,7 +214,7 @@ export default function Sidebar({ onNavigate, onClose }) {
           <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
         </button>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <img src="/urload-logo.png" alt="HaulIQ" style={{ height: 30, width: 'auto' }} />
+          <img src="/urload-logo.png" alt="Urload" style={{ height: 30, width: 'auto' }} />
         </div>
         <button
           onClick={toggleTheme}

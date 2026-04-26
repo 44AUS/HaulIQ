@@ -89,7 +89,7 @@ export default function AdminWaitlist() {
             <IonIcon name="people-outline" style={{ color: 'var(--ion-color-primary)' }} />
             <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Waitlist</h2>
           </div>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>People waiting for early access to HaulIQ</p>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>People waiting for early access to Urload</p>
         </div>
         <button onClick={load} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', border: '1px solid var(--ion-border-color)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.875rem', fontFamily: 'inherit', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}>
           {loading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name="refresh-outline" style={{ fontSize: 14 }} />}

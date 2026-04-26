@@ -79,7 +79,7 @@ export default function DriverInvite() {
           <>
             <h2 style={{ margin: '0 0 8px', textAlign: 'center', fontWeight: 800, fontSize: '1.25rem' }}>You're invited!</h2>
             <p style={{ margin: '0 0 24px', textAlign: 'center', fontSize: '0.875rem', color: '#6b7280' }}>
-              <strong>{inviteInfo.carrier_name}</strong> has invited you to join HaulIQ as a driver.
+              <strong>{inviteInfo.carrier_name}</strong> has invited you to join Urload as a driver.
               Set your password to activate your account.
             </p>
 

@@ -90,7 +90,7 @@ export default function AdminOverview() {
             <IonIcon name="shield-outline" style={{ color: 'var(--ion-color-primary)' }} />
             <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>Admin Dashboard</h2>
           </div>
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Platform overview — HaulIQ Operations</p>
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Platform overview — Urload Operations</p>
         </div>
         <span style={{ backgroundColor: '#2e7d32', color: '#fff', fontSize: '0.75rem', fontWeight: 600, padding: '3px 10px', borderRadius: 12 }}>
           All systems operational
