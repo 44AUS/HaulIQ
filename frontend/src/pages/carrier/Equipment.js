@@ -336,7 +336,7 @@ export default function Equipment() {
     {/* Create / Edit / Repost Modal */}
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '14px' }}>
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
           <IonButtons slot="start">
             <IonButton onClick={() => setDialogOpen(false)}>
               <IonIcon name="close-outline" style={{ fontSize: 24 }} />
