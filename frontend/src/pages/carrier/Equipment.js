@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { IonSpinner, IonModal } from '@ionic/react';
+import {
+  IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
+  IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
+  IonSelectOption, IonTextarea, IonNote,
+} from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -173,7 +177,7 @@ export default function Equipment() {
     try { await truckPostsApi.remove(deleteId); setDeleteId(null); fetchPosts(true); } catch (_) {}
   };
 
-  const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+  const setField = (field) => (e) => setForm(f => ({ ...f, [field]: e.detail?.value ?? e.target?.value ?? '' }));
 
   return (
     <>
@@ -333,109 +337,128 @@ export default function Equipment() {
 
     {/* Create / Edit / Repost Modal */}
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '14px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>
-            {isRepost ? 'Repost Truck — Update Dates' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}
-          </h3>
-        </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {error && (
-            <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
-          )}
-          {isRepost && (
-            <div style={{ padding: '10px 14px', backgroundColor: 'rgba(2,136,209,0.08)', border: '1px solid rgba(2,136,209,0.3)', borderRadius: 6, color: '#0288d1', fontSize: '0.875rem' }}>
-              Same equipment and specs pre-filled — just update your availability dates.
-            </div>
-          )}
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
+          <IonButtons slot="end">
+            <IonButton onClick={() => setDialogOpen(false)}>
+              <IonIcon name="close-outline" style={{ fontSize: 22 }} />
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
 
-          <div>
-            <label style={labelStyle}>Equipment Type *</label>
-            <select style={inputStyle} value={form.equipment_type || ''} onChange={setField('equipment_type')}>
-              {equipmentTypes.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-            </select>
+      <IonContent>
+        {error && (
+          <div style={{ margin: '12px 16px 0', padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
+        )}
+        {isRepost && (
+          <div style={{ margin: '12px 16px 0', padding: '10px 14px', backgroundColor: 'rgba(2,136,209,0.08)', border: '1px solid rgba(2,136,209,0.3)', borderRadius: 6, color: '#0288d1', fontSize: '0.875rem' }}>
+            Same equipment and specs pre-filled — just update your availability dates.
           </div>
+        )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={labelStyle}>Trailer Length (ft)</label>
-              <input style={inputStyle} type="number" min={0} value={form.trailer_length} onChange={setField('trailer_length')} />
-            </div>
-            <div>
-              <label style={labelStyle}>Weight Capacity (lbs)</label>
-              <input style={inputStyle} type="number" min={0} value={form.weight_capacity} onChange={setField('weight_capacity')} />
-            </div>
-          </div>
+        <IonList inset>
+          <IonItem>
+            <IonLabel position="stacked">Equipment Type <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+            <IonSelect value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
+              {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+            </IonSelect>
+          </IonItem>
 
-          <div>
-            <label style={labelStyle}>Current Location *</label>
-            <AddressAutocomplete
-              placeholder="e.g. Dallas, TX"
-              value={form.current_location}
-              onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
-            />
-          </div>
+          <IonItem>
+            <IonLabel position="stacked">Trailer Length (ft)</IonLabel>
+            <IonInput type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" />
+          </IonItem>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={labelStyle}>Preferred Origin</label>
-              <input style={inputStyle} value={form.preferred_origin} onChange={setField('preferred_origin')} />
-            </div>
-            <div>
-              <label style={labelStyle}>Preferred Destination</label>
-              <input style={inputStyle} value={form.preferred_destination} onChange={setField('preferred_destination')} />
-            </div>
-          </div>
+          <IonItem>
+            <IonLabel position="stacked">Weight Capacity (lbs)</IonLabel>
+            <IonInput type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" />
+          </IonItem>
+        </IonList>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <label style={labelStyle}>Available From *</label>
-              <input style={inputStyle} type="date" required value={form.available_from} onChange={setField('available_from')} />
+        <IonList inset>
+          <IonItem>
+            <IonLabel position="stacked">Current Location <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+            <div style={{ width: '100%', paddingBottom: 8 }}>
+              <AddressAutocomplete
+                placeholder="e.g. Dallas, TX"
+                value={form.current_location}
+                onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
+              />
             </div>
-            <div>
-              <label style={labelStyle}>Available To *</label>
-              <input style={inputStyle} type="date" required value={form.available_to} onChange={setField('available_to')} />
-            </div>
-          </div>
+          </IonItem>
 
-          <div>
-            <label style={labelStyle}>Rate Expectation ($/mile)</label>
-            <input style={inputStyle} type="number" min={0} step={0.01} value={form.rate_expectation} onChange={setField('rate_expectation')} placeholder="Optional" />
-          </div>
+          <IonItem>
+            <IonLabel position="stacked">Preferred Origin</IonLabel>
+            <IonInput value={form.preferred_origin} onIonChange={setField('preferred_origin')} placeholder="e.g. Chicago, IL" />
+          </IonItem>
 
-          <div>
-            <label style={labelStyle}>Notes</label>
-            <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 72 }} rows={3} value={form.notes} onChange={setField('notes')} placeholder="Any additional details..." />
-          </div>
-        </div>
-        <div style={{ padding: '12px 24px 20px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
-          <button onClick={() => setDialogOpen(false)} style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
-            Cancel
-          </button>
-          <button onClick={handleSave} disabled={saving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 700, opacity: saving ? 0.7 : 1 }}>
-            {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
-            {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
-          </button>
-        </div>
-      </div>
+          <IonItem>
+            <IonLabel position="stacked">Preferred Destination</IonLabel>
+            <IonInput value={form.preferred_destination} onIonChange={setField('preferred_destination')} placeholder="e.g. Atlanta, GA" />
+          </IonItem>
+        </IonList>
+
+        <IonList inset>
+          <IonItem>
+            <IonLabel position="stacked">Available From <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+            <IonInput type="date" value={form.available_from} onIonChange={setField('available_from')} />
+          </IonItem>
+
+          <IonItem>
+            <IonLabel position="stacked">Available To <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+            <IonInput type="date" value={form.available_to} onIonChange={setField('available_to')} />
+          </IonItem>
+        </IonList>
+
+        <IonList inset>
+          <IonItem>
+            <IonLabel position="stacked">Rate Expectation ($/mile)</IonLabel>
+            <IonInput type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" />
+            <IonNote slot="helper">Leave blank to show as negotiable to brokers</IonNote>
+          </IonItem>
+
+          <IonItem>
+            <IonLabel position="stacked">Notes</IonLabel>
+            <IonTextarea rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow />
+          </IonItem>
+        </IonList>
+      </IonContent>
+
+      <IonFooter>
+        <IonToolbar>
+          <IonButtons slot="end" style={{ paddingRight: 8 }}>
+            <IonButton onClick={() => setDialogOpen(false)}>Cancel</IonButton>
+            <IonButton onClick={handleSave} disabled={saving} fill="solid" color="primary" style={{ '--border-radius': '6px' }}>
+              {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, marginRight: 6 }} />}
+              {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonFooter>
     </IonModal>
 
     {/* Delete Confirm Modal */}
-    <IonModal isOpen={Boolean(deleteId)} onDidDismiss={() => setDeleteId(null)} style={{ '--width': '360px', '--border-radius': '14px' }}>
-      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Delete Truck Posting?</h3>
-        <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+    <IonModal isOpen={Boolean(deleteId)} onDidDismiss={() => setDeleteId(null)} style={{ '--width': '360px', '--border-radius': '14px', '--height': 'auto' }}>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Delete Posting?</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent>
+        <p style={{ margin: '16px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
           This will permanently remove this truck posting. Brokers will no longer be able to find it.
         </p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={() => setDeleteId(null)} style={{ padding: '8px 16px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
-            Cancel
-          </button>
-          <button onClick={handleDelete} style={{ padding: '8px 16px', backgroundColor: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 700 }}>
-            Delete
-          </button>
-        </div>
-      </div>
+      </IonContent>
+      <IonFooter>
+        <IonToolbar>
+          <IonButtons slot="end" style={{ paddingRight: 8 }}>
+            <IonButton onClick={() => setDeleteId(null)}>Cancel</IonButton>
+            <IonButton onClick={handleDelete} fill="solid" color="danger" style={{ '--border-radius': '6px' }}>Delete</IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonFooter>
     </IonModal>
     </>
   );
