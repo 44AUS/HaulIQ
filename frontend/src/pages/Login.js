@@ -69,7 +69,7 @@ export default function Login() {
       {/* ── Background ── */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'linear-gradient(145deg, #020d1f 0%, #041529 40%, #051c38 70%, #030f22 100%)', overflow: 'hidden' }}>
 
-        {/* Map SVG layer */}
+        {/* Map SVG layer — white paths tinted to blue */}
         <img
           src="/map_vector.svg"
           alt=""
@@ -77,9 +77,9 @@ export default function Login() {
           style={{
             position: 'absolute', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '110%', height: '110%', objectFit: 'cover',
-            filter: 'brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(195deg)',
-            opacity: 0.09,
+            width: '120%', height: '120%', objectFit: 'cover',
+            filter: 'sepia(1) saturate(8) hue-rotate(195deg) brightness(0.65)',
+            opacity: 0.22,
             pointerEvents: 'none', userSelect: 'none',
           }}
         />
