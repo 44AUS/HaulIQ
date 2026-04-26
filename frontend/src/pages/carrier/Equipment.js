@@ -336,11 +336,16 @@ export default function Equipment() {
     {/* Create / Edit / Repost Modal */}
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} style={{ '--width': '560px', '--max-height': '90vh', '--border-radius': '14px' }}>
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
+        <IonToolbar style={{ '--background': 'var(--ion-color-light)', '--color': 'var(--ion-color-light-contrast)' }}>
+          <IonButtons slot="start">
+            <IonButton onClick={() => setDialogOpen(false)} style={{ '--color': 'var(--ion-color-light-contrast)' }}>
+              <IonIcon name="close-outline" style={{ fontSize: 24 }} />
+            </IonButton>
+          </IonButtons>
+          <IonTitle style={{ fontWeight: 700 }}>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={() => setDialogOpen(false)}>
-              <IonIcon name="close-outline" style={{ fontSize: 22 }} />
+            <IonButton onClick={handleSave} disabled={saving} style={{ '--color': '#2dd36f' }}>
+              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20 }} /> : <IonIcon name="checkmark-outline" style={{ fontSize: 26, fontWeight: 700 }} />}
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -424,17 +429,6 @@ export default function Equipment() {
         </IonList>
       </IonContent>
 
-      <IonFooter>
-        <IonToolbar>
-          <IonButtons slot="end" style={{ paddingRight: 8 }}>
-            <IonButton onClick={() => setDialogOpen(false)}>Cancel</IonButton>
-            <IonButton onClick={handleSave} disabled={saving} fill="solid" color="primary" style={{ '--border-radius': '6px' }}>
-              {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, marginRight: 6 }} />}
-              {saving ? 'Saving…' : isRepost ? 'Repost Truck' : editPost ? 'Save Changes' : 'Post Truck'}
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonFooter>
     </IonModal>
 
     {/* Delete Confirm Modal */}
