@@ -429,6 +429,10 @@ export default function Equipment() {
       .alert-radio-label, .alert-checkbox-label, .alert-radio-group button, .alert-button-inner {
         color: var(--ion-text-color) !important;
       }
+      .equipment-post-modal ion-list {
+        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+        border-radius: 6px;
+      }
     `}</style>
     </div>
 
