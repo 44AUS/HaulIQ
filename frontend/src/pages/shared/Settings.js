@@ -221,7 +221,7 @@ function TutorialsModal({ open, onClose }) {
               <div style={{ textAlign: 'center', color: 'var(--ion-color-medium)', marginTop: 60 }}>No tutorials found.</div>
             ) : (
               <>
-                {!search && <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--ion-color-medium)', marginBottom: 14, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.75rem' }}>Playlists</div>}
+                {!search && <div style={{ fontWeight: 700, color: 'var(--ion-color-medium)', marginBottom: 14, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.75rem' }}>Playlists</div>}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, maxWidth: 1100, margin: '0 auto' }}>
                   {filteredCats.map(cat => {
                     const firstVid = cat.videos[0];
@@ -260,7 +260,7 @@ function TutorialsModal({ open, onClose }) {
 // ── Main Settings page ────────────────────────────────────────────────────────
 export default function Settings() {
   const { mode, toggleTheme } = useThemeMode();
-  const { user } = useAuth();
+  useAuth();
   const isDark = mode === 'dark';
 
   const [lang, setLang]           = useState(() => localStorage.getItem('urload_lang') || 'en');

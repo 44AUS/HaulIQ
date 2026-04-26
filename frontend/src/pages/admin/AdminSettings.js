@@ -15,7 +15,7 @@ function inputStyle(extra = {}) {
 
 // ── App Info Tab ──────────────────────────────────────────────────────────────
 function AppInfoTab() {
-  const [info, setInfo]       = useState(null);
+  const [, setInfo]           = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving]   = useState(false);
   const [toast, setToast]     = useState({ open: false, msg: '', color: 'success' });
