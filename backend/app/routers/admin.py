@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, text
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime, timedelta
+from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.user import User, UserPlan, UserRole
@@ -326,3 +327,147 @@ def revenue_breakdown(
         "arr":       round(total_mrr * 12, 2),
         "breakdown": sorted(breakdown, key=lambda x: x["mrr"], reverse=True),
     }
+
+
+# ─── App Info (admin) ─────────────────────────────────────────────────────────
+class AppInfoIn(BaseModel):
+    status: Optional[str] = None
+    current_version: Optional[str] = None
+    latest_version: Optional[str] = None
+    release_video_url: Optional[str] = None
+    whats_new: Optional[List[str]] = None
+    known_issues: Optional[List[str]] = None
+
+
+@router.get("/app-info", summary="Get app info")
+def admin_get_app_info(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import AppInfo
+    info = db.query(AppInfo).filter(AppInfo.id == 1).first()
+    if not info:
+        return {"status": "normal", "current_version": "1.0.0", "latest_version": "1.0.0",
+                "release_video_url": None, "whats_new": [], "known_issues": []}
+    return {"status": info.status, "current_version": info.current_version,
+            "latest_version": info.latest_version, "release_video_url": info.release_video_url,
+            "whats_new": info.whats_new or [], "known_issues": info.known_issues or []}
+
+
+@router.put("/app-info", summary="Update app info")
+def admin_update_app_info(body: AppInfoIn, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import AppInfo
+    info = db.query(AppInfo).filter(AppInfo.id == 1).first()
+    if not info:
+        info = AppInfo(id=1)
+        db.add(info)
+    for field, val in body.dict(exclude_none=True).items():
+        setattr(info, field, val)
+    db.commit()
+    return {"ok": True}
+
+
+# ─── Tutorials (admin) ────────────────────────────────────────────────────────
+class TutorialCategoryIn(BaseModel):
+    name: str
+    thumbnail_url: Optional[str] = None
+    description: Optional[str] = None
+    order_idx: Optional[int] = 0
+
+
+class TutorialVideoIn(BaseModel):
+    title: str
+    youtube_url: str
+    description: Optional[str] = None
+    duration: Optional[str] = None
+    order_idx: Optional[int] = 0
+
+
+@router.get("/tutorials/categories", summary="List tutorial categories")
+def admin_list_categories(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialCategory
+    cats = db.query(TutorialCategory).order_by(TutorialCategory.order_idx).all()
+    return [{"id": str(c.id), "name": c.name, "thumbnail_url": c.thumbnail_url,
+             "description": c.description, "order_idx": c.order_idx,
+             "video_count": len(c.videos)} for c in cats]
+
+
+@router.post("/tutorials/categories", status_code=201)
+def admin_create_category(body: TutorialCategoryIn, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialCategory
+    cat = TutorialCategory(**body.dict())
+    db.add(cat); db.commit(); db.refresh(cat)
+    return {"id": str(cat.id), "name": cat.name}
+
+
+@router.delete("/tutorials/categories/{category_id}", status_code=204)
+def admin_delete_category(category_id: UUID, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialCategory
+    cat = db.query(TutorialCategory).filter(TutorialCategory.id == category_id).first()
+    if not cat:
+        raise HTTPException(404, "Category not found")
+    db.delete(cat); db.commit()
+
+
+@router.get("/tutorials/categories/{category_id}/videos")
+def admin_list_videos(category_id: UUID, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialVideo
+    videos = db.query(TutorialVideo).filter(TutorialVideo.category_id == category_id).order_by(TutorialVideo.order_idx).all()
+    return [{"id": str(v.id), "title": v.title, "youtube_url": v.youtube_url,
+             "description": v.description, "duration": v.duration, "order_idx": v.order_idx} for v in videos]
+
+
+@router.post("/tutorials/categories/{category_id}/videos", status_code=201)
+def admin_create_video(category_id: UUID, body: TutorialVideoIn, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialVideo
+    v = TutorialVideo(category_id=category_id, **body.dict())
+    db.add(v); db.commit(); db.refresh(v)
+    return {"id": str(v.id), "title": v.title}
+
+
+@router.delete("/tutorials/videos/{video_id}", status_code=204)
+def admin_delete_video(video_id: UUID, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialVideo
+    v = db.query(TutorialVideo).filter(TutorialVideo.id == video_id).first()
+    if not v:
+        raise HTTPException(404, "Video not found")
+    db.delete(v); db.commit()
+
+
+# ─── Feature Requests (admin) ─────────────────────────────────────────────────
+@router.get("/feature-requests")
+def admin_feature_requests(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import FeatureRequest
+    rows = db.query(FeatureRequest, User).join(User, FeatureRequest.user_id == User.id)\
+             .order_by(desc(FeatureRequest.created_at)).all()
+    return [{"id": str(fr.id), "title": fr.title, "description": fr.description,
+             "status": fr.status, "created_at": fr.created_at.isoformat(),
+             "user_name": u.name, "user_email": u.email} for fr, u in rows]
+
+
+@router.patch("/feature-requests/{fr_id}")
+def admin_update_feature_request(fr_id: UUID, status: str = Query(...), db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import FeatureRequest
+    fr = db.query(FeatureRequest).filter(FeatureRequest.id == fr_id).first()
+    if not fr:
+        raise HTTPException(404, "Not found")
+    fr.status = status; db.commit()
+    return {"ok": True}
+
+
+# ─── Reported Problems (admin) ────────────────────────────────────────────────
+@router.get("/reported-problems")
+def admin_reported_problems(db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import ReportedProblem
+    rows = db.query(ReportedProblem, User).join(User, ReportedProblem.user_id == User.id)\
+             .order_by(desc(ReportedProblem.created_at)).all()
+    return [{"id": str(rp.id), "title": rp.title, "description": rp.description,
+             "severity": rp.severity, "status": rp.status, "created_at": rp.created_at.isoformat(),
+             "user_name": u.name, "user_email": u.email} for rp, u in rows]
+
+
+@router.patch("/reported-problems/{rp_id}")
+def admin_update_reported_problem(rp_id: UUID, status: str = Query(...), db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import ReportedProblem
+    rp = db.query(ReportedProblem).filter(ReportedProblem.id == rp_id).first()
+    if not rp:
+        raise HTTPException(404, "Not found")
+    rp.status = status; db.commit()
+    return {"ok": True}

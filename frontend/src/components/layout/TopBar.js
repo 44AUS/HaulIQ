@@ -44,7 +44,8 @@ const ADMIN_NAV = [
   { icon: 'list-outline',      label: 'Waitlist',  path: '/admin/waitlist' },
   { icon: 'layers-outline',    label: 'Plans',     path: '/admin/plans' },
   { icon: 'car-sport-outline', label: 'Equipment', path: '/admin/equipment' },
-  { icon: 'grid-outline',      label: 'Classes',   path: '/admin/equipment-classes' },
+  { icon: 'grid-outline',      label: 'Classes',        path: '/admin/equipment-classes' },
+  { icon: 'settings-outline',  label: 'App Settings',   path: '/admin/app-settings' },
 ];
 
 // ── Immersive mode config ─────────────────────────────────────────────────────
@@ -61,6 +62,7 @@ const IMMERSIVE_CONFIG = {
   load_detail:    { title: 'Load Details',    tabs: [{ key: 'overview', label: 'Overview' }, { key: 'payments', label: 'Payments' }, { key: 'documents', label: 'Documents' }], messageMode: true },
   carrier_profile:{ title: 'Carrier Profile', tabs: [{ key: 'overview', label: 'Overview' }, { key: 'reviews', label: 'Reviews' }] },
   broker_profile: { title: 'Broker Profile',  tabs: [{ key: 'overview', label: 'Overview' }, { key: 'reviews', label: 'Reviews' }, { key: 'pay_speed', label: 'Pay Speed' }] },
+  settings:       { title: 'Settings',        tabs: [] },
 };
 
 // ── Notification helpers ──────────────────────────────────────────────────────

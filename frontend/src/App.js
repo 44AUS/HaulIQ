@@ -83,6 +83,7 @@ import AdminPlans from './pages/admin/AdminPlans';
 import AdminContacts from './pages/admin/AdminContacts';
 import AdminEquipmentTypes from './pages/admin/AdminEquipmentTypes';
 import AdminEquipmentClasses from './pages/admin/AdminEquipmentClasses';
+import AdminSettings from './pages/admin/AdminSettings';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -234,6 +235,7 @@ function AdminRoutes() {
           <Route path="equipment" element={<AdminEquipmentTypes />} />
           <Route path="equipment-classes" element={<AdminEquipmentClasses />} />
           <Route path="contacts" element={<AdminContacts />} />
+          <Route path="app-settings" element={<AdminSettings />} />
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </DashboardLayout>

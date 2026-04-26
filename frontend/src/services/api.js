@@ -350,5 +350,26 @@ export const profileDocumentsApi = {
   delete: (id)       => request(`/api/profile-documents/${id}`, { method: 'DELETE' }),
 };
 
-const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi, driversApi, driverApi, profileDocumentsApi };
+// ─── Settings ──────────────────────────────────────────────────────────────────
+export const settingsApi = {
+  appInfo:         ()      => request('/api/settings/app-info'),
+  tutorials:       ()      => request('/api/settings/tutorials'),
+  featureRequest:  (data)  => request('/api/settings/feature-request', { method: 'POST', body: JSON.stringify(data) }),
+  reportProblem:   (data)  => request('/api/settings/report-problem',  { method: 'POST', body: JSON.stringify(data) }),
+  // Admin
+  adminGetAppInfo:        ()           => request('/api/admin/app-info'),
+  adminUpdateAppInfo:     (data)       => request('/api/admin/app-info', { method: 'PUT', body: JSON.stringify(data) }),
+  adminListCategories:    ()           => request('/api/admin/tutorials/categories'),
+  adminCreateCategory:    (data)       => request('/api/admin/tutorials/categories', { method: 'POST', body: JSON.stringify(data) }),
+  adminDeleteCategory:    (id)         => request(`/api/admin/tutorials/categories/${id}`, { method: 'DELETE' }),
+  adminListVideos:        (catId)      => request(`/api/admin/tutorials/categories/${catId}/videos`),
+  adminCreateVideo:       (catId, data)=> request(`/api/admin/tutorials/categories/${catId}/videos`, { method: 'POST', body: JSON.stringify(data) }),
+  adminDeleteVideo:       (id)         => request(`/api/admin/tutorials/videos/${id}`, { method: 'DELETE' }),
+  adminFeatureRequests:   ()           => request('/api/admin/feature-requests'),
+  adminUpdateFeatureReq:  (id, status) => request(`/api/admin/feature-requests/${id}?status=${status}`, { method: 'PATCH' }),
+  adminReportedProblems:  ()           => request('/api/admin/reported-problems'),
+  adminUpdateProblem:     (id, status) => request(`/api/admin/reported-problems/${id}?status=${status}`, { method: 'PATCH' }),
+};
+
+const api = { authApi, loadsApi, brokersApi, messagesApi, bidsApi, bookingsApi, analyticsApi, subscriptionsApi, plansApi, carrierReviewsApi, instantBookApi, networkApi, waitlistApi, locationsApi, blocksApi, adminApi, freightPaymentsApi, searchApi, calendarApi, truckPostsApi, equipmentTypesApi, equipmentClassesApi, rateConfirmationApi, notificationsApi, laneWatchesApi, loadTemplatesApi, rateIntelApi, driversApi, driverApi, profileDocumentsApi, settingsApi };
 export default api;

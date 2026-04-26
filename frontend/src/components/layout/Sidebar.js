@@ -409,6 +409,19 @@ export default function Sidebar({ onNavigate, onClose }) {
       </IonList>
 
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
+
+      {/* Settings link */}
+      <div style={{ padding: '8px 16px 12px', flexShrink: 0 }}>
+        <div
+          onClick={() => handleNav('/settings')}
+          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderRadius: 10, cursor: 'pointer', backgroundColor: location.pathname === '/settings' ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent', transition: 'background-color 0.15s' }}
+          onMouseEnter={e => { if (location.pathname !== '/settings') e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)'; }}
+          onMouseLeave={e => { if (location.pathname !== '/settings') e.currentTarget.style.backgroundColor = 'transparent'; }}
+        >
+          <IonIcon name="settings-outline" style={{ fontSize: '1.1rem', color: location.pathname === '/settings' ? 'var(--ion-color-primary)' : iconColor }} />
+          <span style={{ fontSize: '0.9rem', fontWeight: location.pathname === '/settings' ? 700 : 500, color: location.pathname === '/settings' ? 'var(--ion-color-primary)' : nameColor }}>Settings</span>
+        </div>
+      </div>
     </div>
   );
 }
