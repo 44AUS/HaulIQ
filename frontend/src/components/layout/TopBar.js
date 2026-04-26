@@ -551,9 +551,14 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
             {isMobile ? (
               <IonMenuButton style={{ '--color': 'rgba(255,255,255,0.85)' }} />
             ) : (
-              <IonButton fill="clear" onClick={onToggleSidebar} style={{ '--color': 'rgba(255,255,255,0.85)', marginLeft: 4 }}>
-                <IonIcon name="menu-outline" style={{ fontSize: '1.5rem' }} />
-              </IonButton>
+              <button
+                onClick={onToggleSidebar}
+                style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: 4, transition: 'background-color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <IonIcon name="menu-outline" style={{ fontSize: '1.5rem', pointerEvents: 'none' }} />
+              </button>
             )}
           </IonButtons>
 

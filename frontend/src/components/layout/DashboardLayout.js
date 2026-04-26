@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { IonContent, IonMenu, IonPage, IonSplitPane } from '@ionic/react';
 import Sidebar from './Sidebar';
@@ -31,6 +31,7 @@ const isBrokerProfile   = (p) => /^\/b\/[^/]+$/.test(p);
 
 export default function DashboardLayout({ children }) {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const compactPadding = COMPACT_PADDING_PATHS.includes(location.pathname);
 
@@ -67,7 +68,7 @@ export default function DashboardLayout({ children }) {
   // Normal pages: IonSplitPane with sidebar
   return (
     <LayoutContext.Provider value={{ drawerWidth: DRAWER_WIDTH }}>
-      <IonSplitPane contentId="main-content" when="lg" style={{ '--side-max-width': `${DRAWER_WIDTH}px`, '--side-min-width': `${DRAWER_WIDTH}px` }}>
+      <IonSplitPane contentId="main-content" when={sidebarOpen ? 'lg' : '(max-width: -1px)'} style={{ '--side-max-width': `${DRAWER_WIDTH}px`, '--side-min-width': `${DRAWER_WIDTH}px` }}>
         {/* Sidebar */}
         <IonMenu contentId="main-content" menuId="main-menu" type="overlay" style={{ '--width': `${DRAWER_WIDTH}px` }}>
           <IonContent>
@@ -77,12 +78,7 @@ export default function DashboardLayout({ children }) {
 
         {/* Main content */}
         <IonPage id="main-content">
-          <TopBar
-            onToggleSidebar={() => {
-              const menu = document.querySelector('ion-menu');
-              if (menu) menu.toggle();
-            }}
-          />
+          <TopBar onToggleSidebar={() => setSidebarOpen(o => !o)} />
           <IonContent scrollY style={{ '--background': 'var(--ion-background-color)' }}>
             <div style={{ padding }}>
               {children}
