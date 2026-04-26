@@ -403,13 +403,12 @@ export default function Equipment() {
         <IonList inset>
           <IonItem>
             <IonLabel position="stacked">Current Location <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <div style={{ width: '100%', paddingBottom: 8 }}>
-              <AddressAutocomplete
-                placeholder="e.g. Dallas, TX"
-                value={form.current_location}
-                onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
-              />
-            </div>
+            <AddressAutocomplete
+              placeholder="e.g. Dallas, TX"
+              value={form.current_location}
+              onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
+              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
+            />
           </IonItem>
 
           <IonItem>

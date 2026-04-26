@@ -16,7 +16,7 @@ const inputStyle = {
   fontFamily: 'inherit',
 };
 
-export default function AddressAutocomplete({ value, onChange, placeholder, label, required }) {
+export default function AddressAutocomplete({ value, onChange, placeholder, label, required, style: styleProp }) {
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '',
     libraries: LIBRARIES,
@@ -61,7 +61,7 @@ export default function AddressAutocomplete({ value, onChange, placeholder, labe
 
   const inputEl = (
     <input
-      style={inputStyle}
+      style={{ ...inputStyle, ...styleProp }}
       placeholder={placeholder || label}
       required={required}
       value={inputValue}
