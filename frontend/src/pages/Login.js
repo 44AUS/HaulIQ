@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonInput } from '@ionic/react';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import IonIcon from '../components/IonIcon';
@@ -57,11 +57,18 @@ export default function Login() {
   const fieldBorder = isDark ? 'rgba(66,165,245,0.2)' : 'rgba(0,0,0,0.16)';
   const t = LABELS[lang];
 
-  const inputStyle = {
-    width: '100%', boxSizing: 'border-box',
-    background: fieldBg, border: `1px solid ${fieldBorder}`, borderRadius: 6,
-    color: textPri, fontSize: '0.875rem', padding: '9px 12px',
-    outline: 'none', fontFamily: 'inherit',
+  const ionInputStyle = {
+    '--background': fieldBg,
+    '--color': textPri,
+    '--placeholder-color': textSec,
+    '--border-color': fieldBorder,
+    '--border-radius': '6px',
+    '--highlight-color-focused': BRAND_LIGHT,
+    '--padding-start': '12px',
+    '--padding-end': '12px',
+    '--padding-top': '9px',
+    '--padding-bottom': '9px',
+    fontSize: '0.875rem',
   };
 
   return (
@@ -124,22 +131,29 @@ export default function Login() {
                 <div style={{ padding: '0 32px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.email}</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={inputStyle} />
+                    <IonInput
+                      fill="outline"
+                      type="email"
+                      value={email}
+                      onIonChange={e => setEmail(e.detail.value ?? '')}
+                      required
+                      style={ionInputStyle}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.password}</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showPw ? 'text' : 'password'}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        required
-                        style={{ ...inputStyle, paddingRight: 40 }}
-                      />
-                      <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
+                    <IonInput
+                      fill="outline"
+                      type={showPw ? 'text' : 'password'}
+                      value={password}
+                      onIonChange={e => setPassword(e.detail.value ?? '')}
+                      required
+                      style={ionInputStyle}
+                    >
+                      <button slot="end" type="button" onClick={() => setShowPw(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
                         <IonIcon name={showPw ? 'eye-off-outline' : 'eye-outline'} style={{ fontSize: 16 }} />
                       </button>
-                    </div>
+                    </IonInput>
                   </div>
                   <button
                     type="submit"

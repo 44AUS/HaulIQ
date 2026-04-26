@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonInput } from '@ionic/react';
 import { useLoadScript, Autocomplete } from '@react-google-maps/api';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';
@@ -67,7 +67,21 @@ export default function Signup() {
   const fieldBorder = isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.16)';
   const t = LABELS[lang];
 
-  const inputStyle = {
+  const ionInputStyle = {
+    '--background': fieldBg,
+    '--color': textPri,
+    '--placeholder-color': textSec,
+    '--border-color': fieldBorder,
+    '--border-radius': '6px',
+    '--highlight-color-focused': BRAND_LIGHT,
+    '--padding-start': '12px',
+    '--padding-end': '12px',
+    '--padding-top': '9px',
+    '--padding-bottom': '9px',
+    fontSize: '0.875rem',
+  };
+
+  const nativeInputStyle = {
     width: '100%', boxSizing: 'border-box',
     background: fieldBg, border: `1px solid ${fieldBorder}`, borderRadius: 6,
     color: textPri, fontSize: '0.875rem', padding: '9px 12px',
@@ -235,23 +249,23 @@ export default function Signup() {
                 <div style={{ padding: `0 ${px}px 16px`, display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{role === 'broker' ? t.brokerage : t.company}</label>
-                    <input value={form.company} onChange={e => set('company', e.target.value)} style={inputStyle} />
+                    <IonInput fill="outline" value={form.company} onIonChange={e => set('company', e.detail.value ?? '')} style={ionInputStyle} />
                   </div>
                   {role === 'carrier' && (
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>MC Number * (required)</label>
-                      <div style={{ position: 'relative' }}>
-                        <input
-                          value={form.mc}
-                          onChange={e => handleMcChange(e.target.value)}
-                          style={{ ...inputStyle, paddingRight: 36, borderColor: mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : fieldBorder }}
-                        />
-                        <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>
+                      <IonInput
+                        fill="outline"
+                        value={form.mc}
+                        onIonChange={e => handleMcChange(e.detail.value ?? '')}
+                        style={{ ...ionInputStyle, '--border-color': mcState?.valid ? '#4ade80' : mcState?.error ? '#f87171' : fieldBorder }}
+                      >
+                        <span slot="end">
                           {mcState === 'checking' && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: textSec }} />}
                           {mcState?.valid && <IonIcon name="checkmark-outline" style={{ fontSize: 16, color: '#4ade80' }} />}
                           {mcState?.error && <IonIcon name="alert-circle-outline" style={{ fontSize: 16, color: '#f87171' }} />}
                         </span>
-                      </div>
+                      </IonInput>
                       {mcState === 'checking' && <div style={{ fontSize: '0.75rem', color: textSec, marginTop: 3 }}>Verifying…</div>}
                       {mcState?.valid && <div style={{ fontSize: '0.75rem', color: '#4ade80', marginTop: 3 }}>✓ {mcState.legal_name}</div>}
                       {mcState?.error && <div style={{ fontSize: '0.75rem', color: '#f87171', marginTop: 3 }}>{mcState.error}</div>}
@@ -259,7 +273,7 @@ export default function Signup() {
                   )}
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.phone}</label>
-                    <input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} style={inputStyle} />
+                    <IonInput fill="outline" type="tel" value={form.phone} onIonChange={e => set('phone', e.detail.value ?? '')} style={ionInputStyle} />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>Business Address *</label>
@@ -272,11 +286,11 @@ export default function Signup() {
                         <input
                           placeholder="Start typing your address…"
                           defaultValue={form.businessAddress ? `${form.businessAddress}, ${form.businessCity}, ${form.businessState} ${form.businessZip}`.trim().replace(/^,\s*/, '') : ''}
-                          style={inputStyle}
+                          style={nativeInputStyle}
                         />
                       </Autocomplete>
                     ) : (
-                      <input value={form.businessAddress} onChange={e => set('businessAddress', e.target.value)} style={inputStyle} />
+                      <input value={form.businessAddress} onChange={e => set('businessAddress', e.target.value)} style={nativeInputStyle} />
                     )}
                     {form.businessCity && (
                       <div style={{ fontSize: '0.75rem', color: textSec, marginTop: 3 }}>
@@ -320,34 +334,54 @@ export default function Signup() {
                 <div style={{ padding: `0 ${px}px 16px`, display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.name}</label>
-                    <input value={form.name} onChange={e => set('name', e.target.value)} style={inputStyle} />
+                    <IonInput
+                      fill="outline"
+                      value={form.name}
+                      onIonChange={e => set('name', e.detail.value ?? '')}
+                      required
+                      style={ionInputStyle}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.email}</label>
-                    <input type="email" value={form.email} onChange={e => set('email', e.target.value)} style={inputStyle} />
+                    <IonInput
+                      fill="outline"
+                      type="email"
+                      value={form.email}
+                      onIonChange={e => set('email', e.detail.value ?? '')}
+                      required
+                      style={ionInputStyle}
+                    />
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.password}</label>
-                    <div style={{ position: 'relative' }}>
-                      <input type={showPw ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)} style={{ ...inputStyle, paddingRight: 40 }} />
-                      <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
+                    <IonInput
+                      fill="outline"
+                      type={showPw ? 'text' : 'password'}
+                      value={form.password}
+                      onIonChange={e => set('password', e.detail.value ?? '')}
+                      required
+                      style={ionInputStyle}
+                    >
+                      <button slot="end" type="button" onClick={() => setShowPw(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
                         <IonIcon name={showPw ? 'eye-off-outline' : 'eye-outline'} style={{ fontSize: 16 }} />
                       </button>
-                    </div>
+                    </IonInput>
                   </div>
                   <div>
                     <label style={{ display: 'block', fontSize: '0.78rem', color: textSec, marginBottom: 4, fontWeight: 500 }}>{t.confirm}</label>
-                    <div style={{ position: 'relative' }}>
-                      <input
-                        type={showConfirm ? 'text' : 'password'}
-                        value={form.confirmPassword}
-                        onChange={e => set('confirmPassword', e.target.value)}
-                        style={{ ...inputStyle, paddingRight: 40, borderColor: form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : fieldBorder }}
-                      />
-                      <button type="button" onClick={() => setShowConfirm(v => !v)} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
+                    <IonInput
+                      fill="outline"
+                      type={showConfirm ? 'text' : 'password'}
+                      value={form.confirmPassword}
+                      onIonChange={e => set('confirmPassword', e.detail.value ?? '')}
+                      required
+                      style={{ ...ionInputStyle, '--border-color': form.confirmPassword && form.password !== form.confirmPassword ? '#f87171' : fieldBorder }}
+                    >
+                      <button slot="end" type="button" onClick={() => setShowConfirm(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: textSec, display: 'flex', alignItems: 'center', padding: 4 }}>
                         <IonIcon name={showConfirm ? 'eye-off-outline' : 'eye-outline'} style={{ fontSize: 16 }} />
                       </button>
-                    </div>
+                    </IonInput>
                     {form.confirmPassword && form.password !== form.confirmPassword && (
                       <div style={{ fontSize: '0.75rem', color: '#f87171', marginTop: 3 }}>{t.mismatch}</div>
                     )}
