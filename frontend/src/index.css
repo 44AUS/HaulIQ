@@ -41,16 +41,26 @@ tr[style*="cursor:pointer"]:hover {
   background-color: var(--ion-color-step-50, rgba(0,0,0,0.05)) !important;
 }
 
-/* Nav tabs, page tabs, clickable divs/buttons — opacity (wins over inline styles) */
-div[style*="cursor: pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
-div[style*="cursor:pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]),
-button:not([disabled]):not([class*="ion-"]):not([class*="button-"]) {
-  transition: opacity 0.13s !important;
+/* Clickable card / list rows */
+div[style*="cursor: pointer"],
+div[style*="cursor:pointer"] {
+  transition: background-color 0.14s;
 }
-div[style*="cursor: pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]):hover,
-div[style*="cursor:pointer"]:not([style*="position: fixed"]):not([style*="position:fixed"]):hover,
+div[style*="cursor: pointer"]:hover,
+div[style*="cursor:pointer"]:hover {
+  background-color: rgba(0,0,0,0.04);
+}
+.dark div[style*="cursor: pointer"]:hover,
+.dark div[style*="cursor:pointer"]:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* Plain (non-Ionic) buttons */
+button:not([disabled]):not([class*="ion-"]):not([class*="button-"]) {
+  transition: opacity 0.12s;
+}
 button:not([disabled]):not([class*="ion-"]):not([class*="button-"]):hover {
-  opacity: 0.72 !important;
+  opacity: 0.78;
 }
 
 @layer base {
