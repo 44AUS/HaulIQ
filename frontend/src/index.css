@@ -29,6 +29,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Interactive element hover feedback ───────────────────────────────────── */
+
+/* Clickable table rows */
+tr[style*="cursor: pointer"],
+tr[style*="cursor:pointer"] {
+  transition: background-color 0.12s;
+}
+tr[style*="cursor: pointer"]:hover,
+tr[style*="cursor:pointer"]:hover {
+  background-color: var(--ion-color-step-50, rgba(0,0,0,0.05)) !important;
+}
+
+/* Clickable card / list rows (direct-child divs with cursor pointer, not wrappers) */
+div[style*="cursor: pointer"],
+div[style*="cursor:pointer"] {
+  transition: background-color 0.14s;
+}
+div[style*="cursor: pointer"]:hover,
+div[style*="cursor:pointer"]:hover {
+  background-color: rgba(0,0,0,0.04);
+}
+.dark div[style*="cursor: pointer"]:hover,
+.dark div[style*="cursor:pointer"]:hover {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* Plain (non-Ionic) buttons */
+button:not([disabled]):not([class*="ion-"]):not([class*="button-"]) {
+  transition: opacity 0.12s;
+}
+button:not([disabled]):not([class*="ion-"]):not([class*="button-"]):hover {
+  opacity: 0.78;
+}
+
 @layer base {
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
