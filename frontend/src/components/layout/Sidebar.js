@@ -207,9 +207,11 @@ export default function Sidebar({ onNavigate }) {
       <div style={{ display: 'flex', alignItems: 'center', minHeight: 60, padding: '0 8px', flexShrink: 0 }}>
         <button
           onClick={() => { const m = document.querySelector('ion-menu'); if (m) m.close(); }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: iconColor, padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center' }}
+          style={{ width: 40, height: 40, background: 'none', border: 'none', cursor: 'pointer', color: iconColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <IonIcon name="close-outline" fontSize="small" />
+          <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
         </button>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
           <img src="/urload-logo.png" alt="HaulIQ" style={{ height: 30, width: 'auto' }} />
@@ -217,9 +219,11 @@ export default function Sidebar({ onNavigate }) {
         <button
           onClick={toggleTheme}
           title={isDark ? 'Light mode' : 'Dark mode'}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: iconColor, padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center' }}
+          style={{ width: 40, height: 40, background: 'none', border: 'none', cursor: 'pointer', color: iconColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <IonIcon name={isDark ? 'sunny-outline' : 'moon-outline'} fontSize="small" />
+          <IonIcon name={isDark ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 20, pointerEvents: 'none' }} />
         </button>
       </div>
 
