@@ -15,12 +15,12 @@ const NOTIF_DRAWER_WIDTH = 360;
 
 // ── Role nav configs ──────────────────────────────────────────────────────────
 const CARRIER_NAV = [
-  { icon: 'calendar-outline',   label: 'Calendar',   path: '/carrier/calendar' },
-  { icon: 'search-outline',     label: 'Load Board', path: '/carrier/loads' },
-  { icon: 'analytics-outline',  label: 'Loads',      path: '/carrier/job-manager' },
-  { icon: 'wallet-outline',     label: 'Payments',   path: '/carrier/payments' },
-  { icon: 'car-sport-outline',  label: 'My Trucks',  path: '/carrier/equipment' },
-  { icon: 'bookmark-outline',   label: 'Lane Watch', path: '/carrier/lane-watches' },
+  { icon: 'calendar-outline',   label: 'Calendar',     path: '/carrier/calendar' },
+  { icon: 'search-outline',     label: 'Load Board',   path: '/carrier/loads' },
+  { icon: 'layers-outline',     label: 'Loads',        path: '/carrier/job-manager' },
+  { icon: 'cash-outline',       label: 'Payments',     path: '/carrier/payments' },
+  { icon: 'bus-outline',        label: 'My Equipment', path: '/carrier/equipment' },
+  { icon: 'eye-outline',        label: 'Lane Watch',   path: '/carrier/lane-watches' },
 ];
 const BROKER_NAV = [
   { icon: 'calendar-outline',   label: 'Calendar',  path: '/broker/calendar' },
