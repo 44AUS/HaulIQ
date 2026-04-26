@@ -624,19 +624,27 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
 
           {/* Right icons */}
           <IonButtons slot="end">
-            <IonButton fill="clear" onClick={() => setSearchOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)', opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
-              <IonIcon name="search-outline" style={{ fontSize: 22 }} />
-            </IonButton>
-            <IonButton fill="clear" onClick={() => setNotifOpen(true)} style={{ '--color': 'rgba(255,255,255,0.8)', marginRight: 4 }}>
-              <div style={{ position: 'relative' }}>
-                <IonIcon name="notifications-outline" style={{ fontSize: 22 }} />
-                {notifCount > 0 && (
-                  <IonBadge color="danger" style={{ position: 'absolute', top: -4, right: -4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {notifCount > 9 ? '9+' : notifCount}
-                  </IonBadge>
-                )}
-              </div>
-            </IonButton>
+            <button
+              onClick={() => setSearchOpen(true)}
+              style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s', opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? 'none' : 'auto' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <IonIcon name="search-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+            </button>
+            <button
+              onClick={() => setNotifOpen(true)}
+              style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, position: 'relative', marginRight: 4, transition: 'background-color 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <IonIcon name="notifications-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
+              {notifCount > 0 && (
+                <IonBadge color="danger" style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+                  {notifCount > 9 ? '9+' : notifCount}
+                </IonBadge>
+              )}
+            </button>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
