@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
-  IonBadge, IonModal, IonContent, IonList, IonItem, IonLabel,
+  IonBadge, IonList, IonItem, IonLabel,
   IonToggle, IonSkeletonText, IonPopover,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
@@ -520,12 +520,11 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
           )}
         </IonHeader>
 
-        {/* Notifications modal */}
-        <IonModal isOpen={notifOpen} onDidDismiss={() => setNotifOpen(false)} style={{ '--width': `${NOTIF_DRAWER_WIDTH}px`, '--height': '100%', '--border-radius': 0 }} breakpoints={undefined} initialBreakpoint={undefined} className="notif-modal">
-          <IonContent>
-            <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
-          </IonContent>
-        </IonModal>
+        {/* Notifications drawer */}
+        {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.35)' }} />}
+        <div style={{ position: 'fixed', top: 0, right: 0, height: '100%', width: NOTIF_DRAWER_WIDTH, zIndex: 1001, backgroundColor: 'var(--ion-card-background)', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', transform: notifOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)', display: 'flex', flexDirection: 'column' }}>
+          <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
+        </div>
       </>
     );
   }
@@ -652,12 +651,11 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
         </IonList>
       </IonPopover>
 
-      {/* Notifications modal */}
-      <IonModal isOpen={notifOpen} onDidDismiss={() => setNotifOpen(false)} style={{ '--width': `${NOTIF_DRAWER_WIDTH}px`, '--height': '100%', '--border-radius': 0 }} className="notif-modal">
-        <IonContent>
-          <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
-        </IonContent>
-      </IonModal>
+      {/* Notifications drawer */}
+      {notifOpen && <div onClick={() => setNotifOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.35)' }} />}
+      <div style={{ position: 'fixed', top: 0, right: 0, height: '100%', width: NOTIF_DRAWER_WIDTH, zIndex: 1001, backgroundColor: 'var(--ion-card-background)', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', transform: notifOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)', display: 'flex', flexDirection: 'column' }}>
+        <NotificationsPanel onClose={() => setNotifOpen(false)} onCountChange={setNotifCount} />
+      </div>
     </>
   );
 }
