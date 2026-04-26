@@ -4,6 +4,7 @@ import { IonSpinner } from '@ionic/react';
 import { useAuth, ROLES } from '../context/AuthContext';
 import AuthHeader from '../components/AuthHeader';
 import IonIcon from '../components/IonIcon';
+import mapVector from '../assets/map_vector.svg';
 
 const BRAND_MED = '#1976d2';
 const BRAND_LIGHT = '#42a5f5';
@@ -71,7 +72,7 @@ export default function Login() {
 
         {/* Map SVG layer — white paths tinted to blue */}
         <img
-          src="/map_vector.svg"
+          src={mapVector}
           alt=""
           aria-hidden="true"
           style={{
