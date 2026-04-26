@@ -5,7 +5,7 @@ import {
   IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton,
 } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
-import { truckPostsApi, equipmentTypesApi } from '../../services/api';
+import { truckPostsApi, equipmentClassesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
 const TABS = [
@@ -44,8 +44,9 @@ const fmtDate = (s) => {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const emptyForm = (equipmentTypes) => ({
-  equipment_type: equipmentTypes[0]?.name || '',
+const emptyForm = () => ({
+  equipment_class: '',
+  equipment_type: '',
   trailer_length: '',
   weight_capacity: '',
   current_location: '',
@@ -61,7 +62,7 @@ export default function Equipment() {
   const [posts,          setPosts]          = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
-  const [equipmentTypes, setEquipmentTypes] = useState([]);
+  const [equipmentClasses, setEquipmentClasses] = useState([]);
   const [activeTab,      setActiveTab]      = useState('all');
   const [dialogOpen,     setDialogOpen]     = useState(false);
   const [editPost,       setEditPost]       = useState(null);
@@ -84,7 +85,7 @@ export default function Equipment() {
   }, []);
 
   useEffect(() => {
-    equipmentTypesApi.list().then(d => setEquipmentTypes(Array.isArray(d) ? d : [])).catch(() => {});
+    equipmentClassesApi.list().then(d => setEquipmentClasses(Array.isArray(d) ? d : [])).catch(() => {});
     fetchPosts();
   }, [fetchPosts]);
 
@@ -101,15 +102,23 @@ export default function Equipment() {
     return c;
   }, [enriched]);
 
+  const findClassForType = (typeName) => {
+    for (const cls of equipmentClasses) {
+      if (cls.equipment_types.some(t => t.name === typeName)) return cls.name;
+    }
+    return '';
+  };
+
   const openCreate = () => {
     setEditPost(null); setIsRepost(false);
-    setForm(emptyForm(equipmentTypes)); setError(''); setDialogOpen(true);
+    setForm(emptyForm()); setError(''); setDialogOpen(true);
   };
 
   const openEdit = (post) => {
     setEditPost(post); setIsRepost(false);
     setForm({
-      equipment_type:        post.equipment_type || equipmentTypes[0]?.name || '',
+      equipment_class:       findClassForType(post.equipment_type || ''),
+      equipment_type:        post.equipment_type || '',
       trailer_length:        post.trailer_length ?? '',
       weight_capacity:       post.weight_capacity ?? '',
       current_location:      post.current_location || '',
@@ -126,7 +135,8 @@ export default function Equipment() {
   const openRepost = (post) => {
     setEditPost(null); setIsRepost(true);
     setForm({
-      equipment_type:        post.equipment_type || equipmentTypes[0]?.name || '',
+      equipment_class:       findClassForType(post.equipment_type || ''),
+      equipment_type:        post.equipment_type || '',
       trailer_length:        post.trailer_length ?? '',
       weight_capacity:       post.weight_capacity ?? '',
       current_location:      post.current_location || '',
@@ -141,8 +151,8 @@ export default function Equipment() {
   };
 
   const handleSave = async () => {
-    if (!form.equipment_type || !form.current_location || !form.available_from || !form.available_to) {
-      setError('Equipment type, current location, and availability dates are required.'); return;
+    if (!form.equipment_class || !form.equipment_type || !form.current_location || !form.available_from || !form.available_to) {
+      setError('Equipment class, type, current location, and availability dates are required.'); return;
     }
     setSaving(true); setError('');
     try {
@@ -477,9 +487,26 @@ export default function Equipment() {
 
         <IonList inset>
           <IonItem>
+            <IonLabel position="stacked">Equipment Class <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+            <IonSelect
+              value={form.equipment_class || ''}
+              onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
+              placeholder="Select class"
+            >
+              {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
+            </IonSelect>
+          </IonItem>
+
+          <IonItem style={{ opacity: form.equipment_class ? 1 : 0.4, pointerEvents: form.equipment_class ? 'auto' : 'none' }}>
             <IonLabel position="stacked">Equipment Type <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonSelect value={form.equipment_type || ''} onIonChange={setField('equipment_type')} placeholder="Select type">
-              {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+            <IonSelect
+              value={form.equipment_type || ''}
+              onIonChange={setField('equipment_type')}
+              placeholder={form.equipment_class ? 'Select type' : 'Select a class first'}
+              disabled={!form.equipment_class}
+            >
+              {(equipmentClasses.find(c => c.name === form.equipment_class)?.equipment_types || [])
+                .map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
             </IonSelect>
           </IonItem>
 
