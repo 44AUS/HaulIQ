@@ -512,7 +512,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                 >
                   <IonIcon name="notifications-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
                   {notifCount > 0 && (
-                    <IonBadge color="danger" style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, pointerEvents: 'none' }}>
+                    <IonBadge color="danger" style={{ position: 'absolute', top: 4, right: 4, fontSize: '0.6rem', minWidth: 16, height: 16, borderRadius: 8, pointerEvents: 'none', border: `2px solid ${barColor}` }}>
                       {notifCount > 9 ? '9+' : notifCount}
                     </IonBadge>
                   )}

@@ -397,7 +397,7 @@ export default function Sidebar({ onNavigate, onClose }) {
               <div slot="start" style={{ marginRight: 12, position: 'relative', display: 'flex' }}>
                 <IonIcon name={item.icon} style={{ fontSize: '1.25rem' }} />
                 {badgeCount > 0 && (
-                  <IonBadge color="danger" style={{ position: 'absolute', top: -6, right: -8, fontSize: '0.6rem', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8 }}>
+                  <IonBadge color="danger" style={{ position: 'absolute', top: -6, right: -8, fontSize: '0.6rem', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '2px solid var(--app-sidebar-bg)' }}>
                     {badgeCount > 9 ? '9+' : badgeCount}
                   </IonBadge>
                 )}
