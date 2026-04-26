@@ -14,7 +14,7 @@ const TT = {
 };
 
 const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
-const thStyle   = { padding: '10px 12px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-color-light)', whiteSpace: 'nowrap' };
+const thStyle   = { padding: '10px 12px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap' };
 const tdStyle   = { padding: '12px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' };
 
 const fmt  = (n) => n != null ? `$${Number(n).toLocaleString()}` : '—';
