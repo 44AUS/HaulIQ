@@ -28,8 +28,8 @@ function getYouTubeId(url) {
 function Section({ title, children }) {
   return (
     <div style={{ marginBottom: 28 }}>
-      <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', marginBottom: 10, paddingLeft: 4 }}>{title}</div>
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '14px 20px 12px', borderBottom: '1px solid var(--ion-border-color)' }}>{title}</div>
         {children}
       </div>
     </div>
@@ -336,7 +336,7 @@ export default function Settings() {
 
       {/* ── Status ─────────────────────────────────────────────────────────── */}
       <Section title="Status">
-        <Row icon="pulse-outline" label="App Status">
+        <Row label="App Status">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusCfg.color, flexShrink: 0 }} />
             <span style={{ fontSize: '0.82rem', fontWeight: 700, color: statusCfg.color, backgroundColor: statusCfg.bg, padding: '3px 10px', borderRadius: 20 }}>
@@ -345,13 +345,13 @@ export default function Settings() {
           </div>
         </Row>
         {appInfo && (
-          <Row icon="code-slash-outline" label={`Current version: ${appInfo.current_version}`}>
+          <Row label={`Current version: ${appInfo.current_version}`}>
             <span style={{ fontSize: '0.8rem', color: 'var(--ion-color-medium)' }}>Latest: {appInfo.latest_version}</span>
           </Row>
         )}
 
         {releaseVideoId && (
-          <div style={{ paddingLeft: 54, paddingRight: 20, paddingTop: 16, paddingBottom: 16 }}>
+          <div style={{ paddingLeft: 20, paddingRight: 20, paddingTop: 16, paddingBottom: 16 }}>
             <div style={{ maxWidth: 400 }}>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 8, overflow: 'hidden' }}>
                 <iframe
@@ -367,7 +367,7 @@ export default function Settings() {
         )}
 
         {appInfo?.whats_new?.length > 0 && (
-          <div style={{ paddingLeft: 54, paddingTop: 0, paddingBottom: 0 }}>
+          <div style={{ paddingLeft: 20, paddingTop: 0, paddingBottom: 0 }}>
             <div style={{ paddingBottom: 14, paddingRight: 20, borderBottom: '1px solid var(--ion-border-color)' }}>
               <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>What's New</div>
               <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -379,7 +379,7 @@ export default function Settings() {
           </div>
         )}
 
-        <div style={{ paddingLeft: 54, paddingTop: 14, paddingBottom: 14, paddingRight: 20 }}>
+        <div style={{ paddingLeft: 20, paddingTop: 14, paddingBottom: 14, paddingRight: 20 }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Known Issues</div>
           <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
             {appInfo?.known_issues?.length > 0
