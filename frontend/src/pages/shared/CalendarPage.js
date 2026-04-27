@@ -8,7 +8,7 @@ import { useJsApiLoader, GoogleMap, Marker, InfoWindow, TrafficLayer } from '@re
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
-import { IonButton } from '@ionic/react';
+import { IonButton, IonActionSheet } from '@ionic/react';
 import IonIcon from '../../components/IonIcon';
 
 const GMAPS_LIBS = ['places'];
@@ -412,6 +412,7 @@ export default function CalendarPage() {
   const [drivers, setDrivers]     = useState([]);
   const [selectedDrivers, setSelectedDrivers] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const [filters, setFilters]     = useState({ status: 'All' });
   const [appliedFilters, setAppliedFilters] = useState({ status: 'All' });
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -493,8 +494,6 @@ export default function CalendarPage() {
     color: 'var(--ion-text-color)',
     fontFamily: 'inherit',
   };
-
-  const hasFilter = appliedFilters.status !== 'All';
 
   return (
     <div style={{ padding: '4px 6px', position: 'relative' }}>
@@ -601,11 +600,34 @@ export default function CalendarPage() {
 
       {user?.role === 'carrier' && (
         <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
-          <IonButton onClick={() => navigate('/carrier/loads')} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary, '--box-shadow': '0 6px 20px rgba(0,0,0,0.3)' }}>
+          <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary, '--box-shadow': '0 6px 20px rgba(0,0,0,0.3)' }}>
             <IonIcon slot="start" name="search-outline" /> Find Loads
           </IonButton>
         </div>
       )}
+
+      <IonActionSheet
+        isOpen={findLoadsSheet}
+        onDidDismiss={() => setFindLoadsSheet(false)}
+        header="Find Loads"
+        buttons={[
+          {
+            text: 'Browse Load Board',
+            icon: 'albums-outline',
+            handler: () => navigate('/carrier/loads'),
+          },
+          {
+            text: 'Lane Watches',
+            icon: 'eye-outline',
+            handler: () => navigate('/carrier/lane-watches'),
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            icon: 'close-outline',
+          },
+        ]}
+      />
     </div>
   );
 }

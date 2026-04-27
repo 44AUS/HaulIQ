@@ -3,7 +3,7 @@ import { useThemeMode } from '../../context/ThemeContext';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
   IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
-  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton, IonBadge,
+  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton, IonBadge, IonActionSheet,
 } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentClassesApi } from '../../services/api';
@@ -67,6 +67,7 @@ export default function Equipment() {
   const [equipmentClasses, setEquipmentClasses] = useState([]);
   const [activeTab,      setActiveTab]      = useState('all');
   const [dialogOpen,     setDialogOpen]     = useState(false);
+  const [postSheet,      setPostSheet]      = useState(false);
   const [editPost,       setEditPost]       = useState(null);
   const [isRepost,       setIsRepost]       = useState(false);
   const [form,           setForm]           = useState({});
@@ -368,10 +369,28 @@ export default function Equipment() {
 
       {/* Post Truck button */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
-        <IonButton onClick={openCreate} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+        <IonButton onClick={() => setPostSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
           <IonIcon slot="start" name="add-outline" /> Post Truck
         </IonButton>
       </div>
+
+      <IonActionSheet
+        isOpen={postSheet}
+        onDidDismiss={() => setPostSheet(false)}
+        header="Post Equipment"
+        buttons={[
+          {
+            text: 'Post a New Truck',
+            icon: 'add-circle-outline',
+            handler: () => openCreate(),
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            icon: 'close-outline',
+          },
+        ]}
+      />
 
     </div>
     {/* Date / Time Picker Modal */}

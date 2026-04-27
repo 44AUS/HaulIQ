@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
-import { useThemeMode } from '../../context/ThemeContext';
 
 const TABS = [
   { key: 'all',      label: 'ALL' },
@@ -54,7 +53,6 @@ const fmtDate = (s) => {
 };
 
 export default function CarrierPayments() {
-  const { brandColor } = useThemeMode();
   const [payments,  setPayments]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [spinning,  setSpinning]  = useState(false);

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonCheckbox, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonCheckbox, IonRippleEffect, IonActionSheet } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -131,6 +131,7 @@ export default function LoadManager() {
   const [activeTab,  setActiveTab]  = useState('all');
   const [showProgress, setShowProgress] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const [filters, setFilters]       = useState({});
   const [applied, setApplied]       = useState({});
   const [spinning, setSpinning]     = useState(false);
@@ -307,8 +308,6 @@ export default function LoadManager() {
     setSelected(prev => { const n = new Set(prev); deletableKeys.forEach(k => n.delete(k)); return n; });
     refresh();
   };
-
-  const hasActiveFilters = Object.values(applied).some(Boolean);
 
   return (
     <>
@@ -529,10 +528,33 @@ export default function LoadManager() {
 
       {/* Find Loads button */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
-        <IonButton onClick={() => navigate('/carrier/loads')} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+        <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
           <IonIcon slot="start" name="search-outline" /> Find Loads
         </IonButton>
       </div>
+
+      <IonActionSheet
+        isOpen={findLoadsSheet}
+        onDidDismiss={() => setFindLoadsSheet(false)}
+        header="Find Loads"
+        buttons={[
+          {
+            text: 'Browse Load Board',
+            icon: 'albums-outline',
+            handler: () => navigate('/carrier/loads'),
+          },
+          {
+            text: 'Lane Watches',
+            icon: 'eye-outline',
+            handler: () => navigate('/carrier/lane-watches'),
+          },
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            icon: 'close-outline',
+          },
+        ]}
+      />
 
     </div>
 
