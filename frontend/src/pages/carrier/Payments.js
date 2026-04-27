@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -20,11 +20,11 @@ const STATUS_TAB = {
 };
 
 const TAB_CHIP = {
-  pending:  { label: 'Pending',   bg: '#ffce00', text: '#000' },
-  escrowed: { label: 'In Escrow', bg: '#2a7fff', text: '#fff' },
-  released: { label: 'Paid',      bg: '#2dd36f', text: '#fff' },
-  failed:   { label: 'Past Due',  bg: '#eb445a', text: '#fff' },
-  refunded: { label: 'Voided',    bg: '#757575', text: '#fff' },
+  pending:  { label: 'Pending',   ionColor: 'warning' },
+  escrowed: { label: 'In Escrow', ionColor: 'primary' },
+  released: { label: 'Paid',      ionColor: 'success' },
+  failed:   { label: 'Past Due',  ionColor: 'danger'  },
+  refunded: { label: 'Voided',    ionColor: 'medium'  },
 };
 
 const STATUS_BAR = {
@@ -159,7 +159,7 @@ export default function CarrierPayments() {
                 </thead>
                 <tbody>
                   {tabItems.map(p => {
-                    const chip     = TAB_CHIP[p.status] || { label: p.status, bg: '#9e9e9e', text: '#fff' };
+                    const chip     = TAB_CHIP[p.status] || { label: p.status, ionColor: 'medium' };
                     const barColor = STATUS_BAR[p.status] || '#9e9e9e';
                     return (
                       <tr key={p.id} style={{ height: 64 }}>
@@ -172,9 +172,9 @@ export default function CarrierPayments() {
                         <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</td>
                         <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</td>
                         <td style={{ ...tdStyle, width: 120, minWidth: 120 }}>
-                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.text }}>
+                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
                             {chip.label}
-                          </span>
+                          </IonBadge>
                         </td>
                         <td style={{ ...tdStyle, width: 32, minWidth: 32, paddingRight: 8 }}>
                           <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', display: 'block' }} />

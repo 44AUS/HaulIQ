@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -31,8 +31,8 @@ const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-colo
 const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
 const STATUS_CHIP = {
-  active: { label: 'Active', bg: '#2dd36f', color: '#fff' },
-  paused: { label: 'Paused', bg: '#757575', color: '#fff' },
+  active: { label: 'Active', ionColor: 'success' },
+  paused: { label: 'Paused', ionColor: 'medium'  },
 };
 
 function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
@@ -322,13 +322,14 @@ export default function LaneWatches() {
 
                         <td style={{ ...tdStyle, minWidth: 100 }}>
                           {(() => { const chip = STATUS_CHIP[w.active ? 'active' : 'paused']; return (
-                            <span
+                            <IonBadge
+                              color={chip.ionColor}
                               onClick={e => { e.stopPropagation(); handleToggle(w.id, !w.active); }}
                               title={w.active ? 'Click to pause' : 'Click to activate'}
-                              style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.color, cursor: 'pointer' }}
+                              style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
                             >
                               {chip.label}
-                            </span>
+                            </IonBadge>
                           ); })()}
                         </td>
 

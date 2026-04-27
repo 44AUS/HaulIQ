@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -23,12 +23,12 @@ const STATUS_TAB = {
 };
 
 const STATUS_CHIP = {
-  quoted:     { label: 'Pending',     bg: '#9e9e9e',  color: '#fff' },
-  booked:     { label: 'Scheduled',   bg: '#2a7fff',  color: '#fff' },
-  in_transit: { label: 'In Progress', bg: '#ffce00',  color: '#000' },
-  completed:  { label: 'Completed',   bg: '#2dd36f',  color: '#fff' },
-  saved:      { label: 'Saved',       bg: '#757575',  color: '#fff' },
-  archived:   { label: 'Archived',    bg: '#616161',  color: '#fff' },
+  quoted:     { label: 'Pending',     ionColor: 'medium'  },
+  booked:     { label: 'Scheduled',   ionColor: 'primary' },
+  in_transit: { label: 'In Progress', ionColor: 'warning' },
+  completed:  { label: 'Completed',   ionColor: 'success' },
+  saved:      { label: 'Saved',       ionColor: 'medium'  },
+  archived:   { label: 'Archived',    ionColor: 'dark'    },
 };
 
 const STATUS_BAR_COLOR = {
@@ -408,7 +408,7 @@ export default function LoadManager() {
               </thead>
               <tbody>
                 {tabItems.map((item, idx) => {
-                  const chip     = STATUS_CHIP[item.chipKey] || { label: item.status, bg: '#9e9e9e', color: '#fff' };
+                  const chip     = STATUS_CHIP[item.chipKey] || { label: item.status, ionColor: 'medium' };
                   const barColor = STATUS_BAR_COLOR[item.chipKey] || '#9e9e9e';
                   const rowKey   = item._key || idx;
                   const isHovered  = hoveredRow === rowKey;
@@ -484,9 +484,9 @@ export default function LoadManager() {
                         </td>
 
                         <td style={{ ...tdStyle, padding: '0 12px', width: 120, minWidth: 120 }}>
-                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.color }}>
+                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
                             {chip.label}
-                          </span>
+                          </IonBadge>
                         </td>
 
                         <td style={{ ...tdStyle, width: 48, minWidth: 48, paddingRight: 8 }} onClick={e => e.stopPropagation()}>

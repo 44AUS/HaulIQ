@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
   IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
-  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton,
+  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton, IonBadge,
 } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentClassesApi } from '../../services/api';
@@ -16,9 +16,9 @@ const TABS = [
 ];
 
 const STATUS_CHIP = {
-  active:   { label: 'Active',   bg: '#2dd36f', color: '#fff' },
-  expired:  { label: 'Expired',  bg: '#eb445a', color: '#fff' },
-  inactive: { label: 'Inactive', bg: '#757575', color: '#fff' },
+  active:   { label: 'Active',   ionColor: 'success' },
+  expired:  { label: 'Expired',  ionColor: 'danger'  },
+  inactive: { label: 'Inactive', ionColor: 'medium'  },
 };
 
 const STATUS_BAR = {
@@ -288,7 +288,7 @@ export default function Equipment() {
             </thead>
             <tbody>
               {tabItems.map((post) => {
-                const chip     = STATUS_CHIP[post._status] || { label: post._status, bg: '#9e9e9e', color: '#fff' };
+                const chip     = STATUS_CHIP[post._status] || { label: post._status, ionColor: 'medium' };
                 const barColor = STATUS_BAR[post._status]  || '#9e9e9e';
                 return (
                   <tr key={post.id} style={{ height: 64 }}>
@@ -332,13 +332,14 @@ export default function Equipment() {
                     </td>
 
                     <td style={{ ...tdStyle, width: 110, minWidth: 110 }}>
-                      <span
+                      <IonBadge
+                        color={chip.ionColor}
                         onClick={e => handleToggleActive(e, post)}
                         title={post.is_active ? 'Click to deactivate' : 'Click to activate'}
-                        style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.color, cursor: 'pointer' }}
+                        style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
                       >
                         {chip.label}
-                      </span>
+                      </IonBadge>
                     </td>
 
                     <td style={{ ...tdStyle, width: 110, minWidth: 110, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
