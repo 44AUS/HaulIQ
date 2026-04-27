@@ -11,7 +11,7 @@ export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
           onChange={e => setLang(e.target.value)}
           style={{
             height: 32, color: 'rgba(255,255,255,0.85)', fontSize: '0.78rem', fontWeight: 600,
-            background: 'transparent', border: '1px solid rgba(255,255,255,0.22)', borderRadius: 6,
+            background: 'transparent', border: 'none', borderRadius: 6,
             padding: '0 10px', cursor: 'pointer', outline: 'none',
           }}
         >
@@ -23,7 +23,7 @@ export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
           onClick={toggleMode}
           style={{
             color: 'rgba(255,255,255,0.85)', width: 32, height: 32,
-            border: '1px solid rgba(255,255,255,0.22)', borderRadius: 6,
+            border: 'none', borderRadius: 6,
             background: 'transparent', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}

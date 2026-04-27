@@ -68,6 +68,7 @@ export default function Login() {
     '--padding-end': '12px',
     '--padding-top': '9px',
     '--padding-bottom': '9px',
+    '--min-height': '42px',
     fontSize: '0.875rem',
   };
 
