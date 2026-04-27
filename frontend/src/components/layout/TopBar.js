@@ -440,7 +440,9 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   }, [user, location.pathname]);
 
   useEffect(() => {
-    if (searchOpen && searchRef.current) searchRef.current.focus();
+    if (searchOpen && searchRef.current) {
+      setTimeout(() => searchRef.current?.setFocus?.(), 80);
+    }
   }, [searchOpen]);
 
   useEffect(() => {
@@ -456,7 +458,11 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   }, [searchVal]);
 
   useEffect(() => {
-    const h = (e) => { if (searchPanelRef.current && !searchPanelRef.current.contains(e.target)) setSearchResults(null); };
+    const h = (e) => {
+      if (searchPanelRef.current && !e.composedPath().some(el => el === searchPanelRef.current || (searchPanelRef.current && searchPanelRef.current.contains(el)))) {
+        setSearchResults(null);
+      }
+    };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, []);
