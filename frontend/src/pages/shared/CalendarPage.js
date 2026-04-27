@@ -164,7 +164,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
                     onIonChange={() => toggle(d.id)}
                     style={{ marginRight: 12 }}
                   />
-                  <IonAvatar slot="start" style={{ width: 40, height: 40, marginRight: 12, flexShrink: 0 }}>
+                  <IonAvatar slot="end" style={{ width: 40, height: 40, marginLeft: 12, flexShrink: 0 }}>
                     {d.avatar_url
                       ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
                       : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
