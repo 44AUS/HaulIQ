@@ -228,11 +228,6 @@ function OverviewTab({ setSnackbar }) {
             {avatarUploading ? <IonSpinner name="crescent" style={{ width: 28, height: 28, color: '#fff' }} /> : <IonIcon name="camera-outline" style={{ color: '#fff', fontSize: 28 }} />}
           </div>
         </div>
-        <div style={{ position: 'absolute', top: 8, right: 8, backgroundColor: isDark ? 'rgba(30,30,30,0.85)' : 'rgba(255,255,255,0.85)', borderRadius: 6 }}>
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', alignItems: 'center' }}>
-            <IonIcon name="ellipsis-vertical-outline" style={{ fontSize: 18 }} />
-          </button>
-        </div>
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
       </div>
 

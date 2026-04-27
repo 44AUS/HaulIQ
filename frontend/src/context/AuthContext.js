@@ -20,6 +20,7 @@ function mapUser(apiUser) {
     joined:     apiUser.created_at ? apiUser.created_at.split('T')[0] : null,
     avatar:     apiUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2),
     avatar_url: apiUser.avatar_url || null,
+    logo_url:   apiUser.logo_url   || null,
     brand_color: apiUser.brand_color || null,
     carrier_id:  apiUser.carrier_id  || null,
     license_number: apiUser.license_number || null,
