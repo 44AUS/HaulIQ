@@ -389,7 +389,7 @@ export default function Sidebar({ onNavigate, onClose }) {
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
       {/* Nav list */}
-      <IonList lines="full" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
+      <IonList lines="inset" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
         {links.map((item) => {
           const active    = isActive(item.path);
           const badgeCount = item.badge ? getBadge(item.badge) : 0;
@@ -407,7 +407,7 @@ export default function Sidebar({ onNavigate, onClose }) {
                 '--border-color':            divColor,
                 '--min-height':              '48px',
                 '--padding-start':           '20px',
-                '--padding-end':             '20px',
+                '--padding-end':             '0',
                 '--inner-padding-end':       '0',
                 fontWeight: active ? 600 : 400,
               }}
@@ -445,7 +445,7 @@ export default function Sidebar({ onNavigate, onClose }) {
                 '--border-color':            divColor,
                 '--min-height':              '48px',
                 '--padding-start':           '20px',
-                '--padding-end':             '20px',
+                '--padding-end':             '0',
                 '--inner-padding-end':       '0',
                 fontWeight: active ? 600 : 400,
               }}
