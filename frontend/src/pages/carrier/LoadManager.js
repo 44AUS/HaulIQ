@@ -458,7 +458,7 @@ export default function LoadManager() {
 
                         {/* Route — accent bar */}
                         <RippleTd style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 200 }}>
-                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                           <div style={{ paddingLeft: 16 }}>
                             <span style={{ fontSize: '0.875rem', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{item.origin} → {item.dest}</span>
                           </div>

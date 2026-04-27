@@ -167,7 +167,7 @@ export default function CarrierPayments() {
                     return (
                       <tr key={p.id} style={{ height: 64 }}>
                         <RippleTd style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
-                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                           <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{p.load_origin || '—'} → {p.load_destination || '—'}</span>
                         </RippleTd>
                         <RippleTd style={{ ...tdStyle, color: 'var(--ion-color-medium)' }}>{fmt(p.amount)}</RippleTd>

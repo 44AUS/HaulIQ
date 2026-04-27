@@ -195,7 +195,7 @@ export default function TruckBoard() {
                       <tr key={post.id} style={{ height: 64 }}>
                         {/* Carrier — accent bar */}
                         <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 180 }}>
-                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                          <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                           <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.carrier_name || 'Carrier'}</span>
                           {post.carrier_company && (
                             <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.carrier_company}</span>

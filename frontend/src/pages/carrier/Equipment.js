@@ -297,7 +297,7 @@ export default function Equipment() {
                   <tr key={post.id} style={{ height: 64 }}>
                     {/* Equipment — accent bar */}
                     <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 150 }}>
-                      <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                      <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                       <div style={{ paddingLeft: 16 }}>
                         <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.equipment_type}</div>
                         {(post.trailer_length || post.weight_capacity) && (
