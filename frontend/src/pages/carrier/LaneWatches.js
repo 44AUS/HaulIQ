@@ -26,9 +26,6 @@ const EMPTY_FORM = {
 
 const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 400, color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap', borderBottom: '1px solid var(--ion-border-color)' };
 const tdStyle = { padding: '10px 12px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
-function RippleTd({ style, children, ...props }) {
-  return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
-}
 const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
 const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
@@ -272,7 +269,7 @@ export default function LaneWatches() {
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
+              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, minWidth: 640 }}>
                 <thead>
                   <tr>
                     <th style={thStyle}>Lane</th>
@@ -288,9 +285,9 @@ export default function LaneWatches() {
                     const { from, to } = laneLabel(w);
                     const barColor = w.active ? '#2dd36f' : '#757575';
                     return (
-                      <tr key={w.id} style={{ height: 64 }}>
+                      <tr key={w.id} className="ion-activatable" style={{ height: 64, position: 'relative', overflow: 'hidden' }}><IonRippleEffect />
                         {/* Lane — accent bar */}
-                        <RippleTd style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
+                        <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
                           <div style={{ display: 'flex', alignItems: 'stretch', gap: 8 }}>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, paddingBottom: 2 }}>
@@ -303,27 +300,27 @@ export default function LaneWatches() {
                               <span style={{ fontSize: '0.82rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{to}</span>
                             </div>
                           </div>
-                        </RippleTd>
+                        </td>
 
-                        <RippleTd style={{ ...tdStyle, minWidth: 120 }}>
+                        <td style={{ ...tdStyle, minWidth: 120 }}>
                           <span style={{ fontSize: '0.82rem', color: w.equipment_type ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
                             {w.equipment_type || 'Any'}
                           </span>
-                        </RippleTd>
+                        </td>
 
-                        <RippleTd style={{ ...tdStyle, minWidth: 100 }}>
+                        <td style={{ ...tdStyle, minWidth: 100 }}>
                           <span style={{ fontWeight: 600, color: w.min_rate ? '#2e7d32' : 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
                             {w.min_rate ? `$${Number(w.min_rate).toLocaleString()}` : '—'}
                           </span>
-                        </RippleTd>
+                        </td>
 
-                        <RippleTd style={{ ...tdStyle, minWidth: 100 }}>
+                        <td style={{ ...tdStyle, minWidth: 100 }}>
                           <span style={{ fontWeight: 600, color: w.min_rpm ? '#0288d1' : 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
                             {w.min_rpm ? `$${w.min_rpm}/mi` : '—'}
                           </span>
-                        </RippleTd>
+                        </td>
 
-                        <RippleTd style={{ ...tdStyle, minWidth: 100 }}>
+                        <td style={{ ...tdStyle, minWidth: 100 }}>
                           {(() => { const chip = STATUS_CHIP[w.active ? 'active' : 'paused']; return (
                             <IonBadge
                               color={chip.ionColor}
@@ -334,9 +331,9 @@ export default function LaneWatches() {
                               {chip.label}
                             </IonBadge>
                           ); })()}
-                        </RippleTd>
+                        </td>
 
-                        <RippleTd style={{ ...tdStyle, width: 48 }}>
+                        <td style={{ ...tdStyle, width: 48 }}>
                           <button
                             onClick={() => handleDelete(w.id)}
                             title="Delete watch"
@@ -346,7 +343,7 @@ export default function LaneWatches() {
                           >
                             <IonIcon name="trash-outline" style={{ fontSize: 15 }} />
                           </button>
-                        </RippleTd>
+                        </td>
                       </tr>
                     );
                   })}
