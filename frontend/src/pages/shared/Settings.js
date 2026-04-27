@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { IonToggle, IonToast, IonSpinner, IonBadge, IonReorderGroup, IonReorder, IonItem, IonLabel } from '@ionic/react';
+import { IonToggle, IonToast, IonSpinner, IonBadge, IonReorderGroup, IonReorder, IonItem } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { settingsApi } from '../../services/api';
