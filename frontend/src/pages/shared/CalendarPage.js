@@ -119,7 +119,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
 
   const label = selectedDrivers.length === 0 ? 'Assigned'
     : selectedDrivers.length === 1
-      ? (drivers.find(d => d.id === selectedDrivers[0])?.full_name || drivers.find(d => d.id === selectedDrivers[0])?.email || 'Driver')
+      ? (drivers.find(d => d.id === selectedDrivers[0])?.full_name || 'Driver')
       : `${selectedDrivers.length} Drivers`;
 
   return (
@@ -155,7 +155,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
           <div style={{ maxHeight: 240, overflowY: 'auto' }}>
             {drivers.map(d => {
               const checked = pending.includes(d.id);
-              const name = d.full_name || d.email || `Driver ${d.id}`;
+              const name = d.full_name || 'Driver';
               return (
                 <IonItem key={d.id} button detail={false} onClick={() => toggle(d.id)} style={{ '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', '--min-height': '56px' }}>
                   <IonCheckbox
