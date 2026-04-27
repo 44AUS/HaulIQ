@@ -98,7 +98,7 @@ function TableView({ loads, equipmentTypes }) {
             const initials = load.broker?.name?.split(' ').map(w => w[0]).join('').slice(0, 2) || '?';
 
             return (
-              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} className="ion-activatable" style={{ cursor: 'pointer', height: 64, position: 'relative', overflow: 'hidden' }}>
+              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} className="ion-activatable" style={{ cursor: 'pointer', height: 64, position: 'relative' }}>
                 <IonRippleEffect />
                 <td style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{load.posted}</span>

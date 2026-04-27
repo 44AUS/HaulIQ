@@ -285,7 +285,7 @@ export default function LaneWatches() {
                     const { from, to } = laneLabel(w);
                     const barColor = w.active ? '#2dd36f' : '#757575';
                     return (
-                      <tr key={w.id} className="ion-activatable" style={{ height: 64, position: 'relative', overflow: 'hidden' }}>
+                      <tr key={w.id} className="ion-activatable" style={{ height: 64, position: 'relative' }}>
                         <IonRippleEffect />
                         {/* Lane — accent bar */}
                         <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>

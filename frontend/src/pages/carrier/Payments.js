@@ -162,7 +162,7 @@ export default function CarrierPayments() {
                     const chip     = TAB_CHIP[p.status] || { label: p.status, ionColor: 'medium' };
                     const barColor = STATUS_BAR[p.status] || '#9e9e9e';
                     return (
-                      <tr key={p.id} className="ion-activatable" style={{ height: 64, position: 'relative', overflow: 'hidden' }}>
+                      <tr key={p.id} className="ion-activatable" style={{ height: 64, position: 'relative' }}>
                         <IonRippleEffect />
                         <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />

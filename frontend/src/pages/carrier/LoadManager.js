@@ -433,7 +433,7 @@ export default function LoadManager() {
                         onMouseEnter={() => setHoveredRow(rowKey)}
                         onMouseLeave={() => setHoveredRow(null)}
                         className="ion-activatable"
-                        style={{ cursor: 'pointer', height: 64, position: 'relative', overflow: 'hidden', animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
+                        style={{ cursor: 'pointer', height: 64, position: 'relative', animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
                       >
                         <IonRippleEffect />
                         {/* Date / checkbox */}
