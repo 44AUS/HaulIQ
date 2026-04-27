@@ -647,9 +647,9 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                   '--color': isDark ? '#ffffff' : '#000000',
                   '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
                   '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
-                  '--cancel-button-color': 'rgba(255,255,255,0.8)',
+                  '--cancel-button-color': 'var(--ion-color-medium)',
                   '--border-radius': '0px',
-                  '--box-shadow': 'none',
+                  '--box-shadow': '0 4px 24px rgba(0,0,0,0.18)',
                   padding: '0 4px',
                 }}
               />
