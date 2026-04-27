@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonRippleEffect } from '@ionic/react';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -98,7 +98,8 @@ function TableView({ loads, equipmentTypes }) {
             const initials = load.broker?.name?.split(' ').map(w => w[0]).join('').slice(0, 2) || '?';
 
             return (
-              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} style={{ cursor: 'pointer', height: 64 }}>
+              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} className="ion-activatable" style={{ cursor: 'pointer', height: 64, position: 'relative', overflow: 'hidden' }}>
+                <IonRippleEffect />
                 <td style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{load.posted}</span>
                 </td>

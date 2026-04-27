@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonRippleEffect } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -162,7 +162,8 @@ export default function CarrierPayments() {
                     const chip     = TAB_CHIP[p.status] || { label: p.status, ionColor: 'medium' };
                     const barColor = STATUS_BAR[p.status] || '#9e9e9e';
                     return (
-                      <tr key={p.id} style={{ height: 64 }}>
+                      <tr key={p.id} className="ion-activatable" style={{ height: 64, position: 'relative', overflow: 'hidden' }}>
+                        <IonRippleEffect />
                         <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
                           <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{p.load_origin || '—'} → {p.load_destination || '—'}</span>

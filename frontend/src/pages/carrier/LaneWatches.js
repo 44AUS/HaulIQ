@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonRippleEffect } from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -285,7 +285,8 @@ export default function LaneWatches() {
                     const { from, to } = laneLabel(w);
                     const barColor = w.active ? '#2dd36f' : '#757575';
                     return (
-                      <tr key={w.id} style={{ height: 64 }}>
+                      <tr key={w.id} className="ion-activatable" style={{ height: 64, position: 'relative', overflow: 'hidden' }}>
+                        <IonRippleEffect />
                         {/* Lane — accent bar */}
                         <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />

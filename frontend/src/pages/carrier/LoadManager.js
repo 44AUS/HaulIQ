@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonCheckbox } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonCheckbox, IonRippleEffect } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -432,8 +432,10 @@ export default function LoadManager() {
                         onClick={item._nav}
                         onMouseEnter={() => setHoveredRow(rowKey)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        style={{ cursor: 'pointer', height: 64, animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
+                        className="ion-activatable"
+                        style={{ cursor: 'pointer', height: 64, position: 'relative', overflow: 'hidden', animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
                       >
+                        <IonRippleEffect />
                         {/* Date / checkbox */}
                         <td style={{ ...tdStyle, padding: '0 12px', width: 90 }} onClick={isHovered ? toggleSelect : undefined}>
                           {isHovered || isSelected ? (
