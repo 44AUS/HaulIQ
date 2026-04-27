@@ -28,6 +28,15 @@ const COMPACT_PADDING_PATHS = [
   '/broker/trucks', '/carrier/equipment',
 ];
 
+// Pages that manage their own scroll — content div must fill full height
+const FULL_HEIGHT_PATHS = [
+  '/carrier/loads', '/broker/loads', '/driver/loads',
+  '/carrier/job-manager', '/broker/active',
+  '/carrier/payments', '/broker/payments',
+  '/broker/trucks', '/carrier/equipment',
+  '/carrier/lane-watches',
+];
+
 const isLoadDetail      = (p) => /^\/carrier\/loads\/[^/]+$/.test(p) || /^\/carrier\/active\/[^/]+$/.test(p);
 const isCarrierProfile  = (p) => /^\/c\/[^/]+$/.test(p);
 const isBrokerProfile   = (p) => /^\/b\/[^/]+$/.test(p);
@@ -49,6 +58,7 @@ export default function DashboardLayout({ children }) {
   }, []);
 
   const compactPadding = COMPACT_PADDING_PATHS.includes(location.pathname);
+  const fullHeight     = FULL_HEIGHT_PATHS.includes(location.pathname);
 
   const immersiveMode = NETWORK_PATHS.includes(location.pathname)    ? 'network'
     : BILLING_PATHS.includes(location.pathname)    ? 'billing'
@@ -106,8 +116,11 @@ export default function DashboardLayout({ children }) {
         </IonMenu>
         <IonPage id="main-content">
           <TopBar onToggleSidebar={() => setSidebarOpen(o => !o)} />
-          <IonContent scrollY style={{ '--background': 'var(--ion-background-color)' }}>
-            <div style={{ padding }}>
+          <IonContent scrollY={!fullHeight} style={{ '--background': 'var(--ion-background-color)' }}>
+            <div style={fullHeight
+              ? { padding, height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', overflow: 'hidden' }
+              : { padding }
+            }>
               {children}
             </div>
           </IonContent>
