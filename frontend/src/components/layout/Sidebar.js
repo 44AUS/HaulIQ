@@ -383,7 +383,7 @@ export default function Sidebar({ onNavigate, onClose }) {
               onClick={() => handleNav(item.path)}
               style={{
                 '--background':           active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
-                '--background-hover':     isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+                '--background-hover':     'var(--ion-color-step-50, rgba(0,0,0,0.05))',
                 '--color':                isDark ? '#fff' : '#000',
                 '--border-color':         divColor,
                 '--min-height':           '48px',
@@ -411,17 +411,34 @@ export default function Sidebar({ onNavigate, onClose }) {
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
       {/* Settings link */}
-      <div style={{ padding: '8px 16px 12px', flexShrink: 0 }}>
-        <div
-          onClick={() => handleNav('/settings')}
-          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', borderRadius: 10, cursor: 'pointer', backgroundColor: location.pathname === '/settings' ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent', transition: 'background-color 0.15s' }}
-          onMouseEnter={e => { if (location.pathname !== '/settings') e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)'; }}
-          onMouseLeave={e => { if (location.pathname !== '/settings') e.currentTarget.style.backgroundColor = 'transparent'; }}
-        >
-          <IonIcon name="settings-outline" style={{ fontSize: '1.1rem', color: location.pathname === '/settings' ? 'var(--ion-color-primary)' : iconColor }} />
-          <span style={{ fontSize: '0.9rem', fontWeight: location.pathname === '/settings' ? 700 : 500, color: location.pathname === '/settings' ? 'var(--ion-color-primary)' : nameColor }}>Settings</span>
-        </div>
-      </div>
+      <IonList lines="none" style={{ padding: 0, flexShrink: 0 }}>
+        {(() => {
+          const active = location.pathname === '/settings';
+          return (
+            <IonItem
+              button
+              detail={false}
+              onClick={() => handleNav('/settings')}
+              style={{
+                '--background':        active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
+                '--background-hover':  'var(--ion-color-step-50, rgba(0,0,0,0.05))',
+                '--color':             isDark ? '#fff' : '#000',
+                '--border-color':      divColor,
+                '--min-height':        '48px',
+                '--padding-start':     '20px',
+                '--padding-end':       '20px',
+                '--inner-padding-end': '0',
+                fontWeight: active ? 600 : 400,
+              }}
+            >
+              <div slot="start" style={{ marginRight: 12, display: 'flex' }}>
+                <IonIcon name="settings-outline" style={{ fontSize: '1.25rem' }} />
+              </div>
+              <IonLabel style={{ fontSize: '1rem' }}>Settings</IonLabel>
+            </IonItem>
+          );
+        })()}
+      </IonList>
     </div>
   );
 }
