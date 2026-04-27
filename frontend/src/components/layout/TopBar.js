@@ -422,18 +422,43 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                 <IonIcon name="chevron-back-outline" style={{ fontSize: 26, pointerEvents: 'none' }} />
               </button>
             </IonButtons>
-            <span slot="start" style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', color: '#fff', marginLeft: 4 }}>
-              {displayTitle}
-            </span>
+            <div style={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
+              <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', color: '#fff', marginLeft: 4, opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
+                {displayTitle}
+              </span>
+              {immersiveMode === 'network' && (
+                <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', transform: searchOpen ? 'translateY(-50%) scaleX(1)' : 'translateY(-50%) scaleX(0.88)', transformOrigin: 'right center', opacity: searchOpen ? 1 : 0, transition: 'opacity 0.2s, transform 0.2s', pointerEvents: searchOpen ? 'auto' : 'none' }}>
+                  <IonSearchbar
+                    ref={searchRef}
+                    value={searchVal}
+                    onIonInput={e => setSearchVal(e.detail.value ?? '')}
+                    onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
+                    onIonCancel={handleCloseSearch}
+                    showCancelButton="always"
+                    placeholder="Search by name, company, or MC number…"
+                    style={{
+                      '--background': isDark ? 'var(--ion-background-color)' : '#ffffff',
+                      '--color': isDark ? '#ffffff' : '#000000',
+                      '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                      '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
+                      '--cancel-button-color': 'var(--ion-color-medium)',
+                      '--border-radius': '0px',
+                      '--box-shadow': '0 4px 24px rgba(0,0,0,0.18)',
+                      padding: '0 4px',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
             <IonButtons slot="end">
               {immersiveMode === 'network' && (
                 <button
                   onClick={() => { setSearchOpen(v => !v); if (searchOpen) { setSearchVal(''); setSearchParams(prev => { const n = new URLSearchParams(prev); n.delete('q'); return n; }, { replace: true }); } }}
-                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
+                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s', opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? 'none' : 'auto' }}
                   onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
                   onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <IonIcon name={searchOpen ? 'close-outline' : 'search-outline'} style={{ fontSize: 22, pointerEvents: 'none' }} />
+                  <IonIcon name="search-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
                 </button>
               )}
               {config.messageMode ? (
@@ -495,30 +520,6 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                   ))}
                 </div>
               )}
-            </IonToolbar>
-          )}
-          {/* Search row - network page */}
-          {immersiveMode === 'network' && searchOpen && (
-            <IonToolbar style={{ ...toolbarStyle, '--min-height': '52px', '--padding-start': '4px', '--padding-end': '4px' }}>
-              <IonSearchbar
-                ref={searchRef}
-                value={searchVal}
-                onIonInput={e => setSearchVal(e.detail.value ?? '')}
-                onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
-                onIonCancel={handleCloseSearch}
-                showCancelButton="always"
-                placeholder="Search by name, company, or MC number…"
-                style={{
-                  '--background': isDark ? 'var(--ion-background-color)' : '#ffffff',
-                  '--color': isDark ? '#ffffff' : '#000000',
-                  '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
-                  '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
-                  '--cancel-button-color': 'rgba(255,255,255,0.8)',
-                  '--border-radius': '8px',
-                  '--box-shadow': 'none',
-                  padding: '0 4px',
-                }}
-              />
             </IonToolbar>
           )}
         </IonHeader>
