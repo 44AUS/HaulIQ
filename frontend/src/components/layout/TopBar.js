@@ -362,6 +362,17 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   }, [searchOpen]);
 
   useEffect(() => {
+    if (immersiveMode === 'network') {
+      const t = setTimeout(() => {
+        setSearchParams(prev => {
+          const n = new URLSearchParams(prev);
+          if (searchVal.trim()) n.set('q', searchVal.trim());
+          else n.delete('q');
+          return n;
+        }, { replace: true });
+      }, 300);
+      return () => clearTimeout(t);
+    }
     if (!searchVal || searchVal.trim().length < 2) return;
     const t = setTimeout(() => {
       navigate(`/search?q=${encodeURIComponent(searchVal.trim())}`);
@@ -369,7 +380,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
     }, 350);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchVal]);
+  }, [searchVal, immersiveMode]);
 
   useEffect(() => {
     const h = (e) => {
@@ -395,7 +406,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                        : config.title;
     const hasTabs   = config.tabs.length > 0;
     const activeTab = searchParams.get('tab') || (hasTabs ? config.tabs[0].key : null);
-    const setTab    = (t) => setSearchParams({ tab: t }, { replace: true });
+    const setTab    = (t) => setSearchParams(prev => { const n = new URLSearchParams(prev); n.set('tab', t); return n; }, { replace: true });
 
     return (
       <>
@@ -415,6 +426,16 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
               {displayTitle}
             </span>
             <IonButtons slot="end">
+              {immersiveMode === 'network' && (
+                <button
+                  onClick={() => { setSearchOpen(v => !v); if (searchOpen) { setSearchVal(''); setSearchParams(prev => { const n = new URLSearchParams(prev); n.delete('q'); return n; }, { replace: true }); } }}
+                  style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <IonIcon name={searchOpen ? 'close-outline' : 'search-outline'} style={{ fontSize: 22, pointerEvents: 'none' }} />
+                </button>
+              )}
               {config.messageMode ? (
                 <button
                   onClick={() => navigate(`/${user.role}/messages`)}
@@ -474,6 +495,30 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                   ))}
                 </div>
               )}
+            </IonToolbar>
+          )}
+          {/* Search row - network page */}
+          {immersiveMode === 'network' && searchOpen && (
+            <IonToolbar style={{ ...toolbarStyle, '--min-height': '52px', '--padding-start': '4px', '--padding-end': '4px' }}>
+              <IonSearchbar
+                ref={searchRef}
+                value={searchVal}
+                onIonInput={e => setSearchVal(e.detail.value ?? '')}
+                onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
+                onIonCancel={handleCloseSearch}
+                showCancelButton="always"
+                placeholder="Search by name, company, or MC number…"
+                style={{
+                  '--background': isDark ? 'var(--ion-background-color)' : '#ffffff',
+                  '--color': isDark ? '#ffffff' : '#000000',
+                  '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                  '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
+                  '--cancel-button-color': 'rgba(255,255,255,0.8)',
+                  '--border-radius': '8px',
+                  '--box-shadow': 'none',
+                  padding: '0 4px',
+                }}
+              />
             </IonToolbar>
           )}
         </IonHeader>

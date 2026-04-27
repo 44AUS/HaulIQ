@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
@@ -125,6 +125,8 @@ export default function Network() {
   const navigate = useNavigate();
   const activeTab = searchParams.get('tab') || 'connections';
 
+  const query = searchParams.get('q') || '';
+
   const [connections, setConnections] = useState([]);
   const [pending, setPending] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -133,8 +135,6 @@ export default function Network() {
   const [searching, setSearching] = useState(false);
   const [responding, setResponding] = useState(null);
   const [connecting, setConnecting] = useState(null);
-  const [query, setQuery] = useState('');
-  const debounceRef = useRef(null);
 
   useEffect(() => {
     Promise.all([
@@ -148,20 +148,14 @@ export default function Network() {
     }).finally(() => setLoading(false));
   }, []);
 
-  const runSearch = useCallback((q) => {
-    if (!q) { setSearchResults([]); setSearching(false); return; }
+  useEffect(() => {
+    if (!query) { setSearchResults([]); setSearching(false); return; }
     setSearching(true);
-    networkApi.search(q, null)
+    networkApi.search(query, null)
       .then(res => setSearchResults(Array.isArray(res) ? res : []))
       .catch(() => setSearchResults([]))
       .finally(() => setSearching(false));
-  }, []);
-
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => runSearch(query), 350);
-    return () => clearTimeout(debounceRef.current);
-  }, [query, runSearch]);
+  }, [query]);
 
   const handleRespond = (id, accepted) => {
     setResponding(id + (accepted ? '_accept' : '_decline'));
@@ -206,29 +200,6 @@ export default function Network() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Network</span>
-        </div>
-
-        {/* Search */}
-        <div style={{ padding: '0 24px 12px', flexShrink: 0 }}>
-          <div style={{ position: 'relative' }}>
-            <IonIcon name="search-outline" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 16, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
-            <input
-              placeholder="Search by name, company, or MC number…"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 36px', outline: 'none', fontFamily: 'inherit' }}
-            />
-            {searching && (
-              <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}>
-                <IonSpinner name="crescent" style={{ width: 14, height: 14 }} />
-              </div>
-            )}
-            {!searching && query && (
-              <button onClick={() => setQuery('')} style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
-                <IonIcon name="close-outline" style={{ fontSize: 14 }} />
-              </button>
-            )}
-          </div>
         </div>
 
         {/* List */}
