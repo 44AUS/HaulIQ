@@ -2,7 +2,6 @@ import { createContext, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { IonContent, IonMenu, IonPage, IonSplitPane, IonFabButton } from '@ionic/react';
-import IonIcon from '../IonIcon';
 import helpThumbnail from '../../assets/help_thumbnail.png';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
