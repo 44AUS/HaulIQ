@@ -62,9 +62,9 @@ const DOC_TYPE_LABELS = {
 
 const cardStyle = {
   backgroundColor: 'var(--ion-card-background)',
-  border: '1px solid var(--ion-border-color)',
-  borderRadius: 10,
+  borderRadius: 12,
   overflow: 'hidden',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
 };
 
 const inputStyle = {
