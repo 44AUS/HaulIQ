@@ -42,18 +42,19 @@ function Row({ icon, label, children, onClick, noBorder }) {
     <div
       onClick={onClick}
       style={{
-        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px',
-        borderBottom: noBorder ? 'none' : '1px solid var(--ion-border-color)',
+        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px 0',
         cursor: onClick ? 'pointer' : 'default',
       }}
     >
       {icon && (
-        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--ion-color-step-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--ion-color-step-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 14 }}>
           <IonIcon name={icon} style={{ fontSize: 17, color: 'var(--ion-color-medium)' }} />
         </div>
       )}
-      <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: 'var(--ion-text-color)' }}>{label}</span>
-      {children}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', paddingBottom: 14, borderBottom: noBorder ? 'none' : '1px solid var(--ion-border-color)', minWidth: 0 }}>
+        <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 500, color: 'var(--ion-text-color)' }}>{label}</span>
+        {children}
+      </div>
     </div>
   );
 }
