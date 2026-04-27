@@ -29,7 +29,7 @@ function Section({ title, children }) {
   return (
     <div style={{ marginBottom: 28 }}>
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
-        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '14px 20px 12px', borderBottom: '1px solid var(--ion-border-color)' }}>{title}</div>
+        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>{title}</div>
         {children}
       </div>
     </div>
