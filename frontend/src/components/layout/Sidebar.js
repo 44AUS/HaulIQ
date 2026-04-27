@@ -389,7 +389,7 @@ export default function Sidebar({ onNavigate, onClose }) {
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
       {/* Nav list */}
-      <IonList lines="none" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
+      <IonList lines="inset" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
         {links.map((item) => {
           const active    = isActive(item.path);
           const badgeCount = item.badge ? getBadge(item.badge) : 0;
@@ -400,16 +400,16 @@ export default function Sidebar({ onNavigate, onClose }) {
               detail={false}
               onClick={() => handleNav(item.path)}
               style={{
-                '--background':           active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
-                '--background-hover':     'var(--ion-color-step-50, rgba(0,0,0,0.05))',
-                '--color':                isDark ? '#fff' : '#000',
-                '--border-color':         divColor,
-                '--min-height':           '48px',
-                '--padding-start':        '20px',
-                '--padding-end':          '20px',
-                '--inner-padding-end':    '0',
+                '--background':              active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
+                '--background-hover':        isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.07)',
+                '--background-hover-opacity':'1',
+                '--color':                   isDark ? '#fff' : '#000',
+                '--border-color':            divColor,
+                '--min-height':              '48px',
+                '--padding-start':           '20px',
+                '--padding-end':             '20px',
+                '--inner-padding-end':       '0',
                 fontWeight: active ? 600 : 400,
-                borderBottom: `1px solid ${divColor}`,
               }}
             >
               <div slot="start" style={{ position: 'relative', display: 'flex' }}>
@@ -438,14 +438,15 @@ export default function Sidebar({ onNavigate, onClose }) {
               detail={false}
               onClick={() => handleNav('/settings')}
               style={{
-                '--background':        active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
-                '--background-hover':  'var(--ion-color-step-50, rgba(0,0,0,0.05))',
-                '--color':             isDark ? '#fff' : '#000',
-                '--border-color':      divColor,
-                '--min-height':        '48px',
-                '--padding-start':     '20px',
-                '--padding-end':       '20px',
-                '--inner-padding-end': '0',
+                '--background':              active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
+                '--background-hover':        isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.07)',
+                '--background-hover-opacity':'1',
+                '--color':                   isDark ? '#fff' : '#000',
+                '--border-color':            divColor,
+                '--min-height':              '48px',
+                '--padding-start':           '20px',
+                '--padding-end':             '20px',
+                '--inner-padding-end':       '0',
                 fontWeight: active ? 600 : 400,
               }}
             >
