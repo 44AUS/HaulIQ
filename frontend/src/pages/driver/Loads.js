@@ -84,7 +84,7 @@ export default function DriverLoads() {
                     )}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                    <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: 0, fontSize: '0.72rem', fontWeight: 600, backgroundColor: chipCfg.bg, color: chipCfg.color }}>
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.72rem', fontWeight: 600, backgroundColor: chipCfg.bg, color: chipCfg.color }}>
                       {status.replace(/_/g, ' ')}
                     </span>
                     {load.driver_pay && (

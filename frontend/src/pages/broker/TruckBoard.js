@@ -238,7 +238,7 @@ export default function TruckBoard() {
                         </td>
 
                         <td style={{ ...tdStyle, minWidth: 110 }}>
-                          <span style={{ display: 'inline-block', padding: '1px 6px', borderRadius: 0, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.text }}>
+                          <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 8, fontSize: '0.68rem', fontWeight: 600, backgroundColor: chip.bg, color: chip.text }}>
                             {chip.label}
                           </span>
                         </td>

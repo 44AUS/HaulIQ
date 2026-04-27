@@ -175,7 +175,7 @@ export default function CarrierPayments() {
                         <RippleTd style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</RippleTd>
                         <RippleTd style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</RippleTd>
                         <RippleTd style={{ ...tdStyle, width: 120, minWidth: 120 }}>
-                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, '--border-radius': '0', padding: '1px 6px' }}>
+                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
                             {chip.label}
                           </IonBadge>
                         </RippleTd>
