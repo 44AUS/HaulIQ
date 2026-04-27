@@ -331,7 +331,7 @@ export default function Settings() {
   const releaseVideoId = getYouTubeId(appInfo?.release_video_url);
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '8px 0 48px' }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '8px 0 48px' }}>
 
       {/* ── Status ─────────────────────────────────────────────────────────── */}
       <Section title="Status">
