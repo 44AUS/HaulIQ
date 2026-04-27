@@ -93,8 +93,8 @@ export default function SearchResults() {
   }, [q]);
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
-      <div style={{ marginBottom: 24 }}>
+    <div style={{ padding: '4px 6px' }}>
+      <div style={{ marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>
           {q ? `Top 10 search results for "${q}"` : 'Search results'}
         </h2>
@@ -107,12 +107,12 @@ export default function SearchResults() {
       )}
 
       {!loading && results !== null && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {SEARCH_CATS.map(({ key, label, icon }) => {
             const items = (results[key] || []).slice(0, 10);
             return (
-              <div key={key} style={{ backgroundColor: 'var(--ion-card-background)', marginBottom: 1, overflow: 'hidden' }}>
-                <div style={{ padding: '14px 20px 10px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' }}>
+              <div key={key} style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
+                <div style={{ padding: '14px 20px 10px', fontSize: '0.95rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>
                   {label}
                 </div>
                 {items.length === 0 ? (
@@ -127,9 +127,7 @@ export default function SearchResults() {
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--ion-color-step-50, rgba(0,0,0,0.04))'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
-                          <IonIcon name={icon} style={{ fontSize: 17, color: '#fff' }} />
-                        </div>
+                        <IonIcon name={icon} style={{ fontSize: 20, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontSize: '0.9rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>
                             {getLabel(key, item)}
