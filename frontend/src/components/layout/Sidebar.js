@@ -375,14 +375,11 @@ export default function Sidebar({ onNavigate, onClose }) {
       {/* Message Center */}
       {messagesPath && (
         <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
-          <button
-            onClick={() => handleNav(messagesPath)}
-            style={{ width: '100%', background: 'none', border: `1px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)'}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
-            <IonIcon name="chatbubble-outline" fontSize="small" />
-            Message Center
-            {unread > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
-          </button>
+          <IonChip color="dark" onClick={() => handleNav(messagesPath)} style={{ width: '100%', margin: 0, justifyContent: 'center' }}>
+            <IonIcon name="chatbubbles-outline" style={{ fontSize: 18 }} />
+            <IonLabel>Message Center</IonLabel>
+            {unread > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block', marginLeft: 4 }} />}
+          </IonChip>
         </div>
       )}
 
