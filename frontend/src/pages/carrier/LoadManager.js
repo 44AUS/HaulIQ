@@ -49,6 +49,9 @@ const FILTER_FIELDS = [
 
 const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 400, color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap' };
 const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', height: 64, verticalAlign: 'middle' };
+function RippleTd({ style, children, ...props }) {
+  return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
+}
 const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
 
 const TMS_STEPS  = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
@@ -432,12 +435,10 @@ export default function LoadManager() {
                         onClick={item._nav}
                         onMouseEnter={() => setHoveredRow(rowKey)}
                         onMouseLeave={() => setHoveredRow(null)}
-                        className="ion-activatable"
-                        style={{ cursor: 'pointer', height: 64, position: 'relative', animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
+                        style={{ cursor: 'pointer', height: 64, animation: isFlashing ? 'rowSelectFlash 0.45s ease-out forwards' : undefined }}
                       >
-                        <IonRippleEffect />
                         {/* Date / checkbox */}
-                        <td style={{ ...tdStyle, padding: '0 12px', width: 90 }} onClick={isHovered ? toggleSelect : undefined}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px', width: 90 }} onClick={isHovered ? toggleSelect : undefined}>
                           {isHovered || isSelected ? (
                             <IonCheckbox
                               checked={isSelected}
@@ -453,25 +454,25 @@ export default function LoadManager() {
                           ) : (
                             <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>—</span>
                           )}
-                        </td>
+                        </RippleTd>
 
                         {/* Route — accent bar */}
-                        <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 200 }}>
+                        <RippleTd style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
                           <div style={{ paddingLeft: 16 }}>
                             <span style={{ fontSize: '0.875rem', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{item.origin} → {item.dest}</span>
                           </div>
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, padding: '0 12px', minWidth: 140 }}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 140 }}>
                           <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>{item.equipment || '—'}</span>
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, padding: '0 12px' }}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px' }}>
                           <span style={{ fontSize: '0.875rem' }}>{item.miles ? `${Number(item.miles).toLocaleString()} mi` : '—'}</span>
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, padding: '0 12px', whiteSpace: 'nowrap' }}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px', whiteSpace: 'nowrap' }}>
                           {item.rate
                             ? <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#2e7d32', display: 'block' }}>${Number(item.rate).toLocaleString()}</span>
                             : <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>—</span>}
@@ -480,19 +481,19 @@ export default function LoadManager() {
                               Net {item.net >= 0 ? '+' : ''}${Number(item.net).toLocaleString()}
                             </span>
                           )}
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, padding: '0 12px', minWidth: 120 }}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 120 }}>
                           <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{item.broker || '—'}</span>
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, padding: '0 12px', width: 120, minWidth: 120 }}>
+                        <RippleTd style={{ ...tdStyle, padding: '0 12px', width: 120, minWidth: 120 }}>
                           <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
                             {chip.label}
                           </IonBadge>
-                        </td>
+                        </RippleTd>
 
-                        <td style={{ ...tdStyle, width: 48, minWidth: 48, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
+                        <RippleTd style={{ ...tdStyle, width: 48, minWidth: 48, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
                           {item.chipKey === 'archived' ? (
                             <button
                               title="Delete permanently"
@@ -504,7 +505,7 @@ export default function LoadManager() {
                           ) : (
                             <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', display: 'block' }} />
                           )}
-                        </td>
+                        </RippleTd>
                       </tr>
 
                       {/* Progress row */}

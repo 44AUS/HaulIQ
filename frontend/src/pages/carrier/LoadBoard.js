@@ -41,6 +41,9 @@ const TABS = [
 
 const thStyle = { padding: '10px 12px', textAlign: 'left', fontSize: '0.72rem', fontWeight: 400, color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap' };
 const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', height: 64, verticalAlign: 'middle' };
+function RippleTd({ style, children, ...props }) {
+  return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
+}
 const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
 const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 
@@ -98,13 +101,12 @@ function TableView({ loads, equipmentTypes }) {
             const initials = load.broker?.name?.split(' ').map(w => w[0]).join('').slice(0, 2) || '?';
 
             return (
-              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} className="ion-activatable" style={{ cursor: 'pointer', height: 64, position: 'relative' }}>
-                <IonRippleEffect />
-                <td style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
+              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} style={{ cursor: 'pointer', height: 64 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{load.posted}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 100 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 100 }}>
                   {load.broker ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -121,23 +123,23 @@ function TableView({ loads, equipmentTypes }) {
                       </div>
                     </div>
                   ) : <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>—</span>}
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.pickup}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>${load.rate?.toLocaleString()}</span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>${load.ratePerMile}/mi</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.miles} mi</span>
-                </td>
+                </RippleTd>
 
                 {/* Lane — accent bar */}
-                <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 180 }}>
+                <RippleTd style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 180 }}>
                   <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
                   <div style={{ paddingLeft: 16, display: 'flex', alignItems: 'stretch', gap: 8 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, paddingBottom: 2 }}>
@@ -150,33 +152,33 @@ function TableView({ loads, equipmentTypes }) {
                       <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{destCity}</span>
                     </div>
                   </div>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.deadhead > 0 ? `${load.deadhead} mi` : '—'}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.delivery}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>{abbr}</span>
                   <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>{equipParts.slice(1).join(' · ')}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
+                <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
-                </td>
+                </RippleTd>
 
-                <td style={{ ...tdStyle, width: 60, paddingRight: 6 }} onClick={e => e.stopPropagation()}>
+                <RippleTd style={{ ...tdStyle, width: 60, paddingRight: 6 }} onClick={e => e.stopPropagation()}>
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     <button onClick={e => handleSave(e, load)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isSaved ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
                       <IonIcon name={isSaved ? 'bookmark' : 'bookmark-outline'} style={{ fontSize: 15 }} />
                     </button>
                     <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
                   </div>
-                </td>
+                </RippleTd>
               </tr>
             );
           })}

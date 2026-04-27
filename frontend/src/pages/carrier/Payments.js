@@ -37,6 +37,9 @@ const STATUS_BAR = {
 
 const thStyle = { fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ion-color-medium)', padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap' };
 const tdStyle = { padding: '10px 12px', fontSize: '0.82rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)', verticalAlign: 'middle' };
+function RippleTd({ style, children, ...props }) {
+  return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
+}
 
 const fmt = (n) =>
   n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—';
@@ -162,24 +165,23 @@ export default function CarrierPayments() {
                     const chip     = TAB_CHIP[p.status] || { label: p.status, ionColor: 'medium' };
                     const barColor = STATUS_BAR[p.status] || '#9e9e9e';
                     return (
-                      <tr key={p.id} className="ion-activatable" style={{ height: 64, position: 'relative' }}>
-                        <IonRippleEffect />
-                        <td style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
+                      <tr key={p.id} style={{ height: 64 }}>
+                        <RippleTd style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
                           <span style={{ fontWeight: 600, whiteSpace: 'nowrap' }}>{p.load_origin || '—'} → {p.load_destination || '—'}</span>
-                        </td>
-                        <td style={{ ...tdStyle, color: 'var(--ion-color-medium)' }}>{fmt(p.amount)}</td>
-                        <td style={{ ...tdStyle, fontWeight: 700, color: '#2e7d32' }}>{fmt(p.carrier_amount)}</td>
-                        <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</td>
-                        <td style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</td>
-                        <td style={{ ...tdStyle, width: 120, minWidth: 120 }}>
+                        </RippleTd>
+                        <RippleTd style={{ ...tdStyle, color: 'var(--ion-color-medium)' }}>{fmt(p.amount)}</RippleTd>
+                        <RippleTd style={{ ...tdStyle, fontWeight: 700, color: '#2e7d32' }}>{fmt(p.carrier_amount)}</RippleTd>
+                        <RippleTd style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.escrowed_at)}</RippleTd>
+                        <RippleTd style={{ ...tdStyle, fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{fmtDate(p.released_at)}</RippleTd>
+                        <RippleTd style={{ ...tdStyle, width: 120, minWidth: 120 }}>
                           <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
                             {chip.label}
                           </IonBadge>
-                        </td>
-                        <td style={{ ...tdStyle, width: 32, minWidth: 32, paddingRight: 8 }}>
+                        </RippleTd>
+                        <RippleTd style={{ ...tdStyle, width: 32, minWidth: 32, paddingRight: 8 }}>
                           <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', display: 'block' }} />
-                        </td>
+                        </RippleTd>
                       </tr>
                     );
                   })}
