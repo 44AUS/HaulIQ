@@ -397,6 +397,15 @@ def admin_create_category(body: TutorialCategoryIn, db: Session = Depends(get_db
     return {"id": str(cat.id), "name": cat.name}
 
 
+@router.patch("/tutorials/categories/reorder")
+def admin_reorder_categories(body: list, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+    from app.models.app_settings import TutorialCategory
+    for idx, cat_id in enumerate(body):
+        db.query(TutorialCategory).filter(TutorialCategory.id == cat_id).update({"order_idx": idx})
+    db.commit()
+    return {"ok": True}
+
+
 @router.delete("/tutorials/categories/{category_id}", status_code=204)
 def admin_delete_category(category_id: UUID, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     from app.models.app_settings import TutorialCategory

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { IonToggle, IonToast, IonSpinner, IonBadge } from '@ionic/react';
+import { IonToggle, IonToast, IonSpinner, IonBadge, IonReorderGroup, IonReorder, IonItem, IonLabel } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { settingsApi } from '../../services/api';
@@ -105,11 +105,11 @@ function FormModal({ title, open, onClose, onSubmit, loading, fields, setFields 
 }
 
 // ── Tutorials modal ───────────────────────────────────────────────────────────
-function TutorialsModal({ open, onClose }) {
+function TutorialsModal({ open, onClose, isAdmin }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');
-  const [selected, setSelected]     = useState(null); // category
+  const [selected, setSelected]     = useState(null);
   const [playingVideo, setPlayingVideo] = useState(null);
   const searchRef = useRef(null);
 
@@ -122,6 +122,12 @@ function TutorialsModal({ open, onClose }) {
       .finally(() => setLoading(false));
     setTimeout(() => searchRef.current?.focus(), 100);
   }, [open]);
+
+  const handleReorder = (e) => {
+    const reordered = e.detail.complete(categories);
+    setCategories(reordered);
+    settingsApi.adminReorderCategories(reordered.map(c => c.id)).catch(() => {});
+  };
 
   useEffect(() => {
     if (!open) { setSearch(''); setSelected(null); setPlayingVideo(null); }
@@ -223,6 +229,36 @@ function TutorialsModal({ open, onClose }) {
             ) : (
               <>
                 {!search && <div style={{ fontWeight: 700, color: 'var(--ion-color-medium)', marginBottom: 14, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.75rem' }}>Playlists</div>}
+
+                {isAdmin && !search ? (
+                  <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
+                    {categories.map(cat => {
+                      const firstVid = cat.videos?.[0];
+                      const thumbVid = firstVid ? getYouTubeId(firstVid.youtube_url) : null;
+                      const thumb = cat.thumbnail_url || (thumbVid ? `https://img.youtube.com/vi/${thumbVid}/mqdefault.jpg` : null);
+                      return (
+                        <IonItem key={cat.id} button detail={false} onClick={() => setSelected(cat)}
+                          style={{ '--padding-start': '0', '--inner-padding-end': '0', '--background': 'transparent', '--border-color': 'var(--ion-border-color)', marginBottom: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '8px 0' }}>
+                            <div style={{ width: 72, height: 48, borderRadius: 6, overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--ion-color-step-100)' }}>
+                              {thumb
+                                ? <img src={thumb} alt={cat.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <IonIcon name="play-circle-outline" style={{ fontSize: 24, color: 'var(--ion-color-step-400)' }} />
+                                  </div>
+                              }
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: 2 }}>{cat.name}</div>
+                              <div style={{ fontSize: '0.78rem', color: 'var(--ion-color-medium)' }}>{cat.video_count} video{cat.video_count !== 1 ? 's' : ''}</div>
+                            </div>
+                          </div>
+                          <IonReorder slot="end" />
+                        </IonItem>
+                      );
+                    })}
+                  </IonReorderGroup>
+                ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, maxWidth: 1100, margin: '0 auto' }}>
                   {filteredCats.map(cat => {
                     const firstVid = cat.videos[0];
@@ -248,6 +284,7 @@ function TutorialsModal({ open, onClose }) {
                     );
                   })}
                 </div>
+                )}
               </>
             )}
           </div>
@@ -261,7 +298,8 @@ function TutorialsModal({ open, onClose }) {
 // ── Main Settings page ────────────────────────────────────────────────────────
 export default function Settings() {
   const { mode, toggleTheme } = useThemeMode();
-  useAuth();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const isDark = mode === 'dark';
 
   const [lang, setLang]           = useState(() => localStorage.getItem('urload_lang') || 'en');
@@ -457,7 +495,7 @@ export default function Settings() {
       </div>
 
       {/* ── Modals ─────────────────────────────────────────────────────────── */}
-      <TutorialsModal open={tutorialsOpen} onClose={() => setTutorialsOpen(false)} />
+      <TutorialsModal open={tutorialsOpen} onClose={() => setTutorialsOpen(false)} isAdmin={isAdmin} />
 
       <FormModal
         title="Feature Request"

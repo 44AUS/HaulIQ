@@ -362,6 +362,7 @@ export const settingsApi = {
   adminListCategories:    ()           => request('/api/admin/tutorials/categories'),
   adminCreateCategory:    (data)       => request('/api/admin/tutorials/categories', { method: 'POST', body: JSON.stringify(data) }),
   adminDeleteCategory:    (id)         => request(`/api/admin/tutorials/categories/${id}`, { method: 'DELETE' }),
+  adminReorderCategories: (ids)        => request('/api/admin/tutorials/categories/reorder', { method: 'PATCH', body: JSON.stringify(ids) }),
   adminListVideos:        (catId)      => request(`/api/admin/tutorials/categories/${catId}/videos`),
   adminCreateVideo:       (catId, data)=> request(`/api/admin/tutorials/categories/${catId}/videos`, { method: 'POST', body: JSON.stringify(data) }),
   adminDeleteVideo:       (id)         => request(`/api/admin/tutorials/videos/${id}`, { method: 'DELETE' }),
