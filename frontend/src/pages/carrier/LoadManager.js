@@ -488,7 +488,7 @@ export default function LoadManager() {
                         </RippleTd>
 
                         <RippleTd style={{ ...tdStyle, padding: '0 12px', width: 120, minWidth: 120 }}>
-                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600 }}>
+                          <IonBadge color={chip.ionColor} style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, '--border-radius': '0', padding: '1px 6px' }}>
                             {chip.label}
                           </IonBadge>
                         </RippleTd>

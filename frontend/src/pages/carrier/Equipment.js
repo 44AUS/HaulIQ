@@ -339,7 +339,7 @@ export default function Equipment() {
                         color={chip.ionColor}
                         onClick={e => handleToggleActive(e, post)}
                         title={post.is_active ? 'Click to deactivate' : 'Click to activate'}
-                        style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
+                        style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer', '--border-radius': '0', padding: '1px 6px' }}
                       >
                         {chip.label}
                       </IonBadge>

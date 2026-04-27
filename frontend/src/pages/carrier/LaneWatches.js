@@ -328,7 +328,7 @@ export default function LaneWatches() {
                               color={chip.ionColor}
                               onClick={e => { e.stopPropagation(); handleToggle(w.id, !w.active); }}
                               title={w.active ? 'Click to pause' : 'Click to activate'}
-                              style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ color: '#fff', fontSize: '0.68rem', fontWeight: 600, cursor: 'pointer', '--border-radius': '0', padding: '1px 6px' }}
                             >
                               {chip.label}
                             </IonBadge>
