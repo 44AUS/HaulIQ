@@ -64,7 +64,6 @@ function TableView({ loads, equipmentTypes }) {
   equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
 
   const PROFIT_BAR = { green: '#2dd36f', yellow: '#ffce00', red: '#eb445a' };
-  const PROFIT_COLOR = { green: '#2e7d32', yellow: '#ed6c02', red: '#d32f2f' };
 
   if (!loads.length) return null;
   return (
