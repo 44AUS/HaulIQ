@@ -141,7 +141,7 @@ function TableView({ loads, equipmentTypes }) {
 
                 {/* Lane — accent bar */}
                 <RippleTd style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 180 }}>
-                  <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 4, backgroundColor: barColor, borderRadius: '0 2px 2px 0' }} />
+                  <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                   <div style={{ paddingLeft: 16, display: 'flex', alignItems: 'stretch', gap: 8 }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, paddingBottom: 2 }}>
                       <IonIcon name="ellipse" style={{ fontSize: 8, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
