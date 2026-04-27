@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   IonList, IonItem, IonLabel, IonBadge,
-  IonAvatar, IonPopover,
+  IonAvatar, IonPopover, IonChip, IonText,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
@@ -229,7 +229,25 @@ export default function Sidebar({ onNavigate, onClose }) {
 
       {/* User identity block */}
       <div style={{ padding: '0 8px 12px', flexShrink: 0 }}>
-        <div style={{ borderRadius: 10, overflow: 'hidden', backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)', border: `1px solid ${divColor}` }}>
+        {user.subscription?.status === 'trialing' && (() => {
+          const daysLeft = user.subscription.current_period_end
+            ? Math.max(0, Math.ceil((new Date(user.subscription.current_period_end) - Date.now()) / 86400000))
+            : null;
+          const billingPath = `/${user.role}/billing`;
+          return (
+            <IonChip
+              color="warning"
+              onClick={() => handleNav(billingPath)}
+              style={{ display: 'flex', justifyContent: 'space-between', width: '100%', margin: '0 0 0 0', borderRadius: '8px 8px 0 0', fontWeight: 700, cursor: 'pointer' }}
+            >
+              <IonText>{daysLeft !== null ? `Trialing (${daysLeft} day${daysLeft === 1 ? '' : 's'} left)` : 'Trialing'}</IonText>
+              <IonText color="success" style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                Subscribe <ion-icon name="arrow-forward-outline" style={{ verticalAlign: 'sub', fontSize: 16, margin: 0 }} />
+              </IonText>
+            </IonChip>
+          );
+        })()}
+        <div style={{ borderRadius: user.subscription?.status === 'trialing' ? '0 0 10px 10px' : 10, overflow: 'hidden', backgroundColor: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.04)', border: `1px solid ${divColor}` }}>
 
           {/* Business row */}
           <div

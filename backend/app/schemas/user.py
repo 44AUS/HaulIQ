@@ -3,6 +3,7 @@ from typing import Optional
 from uuid import UUID
 from datetime import datetime
 from app.models.user import UserRole, UserPlan
+from app.schemas.subscription import SubscriptionOut
 
 
 class UserCreate(BaseModel):
@@ -74,6 +75,7 @@ class UserOut(BaseModel):
     clock_in_lat:      Optional[float] = None
     clock_in_lng:      Optional[float] = None
     created_at: datetime
+    subscription:      Optional[SubscriptionOut] = None
 
     model_config = {"from_attributes": True}
 
