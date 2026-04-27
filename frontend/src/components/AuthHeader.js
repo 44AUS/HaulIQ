@@ -63,14 +63,17 @@ export default function AuthHeader({ lang, setLang, mode, toggleMode }) {
 
         <button
           onClick={toggleMode}
+          onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.12)'}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           style={{
-            color: 'rgba(255,255,255,0.85)', width: 32, height: 32,
-            border: 'none', borderRadius: 6,
+            color: 'rgba(255,255,255,0.85)', width: 36, height: 36,
+            border: 'none', borderRadius: '50%',
             background: 'transparent', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'background-color 0.15s',
           }}
         >
-          <IonIcon name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} style={{ fontSize: 16 }} />
+          <IonIcon name={mode === 'dark' ? 'moon-outline' : 'sunny-outline'} style={{ fontSize: 18, pointerEvents: 'none' }} />
         </button>
       </div>
     </div>
