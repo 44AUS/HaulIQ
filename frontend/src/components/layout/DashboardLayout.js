@@ -1,6 +1,7 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { IonContent, IonMenu, IonPage, IonSplitPane } from '@ionic/react';
+import { IonContent, IonMenu, IonPage, IonSplitPane, IonFab, IonFabButton } from '@ionic/react';
+import IonIcon from '../IonIcon';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
@@ -33,6 +34,18 @@ const isBrokerProfile   = (p) => /^\/b\/[^/]+$/.test(p);
 export default function DashboardLayout({ children }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showHelp, setShowHelp] = useState(() => localStorage.getItem('hauliq_show_help') === 'true');
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === 'hauliq_show_help') setShowHelp(e.newValue === 'true');
+    };
+    window.addEventListener('storage', onStorage);
+    const interval = setInterval(() => {
+      setShowHelp(localStorage.getItem('hauliq_show_help') === 'true');
+    }, 500);
+    return () => { window.removeEventListener('storage', onStorage); clearInterval(interval); };
+  }, []);
 
   const compactPadding = COMPACT_PADDING_PATHS.includes(location.pathname);
 
@@ -59,8 +72,17 @@ export default function DashboardLayout({ children }) {
       <LayoutContext.Provider value={{ drawerWidth: 0 }}>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--ion-background-color)' }}>
           <TopBar immersiveMode={immersiveMode} />
-          <div style={{ flex: 1, overflowY: 'auto', padding }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding, position: 'relative' }}>
             {children}
+            {showHelp && (
+              <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9000 }}>
+                <IonFab>
+                  <IonFabButton color="primary">
+                    <IonIcon name="help-outline" style={{ fontSize: 24 }} />
+                  </IonFabButton>
+                </IonFab>
+              </div>
+            )}
           </div>
         </div>
       </LayoutContext.Provider>
@@ -85,6 +107,13 @@ export default function DashboardLayout({ children }) {
             <div style={{ padding }}>
               {children}
             </div>
+            {showHelp && (
+              <IonFab slot="fixed" vertical="bottom" horizontal="end">
+                <IonFabButton color="primary">
+                  <IonIcon name="help-outline" style={{ fontSize: 24 }} />
+                </IonFabButton>
+              </IonFab>
+            )}
           </IonContent>
         </IonPage>
       </IonSplitPane>
