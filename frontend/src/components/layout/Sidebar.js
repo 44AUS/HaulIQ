@@ -412,15 +412,15 @@ export default function Sidebar({ onNavigate, onClose }) {
                 borderBottom: `1px solid ${divColor}`,
               }}
             >
-              <div slot="start" style={{ marginRight: 12, position: 'relative', display: 'flex' }}>
-                <IonIcon name={item.icon} style={{ fontSize: '1.25rem' }} />
+              <div slot="start" style={{ position: 'relative', display: 'flex' }}>
+                <IonIcon slot="start" color="medium" name={item.icon} style={{ fontSize: '1.25rem' }} />
                 {badgeCount > 0 && (
                   <IonBadge color="danger" style={{ position: 'absolute', top: -6, right: -8, fontSize: '0.6rem', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '2px solid var(--app-sidebar-bg)' }}>
                     {badgeCount > 9 ? '9+' : badgeCount}
                   </IonBadge>
                 )}
               </div>
-              <IonLabel style={{ fontSize: '1rem' }}>{item.label}</IonLabel>
+              <IonLabel>{item.label}</IonLabel>
             </IonItem>
           );
         })}
@@ -449,10 +449,8 @@ export default function Sidebar({ onNavigate, onClose }) {
                 fontWeight: active ? 600 : 400,
               }}
             >
-              <div slot="start" style={{ marginRight: 12, display: 'flex' }}>
-                <IonIcon name="settings-outline" style={{ fontSize: '1.25rem' }} />
-              </div>
-              <IonLabel style={{ fontSize: '1rem' }}>Settings</IonLabel>
+              <IonIcon slot="start" color="medium" name="settings-outline" style={{ fontSize: '1.25rem' }} />
+              <IonLabel>Settings</IonLabel>
             </IonItem>
           );
         })()}
