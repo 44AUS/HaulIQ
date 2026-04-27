@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -326,21 +326,26 @@ export default function LoadManager() {
       </div>
 
       {/* Tab bar */}
-      <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflowX: 'auto' }}>
-        {TABS.map(tab => {
-          const isActive = activeTab === tab.key;
-          const count    = tabCounts[tab.key] ?? 0;
-          return (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 24px', cursor: 'pointer', flexShrink: 0, border: 'none', borderBottom: isActive ? '2px solid var(--ion-text-color)' : '2px solid transparent', backgroundColor: 'transparent', color: isActive ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', opacity: isActive ? 1 : 0.6, fontFamily: 'inherit', transition: 'opacity 0.15s' }}
+      <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+        <IonSegment
+          value={activeTab}
+          onIonChange={e => setActiveTab(String(e.detail.value))}
+          style={{ '--background': 'transparent', flex: '0 0 auto' }}
+        >
+          {TABS.map(tab => (
+            <IonSegmentButton
+              key={tab.key}
+              value={tab.key}
+              layout="label-only"
+              style={{ '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--indicator-color': 'var(--ion-text-color)', '--border-radius': '0', '--padding-top': '0', '--padding-bottom': '0', minHeight: 46, flexShrink: 0 }}
             >
-              <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1 }}>{tab.label}</span>
-              <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)', lineHeight: 1.4 }}>{count}</span>
-              </span>
-            </button>
-          );
-        })}
+              <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, letterSpacing: '0.08em' }}>
+                {tab.label}
+                <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
+              </IonLabel>
+            </IonSegmentButton>
+          ))}
+        </IonSegment>
         <div style={{ flex: 1 }} />
         <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
           <button title="Refresh" onClick={refresh} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
