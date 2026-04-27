@@ -295,25 +295,24 @@ export default function Equipment() {
                 const barColor = STATUS_BAR[post._status]  || '#9e9e9e';
                 return (
                   <tr key={post.id} style={{ height: 64 }}>
-                    {/* Equipment — accent bar */}
-                    <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 150 }}>
-                      <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
-                      <div style={{ paddingLeft: 16 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.equipment_type}</div>
-                        {(post.trailer_length || post.weight_capacity) && (
-                          <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
-                            {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${Number(post.weight_capacity).toLocaleString()} lbs`].filter(Boolean).join(' · ')}
-                          </div>
-                        )}
-                      </div>
+                    {/* Equipment */}
+                    <td style={{ ...tdStyle, minWidth: 150 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.equipment_type}</div>
+                      {(post.trailer_length || post.weight_capacity) && (
+                        <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>
+                          {[post.trailer_length && `${post.trailer_length} ft`, post.weight_capacity && `${Number(post.weight_capacity).toLocaleString()} lbs`].filter(Boolean).join(' · ')}
+                        </div>
+                      )}
                     </td>
 
                     <td style={{ ...tdStyle, minWidth: 160 }}>
                       <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', maxWidth: 160 }}>{post.current_location || '—'}</span>
                     </td>
 
-                    <td style={{ ...tdStyle, minWidth: 200, whiteSpace: 'nowrap' }}>
-                      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>
+                    {/* Available dates — accent bar */}
+                    <td style={{ ...tdStyle, paddingLeft: 0, position: 'relative', minWidth: 200, whiteSpace: 'nowrap' }}>
+                      <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', paddingLeft: 12 }}>
                         {fmtDate(post.available_from)} — {fmtDate(post.available_to)}
                       </span>
                     </td>
