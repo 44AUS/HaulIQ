@@ -163,7 +163,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Assigned</span>
-            <IonButton size="small" onClick={() => { onApply(pending); setOpen(false); }}>APPLY</IonButton>
+            <IonButton size="small" color="success" onClick={() => { onApply(pending); setOpen(false); }}>APPLY</IonButton>
           </div>
 
           {/* All option */}
