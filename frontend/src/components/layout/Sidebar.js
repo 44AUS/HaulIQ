@@ -373,38 +373,18 @@ export default function Sidebar({ onNavigate, onClose }) {
       </IonPopover>
 
       {/* Message Center */}
-      {messagesPath && (() => {
-        const active = isActive(messagesPath);
-        return (
-          <IonList lines="none" style={{ padding: '0 0 4px', flexShrink: 0 }}>
-            <IonItem
-              button
-              detail={false}
-              onClick={() => handleNav(messagesPath)}
-              style={{
-                '--background':        active ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(21,101,192,0.08)') : 'transparent',
-                '--background-hover':  'var(--ion-color-step-50, rgba(0,0,0,0.05))',
-                '--color':             isDark ? '#fff' : '#000',
-                '--min-height':        '48px',
-                '--padding-start':     '20px',
-                '--padding-end':       '20px',
-                '--inner-padding-end': '0',
-                fontWeight: active ? 600 : 400,
-              }}
-            >
-              <div slot="start" style={{ marginRight: 12, position: 'relative', display: 'flex' }}>
-                <IonIcon name="chatbubble-outline" style={{ fontSize: '1.25rem' }} />
-                {unread > 0 && (
-                  <IonBadge color="danger" style={{ position: 'absolute', top: -6, right: -8, fontSize: '0.6rem', minWidth: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: '2px solid var(--app-sidebar-bg)' }}>
-                    {unread > 9 ? '9+' : unread}
-                  </IonBadge>
-                )}
-              </div>
-              <IonLabel style={{ fontSize: '1rem' }}>Message Center</IonLabel>
-            </IonItem>
-          </IonList>
-        );
-      })()}
+      {messagesPath && (
+        <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
+          <button
+            onClick={() => handleNav(messagesPath)}
+            style={{ width: '100%', background: 'none', border: `1px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)'}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          >
+            <IonIcon name="chatbubble-outline" fontSize="small" />
+            Message Center
+            {unread > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
+          </button>
+        </div>
+      )}
 
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
