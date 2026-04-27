@@ -562,7 +562,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            <IonButton size="small" color="medium" fill="outline" onClick={() => setFilterOpen(true)} style={{ flexShrink: 0 }}>
+            <IonButton size="small" color="medium" fill="clear" onClick={() => setFilterOpen(true)} style={{ flexShrink: 0 }}>
               <IonIcon slot="start" name="funnel-outline" /> Filter
             </IonButton>
           </div>
