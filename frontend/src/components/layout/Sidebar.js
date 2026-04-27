@@ -389,7 +389,7 @@ export default function Sidebar({ onNavigate, onClose }) {
       <hr style={{ margin: 0, border: 'none', borderTop: `1px solid ${divColor}` }} />
 
       {/* Nav list */}
-      <IonList lines="inset" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
+      <IonList lines="full" style={{ flexGrow: 1, overflowY: 'auto', padding: 0 }}>
         {links.map((item) => {
           const active    = isActive(item.path);
           const badgeCount = item.badge ? getBadge(item.badge) : 0;
