@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
   IonBadge, IonList, IonItem, IonLabel,
-  IonToggle, IonSkeletonText, IonPopover,
+  IonToggle, IonSkeletonText, IonPopover, IonSearchbar,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
@@ -407,7 +407,8 @@ function ImmersiveTab({ label, active, onClick }) {
 // ── Main TopBar ───────────────────────────────────────────────────────────────
 export default function TopBar({ onToggleSidebar, immersiveMode }) {
   const { user } = useAuth();
-  const { brandColor } = useThemeMode();
+  const { brandColor, mode } = useThemeMode();
+  const isDark = mode === 'dark';
   const barColor = brandColor || DEFAULT_BAR_COLOR;
   const location = useLocation();
   const navigate = useNavigate();
@@ -625,30 +626,33 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
               </div>
             )}
 
-            {/* Expanding search */}
+            {/* IonSearchbar */}
             <div style={{
               position: 'absolute', left: 0, right: 0, top: '50%',
               transform: searchOpen ? 'translateY(-50%) scaleX(1)' : 'translateY(-50%) scaleX(0.88)',
               transformOrigin: 'right center',
               opacity: searchOpen ? 1 : 0, transition: 'opacity 0.2s, transform 0.2s',
               pointerEvents: searchOpen ? 'auto' : 'none',
-              display: 'flex', alignItems: 'center',
-              backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 8,
-              padding: '0 12px', height: 38, margin: '0 4px',
-              backdropFilter: 'blur(4px)',
             }}>
-              <IonIcon name="search-outline" style={{ fontSize: 17, marginRight: 8, opacity: 0.8, flexShrink: 0 }} />
-              <input
+              <IonSearchbar
                 ref={searchRef}
                 value={searchVal}
-                onChange={e => setSearchVal(e.target.value)}
+                onIonInput={e => setSearchVal(e.detail.value ?? '')}
                 onKeyDown={e => e.key === 'Escape' && handleCloseSearch()}
+                onIonCancel={handleCloseSearch}
+                showCancelButton="always"
                 placeholder="Search…"
-                style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: '#fff', fontSize: '0.85rem' }}
+                style={{
+                  '--background': isDark ? '#2a2a2a' : '#ffffff',
+                  '--color': isDark ? '#ffffff' : '#000000',
+                  '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                  '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
+                  '--cancel-button-color': 'rgba(255,255,255,0.8)',
+                  '--border-radius': '8px',
+                  '--box-shadow': 'none',
+                  padding: '0 4px',
+                }}
               />
-              <button onClick={handleCloseSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.75)', padding: 2, display: 'flex', alignItems: 'center' }}>
-                <IonIcon name="close-outline" style={{ fontSize: 15 }} />
-              </button>
             </div>
 
             {/* Search results dropdown */}
