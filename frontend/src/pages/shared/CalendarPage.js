@@ -500,29 +500,31 @@ export default function CalendarPage() {
       <div style={{ borderRadius: 6, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', backgroundColor: 'var(--ion-card-background)', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
         {/* Row 1: month picker + view toggle | filter */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ position: 'relative' }} ref={pickerAnchorRef}>
-              <IonButton fill="clear" onClick={() => setPickerOpen(o => !o)} style={{ fontWeight: 700, fontSize: '1rem', '--color': 'var(--ion-text-color)' }}>
-                {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
-                <IonIcon slot="end" name="chevron-down-outline" />
-              </IonButton>
-              <MonthPickerDropdown open={pickerOpen} onClose={() => setPickerOpen(false)} date={date} onSelect={d => { setDate(d); setView('month'); }} anchorRef={pickerAnchorRef} />
+        <div style={{ overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'thin' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', minWidth: 'max-content', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ position: 'relative' }} ref={pickerAnchorRef}>
+                <IonButton fill="clear" onClick={() => setPickerOpen(o => !o)} style={{ fontWeight: 700, fontSize: '1rem', '--color': 'var(--ion-text-color)' }}>
+                  {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
+                  <IonIcon slot="end" name="chevron-down-outline" />
+                </IonButton>
+                <MonthPickerDropdown open={pickerOpen} onClose={() => setPickerOpen(false)} date={date} onSelect={d => { setDate(d); setView('month'); }} anchorRef={pickerAnchorRef} />
+              </div>
+
+              <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2 }}>
+                {VIEW_OPTIONS.map(({ value, label }) => (
+                  <button key={value} onClick={() => setView(value)}
+                    style={{ background: view === value ? 'var(--ion-card-background)' : 'transparent', color: view === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: view === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2 }}>
-              {VIEW_OPTIONS.map(({ value, label }) => (
-                <button key={value} onClick={() => setView(value)}
-                  style={{ background: view === value ? 'var(--ion-card-background)' : 'transparent', color: view === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: view === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s' }}>
-                  {label}
-                </button>
-              ))}
-            </div>
+            <IonButton size="small" onClick={() => setFilterOpen(true)} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary, flexShrink: 0 }}>
+              <IonIcon slot="start" name="funnel-outline" /> Filter
+            </IonButton>
           </div>
-
-          <IonButton size="small" onClick={() => setFilterOpen(true)} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary }}>
-            <IonIcon slot="start" name="funnel-outline" /> Filter
-          </IonButton>
         </div>
 
         {/* Row 2: nav + assigned + revenue */}
