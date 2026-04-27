@@ -134,7 +134,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
               {selectedDriverObjs.slice(0, 4).map((d, i) => {
                 const name = d.full_name || 'D';
                 return (
-                  <span key={d.id} style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#fff', marginLeft: i === 0 ? 0 : -6, overflow: 'hidden', flexShrink: 0 }}>
+                  <span key={d.id} style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#fff', marginLeft: i === 0 ? 0 : 4, overflow: 'hidden', flexShrink: 0 }}>
                     {d.avatar_url
                       ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : name[0]?.toUpperCase()
@@ -143,7 +143,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
                 );
               })}
               {selectedDriverObjs.length > 4 && (
-                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.25)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700, color: '#fff', marginLeft: -6, flexShrink: 0 }}>
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.25)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700, color: '#fff', marginLeft: 4, flexShrink: 0 }}>
                   +{selectedDriverObjs.length - 4}
                 </span>
               )}
