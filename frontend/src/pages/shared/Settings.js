@@ -337,7 +337,7 @@ export default function Settings() {
       {/* ── Status ─────────────────────────────────────────────────────────── */}
       <Section title="Status">
         <Row label="App Status">
-          <IonBadge color={statusCfg.ionColor}>{statusCfg.label}</IonBadge>
+          <IonBadge color={statusCfg.ionColor} style={{ color: '#fff' }}>{statusCfg.label}</IonBadge>
         </Row>
         {appInfo && (
           <Row label={`Current version: ${appInfo.current_version}`}>
