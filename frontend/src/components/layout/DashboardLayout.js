@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
-import { IonContent, IonMenu, IonPage, IonSplitPane, IonFab, IonFabButton } from '@ionic/react';
+import { IonContent, IonMenu, IonPage, IonSplitPane, IonFabButton } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
@@ -66,25 +67,26 @@ export default function DashboardLayout({ children }) {
 
   const padding = compactPadding ? '10px' : '24px';
 
+  const helpFab = showHelp && createPortal(
+    <div style={{ position: 'fixed', bottom: 32, right: 32, zIndex: 99999 }}>
+      <IonFabButton color="primary" style={{ width: 56, height: 56 }}>
+        <IonIcon name="help-outline" style={{ fontSize: 26 }} />
+      </IonFabButton>
+    </div>,
+    document.body
+  );
+
   // Immersive pages: full-width, no sidebar
   if (immersiveMode) {
     return (
       <LayoutContext.Provider value={{ drawerWidth: 0 }}>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--ion-background-color)' }}>
           <TopBar immersiveMode={immersiveMode} />
-          <div style={{ flex: 1, overflowY: 'auto', padding, position: 'relative' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding }}>
             {children}
-            {showHelp && (
-              <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9000 }}>
-                <IonFab>
-                  <IonFabButton color="primary">
-                    <IonIcon name="help-outline" style={{ fontSize: 24 }} />
-                  </IonFabButton>
-                </IonFab>
-              </div>
-            )}
           </div>
         </div>
+        {helpFab}
       </LayoutContext.Provider>
     );
   }
@@ -93,30 +95,21 @@ export default function DashboardLayout({ children }) {
   return (
     <LayoutContext.Provider value={{ drawerWidth: DRAWER_WIDTH }}>
       <IonSplitPane contentId="main-content" when={sidebarOpen ? 'lg' : '(max-width: -1px)'} style={{ '--side-max-width': `${DRAWER_WIDTH}px`, '--side-min-width': `${DRAWER_WIDTH}px` }}>
-        {/* Sidebar */}
         <IonMenu contentId="main-content" menuId="main-menu" type="overlay" style={{ '--width': `${DRAWER_WIDTH}px` }}>
           <IonContent>
             <Sidebar onNavigate={() => {}} onClose={() => setSidebarOpen(false)} />
           </IonContent>
         </IonMenu>
-
-        {/* Main content */}
         <IonPage id="main-content">
           <TopBar onToggleSidebar={() => setSidebarOpen(o => !o)} />
           <IonContent scrollY style={{ '--background': 'var(--ion-background-color)' }}>
             <div style={{ padding }}>
               {children}
             </div>
-            {showHelp && (
-              <IonFab slot="fixed" vertical="bottom" horizontal="end">
-                <IonFabButton color="primary">
-                  <IonIcon name="help-outline" style={{ fontSize: 24 }} />
-                </IonFabButton>
-              </IonFab>
-            )}
           </IonContent>
         </IonPage>
       </IonSplitPane>
+      {helpFab}
     </LayoutContext.Provider>
   );
 }
