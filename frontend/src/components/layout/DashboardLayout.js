@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { IonContent, IonMenu, IonPage, IonSplitPane, IonFabButton } from '@ionic/react';
 import IonIcon from '../IonIcon';
+import helpThumbnail from '../../assets/help_thumbnail.png';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
@@ -69,8 +70,12 @@ export default function DashboardLayout({ children }) {
 
   const helpFab = showHelp && createPortal(
     <div style={{ position: 'fixed', bottom: 32, right: 32, zIndex: 99999 }}>
-      <IonFabButton color="primary" style={{ width: 56, height: 56 }}>
-        <IonIcon name="help-outline" style={{ fontSize: 26 }} />
+      <IonFabButton style={{ '--background': 'transparent', '--box-shadow': 'none', width: 64, height: 64, '--padding-start': 0, '--padding-end': 0 }}>
+        <img
+          src={helpThumbnail}
+          alt="Help"
+          style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', boxShadow: '0 4px 24px rgba(0,0,0,0.35)' }}
+        />
       </IonFabButton>
     </div>,
     document.body
