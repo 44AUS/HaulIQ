@@ -362,8 +362,8 @@ export default function Settings() {
         {appInfo?.whats_new?.length > 0 && (
           <div style={{ paddingLeft: 20, paddingTop: 0, paddingBottom: 0 }}>
             <div style={{ paddingBottom: 14, paddingRight: 20, borderBottom: '1px solid var(--ion-border-color)' }}>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>What's New</div>
-              <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--ion-color-medium)', marginBottom: 8 }}>What's New</div>
+              <ul style={{ margin: 0, padding: '0 0 0 20px', display: 'flex', flexDirection: 'column', gap: 5, listStyleType: 'disc' }}>
                 {appInfo.whats_new.map((item, i) => (
                   <li key={i} style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)', lineHeight: 1.6 }}>{item}</li>
                 ))}
@@ -373,7 +373,7 @@ export default function Settings() {
         )}
 
         <div style={{ paddingLeft: 20, paddingTop: 14, paddingBottom: 14, paddingRight: 20 }}>
-          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Known Issues</div>
+          <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--ion-color-medium)', marginBottom: 8 }}>Known Issues</div>
           <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
             {appInfo?.known_issues?.length > 0
               ? appInfo.known_issues.map((item, i) => (
