@@ -30,6 +30,7 @@ const COMPACT_PADDING_PATHS = [
 
 // Pages that manage their own scroll — content div must fill full height
 const FULL_HEIGHT_PATHS = [
+  '/carrier/calendar', '/broker/calendar',
   '/carrier/loads', '/broker/loads', '/driver/loads',
   '/carrier/job-manager', '/broker/active',
   '/carrier/payments', '/broker/payments',

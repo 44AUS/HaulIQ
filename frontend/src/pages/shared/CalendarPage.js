@@ -496,8 +496,8 @@ export default function CalendarPage() {
   };
 
   return (
-    <div style={{ padding: '4px 6px', position: 'relative' }}>
-      <div style={{ borderRadius: 6, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', backgroundColor: 'var(--ion-card-background)' }}>
+    <div style={{ padding: '4px 6px', position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ borderRadius: 6, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', backgroundColor: 'var(--ion-card-background)', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
         {/* Row 1: month picker + view toggle | filter */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
@@ -545,16 +545,16 @@ export default function CalendarPage() {
 
         {/* Calendar content */}
         {loading ? (
-          <div style={{ padding: 24 }}><div style={{ height: 650, borderRadius: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} /></div>
+          <div style={{ flex: 1, padding: 24 }}><div style={{ height: '100%', borderRadius: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }} /></div>
         ) : view === 'map' ? (
-          <MapView events={filteredEvents} mapsLoaded={mapsLoaded} mapMarker={mapMarker} setMapMarker={setMapMarker} isDark={isDark} />
+          <div style={{ flex: 1, overflow: 'hidden' }}><MapView events={filteredEvents} mapsLoaded={mapsLoaded} mapMarker={mapMarker} setMapMarker={setMapMarker} isDark={isDark} /></div>
         ) : view === 'month' ? (
-          <MonthGrid date={date} allEvents={allEvents} onSelectEvent={handleEventClick} onDayClick={handleDayClick} isDark={isDark} brandColor={primary} />
+          <div style={{ flex: 1, overflow: 'hidden' }}><MonthGrid date={date} allEvents={allEvents} onSelectEvent={handleEventClick} onDayClick={handleDayClick} isDark={isDark} brandColor={primary} /></div>
         ) : (
-          <div style={{ ...calSx, ...calStyle }}>
+          <div style={{ ...calSx, ...calStyle, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <style>{`
               .rbc-toolbar { display: none !important; }
-              .rbc-calendar { color: var(--ion-text-color); font-family: inherit; }
+              .rbc-calendar { color: var(--ion-text-color); font-family: inherit; height: 100% !important; }
               .rbc-month-view, .rbc-time-view, .rbc-agenda-view { border: 0 !important; }
               .rbc-header { border-bottom: 1px solid var(--ion-border-color) !important; padding: 10px !important; font-weight: 600; font-size: 0.78rem; color: var(--ion-color-medium); background: var(--ion-card-background); }
               .rbc-day-bg + .rbc-day-bg { border-left: 1px solid var(--ion-border-color) !important; }
@@ -581,7 +581,7 @@ export default function CalendarPage() {
               onView={setView}
               eventPropGetter={eventPropGetter}
               onSelectEvent={handleEventClick}
-              style={{ height: 920 }}
+              style={{ flex: 1, height: '100%' }}
               popup
             />
           </div>
