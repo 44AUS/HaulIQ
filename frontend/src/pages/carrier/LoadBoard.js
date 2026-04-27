@@ -92,7 +92,7 @@ function TableView({ loads, equipmentTypes }) {
             const destCity   = load.dest   || '—';
             const abbr       = abbrMap[load.type] || load.type?.slice(0, 3).toUpperCase() || '—';
             const barColor   = PROFIT_BAR[load.profitScore] || '#9e9e9e';
-            const netColor   = PROFIT_COLOR[load.profitScore] || 'var(--ion-text-color)';
+            const netColor   = load.netProfit == null ? 'var(--ion-text-color)' : load.netProfit < 0 ? 'var(--ion-color-danger)' : 'var(--ion-color-success)';
             const equipParts = [
               abbr,
               load.weight || null,
