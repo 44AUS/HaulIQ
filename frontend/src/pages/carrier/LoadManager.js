@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonCheckbox } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
+import { useThemeMode } from '../../context/ThemeContext';
 
 const TABS = [
   { key: 'all',         label: 'ALL' },
@@ -115,6 +116,8 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
 
 export default function LoadManager() {
   const navigate = useNavigate();
+  const { brandColor } = useThemeMode();
+  const cbColor = brandColor || 'var(--ion-color-primary)';
 
   const [active,     setActive]     = useState([]);
   const [completed,  setCompleted]  = useState([]);
@@ -377,13 +380,12 @@ export default function LoadManager() {
                     onClick={toggleAll}
                   >
                     {hoveredHeader || allSelected || someSelected ? (
-                      <input
-                        type="checkbox"
-                        ref={el => { if (el) el.indeterminate = someSelected; }}
+                      <IonCheckbox
                         checked={allSelected}
-                        onChange={toggleAll}
+                        indeterminate={someSelected}
+                        onIonChange={toggleAll}
                         onClick={e => e.stopPropagation()}
-                        style={{ cursor: 'pointer' }}
+                        style={{ '--checkbox-background-checked': cbColor, '--border-color-checked': cbColor, '--checkmark-color': '#fff', '--size': '16px' }}
                       />
                     ) : (
                       <span style={{ fontSize: '0.78rem', fontWeight: 400, color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>Date</span>
@@ -435,12 +437,11 @@ export default function LoadManager() {
                         {/* Date / checkbox */}
                         <td style={{ ...tdStyle, padding: '0 12px', width: 90 }} onClick={isHovered ? toggleSelect : undefined}>
                           {isHovered || isSelected ? (
-                            <input
-                              type="checkbox"
+                            <IonCheckbox
                               checked={isSelected}
-                              onChange={toggleSelect}
+                              onIonChange={toggleSelect}
                               onClick={e => e.stopPropagation()}
-                              style={{ cursor: 'pointer' }}
+                              style={{ '--checkbox-background-checked': cbColor, '--border-color-checked': cbColor, '--checkmark-color': '#fff', '--size': '16px' }}
                             />
                           ) : item.date ? (
                             <div>
