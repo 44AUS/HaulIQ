@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { IonToggle, IonToast, IonSpinner, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonToggle, IonToast, IonSpinner, IonBadge } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { settingsApi } from '../../services/api';
@@ -13,9 +13,9 @@ const LANG_OPTIONS = [
 ];
 
 const STATUS_CONFIG = {
-  normal:   { label: 'Normal',   color: '#2dd36f', bg: 'rgba(45,211,111,0.12)' },
-  degraded: { label: 'Degraded', color: '#ffce00', bg: 'rgba(255,206,0,0.12)' },
-  outage:   { label: 'Outage',   color: '#eb445a', bg: 'rgba(235,68,90,0.12)' },
+  normal:   { label: 'Normal',   ionColor: 'success' },
+  degraded: { label: 'Degraded', ionColor: 'warning' },
+  outage:   { label: 'Outage',   ionColor: 'danger'  },
 };
 
 function getYouTubeId(url) {
@@ -337,12 +337,7 @@ export default function Settings() {
       {/* ── Status ─────────────────────────────────────────────────────────── */}
       <Section title="Status">
         <Row label="App Status">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: statusCfg.color, flexShrink: 0 }} />
-            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: statusCfg.color, backgroundColor: statusCfg.bg, padding: '3px 10px', borderRadius: 20 }}>
-              {statusCfg.label}
-            </span>
-          </div>
+          <IonBadge color={statusCfg.ionColor}>{statusCfg.label}</IonBadge>
         </Row>
         {appInfo && (
           <Row label={`Current version: ${appInfo.current_version}`}>
@@ -395,13 +390,14 @@ export default function Settings() {
       {/* ── Appearance ─────────────────────────────────────────────────────── */}
       <Section title="Appearance">
         <Row icon="globe-outline" label="Language">
-          <IonSegment value={lang} onIonChange={e => handleLang(e.detail.value)} style={{ width: 'auto', minWidth: 240 }}>
+          <div style={{ display: 'flex', gap: 4 }}>
             {LANG_OPTIONS.map(o => (
-              <IonSegmentButton key={o.key} value={o.key}>
-                <IonLabel style={{ fontSize: '0.8rem' }}>{o.label}</IonLabel>
-              </IonSegmentButton>
+              <button key={o.key} onClick={() => handleLang(o.key)}
+                style={{ padding: '5px 12px', borderRadius: 8, border: `1px solid ${lang === o.key ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, background: lang === o.key ? 'var(--ion-color-primary)' : 'none', color: lang === o.key ? '#fff' : 'var(--ion-text-color)', fontWeight: lang === o.key ? 700 : 500, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s' }}>
+                {o.label}
+              </button>
             ))}
-          </IonSegment>
+          </div>
         </Row>
         <Row icon="moon-outline" label="Dark theme">
           <IonToggle checked={isDark} onIonChange={() => toggleTheme()} style={{ '--handle-width': '20px', '--handle-height': '20px' }} />
