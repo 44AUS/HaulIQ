@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
   IonBadge, IonList, IonItem, IonLabel,
-  IonToggle, IonPopover, IonSearchbar,
+  IonToggle, IonPopover, IonSearchbar, IonSkeletonText,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
@@ -395,14 +395,14 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   useEffect(() => {
     const h = (e) => {
       if (searchPanelRef.current && !e.composedPath().some(el => el === searchPanelRef.current || (searchPanelRef.current && searchPanelRef.current.contains(el)))) {
-        setSearchResults(null);
+        setSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, []);
 
-  const handleCloseSearch = () => { setSearchOpen(false); setSearchVal(''); setSearchResults(null); };
+  const handleCloseSearch = () => { setSearchOpen(false); setSearchVal(''); };
 
   if (!user) return null;
 
