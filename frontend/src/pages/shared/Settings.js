@@ -351,7 +351,7 @@ export default function Settings() {
         )}
 
         {releaseVideoId && (
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div style={{ paddingLeft: 54, paddingRight: 20, paddingTop: 16, paddingBottom: 16 }}>
             <div style={{ maxWidth: 400 }}>
               <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 8, overflow: 'hidden' }}>
                 <iframe
@@ -367,17 +367,19 @@ export default function Settings() {
         )}
 
         {appInfo?.whats_new?.length > 0 && (
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>What's New</div>
-            <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
-              {appInfo.whats_new.map((item, i) => (
-                <li key={i} style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)', lineHeight: 1.6 }}>{item}</li>
-              ))}
-            </ul>
+          <div style={{ paddingLeft: 54, paddingTop: 0, paddingBottom: 0 }}>
+            <div style={{ paddingBottom: 14, paddingRight: 20, borderBottom: '1px solid var(--ion-border-color)' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>What's New</div>
+              <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {appInfo.whats_new.map((item, i) => (
+                  <li key={i} style={{ fontSize: '0.875rem', color: 'var(--ion-text-color)', lineHeight: 1.6 }}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 
-        <div style={{ padding: '14px 20px' }}>
+        <div style={{ paddingLeft: 54, paddingTop: 14, paddingBottom: 14, paddingRight: 20 }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Known Issues</div>
           <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
             {appInfo?.known_issues?.length > 0
