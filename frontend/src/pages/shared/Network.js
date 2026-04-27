@@ -122,7 +122,6 @@ function SectionHeader({ label, count }) {
 export default function Network() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const activeTab = searchParams.get('tab') || 'connections';
 
   const query = searchParams.get('q') || '';
