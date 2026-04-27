@@ -206,17 +206,6 @@ export default function Network() {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Network</span>
-          <div style={{ display: 'flex', backgroundColor: 'rgba(0,0,0,0.06)', borderRadius: 10, padding: 3, gap: 2 }}>
-            {[
-              { value: 'connections', label: `Connections${pending.length > 0 ? ` (${pending.length})` : ''}` },
-              { value: 'know', label: 'People You May Know' },
-            ].map(tab => (
-              <button key={tab.value} onClick={() => navigate(`?tab=${tab.value}`)}
-                style={{ background: activeTab === tab.value ? 'var(--ion-card-background)' : 'transparent', color: activeTab === tab.value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '5px 14px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: activeTab === tab.value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none' }}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Search */}
