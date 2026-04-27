@@ -62,7 +62,6 @@ const DOC_TYPE_LABELS = {
 
 const cardStyle = {
   backgroundColor: 'var(--ion-card-background)',
-  border: '1px solid var(--ion-border-color)',
   borderRadius: 12,
   overflow: 'hidden',
   boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
@@ -173,7 +172,7 @@ function OverviewTab({ setSnackbar }) {
   }
 
   const InfoRow = ({ label, value, copyKey, showEmail }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--ion-border-color)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', lineHeight: 1.3 }}>{label}</div>
         {value && <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>}
