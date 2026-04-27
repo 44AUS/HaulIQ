@@ -457,7 +457,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                     </span>
                     <IonIcon name="chevron-down-outline" style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
                   </div>
-                  <IonPopover open={tabMenuOpen} onDidDismiss={() => setTabMenuOpen(false)} trigger="tab-menu-trigger" triggerAction="click">
+                  <IonPopover isOpen={tabMenuOpen} onDidDismiss={() => setTabMenuOpen(false)} trigger="tab-menu-trigger">
                     <IonList lines="none">
                       {config.tabs.map(({ key, label }) => (
                         <IonItem key={key} button detail={false} onClick={() => { setTab(key); setTabMenuOpen(false); }} style={{ '--background': activeTab === key ? 'var(--ion-color-step-100)' : 'transparent' }}>
@@ -637,7 +637,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
       </IonHeader>
 
       {/* Mobile nav dropdown */}
-      <IonPopover open={mobileNavOpen} onDidDismiss={() => setMobileNavOpen(false)} trigger="mobile-nav-trigger" triggerAction="click" style={{ '--min-width': '200px', '--border-radius': '12px' }}>
+      <IonPopover isOpen={mobileNavOpen} onDidDismiss={() => setMobileNavOpen(false)} trigger="mobile-nav-trigger" style={{ '--min-width': '200px', '--border-radius': '12px' }}>
         <IonList lines="none">
           {nav.map(item => {
             const active = isActive(item.path);
