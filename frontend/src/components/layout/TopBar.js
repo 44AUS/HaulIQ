@@ -3,12 +3,12 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
   IonBadge, IonList, IonItem, IonLabel,
-  IonToggle, IonSkeletonText, IonPopover, IonSearchbar,
+  IonToggle, IonPopover, IonSearchbar,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
-import { searchApi, notificationsApi } from '../../services/api';
+import { notificationsApi } from '../../services/api';
 
 const DEFAULT_BAR_COLOR = '#1565C0';
 const NOTIF_DRAWER_WIDTH = 360;
@@ -91,67 +91,6 @@ function formatTime(iso) {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
-}
-
-// ── Search results panel ──────────────────────────────────────────────────────
-const SEARCH_CATS = [
-  { key: 'connections',       label: 'Connections',       icon: 'person-outline' },
-  { key: 'messages',          label: 'Messages',          icon: 'chatbubble-outline' },
-  { key: 'loads_in_progress', label: 'Loads In Progress', icon: 'car-sport-outline' },
-  { key: 'completed_loads',   label: 'Completed Loads',   icon: 'checkmark-circle-outline' },
-  { key: 'saved_loads',       label: 'Saved Loads',       icon: 'bookmark-outline' },
-  { key: 'payments',          label: 'Payments',          icon: 'cash-outline' },
-];
-
-function SearchPanel({ results, loading, onNavigate }) {
-  if (loading) return (
-    <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {[1, 2, 3].map(i => (
-        <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <IonSkeletonText animated style={{ width: 28, height: 28, borderRadius: '50%' }} />
-          <div style={{ flex: 1 }}>
-            <IonSkeletonText animated style={{ width: '60%', height: 16 }} />
-            <IonSkeletonText animated style={{ width: '40%', height: 13, marginTop: 2 }} />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-  const hasAny = SEARCH_CATS.some(c => (results?.[c.key] || []).length > 0);
-  if (!hasAny) return (
-    <div style={{ padding: 24, textAlign: 'center', color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>No results found</div>
-  );
-
-  return (
-    <div style={{ maxHeight: 480, overflowY: 'auto', padding: '8px 0' }}>
-      {SEARCH_CATS.map(({ key, label, icon }) => {
-        const items = results?.[key] || [];
-        if (!items.length) return null;
-        return (
-          <div key={key}>
-            <div style={{ padding: '6px 16px', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--ion-color-step-400)' }}>{label}</div>
-            {items.map(item => (
-              <div key={item.id} onClick={() => onNavigate(item)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', cursor: 'pointer' }} className="search-result-row">
-                <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, opacity: 0.85 }}>
-                  <IonIcon name={icon} style={{ fontSize: 14, color: '#fff' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {key === 'connections' ? item.name : key === 'messages' ? `${item.other_name}: ${item.body}` : `${item.origin} → ${item.destination}`}
-                  </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {key === 'connections' ? (item.company || item.role) : key === 'messages' ? 'Message' : key === 'payments' ? `$${item.amount?.toFixed(2)} · ${item.status}` : `${item.commodity || ''} · $${item.rate?.toLocaleString()}`}
-                  </div>
-                </div>
-              </div>
-            ))}
-            <hr style={{ margin: '4px 0', border: 'none', borderTop: '1px solid var(--ion-border-color)' }} />
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 // ── Notification panel ────────────────────────────────────────────────────────
@@ -426,8 +365,6 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   const [notifCount,   setNotifCount]   = useState(0);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [tabMenuOpen,  setTabMenuOpen]  = useState(false);
-  const [searchResults, setSearchResults] = useState(null);
-  const [searchLoading, setSearchLoading] = useState(false);
   const searchRef    = useRef(null);
   const searchPanelRef = useRef(null);
 
@@ -446,15 +383,13 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   }, [searchOpen]);
 
   useEffect(() => {
-    if (!searchVal || searchVal.trim().length < 2) { setSearchResults(null); return; }
-    setSearchLoading(true);
+    if (!searchVal || searchVal.trim().length < 2) return;
     const t = setTimeout(() => {
-      searchApi.search(searchVal.trim())
-        .then(d => setSearchResults(d))
-        .catch(() => setSearchResults(null))
-        .finally(() => setSearchLoading(false));
+      navigate(`/search?q=${encodeURIComponent(searchVal.trim())}`);
+      handleCloseSearch();
     }, 350);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchVal]);
 
   useEffect(() => {
@@ -661,12 +596,6 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
               />
             </div>
 
-            {/* Search results dropdown */}
-            {searchOpen && (searchResults !== null || searchLoading) && (
-              <div style={{ position: 'absolute', top: 62, left: 0, right: 0, zIndex: 9999, borderRadius: 8, overflow: 'hidden', minWidth: 320, backgroundColor: 'var(--ion-card-background)', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
-                <SearchPanel results={searchResults} loading={searchLoading} onNavigate={(item) => { navigate(item.conv_id ? `${item.path}?conv=${item.conv_id}` : item.path); handleCloseSearch(); }} />
-              </div>
-            )}
           </div>
 
           {/* Right icons */}

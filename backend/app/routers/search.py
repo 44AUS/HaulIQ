@@ -9,6 +9,9 @@ from app.models.booking import Booking, BookingStatus
 from app.models.load import Load, SavedLoad
 from app.models.load_payment import LoadPayment
 from app.models.network import BrokerNetwork
+from app.models.truck_post import TruckPost
+from app.models.lane_watch import LaneWatch
+from app.models.document import LoadDocument
 
 router = APIRouter()
 
@@ -189,5 +192,102 @@ def search(
     for pay, load in pay_rows:
         payments.append({"id": str(pay.id), "origin": load.origin, "destination": load.destination, "amount": pay.amount, "status": pay.status, "path": f"/{current_user.role}/payments"})
     results["payments"] = payments
+
+    # ── Equipment (carrier only) ───────────────────────────────────────────────
+    equipment = []
+    if is_carrier:
+        rows = (
+            db.query(TruckPost)
+            .filter(
+                TruckPost.carrier_id == uid,
+                or_(
+                    func.lower(TruckPost.equipment_type).like(func.lower(like)),
+                    func.lower(TruckPost.current_location).like(func.lower(like)),
+                    func.lower(TruckPost.preferred_origin).like(func.lower(like)),
+                    func.lower(TruckPost.preferred_destination).like(func.lower(like)),
+                ),
+            )
+            .limit(LIMIT).all()
+        )
+        for row in rows:
+            equipment.append({
+                "id": str(row.id),
+                "equipment_type": row.equipment_type,
+                "current_location": row.current_location,
+                "preferred_origin": row.preferred_origin,
+                "path": "/carrier/equipment",
+            })
+    results["equipment"] = equipment
+
+    # ── Lane watches (carrier only) ────────────────────────────────────────────
+    lane_watches = []
+    if is_carrier:
+        rows = (
+            db.query(LaneWatch)
+            .filter(
+                LaneWatch.carrier_id == uid,
+                or_(
+                    func.lower(LaneWatch.origin_city).like(func.lower(like)),
+                    func.lower(LaneWatch.origin_state).like(func.lower(like)),
+                    func.lower(LaneWatch.dest_city).like(func.lower(like)),
+                    func.lower(LaneWatch.dest_state).like(func.lower(like)),
+                    func.lower(LaneWatch.equipment_type).like(func.lower(like)),
+                ),
+            )
+            .limit(LIMIT).all()
+        )
+        for row in rows:
+            lane_watches.append({
+                "id": str(row.id),
+                "origin_city": row.origin_city,
+                "origin_state": row.origin_state,
+                "dest_city": row.dest_city,
+                "dest_state": row.dest_state,
+                "equipment_type": row.equipment_type,
+                "path": "/carrier/lane-watches",
+            })
+    results["lane_watches"] = lane_watches
+
+    # ── Documents ─────────────────────────────────────────────────────────────
+    documents = []
+    doc_rows = (
+        db.query(LoadDocument)
+        .filter(
+            LoadDocument.uploader_id == uid,
+            or_(
+                func.lower(LoadDocument.file_name).like(func.lower(like)),
+                func.lower(LoadDocument.doc_type).like(func.lower(like)),
+            ),
+        )
+        .limit(LIMIT).all()
+    )
+    for row in doc_rows:
+        documents.append({
+            "id": str(row.id),
+            "file_name": row.file_name,
+            "doc_type": row.doc_type,
+            "path": f"/{current_user.role}/loads",
+        })
+    results["documents"] = documents
+
+    # ── Drivers (carrier only) ────────────────────────────────────────────────
+    drivers = []
+    if is_carrier:
+        rows = (
+            db.query(User)
+            .filter(
+                User.carrier_id == uid,
+                User.role == UserRole.driver,
+                func.lower(User.name).like(func.lower(like)),
+            )
+            .limit(LIMIT).all()
+        )
+        for row in rows:
+            drivers.append({
+                "id": str(row.id),
+                "name": row.name,
+                "path": "/carrier/drivers",
+            })
+    results["drivers"] = drivers
 
     return results
