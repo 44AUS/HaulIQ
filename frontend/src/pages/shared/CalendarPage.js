@@ -8,7 +8,7 @@ import { useJsApiLoader, GoogleMap, Marker, InfoWindow, TrafficLayer } from '@re
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
-import { IonButton, IonActionSheet } from '@ionic/react';
+import { IonButton, IonActionSheet, IonPopover, IonList, IonItem, IonLabel, IonCheckbox, IonAvatar } from '@ionic/react';
 import IonIcon from '../../components/IonIcon';
 
 const GMAPS_LIBS = ['places'];
@@ -113,60 +113,83 @@ function MonthPickerDropdown({ open, onClose, date, onSelect, anchorRef }) {
 function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState([]);
-  const ref = useRef(null);
-  const handleOpen = () => { setPending(selectedDrivers); setOpen(true); };
-  const toggleAll  = () => setPending([]);
-  const toggle     = (id) => setPending(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
-  const allSel     = pending.length === 0;
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
+  const toggleAll = () => setPending([]);
+  const toggle    = (id) => setPending(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const allSel    = pending.length === 0;
+
   const label = selectedDrivers.length === 0 ? 'Assigned'
     : selectedDrivers.length === 1
       ? (drivers.find(d => d.id === selectedDrivers[0])?.full_name || drivers.find(d => d.id === selectedDrivers[0])?.email || 'Driver')
       : `${selectedDrivers.length} Drivers`;
+
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <IonButton size="small" onClick={handleOpen} style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent' }}>
+    <>
+      <IonButton
+        id="assigned-driver-trigger"
+        size="small"
+        onClick={() => { setPending(selectedDrivers); setOpen(true); }}
+        style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent' }}
+      >
         {label} <IonIcon name="chevron-down-outline" style={{ fontSize: 13, marginLeft: 4 }} />
       </IonButton>
-      {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 100, width: 220, backgroundColor: 'var(--ion-card-background)', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', marginTop: 4 }}>
-          <div style={{ padding: '4px 0' }}>
-            <div onClick={toggleAll} style={{ padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', backgroundColor: allSel ? 'rgba(0,0,0,0.06)' : 'transparent' }}
-              onMouseEnter={e => { if (!allSel) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'; }}
-              onMouseLeave={e => { if (!allSel) e.currentTarget.style.backgroundColor = 'transparent'; }}>
-              <input type="checkbox" checked={allSel} onChange={toggleAll} onClick={e => e.stopPropagation()} style={{ margin: 0 }} />
-              <span style={{ fontSize: '0.875rem', fontWeight: allSel ? 700 : 400, color: 'var(--ion-text-color)' }}>All</span>
-            </div>
-            <div style={{ maxHeight: 200, overflowY: 'auto' }}>
-              {drivers.map(d => {
-                const checked = pending.includes(d.id);
-                const name = d.full_name || d.email || `Driver ${d.id}`;
-                return (
-                  <div key={d.id} onClick={() => toggle(d.id)} style={{ padding: '7px 16px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-                    <input type="checkbox" checked={checked} onChange={() => toggle(d.id)} onClick={e => e.stopPropagation()} style={{ margin: 0 }} />
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: '#fff', flexShrink: 0 }}>
-                      {name[0]?.toUpperCase()}
-                    </div>
-                    <span style={{ fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{name}</span>
-                  </div>
-                );
-              })}
-              {drivers.length === 0 && <div style={{ padding: '12px 16px' }}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>No drivers assigned</span></div>}
-            </div>
-            <div style={{ padding: '8px 16px 12px', borderTop: '1px solid var(--ion-border-color)', marginTop: 4 }}>
-              <IonButton expand="block" onClick={() => { onApply(pending); setOpen(false); }} style={{ '--background': 'var(--ion-color-primary)' }}>Apply</IonButton>
-            </div>
+
+      <IonPopover
+        trigger="assigned-driver-trigger"
+        isOpen={open}
+        onDidDismiss={() => setOpen(false)}
+        style={{ '--width': '280px', '--border-radius': '12px' }}
+      >
+        <IonList lines="none" style={{ paddingTop: 8 }}>
+          {/* All option */}
+          <IonItem button detail={false} onClick={toggleAll} style={{ '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0' }}>
+            <IonCheckbox
+              slot="start"
+              checked={allSel}
+              onIonChange={toggleAll}
+              style={{ marginRight: 12 }}
+            />
+            <IonLabel style={{ fontSize: '0.9rem', fontWeight: allSel ? 700 : 400 }}>All Drivers</IonLabel>
+          </IonItem>
+
+          {/* Driver list */}
+          <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+            {drivers.map(d => {
+              const checked = pending.includes(d.id);
+              const name = d.full_name || d.email || `Driver ${d.id}`;
+              return (
+                <IonItem key={d.id} button detail={false} onClick={() => toggle(d.id)} style={{ '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', '--min-height': '56px' }}>
+                  <IonCheckbox
+                    slot="start"
+                    checked={checked}
+                    onIonChange={() => toggle(d.id)}
+                    style={{ marginRight: 12 }}
+                  />
+                  <IonAvatar slot="start" style={{ width: 40, height: 40, marginRight: 12, flexShrink: 0 }}>
+                    {d.avatar_url
+                      ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                      : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
+                          {name[0]?.toUpperCase()}
+                        </div>
+                    }
+                  </IonAvatar>
+                  <IonLabel style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</IonLabel>
+                </IonItem>
+              );
+            })}
+            {drivers.length === 0 && (
+              <IonItem style={{ '--padding-start': '16px' }}>
+                <IonLabel style={{ fontSize: '0.8rem', color: 'var(--ion-color-medium)' }}>No drivers assigned</IonLabel>
+              </IonItem>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+
+          {/* Apply */}
+          <div style={{ padding: '8px 16px 12px', borderTop: '1px solid var(--ion-border-color)', marginTop: 4 }}>
+            <IonButton expand="block" onClick={() => { onApply(pending); setOpen(false); }}>Apply</IonButton>
+          </div>
+        </IonList>
+      </IonPopover>
+    </>
   );
 }
 
