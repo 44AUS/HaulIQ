@@ -70,7 +70,13 @@ function getHolidaysForYear(year) {
 
 function MonthPickerDropdown({ open, onClose, date, onSelect, anchorRef }) {
   const [pickerYear, setPickerYear] = useState(date.getFullYear());
+  const [pos, setPos] = useState({ top: 0, left: 0 });
   const ref = useRef(null);
+  useEffect(() => {
+    if (!open || !anchorRef.current) return;
+    const r = anchorRef.current.getBoundingClientRect();
+    setPos({ top: r.bottom + 4, left: r.left });
+  }, [open, anchorRef]);
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target) && anchorRef.current && !anchorRef.current.contains(e.target)) onClose(); };
@@ -79,7 +85,7 @@ function MonthPickerDropdown({ open, onClose, date, onSelect, anchorRef }) {
   }, [open, onClose, anchorRef]);
   if (!open) return null;
   return (
-    <div ref={ref} style={{ position: 'absolute', top: '100%', left: 0, zIndex: 100, width: 248, backgroundColor: 'var(--ion-card-background)', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', marginTop: 4, padding: 16 }}>
+    <div ref={ref} style={{ position: 'fixed', top: pos.top, left: pos.left, zIndex: 10000, width: 248, backgroundColor: 'var(--ion-card-background)', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <IonButton fill="clear" shape="round" size="small" onClick={() => setPickerYear(y => y - 1)}>
           <IonIcon slot="icon-only" name="chevron-back-outline" />
@@ -500,7 +506,8 @@ export default function CalendarPage() {
       <div style={{ borderRadius: 6, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', backgroundColor: 'var(--ion-card-background)', flex: 1, display: 'flex', flexDirection: 'column' }}>
 
         {/* Row 1: month picker + view toggle | filter */}
-        <div style={{ overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'thin' }}>
+        <style>{`@media (max-width: 768px) { .cal-toprow-scroll { overflow-x: auto; scrollbar-width: thin; } }`}</style>
+        <div className="cal-toprow-scroll" style={{ flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', minWidth: 'max-content', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ position: 'relative' }} ref={pickerAnchorRef}>
