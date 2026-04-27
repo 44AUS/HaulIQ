@@ -4,6 +4,7 @@ import {
   IonHeader, IonToolbar, IonButtons, IonButton, IonMenuButton,
   IonBadge, IonList, IonItem, IonLabel,
   IonToggle, IonPopover, IonSearchbar, IonSkeletonText,
+  IonSegment, IonSegmentButton,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
 import { useAuth } from '../../context/AuthContext';
@@ -301,28 +302,6 @@ function NotificationsPanel({ onClose, onCountChange }) {
 }
 
 // ── Desktop nav link ──────────────────────────────────────────────────────────
-function NavLink({ item, active, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 7,
-        padding: '0 20px', height: '100%', cursor: 'pointer', flexShrink: 0,
-        color: active ? '#fff' : 'rgba(255,255,255,0.75)',
-        backgroundColor: active ? 'rgba(255,255,255,0.12)' : 'transparent',
-        position: 'relative', userSelect: 'none', minWidth: 0,
-        borderBottom: active ? '3px solid #fff' : '3px solid transparent',
-        transition: 'all 0.15s',
-      }}
-    >
-      <IonIcon name={item.icon} style={{ fontSize: 18, flexShrink: 0 }} />
-      <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-        {item.label}
-      </span>
-    </div>
-  );
-}
-
 // ── Immersive tab ─────────────────────────────────────────────────────────────
 function ImmersiveTab({ label, active, onClick }) {
   return (
@@ -545,11 +524,43 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
           <div ref={searchPanelRef} style={{ flex: 1, minWidth: 0, position: 'relative', height: 60, display: 'flex', alignItems: 'center' }}>
             {/* Desktop nav */}
             {!isMobile && (
-              <div style={{ display: 'flex', alignItems: 'stretch', height: 60, width: '100%', overflowX: 'auto', scrollbarWidth: 'none', opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
+              <IonSegment
+                value={activeNavItem?.path ?? ''}
+                onIonChange={e => { if (e.detail.value) navigate(String(e.detail.value)); }}
+                style={{
+                  '--background': 'transparent',
+                  height: 60,
+                  width: '100%',
+                  opacity: searchOpen ? 0 : 1,
+                  transition: 'opacity 0.18s',
+                  pointerEvents: searchOpen ? 'none' : 'auto',
+                  overflowX: 'auto',
+                  scrollbarWidth: 'none',
+                  flexShrink: 1,
+                }}
+              >
                 {nav.map(item => (
-                  <NavLink key={item.path} item={item} active={isActive(item.path)} onClick={() => navigate(item.path)} />
+                  <IonSegmentButton
+                    key={item.path}
+                    value={item.path}
+                    layout="icon-start"
+                    style={{
+                      '--color': 'rgba(255,255,255,0.7)',
+                      '--color-checked': '#fff',
+                      '--indicator-color': '#fff',
+                      '--background-checked': 'rgba(255,255,255,0.12)',
+                      '--border-radius': '0',
+                      '--padding-top': '0',
+                      '--padding-bottom': '0',
+                      minHeight: 60,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <IonIcon name={item.icon} />
+                    <IonLabel style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{item.label}</IonLabel>
+                  </IonSegmentButton>
                 ))}
-              </div>
+              </IonSegment>
             )}
 
             {/* Mobile: current page label */}
