@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect } from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
+import { useThemeMode } from '../../context/ThemeContext';
 
 const US_STATES = [
   'AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA',
@@ -39,6 +40,7 @@ const STATUS_CHIP = {
 };
 
 function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
+  const { brandColor } = useThemeMode();
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -68,9 +70,9 @@ function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
       <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 340, backgroundColor: 'var(--ion-card-background)', zIndex: 1201, transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.2)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>New Lane Watch</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex' }}>
-            <IonIcon name="close-outline" style={{ fontSize: 20 }} />
-          </button>
+          <IonButton fill="clear" shape="round" onClick={onClose}>
+            <IonIcon slot="icon-only" name="close-outline" />
+          </IonButton>
         </div>
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
@@ -142,13 +144,11 @@ function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
         </div>
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
-          <button onClick={onClose} style={{ padding: '7px 16px', background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}>
-            Cancel
-          </button>
-          <button onClick={handleCreate} disabled={saving} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 16px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600, opacity: saving ? 0.7 : 1 }}>
+          <IonButton fill="outline" onClick={onClose}>Cancel</IonButton>
+          <IonButton onClick={handleCreate} disabled={saving} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>
             {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
             Save Watch
-          </button>
+          </IonButton>
         </div>
       </div>
     </>,
@@ -163,6 +163,7 @@ const laneLabel = (w) => {
 };
 
 export default function LaneWatches() {
+  const { brandColor } = useThemeMode();
   const [watches,        setWatches]        = useState([]);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [loading,        setLoading]        = useState(true);
@@ -220,12 +221,10 @@ export default function LaneWatches() {
               {loading ? 'Loading…' : `${watches.length} watch${watches.length !== 1 ? 'es' : ''} · get notified when matching loads are posted`}
             </p>
           </div>
-          <button
-            onClick={() => setDrawerOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', fontWeight: 600 }}
-          >
-            <IonIcon name="add-outline" style={{ fontSize: 16 }} /> Add Watch
-          </button>
+          <IonButton onClick={() => setDrawerOpen(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>
+            <IonIcon slot="start" name="add-outline" />
+            Add Watch
+          </IonButton>
         </div>
 
         {/* Tab bar */}
@@ -251,9 +250,9 @@ export default function LaneWatches() {
           </IonSegment>
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-            <button title="Refresh" onClick={() => fetchData(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </button>
+            <IonButton fill="clear" shape="round" onClick={() => fetchData(true)} title="Refresh">
+              <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </IonButton>
           </div>
         </div>
 
@@ -337,15 +336,9 @@ export default function LaneWatches() {
                         </RippleTd>
 
                         <RippleTd style={{ ...tdStyle, width: 48 }}>
-                          <button
-                            onClick={() => handleDelete(w.id)}
-                            title="Delete watch"
-                            style={{ width: 32, height: 32, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(211,47,47,0.1)'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                          >
-                            <IonIcon name="trash-outline" style={{ fontSize: 15 }} />
-                          </button>
+                          <IonButton fill="clear" shape="round" color="danger" onClick={() => handleDelete(w.id)} title="Delete watch">
+                            <IonIcon slot="icon-only" name="trash-outline" />
+                          </IonButton>
                         </RippleTd>
                       </tr>
                     );

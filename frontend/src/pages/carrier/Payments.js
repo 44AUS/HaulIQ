@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect } from '@ionic/react';
 import { freightPaymentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
+import { useThemeMode } from '../../context/ThemeContext';
 
 const TABS = [
   { key: 'all',      label: 'ALL' },
@@ -53,6 +54,7 @@ const fmtDate = (s) => {
 };
 
 export default function CarrierPayments() {
+  const { brandColor } = useThemeMode();
   const [payments,  setPayments]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [spinning,  setSpinning]  = useState(false);
@@ -130,9 +132,9 @@ export default function CarrierPayments() {
           </IonSegment>
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-            <button title="Refresh" onClick={() => fetchData(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </button>
+            <IonButton fill="clear" shape="round" onClick={() => fetchData(true)} title="Refresh">
+              <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </IonButton>
           </div>
         </div>
 

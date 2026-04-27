@@ -8,6 +8,7 @@ import { useJsApiLoader, GoogleMap, Marker, InfoWindow, TrafficLayer } from '@re
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
+import { IonButton } from '@ionic/react';
 import IonIcon from '../../components/IonIcon';
 
 const GMAPS_LIBS = ['places'];
@@ -80,13 +81,13 @@ function MonthPickerDropdown({ open, onClose, date, onSelect, anchorRef }) {
   return (
     <div ref={ref} style={{ position: 'absolute', top: '100%', left: 0, zIndex: 100, width: 248, backgroundColor: 'var(--ion-card-background)', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', marginTop: 4, padding: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <button onClick={() => setPickerYear(y => y - 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: 4, display: 'flex', borderRadius: 4 }}>
-          <IonIcon name="chevron-back-outline" style={{ fontSize: 16 }} />
-        </button>
+        <IonButton fill="clear" shape="round" size="small" onClick={() => setPickerYear(y => y - 1)}>
+          <IonIcon slot="icon-only" name="chevron-back-outline" />
+        </IonButton>
         <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>{pickerYear}</span>
-        <button onClick={() => setPickerYear(y => y + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: 4, display: 'flex', borderRadius: 4 }}>
-          <IonIcon name="chevron-forward-outline" style={{ fontSize: 16 }} />
-        </button>
+        <IonButton fill="clear" shape="round" size="small" onClick={() => setPickerYear(y => y + 1)}>
+          <IonIcon slot="icon-only" name="chevron-forward-outline" />
+        </IonButton>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 4 }}>
         {MONTH_NAMES.map((m, i) => {
@@ -123,10 +124,9 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
       : `${selectedDrivers.length} Drivers`;
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={handleOpen}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', backgroundColor: selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-        {label} <IonIcon name="chevron-down-outline" style={{ fontSize: 13 }} />
-      </button>
+      <IonButton size="small" onClick={handleOpen} style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent' }}>
+        {label} <IonIcon name="chevron-down-outline" style={{ fontSize: 13, marginLeft: 4 }} />
+      </IonButton>
       {open && (
         <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 100, width: 220, backgroundColor: 'var(--ion-card-background)', borderRadius: 10, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', marginTop: 4 }}>
           <div style={{ padding: '4px 0' }}>
@@ -155,7 +155,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
               {drivers.length === 0 && <div style={{ padding: '12px 16px' }}><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>No drivers assigned</span></div>}
             </div>
             <div style={{ padding: '8px 16px 12px', borderTop: '1px solid var(--ion-border-color)', marginTop: 4 }}>
-              <button onClick={() => { onApply(pending); setOpen(false); }} style={{ width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 0', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.875rem' }}>Apply</button>
+              <IonButton expand="block" onClick={() => { onApply(pending); setOpen(false); }} style={{ '--background': 'var(--ion-color-primary)' }}>Apply</IonButton>
             </div>
           </div>
         </div>
@@ -172,8 +172,8 @@ function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onCle
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={onClear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-danger)', fontWeight: 700, fontSize: '0.8rem', fontFamily: 'inherit', padding: '0 4px' }}>CLEAR</button>
-            <button onClick={onApply} style={{ backgroundColor: '#4CAF50', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 16px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.8rem' }}>APPLY</button>
+            <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
+            <IonButton size="small" onClick={onApply} style={{ '--background': 'var(--ion-color-primary)' }}>APPLY</IonButton>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
@@ -329,7 +329,7 @@ function MapLayersPanel({ pending, onToggle, onApply, isDark }) {
     <div style={{ position: 'absolute', top: 'calc(44px + 10px)', left: 10, zIndex: 10, width: 260, backgroundColor: bg, borderRadius: 10, boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.55)' : '0 4px 24px rgba(0,0,0,0.18)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 12px' }}>
         <span style={{ color: textCol, fontWeight: 700, fontSize: '1.1rem' }}>Layers</span>
-        <button onClick={onApply} style={{ backgroundColor: '#2dd36f', color: '#fff', border: 'none', borderRadius: 6, padding: '5px 16px', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem', fontFamily: 'inherit', letterSpacing: '0.04em' }}>APPLY</button>
+        <IonButton size="small" onClick={onApply} style={{ '--background': 'var(--ion-color-primary)' }}>APPLY</IonButton>
       </div>
       {MAP_LAYERS.map(({ key, label, icon }, i) => (
         <div key={key} onClick={() => onToggle(key)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 20px', borderTop: i > 0 ? `1px solid ${divider}` : 'none', cursor: 'pointer' }}
@@ -504,13 +504,10 @@ export default function CalendarPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ position: 'relative' }} ref={pickerAnchorRef}>
-              <button onClick={() => setPickerOpen(o => !o)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: '1rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: '4px 8px', borderRadius: 8, fontFamily: 'inherit' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
+              <IonButton fill="clear" onClick={() => setPickerOpen(o => !o)} style={{ fontWeight: 700, fontSize: '1rem', '--color': 'var(--ion-text-color)' }}>
                 {MONTH_FULL[date.getMonth()]} {date.getFullYear()}
-                <IonIcon name="chevron-down-outline" style={{ fontSize: 15 }} />
-              </button>
+                <IonIcon slot="end" name="chevron-down-outline" />
+              </IonButton>
               <MonthPickerDropdown open={pickerOpen} onClose={() => setPickerOpen(false)} date={date} onSelect={d => { setDate(d); setView('month'); }} anchorRef={pickerAnchorRef} />
             </div>
 
@@ -524,26 +521,21 @@ export default function CalendarPage() {
             </div>
           </div>
 
-          <button onClick={() => setFilterOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', backgroundColor: hasFilter ? primary : 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
-            <IonIcon name="funnel-outline" style={{ fontSize: 14 }} /> Filter
-          </button>
+          <IonButton size="small" onClick={() => setFilterOpen(true)} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary }}>
+            <IonIcon slot="start" name="funnel-outline" /> Filter
+          </IonButton>
         </div>
 
         {/* Row 2: nav + assigned + revenue */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={prev} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: 4, display: 'flex', borderRadius: 4 }}>
-              <IonIcon name="chevron-back-outline" style={{ fontSize: 18 }} />
-            </button>
-            <button onClick={() => setDate(new Date())} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: '4px 12px', borderRadius: 8, fontWeight: 700, fontSize: '0.78rem', fontFamily: 'inherit' }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
-              Today
-            </button>
-            <button onClick={next} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-text-color)', padding: 4, display: 'flex', borderRadius: 4 }}>
-              <IonIcon name="chevron-forward-outline" style={{ fontSize: 18 }} />
-            </button>
+            <IonButton fill="clear" shape="round" size="small" onClick={prev}>
+              <IonIcon slot="icon-only" name="chevron-back-outline" />
+            </IonButton>
+            <IonButton fill="clear" size="small" onClick={() => setDate(new Date())}>Today</IonButton>
+            <IonButton fill="clear" shape="round" size="small" onClick={next}>
+              <IonIcon slot="icon-only" name="chevron-forward-outline" />
+            </IonButton>
             {user?.role === 'carrier' && <AssignedDropdown drivers={drivers} selectedDrivers={selectedDrivers} onApply={setSelectedDrivers} />}
           </div>
           <div style={{ textAlign: 'center' }}>
@@ -609,10 +601,9 @@ export default function CalendarPage() {
 
       {user?.role === 'carrier' && (
         <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
-          <button onClick={() => navigate('/carrier/loads')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, backgroundColor: primary, color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 6px 20px rgba(0,0,0,0.3)' }}>
-            <IonIcon name="search-outline" style={{ fontSize: 16 }} /> Find Loads
-          </button>
+          <IonButton onClick={() => navigate('/carrier/loads')} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary, '--box-shadow': '0 6px 20px rgba(0,0,0,0.3)' }}>
+            <IonIcon slot="start" name="search-outline" /> Find Loads
+          </IonButton>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useThemeMode } from '../../context/ThemeContext';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
   IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
@@ -59,6 +60,7 @@ const emptyForm = () => ({
 });
 
 export default function Equipment() {
+  const { brandColor } = useThemeMode();
   const [posts,          setPosts]          = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
@@ -251,9 +253,9 @@ export default function Equipment() {
         </IonSegment>
         <div style={{ flex: 1 }} />
         <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-          <button title="Refresh" onClick={() => fetchPosts(true)} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-            <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-          </button>
+          <IonButton fill="clear" shape="round" onClick={() => fetchPosts(true)} title="Refresh">
+            <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+          </IonButton>
         </div>
       </div>
 
@@ -268,9 +270,9 @@ export default function Equipment() {
             <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No trucks in this category.</p>
             {activeTab === 'all' && (
-              <button onClick={openCreate} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, backgroundColor: 'transparent', color: 'var(--ion-color-primary)', cursor: 'pointer', fontSize: '0.875rem', fontFamily: 'inherit', fontWeight: 600 }}>
-                <IonIcon name="add-outline" style={{ fontSize: 16 }} /> Post Your First Truck
-              </button>
+              <IonButton fill="outline" onClick={openCreate} style={{ '--color': brandColor, '--border-color': brandColor }}>
+                <IonIcon slot="start" name="add-outline" /> Post Your First Truck
+              </IonButton>
             )}
           </div>
         ) : (
@@ -344,15 +346,15 @@ export default function Equipment() {
 
                     <td style={{ ...tdStyle, width: 110, minWidth: 110, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <button title="Repost with new dates" onClick={() => openRepost(post)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
-                          <IonIcon name="reload-outline" style={{ fontSize: 15 }} />
-                        </button>
-                        <button title="Edit" onClick={() => openEdit(post)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
-                          <IonIcon name="create-outline" style={{ fontSize: 15 }} />
-                        </button>
-                        <button title="Delete" onClick={() => setDeleteId(post.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
-                          <IonIcon name="trash-outline" style={{ fontSize: 15 }} />
-                        </button>
+                        <IonButton fill="clear" shape="round" size="small" title="Repost with new dates" onClick={() => openRepost(post)}>
+                          <IonIcon slot="icon-only" name="reload-outline" />
+                        </IonButton>
+                        <IonButton fill="clear" shape="round" size="small" title="Edit" onClick={() => openEdit(post)}>
+                          <IonIcon slot="icon-only" name="create-outline" />
+                        </IonButton>
+                        <IonButton fill="clear" shape="round" size="small" color="danger" title="Delete" onClick={() => setDeleteId(post.id)}>
+                          <IonIcon slot="icon-only" name="trash-outline" />
+                        </IonButton>
                         <IonIcon name="chevron-forward-outline" style={{ fontSize: 16, color: 'var(--ion-color-medium)' }} />
                       </div>
                     </td>
@@ -366,9 +368,9 @@ export default function Equipment() {
 
       {/* Post Truck button */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
-        <button onClick={openCreate} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
-          <IonIcon name="add-outline" style={{ fontSize: 17 }} /> Post Truck
-        </button>
+        <IonButton onClick={openCreate} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon slot="start" name="add-outline" /> Post Truck
+        </IonButton>
       </div>
 
     </div>
@@ -376,17 +378,17 @@ export default function Equipment() {
     <IonModal isOpen={dateModalOpen} onDidDismiss={() => setDateModalOpen(false)} className="date-picker-modal">
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
-          <div slot="start" style={{ paddingLeft: 4 }}>
-            <button onClick={() => setDateModalOpen(false)} style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: 'var(--ion-text-color)' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
-            </button>
-          </div>
+          <IonButtons slot="start">
+            <IonButton fill="clear" shape="round" onClick={() => setDateModalOpen(false)}>
+              <IonIcon slot="icon-only" name="close-outline" />
+            </IonButton>
+          </IonButtons>
           <IonTitle style={{ fontWeight: 700 }}>Select Dates</IonTitle>
-          <div slot="end" style={{ paddingRight: 4 }}>
-            <button onClick={confirmDates} style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: '#2dd36f' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(45,211,111,0.2)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <IonIcon name="checkmark-outline" style={{ fontSize: 24, pointerEvents: 'none' }} />
-            </button>
-          </div>
+          <IonButtons slot="end">
+            <IonButton fill="clear" shape="round" onClick={confirmDates} style={{ '--color': '#2dd36f' }}>
+              <IonIcon slot="icon-only" name="checkmark-outline" />
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -456,28 +458,17 @@ export default function Equipment() {
     <IonModal isOpen={dialogOpen} onDidDismiss={() => setDialogOpen(false)} className="equipment-post-modal">
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
-          <div slot="start" style={{ paddingLeft: 4 }}>
-            <button
-              onClick={() => setDialogOpen(false)}
-              style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: 'var(--ion-text-color)' }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
-            </button>
-          </div>
+          <IonButtons slot="start">
+            <IonButton fill="clear" shape="round" onClick={() => setDialogOpen(false)}>
+              <IonIcon slot="icon-only" name="close-outline" />
+            </IonButton>
+          </IonButtons>
           <IonTitle style={{ fontWeight: 700 }}>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
-          <div slot="end" style={{ paddingRight: 4 }}>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{ width: 38, height: 38, borderRadius: '50%', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s', color: '#2dd36f', opacity: saving ? 0.6 : 1 }}
-              onMouseEnter={e => { if (!saving) e.currentTarget.style.backgroundColor = 'rgba(45,211,111,0.2)'; }}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: '#2dd36f' }} /> : <IonIcon name="checkmark-outline" style={{ fontSize: 24, pointerEvents: 'none' }} />}
-            </button>
-          </div>
+          <IonButtons slot="end">
+            <IonButton fill="clear" shape="round" onClick={handleSave} disabled={saving} style={{ '--color': '#2dd36f', opacity: saving ? 0.6 : 1 }}>
+              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: '#2dd36f' }} /> : <IonIcon slot="icon-only" name="checkmark-outline" />}
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
 

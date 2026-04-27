@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect } from '@ionic/react';
+import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -189,6 +190,7 @@ function TableView({ loads, equipmentTypes }) {
 }
 
 function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTypes }) {
+  const { brandColor } = useThemeMode();
   return createPortal(
     <>
       {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
@@ -197,8 +199,8 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={onClear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>CLEAR</button>
-            <button onClick={onApply} style={{ padding: '4px 16px', backgroundColor: '#4CAF50', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>APPLY</button>
+            <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
+            <IonButton size="small" onClick={onApply} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>APPLY</IonButton>
           </div>
         </div>
 
@@ -305,6 +307,7 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
 }
 
 export default function LoadBoard() {
+  const { brandColor } = useThemeMode();
   const [pf, setPF_state]             = useState(INIT);
   const [appliedFilters, setAppliedFilters] = useState(INIT);
   const [loads, setLoads]             = useState([]);
@@ -394,12 +397,9 @@ export default function LoadBoard() {
               {loading ? 'Loading…' : `${tabLoads.length} loads available`}
             </p>
           </div>
-          <button
-            onClick={() => setFilterOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', border: `1px solid ${hasActive ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, borderRadius: 4, backgroundColor: 'transparent', color: hasActive ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}
-          >
-            <IonIcon name="funnel-outline" style={{ fontSize: 16 }} /> Filter
-          </button>
+          <IonButton fill="outline" size="small" onClick={() => setFilterOpen(true)} style={{ '--color': brandColor, '--border-color': brandColor }}>
+            <IonIcon slot="start" name="funnel-outline" /> Filter
+          </IonButton>
         </div>
 
         {/* Tab bar */}
@@ -425,9 +425,9 @@ export default function LoadBoard() {
           </IonSegment>
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-            <button title="Refresh" onClick={refresh} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-              <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-            </button>
+            <IonButton fill="clear" shape="round" onClick={refresh} title="Refresh">
+              <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+            </IonButton>
           </div>
         </div>
 
@@ -440,16 +440,16 @@ export default function LoadBoard() {
           ) : apiError ? (
             <div style={{ border: '1px solid #d32f2f', borderRadius: 8, margin: 16, padding: 32, textAlign: 'center' }}>
               <p style={{ margin: '0 0 12px', color: '#d32f2f' }}>{apiError}</p>
-              <button onClick={() => fetchLoads(appliedFilters)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontFamily: 'inherit', fontSize: '0.875rem' }}>Retry</button>
+              <IonButton fill="clear" size="small" onClick={() => fetchLoads(appliedFilters)} style={{ '--color': brandColor }}>Retry</IonButton>
             </div>
           ) : tabLoads.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 8 }}>
               <IonIcon name="car-sport-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
               <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No loads match your filters</p>
               {hasActive && (
-                <button onClick={() => { setPF_state(INIT); fetchLoads(INIT); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontFamily: 'inherit', fontSize: '0.875rem' }}>
+                <IonButton fill="clear" size="small" onClick={() => { setPF_state(INIT); fetchLoads(INIT); }} style={{ '--color': brandColor }}>
                   Clear filters
-                </button>
+                </IonButton>
               )}
             </div>
           ) : (

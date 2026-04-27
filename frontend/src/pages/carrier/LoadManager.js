@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonCheckbox, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonCheckbox, IonRippleEffect } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
@@ -82,6 +82,7 @@ function TmsProgress({ tmsStatus }) {
 }
 
 function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
+  const { brandColor } = useThemeMode();
   return createPortal(
     <>
       {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
@@ -89,8 +90,8 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={onClear} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>CLEAR</button>
-            <button onClick={onApply} style={{ padding: '4px 16px', backgroundColor: '#4CAF50', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.8rem' }}>APPLY</button>
+            <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
+            <IonButton size="small" onClick={onApply} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>APPLY</IonButton>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
@@ -319,15 +320,15 @@ export default function LoadManager() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
         <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>Loads</h2>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button onClick={() => setShowProgress(v => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: showProgress ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase', padding: '4px 8px' }}>
-            <span style={{ fontSize: 14 }}>≡</span> {showProgress ? 'Hide Progress' : 'Show Progress'}
-          </button>
-          <button onClick={() => setFilterOpen(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', border: `1px solid ${hasActiveFilters ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, borderRadius: 4, backgroundColor: 'transparent', color: hasActiveFilters ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            <IonIcon name="funnel-outline" style={{ fontSize: 16 }} /> Filter
-          </button>
-          <button onClick={handleExport} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', border: '1px solid var(--ion-border-color)', borderRadius: 4, backgroundColor: 'transparent', color: 'var(--ion-color-medium)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.72rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            <IonIcon name="download-outline" style={{ fontSize: 16 }} /> Export
-          </button>
+          <IonButton fill="clear" size="small" onClick={() => setShowProgress(v => !v)} style={{ '--color': showProgress ? (brandColor || 'var(--ion-color-primary)') : 'var(--ion-color-medium)' }}>
+            <span style={{ fontSize: 14, marginRight: 4 }}>≡</span> {showProgress ? 'Hide Progress' : 'Show Progress'}
+          </IonButton>
+          <IonButton fill="outline" size="small" onClick={() => setFilterOpen(true)} style={{ '--color': brandColor, '--border-color': brandColor }}>
+            <IonIcon slot="start" name="funnel-outline" /> Filter
+          </IonButton>
+          <IonButton fill="outline" size="small" onClick={handleExport}>
+            <IonIcon slot="start" name="download-outline" /> Export
+          </IonButton>
         </div>
       </div>
 
@@ -354,9 +355,9 @@ export default function LoadManager() {
         </IonSegment>
         <div style={{ flex: 1 }} />
         <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-          <button title="Refresh" onClick={refresh} style={{ width: 36, height: 36, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-            <IonIcon name="refresh-outline" style={{ fontSize: 18, animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
-          </button>
+          <IonButton fill="clear" shape="round" onClick={refresh} title="Refresh">
+            <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
+          </IonButton>
         </div>
       </div>
 
@@ -400,10 +401,10 @@ export default function LoadManager() {
                   {/* Status / bulk delete header */}
                   {deletableKeys.length > 0 ? (
                     <th style={{ ...thStyle, width: 120, minWidth: 120 }}>
-                      <button onClick={handleBulkDelete} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', fontFamily: 'inherit', fontWeight: 600, fontSize: '0.68rem', padding: '2px 4px' }}>
-                        <IonIcon name="trash-outline" style={{ fontSize: 14 }} />
+                      <IonButton fill="clear" color="danger" size="small" onClick={handleBulkDelete}>
+                        <IonIcon slot="start" name="trash-outline" />
                         {deletableKeys.length > 1 ? `Delete (${deletableKeys.length})` : (tabItems.find((i, idx) => (i._key || idx) === deletableKeys[0])?.chipKey === 'archived' ? 'Delete' : 'Archive')}
-                      </button>
+                      </IonButton>
                     </th>
                   ) : (
                     <th style={{ ...thStyle, width: 120, minWidth: 120 }}>Status</th>
@@ -495,13 +496,9 @@ export default function LoadManager() {
 
                         <RippleTd style={{ ...tdStyle, width: 48, minWidth: 48, paddingRight: 8 }} onClick={e => e.stopPropagation()}>
                           {item.chipKey === 'archived' ? (
-                            <button
-                              title="Delete permanently"
-                              onClick={async (e) => { e.stopPropagation(); try { await bookingsApi.destroy(item._key); } catch (_) {} refresh(); }}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d32f2f', padding: 4, display: 'flex', borderRadius: 4 }}
-                            >
-                              <IonIcon name="trash-outline" style={{ fontSize: 16 }} />
-                            </button>
+                            <IonButton fill="clear" color="danger" shape="round" size="small" title="Delete permanently" onClick={async (e) => { e.stopPropagation(); try { await bookingsApi.destroy(item._key); } catch (_) {} refresh(); }}>
+                              <IonIcon slot="icon-only" name="trash-outline" />
+                            </IonButton>
                           ) : (
                             <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', display: 'block' }} />
                           )}
@@ -532,9 +529,9 @@ export default function LoadManager() {
 
       {/* Find Loads button */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
-        <button onClick={() => navigate('/carrier/loads')} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', boxShadow: '0 4px 16px rgba(0,0,0,0.22)' }}>
-          <IonIcon name="search-outline" style={{ fontSize: 17 }} /> Find Loads
-        </button>
+        <IonButton onClick={() => navigate('/carrier/loads')} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon slot="start" name="search-outline" /> Find Loads
+        </IonButton>
       </div>
 
     </div>
