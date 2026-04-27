@@ -159,16 +159,17 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
         onDidDismiss={() => setOpen(false)}
         style={{ '--width': '280px', '--border-radius': '12px' }}
       >
-        <IonList lines="none" style={{ paddingTop: 8 }}>
+        <IonList lines="none" style={{ paddingTop: 0 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Assigned</span>
+            <IonButton size="small" onClick={() => { onApply(pending); setOpen(false); }}>APPLY</IonButton>
+          </div>
+
           {/* All option */}
           <IonItem button detail={false} onClick={toggleAll} style={{ '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0' }}>
-            <IonCheckbox
-              slot="start"
-              checked={allSel}
-              onIonChange={toggleAll}
-              style={{ marginRight: 12 }}
-            />
-            <IonLabel style={{ fontSize: '0.9rem', fontWeight: allSel ? 700 : 400 }}>All Drivers</IonLabel>
+            <IonCheckbox slot="start" checked={allSel} onIonChange={toggleAll} style={{ marginRight: 12 }} />
+            <IonLabel style={{ fontSize: '0.9rem' }}>All Drivers</IonLabel>
           </IonItem>
 
           {/* Driver list */}
@@ -178,12 +179,8 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
               const name = d.full_name || 'Driver';
               return (
                 <IonItem key={d.id} button detail={false} onClick={() => toggle(d.id)} style={{ '--padding-start': '16px', '--padding-end': '16px', '--inner-padding-end': '0', '--min-height': '56px' }}>
-                  <IonCheckbox
-                    slot="start"
-                    checked={checked}
-                    onIonChange={() => toggle(d.id)}
-                    style={{ marginRight: 12 }}
-                  />
+                  <IonCheckbox slot="start" checked={checked} onIonChange={() => toggle(d.id)} style={{ marginRight: 12 }} />
+                  <IonLabel style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</IonLabel>
                   <IonAvatar slot="end" style={{ width: 40, height: 40, marginLeft: 12, flexShrink: 0 }}>
                     {d.avatar_url
                       ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
@@ -192,7 +189,6 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
                         </div>
                     }
                   </IonAvatar>
-                  <IonLabel style={{ fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</IonLabel>
                 </IonItem>
               );
             })}
@@ -201,11 +197,6 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
                 <IonLabel style={{ fontSize: '0.8rem', color: 'var(--ion-color-medium)' }}>No drivers assigned</IonLabel>
               </IonItem>
             )}
-          </div>
-
-          {/* Apply */}
-          <div style={{ padding: '8px 16px 12px', borderTop: '1px solid var(--ion-border-color)', marginTop: 4 }}>
-            <IonButton expand="block" onClick={() => { onApply(pending); setOpen(false); }}>Apply</IonButton>
           </div>
         </IonList>
       </IonPopover>
