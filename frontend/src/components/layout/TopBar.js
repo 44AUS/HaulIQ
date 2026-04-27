@@ -643,12 +643,12 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                 showCancelButton="always"
                 placeholder="Search…"
                 style={{
-                  '--background': isDark ? '#2a2a2a' : '#ffffff',
+                  '--background': isDark ? 'var(--ion-background-color)' : '#ffffff',
                   '--color': isDark ? '#ffffff' : '#000000',
                   '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
                   '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
                   '--cancel-button-color': 'rgba(255,255,255,0.8)',
-                  '--border-radius': '8px',
+                  '--border-radius': '0px',
                   '--box-shadow': 'none',
                   padding: '0 4px',
                 }}
