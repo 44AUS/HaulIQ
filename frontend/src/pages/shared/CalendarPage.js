@@ -117,10 +117,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
   const toggle    = (id) => setPending(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
   const allSel    = pending.length === 0;
 
-  const label = selectedDrivers.length === 0 ? 'Assigned'
-    : selectedDrivers.length === 1
-      ? (drivers.find(d => d.id === selectedDrivers[0])?.full_name || 'Driver')
-      : `${selectedDrivers.length} Drivers`;
+  const selectedDriverObjs = drivers.filter(d => selectedDrivers.includes(d.id));
 
   return (
     <>
@@ -128,9 +125,32 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
         id="assigned-driver-trigger"
         size="small"
         onClick={() => { setPending(selectedDrivers); setOpen(true); }}
-        style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent' }}
+        style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent', '--padding-start': '10px', '--padding-end': '10px' }}
       >
-        {label} <IonIcon name="chevron-down-outline" style={{ fontSize: 13, marginLeft: 4 }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Assigned</span>
+          {selectedDriverObjs.length > 0 && (
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              {selectedDriverObjs.slice(0, 4).map((d, i) => {
+                const name = d.full_name || 'D';
+                return (
+                  <span key={d.id} style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#fff', marginLeft: i === 0 ? 0 : -6, overflow: 'hidden', flexShrink: 0 }}>
+                    {d.avatar_url
+                      ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : name[0]?.toUpperCase()
+                    }
+                  </span>
+                );
+              })}
+              {selectedDriverObjs.length > 4 && (
+                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.25)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700, color: '#fff', marginLeft: -6, flexShrink: 0 }}>
+                  +{selectedDriverObjs.length - 4}
+                </span>
+              )}
+            </span>
+          )}
+          <IonIcon name="chevron-down-outline" style={{ fontSize: 13 }} />
+        </span>
       </IonButton>
 
       <IonPopover
