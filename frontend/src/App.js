@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { IonApp, IonSpinner } from '@ionic/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
+import { MinimizedChatsProvider } from './context/MinimizedChatsContext';
 import { AppThemeProvider, useThemeMode } from './context/ThemeContext';
 import UpdateNotifier from './components/UpdateNotifier';
 
@@ -311,11 +312,13 @@ export default function App() {
       <IonApp>
         <AuthProvider>
           <MessagingProvider>
+            <MinimizedChatsProvider>
             <BrowserRouter>
               <UpdateNotifier />
               <BrandColorSync />
               <AppRoutes />
             </BrowserRouter>
+            </MinimizedChatsProvider>
           </MessagingProvider>
         </AuthProvider>
       </IonApp>

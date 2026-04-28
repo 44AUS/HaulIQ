@@ -5,6 +5,7 @@ import { IonContent, IonMenu, IonPage, IonSplitPane, IonFabButton } from '@ionic
 import helpThumbnail from '../../assets/help_thumbnail.png';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import MinimizedChatsFAB from './MinimizedChatsFAB';
 
 export const DRAWER_WIDTH = 300;
 export const LayoutContext = createContext({ drawerWidth: DRAWER_WIDTH });
@@ -102,6 +103,7 @@ export default function DashboardLayout({ children }) {
           </div>
         </div>
         {helpFab}
+        <MinimizedChatsFAB />
       </LayoutContext.Provider>
     );
   }
@@ -128,6 +130,7 @@ export default function DashboardLayout({ children }) {
         </IonPage>
       </IonSplitPane>
       {helpFab}
+      <MinimizedChatsFAB />
     </LayoutContext.Provider>
   );
 }
