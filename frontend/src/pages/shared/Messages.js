@@ -592,7 +592,7 @@ export default function Messages() {
         </IonLabel>
         <div slot="end" style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ opacity: isHovered || isPinned ? 1 : 0, transition: 'opacity 0.15s' }}>
-            <IonButton fill="clear" color={isPinned ? 'primary' : 'medium'} size="small" onClick={(e) => togglePin(c.id, e)} style={{ '--border-radius': '50%' }} title={isPinned ? 'Unpin' : 'Pin'}>
+            <IonButton fill="clear" color={isPinned ? 'warning' : 'medium'} size="small" onClick={(e) => togglePin(c.id, e)} style={{ '--border-radius': '50%' }} title={isPinned ? 'Unpin' : 'Pin'}>
               <IonIcon slot="icon-only" name={isPinned ? 'star' : 'star-outline'} />
             </IonButton>
           </div>
