@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation, useSearchParams, Link } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
@@ -238,6 +238,7 @@ export default function Messages() {
   const isDark = mode === 'dark';
   const btnTextColor = isDark ? '#ffffff' : '#1a1a1a';
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -326,6 +327,7 @@ export default function Messages() {
     minimizeConvo(activeConvo, activeMessages);
     setActiveConvoId(null);
     setActiveMessages([]);
+    navigate(-1);
   };
 
   // Listen for restore events dispatched by MinimizedChatsFAB

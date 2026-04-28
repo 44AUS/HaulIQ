@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { IonButton, IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useMinimizedChats } from '../../context/MinimizedChatsContext';
@@ -32,8 +33,17 @@ function parseSpecial(body) {
 
 export default function MinimizedChatsFAB() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { minimizedConvos, openMiniId, miniInputs, miniSending, setMiniInputs, restore, close, sendMini, openMini } = useMinimizedChats();
   const miniScrollRef = useRef(null);
+
+  const handleRestore = (id) => {
+    restore(id, (found) => {
+      window.dispatchEvent(new CustomEvent('hauliq-restore-mini', { detail: found }));
+      const role = user?.role || 'carrier';
+      navigate(`/${role}/messages?conv=${found.id}`);
+    });
+  };
 
   useEffect(() => {
     if (miniScrollRef.current) miniScrollRef.current.scrollTop = miniScrollRef.current.scrollHeight;
@@ -80,7 +90,10 @@ export default function MinimizedChatsFAB() {
                     {op?.name || 'Chat'}
                     {mc.convo.load_id && <span style={{ fontWeight: 400, fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginLeft: 6 }}>Load #{mc.convo.load_id.slice(0, 8).toUpperCase()}</span>}
                   </span>
-                  <IonButton fill="clear" color="medium" size="small" title="Expand" onClick={() => restore(mc.id, (found) => { window.dispatchEvent(new CustomEvent('hauliq-restore-mini', { detail: found })); })} style={{ '--border-radius': '50%' }}>
+                  <IonButton fill="clear" color="medium" size="small" title="Minimize" onClick={() => openMini(mc.id)} style={{ '--border-radius': '50%' }}>
+                    <IonIcon slot="icon-only" name="remove-outline" style={{ fontSize: 16 }} />
+                  </IonButton>
+                  <IonButton fill="clear" color="medium" size="small" title="Expand" onClick={() => handleRestore(mc.id)} style={{ '--border-radius': '50%' }}>
                     <IonIcon slot="icon-only" name="expand-outline" style={{ fontSize: 16 }} />
                   </IonButton>
                   <IonButton fill="clear" color="medium" size="small" title="Close" onClick={() => close(mc.id)} style={{ '--border-radius': '50%' }}>
