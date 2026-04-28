@@ -21,7 +21,7 @@ function UserAvatar({ name, src, size = 32 }) {
     <IonAvatar style={{ width: size, height: size, minWidth: size, flexShrink: 0 }}>
       {src
         ? <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size < 30 ? 11 : 13, fontWeight: 700, color: '#fff' }}>{initials}</div>
+        : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size < 30 ? 11 : 13, fontWeight: 700, color: '#fff' }}>{initials}</div>
       }
     </IonAvatar>
   );
