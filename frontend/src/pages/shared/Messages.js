@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
-import { LayoutContext } from '../../components/layout/DashboardLayout';
-import { IonSpinner, IonModal } from '@ionic/react';
+import { IonSpinner, IonModal, IonList, IonItem, IonLabel, IonRippleEffect } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -158,7 +157,7 @@ function LoadDocsModal({ loadId, onClose, onView }) {
     <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '500px', '--height': 'auto', '--max-height': '80vh', '--border-radius': '12px' }}>
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
-          <IonIcon name="folder-open-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)' }} />
+          <IonIcon name="folder-open-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
           <span style={{ fontWeight: 700, fontSize: '0.875rem', flex: 1, color: 'var(--ion-text-color)' }}>Load Documents</span>
           <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginRight: 8 }}>Load #{String(loadId).slice(0, 8)}</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
@@ -231,11 +230,22 @@ function PresenceDot({ lastActiveAt, size = 10 }) {
   );
 }
 
+const LIST_WIDTH = 300;
+
 export default function Messages() {
   const { user } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { drawerWidth } = useContext(LayoutContext);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, []);
+
+  const query = searchParams.get('q') || '';
+
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
   const [activeMessages, setActiveMessages] = useState([]);
@@ -428,156 +438,199 @@ export default function Messages() {
     ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
     : network;
 
+  // Apply topbar search filter
+  const filteredConvos = query
+    ? conversations.filter(c => {
+        const q = query.toLowerCase();
+        return getConvoLabel(c).toLowerCase().includes(q)
+          || (getLastMsg(c)?.body || '').toLowerCase().includes(q);
+      })
+    : conversations;
+
+  const loadConvos   = filteredConvos.filter(c => c.load_id);
+  const directConvos = filteredConvos.filter(c => !c.load_id);
+
   const otherParty = getOtherParty(activeConvo);
 
+  // Mobile: show list when no convo selected, show chat when selected
+  const showList = !isMobile || !activeConvoId;
+  const showChat = !!activeConvoId;
+
   const renderConvo = (c) => {
-    const lastMsg = getLastMsg(c);
-    const unread  = hasUnread(c);
-    const label   = getConvoLabel(c);
+    const lastMsg  = getLastMsg(c);
+    const unread   = hasUnread(c);
+    const label    = getConvoLabel(c);
     const otherRole   = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
     const otherId     = otherRole === 'broker' ? c.broker_id : c.carrier_id;
     const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
+    const isActive    = activeConvoId === c.id;
+
     return (
-      <div key={c.id} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: activeConvoId === c.id ? 'rgba(0,0,0,0.06)' : 'transparent', cursor: 'pointer' }}
-        onMouseEnter={e => { if (activeConvoId !== c.id) e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'; }}
-        onMouseLeave={e => { if (activeConvoId !== c.id) e.currentTarget.style.backgroundColor = 'transparent'; }}>
-        <div onClick={() => setActiveConvoId(c.id)} style={{ flex: 1, display: 'flex', alignItems: 'center', padding: '10px 12px 10px 16px', gap: 10 }}>
-          <div style={{ position: 'relative', width: 34, height: 34, flexShrink: 0 }}>
-            <Link to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
-              <UserAvatar name={label} src={otherAvatar} size={34} />
-            </Link>
-            {c.other_last_active_at && (
-              <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
-                <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
-              </div>
-            )}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              {unread && <div style={{ width: 7, height: 7, backgroundColor: 'var(--ion-color-primary)', borderRadius: '50%', flexShrink: 0 }} />}
-              {c.is_blocked_by_me && <IonIcon name="ban-outline" style={{ fontSize: 10, color: 'var(--ion-color-danger)' }} />}
-              <span style={{ fontSize: '0.875rem', fontWeight: unread ? 700 : c.load_id ? 600 : 500, color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {c.load_id ? `LOAD #${c.load_id.slice(0, 8).toUpperCase()}` : label}
-              </span>
+      <IonItem
+        key={c.id}
+        button
+        detail={false}
+        onClick={() => setActiveConvoId(c.id)}
+        style={{
+          '--background':              isActive ? 'rgba(0,0,0,0.06)' : 'transparent',
+          '--background-hover':        'rgba(0,0,0,0.04)',
+          '--background-hover-opacity':'1',
+          '--min-height':              '64px',
+          '--padding-start':           '16px',
+          '--padding-end':             '12px',
+          '--inner-padding-end':       '0',
+        }}
+      >
+        <div slot="start" style={{ position: 'relative', width: 36, height: 36, flexShrink: 0, marginRight: 4 }}>
+          <Link to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
+            <UserAvatar name={label} src={otherAvatar} size={36} />
+          </Link>
+          {c.other_last_active_at && (
+            <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
+              <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
             </div>
-            {c.load_id && <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</div>}
-            {lastMsg && <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getPreview(lastMsg.body)}</div>}
-          </div>
+          )}
         </div>
-      </div>
+        <IonLabel style={{ margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+            {unread && <div style={{ width: 7, height: 7, backgroundColor: 'var(--ion-color-primary)', borderRadius: '50%', flexShrink: 0 }} />}
+            {c.is_blocked_by_me && <IonIcon name="ban-outline" style={{ fontSize: 10, color: 'var(--ion-color-danger)' }} />}
+            <span style={{ fontSize: '0.875rem', fontWeight: unread ? 700 : c.load_id ? 600 : 500, color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {c.load_id ? `LOAD #${c.load_id.slice(0, 8).toUpperCase()}` : label}
+            </span>
+          </div>
+          {c.load_id && <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</p>}
+          {lastMsg && <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getPreview(lastMsg.body)}</p>}
+        </IonLabel>
+      </IonItem>
     );
   };
 
-  const loadConvos   = conversations.filter(c => c.load_id);
-  const directConvos = conversations.filter(c => !c.load_id);
-
   return (
     <>
-      <div style={{ position: 'fixed', top: 60, left: drawerWidth, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', zIndex: 1 }}>
+      <div style={{ position: 'fixed', top: 60, left: 0, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', zIndex: 1 }}>
 
-        {/* Conversation list */}
-        <div style={{ width: 300, flexShrink: 0, borderRight: '1px solid var(--ion-border-color)', display: activeConvoId ? 'none' : 'flex', flexDirection: 'column' }}
-          className="messages-sidebar">
-          <style>{`@media(min-width:768px){.messages-sidebar{display:flex!important}}`}</style>
+        {/* ── Conversation list panel ── */}
+        {showList && (
+          <div style={{ width: isMobile ? '100%' : LIST_WIDTH, flexShrink: 0, borderRight: isMobile ? 'none' : '1px solid var(--ion-border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <IonIcon name="chatbubble-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
-            <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: 'var(--ion-text-color)' }}>Message Center</span>
-          </div>
-
-          {user?.role !== 'driver' && (
-            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
-              <button onClick={() => setComposing(v => !v)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 0', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.78rem', letterSpacing: '0.04em' }}>
-                <IonIcon name="create-outline" style={{ fontSize: 14 }} /> New Message
-              </button>
+            {/* Header */}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <IonIcon name="chatbubble-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: 'var(--ion-text-color)' }}>Message Center</span>
             </div>
-          )}
 
-          {composing && (
-            <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: 12, backgroundColor: 'rgba(0,0,0,0.03)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, flex: 1, color: 'var(--ion-text-color)' }}>New Message</span>
-                <button onClick={() => { setComposing(false); setNetworkQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
-                  <IonIcon name="close-outline" style={{ fontSize: 14 }} />
+            {/* New Message button */}
+            {user?.role !== 'driver' && (
+              <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+                <button
+                  onClick={() => setComposing(v => !v)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 0', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.78rem', letterSpacing: '0.04em' }}
+                >
+                  <IonIcon name="create-outline" style={{ fontSize: 14 }} /> New Message
                 </button>
               </div>
-              <div style={{ position: 'relative', marginBottom: 8 }}>
-                <IonIcon name="search-outline" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
-                <input autoFocus placeholder="Search your network..." value={networkQuery} onChange={e => setNetworkQuery(e.target.value)}
-                  style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.78rem', padding: '6px 8px 6px 26px', outline: 'none', fontFamily: 'inherit' }} />
-              </div>
-              {filteredNetwork.length === 0 ? (
-                <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', padding: '0 4px' }}>{network.length === 0 ? 'No connections yet.' : 'No matches.'}</span>
-              ) : (
-                <div style={{ maxHeight: 160, overflowY: 'auto' }}>
-                  {filteredNetwork.map(contact => (
-                    <div key={contact.user_id} onClick={() => handleStartDirect(contact)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 6, cursor: 'pointer' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
-                      <UserAvatar name={contact.name} src={contact.avatar_url} size={28} />
-                      <div>
-                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{contact.name}</div>
-                        {contact.company && <div style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)' }}>{contact.company}</div>}
-                      </div>
-                    </div>
-                  ))}
+            )}
+
+            {/* Compose panel */}
+            {composing && (
+              <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: 12, backgroundColor: 'rgba(0,0,0,0.03)', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600, flex: 1, color: 'var(--ion-text-color)' }}>New Message</span>
+                  <button onClick={() => { setComposing(false); setNetworkQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
+                    <IonIcon name="close-outline" style={{ fontSize: 14 }} />
+                  </button>
                 </div>
+                <div style={{ position: 'relative', marginBottom: 8 }}>
+                  <IonIcon name="search-outline" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
+                  <input autoFocus placeholder="Search your network..." value={networkQuery} onChange={e => setNetworkQuery(e.target.value)}
+                    style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.78rem', padding: '6px 8px 6px 26px', outline: 'none', fontFamily: 'inherit' }} />
+                </div>
+                {filteredNetwork.length === 0 ? (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', padding: '0 4px' }}>{network.length === 0 ? 'No connections yet.' : 'No matches.'}</span>
+                ) : (
+                  <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+                    {filteredNetwork.map(contact => (
+                      <div key={contact.user_id} onClick={() => handleStartDirect(contact)}
+                        className="ion-activatable"
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderRadius: 6, cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
+                        <IonRippleEffect />
+                        <UserAvatar name={contact.name} src={contact.avatar_url} size={28} />
+                        <div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{contact.name}</div>
+                          {contact.company && <div style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)' }}>{contact.company}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Conversation list */}
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              {loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                  <IonSpinner name="crescent" style={{ width: 24, height: 24 }} />
+                </div>
+              ) : filteredConvos.length === 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '0 24px', textAlign: 'center' }}>
+                  <IonIcon name="chatbubble-outline" style={{ fontSize: 36, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
+                  <p style={{ margin: '0 0 8px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
+                    {query ? 'No conversations match your search' : 'No conversations yet'}
+                  </p>
+                  {!query && user?.role === 'driver' && user?.carrier_id ? (
+                    <button onClick={() => {
+                      messagesApi.direct(user.carrier_id)
+                        .then(convo => { setConversations([convo]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
+                        .catch(() => {});
+                    }} style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.825rem', marginTop: 4 }}>
+                      Message your carrier
+                    </button>
+                  ) : !query && (
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Use New Message to start one</span>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {loadConvos.length > 0 && (
+                    <>
+                      <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Load Conversations</span>
+                      </div>
+                      <IonList lines="full" style={{ padding: 0 }}>
+                        {loadConvos.map(renderConvo)}
+                      </IonList>
+                    </>
+                  )}
+                  {directConvos.length > 0 && (
+                    <>
+                      <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Direct Messages</span>
+                      </div>
+                      <IonList lines="full" style={{ padding: 0 }}>
+                        {directConvos.map(renderConvo)}
+                      </IonList>
+                    </>
+                  )}
+                </>
               )}
             </div>
-          )}
-
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><IonSpinner name="crescent" style={{ width: 24, height: 24 }} /></div>
-            ) : conversations.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '0 24px', textAlign: 'center' }}>
-                <IonIcon name="chatbubble-outline" style={{ fontSize: 36, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
-                <p style={{ margin: '0 0 8px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No conversations yet</p>
-                {user?.role === 'driver' && user?.carrier_id ? (
-                  <button onClick={() => {
-                    messagesApi.direct(user.carrier_id)
-                      .then(convo => { setConversations([convo]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
-                      .catch(() => {});
-                  }} style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.825rem', marginTop: 4 }}>
-                    Message your carrier
-                  </button>
-                ) : (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Use New Message to start one</span>
-                )}
-              </div>
-            ) : (
-              <>
-                {loadConvos.length > 0 && (
-                  <>
-                    <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Load Conversations</span>
-                    </div>
-                    {loadConvos.map(renderConvo)}
-                  </>
-                )}
-                {directConvos.length > 0 && (
-                  <>
-                    <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Direct Messages</span>
-                    </div>
-                    {directConvos.map(renderConvo)}
-                  </>
-                )}
-              </>
-            )}
           </div>
-        </div>
+        )}
 
-        {/* Chat area */}
-        {activeConvo ? (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        {/* ── Chat area ── */}
+        {showChat ? (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
             {/* Chat header */}
-            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button onClick={() => setActiveConvoId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}
-                className="messages-back-btn">
-                <style>{`@media(min-width:768px){.messages-back-btn{display:none!important}}`}</style>
-                <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} />
-              </button>
+            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              {isMobile && (
+                <button onClick={() => setActiveConvoId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
+                  <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} />
+                </button>
+              )}
               {otherParty && (
                 <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none' }}>
                   <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
@@ -624,7 +677,7 @@ export default function Messages() {
             </div>
 
             {activeConvo.is_blocked_by_me && (
-              <div style={{ margin: '12px 16px 0', padding: '8px 16px', borderRadius: 8, backgroundColor: 'rgba(235,68,90,0.15)', border: '1px solid var(--ion-color-danger)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ margin: '12px 16px 0', padding: '8px 16px', borderRadius: 8, backgroundColor: 'rgba(235,68,90,0.15)', border: '1px solid var(--ion-color-danger)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                 <IonIcon name="ban-outline" style={{ fontSize: 13, color: 'var(--ion-color-danger)' }} />
                 <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-danger)' }}>You have blocked this user. They can no longer message you.</span>
               </div>
@@ -688,7 +741,7 @@ export default function Messages() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: 12, borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8 }}>
+            <div style={{ padding: 12, borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, flexShrink: 0 }}>
               <input
                 placeholder="Type a message..."
                 value={input}
@@ -703,17 +756,17 @@ export default function Messages() {
               </button>
             </div>
           </div>
-        ) : (
-          <div style={{ flex: 1, alignItems: 'center', justifyContent: 'center', display: 'none' }} className="messages-empty">
-            <style>{`@media(min-width:768px){.messages-empty{display:flex!important}}`}</style>
+        ) : !isMobile ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ textAlign: 'center' }}>
               <IonIcon name="chatbubble-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
               <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Select a conversation</p>
               <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>or use New Message to start one</span>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
+
       {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
       {docsModalLoadId && (
         <LoadDocsModal loadId={docsModalLoadId} onClose={() => setDocsModalLoadId(null)} onView={(doc) => { setDocsModalLoadId(null); setViewerDoc(doc); }} />

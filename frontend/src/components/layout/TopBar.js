@@ -361,8 +361,10 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
     }
   }, [searchOpen]);
 
+  const isSearchableImmersive = immersiveMode === 'network' || immersiveMode === 'messages';
+
   useEffect(() => {
-    if (immersiveMode === 'network') {
+    if (isSearchableImmersive) {
       const t = setTimeout(() => {
         setSearchParams(prev => {
           const n = new URLSearchParams(prev);
@@ -380,7 +382,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
     }, 350);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchVal, immersiveMode]);
+  }, [searchVal, isSearchableImmersive]);
 
   useEffect(() => {
     const h = (e) => {
@@ -426,7 +428,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
               <span style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em', color: '#fff', marginLeft: 4, opacity: searchOpen ? 0 : 1, transition: 'opacity 0.18s', pointerEvents: searchOpen ? 'none' : 'auto' }}>
                 {displayTitle}
               </span>
-              {immersiveMode === 'network' && (
+              {isSearchableImmersive && (
                 <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', transform: searchOpen ? 'translateY(-50%) scaleX(1)' : 'translateY(-50%) scaleX(0.88)', transformOrigin: 'right center', opacity: searchOpen ? 1 : 0, transition: 'opacity 0.2s, transform 0.2s', pointerEvents: searchOpen ? 'auto' : 'none' }}>
                   <IonSearchbar
                     ref={searchRef}
@@ -451,7 +453,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
               )}
             </div>
             <IonButtons slot="end">
-              {immersiveMode === 'network' && (
+              {isSearchableImmersive && (
                 <button
                   onClick={() => { setSearchOpen(v => !v); if (searchOpen) { setSearchVal(''); setSearchParams(prev => { const n = new URLSearchParams(prev); n.delete('q'); return n; }, { replace: true }); } }}
                   style={{ width: 40, height: 40, borderRadius: '50%', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s', opacity: searchOpen ? 0 : 1, pointerEvents: searchOpen ? 'none' : 'auto' }}
