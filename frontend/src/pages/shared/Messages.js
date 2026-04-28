@@ -612,7 +612,7 @@ export default function Messages() {
 
             {/* New Message button */}
             {user?.role !== 'driver' && (
-              <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, minHeight: 60, display: 'flex', alignItems: 'center', backgroundColor: 'var(--ion-background-color)' }}>
+              <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
                 <IonButton expand="block" size="small" onClick={() => setComposing(v => !v)} style={{ flex: 1 }}>
                   <IonIcon slot="start" name="create-outline" />
                   New Message
@@ -734,7 +734,7 @@ export default function Messages() {
         {showChat ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
             {/* Chat header */}
-            <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, minHeight: 60 }}>
+            <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, height: 60 }}>
               {/* Hamburger / back */}
               <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)} style={{ '--border-radius': '50%' }}>
                 <IonIcon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
