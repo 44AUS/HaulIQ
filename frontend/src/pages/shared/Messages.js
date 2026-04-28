@@ -3,7 +3,7 @@ import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
-  IonReorderGroup, IonReorder, IonProgressBar, IonSegment, IonSegmentButton,
+  IonReorderGroup, IonReorder, IonProgressBar,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -670,22 +670,19 @@ export default function Messages() {
         {showList && (
           <div style={{ width: isMobile ? '100%' : LIST_WIDTH, flexShrink: 0, borderRight: isMobile ? 'none' : '1px solid var(--ion-border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-            {/* Segment tabs */}
+            {/* Tab toggle */}
             <div style={{ padding: '0 10px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
-              <IonSegment
-                value={listTab}
-                onIonChange={e => setListTab(e.detail.value)}
-                style={{ '--background': 'var(--ion-color-step-100, rgba(0,0,0,0.08))', borderRadius: 10 }}
-              >
-                <IonSegmentButton value="main" style={{ '--border-radius': '8px', '--indicator-color': 'var(--ion-background-color)', minHeight: 36 }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>
-                    {user?.role === 'carrier' ? 'Brokers' : 'Carriers'}
-                  </span>
-                </IonSegmentButton>
-                <IonSegmentButton value="employees" style={{ '--border-radius': '8px', '--indicator-color': 'var(--ion-background-color)', minHeight: 36 }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Employees</span>
-                </IonSegmentButton>
-              </IonSegment>
+              <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2, width: '100%' }}>
+                {[
+                  { value: 'main', label: user?.role === 'carrier' ? 'Brokers' : 'Carriers' },
+                  { value: 'employees', label: 'Employees' },
+                ].map(({ value, label }) => (
+                  <button key={value} onClick={() => setListTab(value)}
+                    style={{ flex: 1, background: listTab === value ? 'var(--ion-card-background)' : 'var(--ion-background-color)', color: listTab === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit', boxShadow: listTab === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s' }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Compose panel */}
