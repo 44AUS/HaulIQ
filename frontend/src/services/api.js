@@ -1,6 +1,15 @@
 const BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // ─── Core fetch wrapper ────────────────────────────────────────────────────────
+async function requestFormData(path, formData) {
+  const token = localStorage.getItem('urload_token');
+  const headers = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(`${BASE}${path}`, { method: 'POST', headers, body: formData });
+  if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.detail || `Request failed (${res.status})`); }
+  return res.json();
+}
+
 async function request(path, options = {}) {
   const token = localStorage.getItem('urload_token');
   const headers = { 'Content-Type': 'application/json', ...options.headers };
@@ -62,6 +71,7 @@ export const messagesApi = {
   conversations:  ()                          => request('/api/messages/conversations'),
   conversation:   (id)                        => request(`/api/messages/conversations/${id}`),
   send:           (loadId, brokerId, body)    => request('/api/messages/send', { method: 'POST', body: JSON.stringify({ load_id: loadId || undefined, broker_id: brokerId, body }) }),
+  uploadImage:    (file) => { const fd = new FormData(); fd.append('file', file); return requestFormData('/api/messages/images', fd); },
   direct:         (otherUserId, body = null)  => request('/api/messages/direct', { method: 'POST', body: JSON.stringify({ other_user_id: otherUserId, body }) }),
   deleteConvo:    (id)                        => request(`/api/messages/conversations/${id}`, { method: 'DELETE' }),
   unreadCount:    ()                          => request('/api/messages/unread-count'),

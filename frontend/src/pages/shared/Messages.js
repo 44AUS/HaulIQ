@@ -266,6 +266,9 @@ export default function Messages() {
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
   const [loadDocs, setLoadDocs] = useState(null);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
+  const [pendingImages, setPendingImages] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const imageInputRef = useRef(null);
   const [listVisible, setListVisible] = useState(true);
   const [hoveredConvoId, setHoveredConvoId] = useState(null);
   const [pinnedIds, setPinnedIds] = useState(() => {
@@ -424,12 +427,43 @@ export default function Messages() {
     clearTimeout(typingTimeoutRef.current);
   };
 
-  const handleSend = () => {
-    if (!input.trim() || !activeConvo) return;
+  const handleSend = async () => {
+    if ((!input.trim() && pendingImages.length === 0) || !activeConvo) return;
     clearTimeout(typingTimeoutRef.current);
-    messagesApi.send(activeConvo.load_id || null, user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id, input.trim())
+    const recipientId = user?.role === 'carrier' ? activeConvo.broker_id : activeConvo.carrier_id;
+
+    if (pendingImages.length > 0) {
+      setUploadingImages(true);
+      try {
+        const urls = await Promise.all(pendingImages.map(p => messagesApi.uploadImage(p.file).then(r => r.url)));
+        const body = JSON.stringify({ __type: 'image_attachment', urls, caption: input.trim() || undefined });
+        const msg = await messagesApi.send(activeConvo.load_id || null, recipientId, body);
+        setActiveMessages(prev => [...prev, msg]);
+        setPendingImages(prev => { prev.forEach(p => URL.revokeObjectURL(p.previewUrl)); return []; });
+        setInput('');
+      } catch { /* upload failed — keep images so user can retry */ }
+      finally { setUploadingImages(false); }
+      return;
+    }
+
+    messagesApi.send(activeConvo.load_id || null, recipientId, input.trim())
       .then(msg => { setActiveMessages(prev => [...prev, msg]); setInput(''); })
       .catch(() => {});
+  };
+
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const newImages = files.map(file => ({ file, previewUrl: URL.createObjectURL(file) }));
+    setPendingImages(prev => [...prev, ...newImages]);
+    e.target.value = '';
+  };
+
+  const removePendingImage = (idx) => {
+    setPendingImages(prev => {
+      URL.revokeObjectURL(prev[idx].previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const handleStartDirect = (contact) => {
@@ -741,6 +775,22 @@ export default function Messages() {
                   content = <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />;
                 } else if (special?.__type === 'location_share') {
                   content = <LocationShareCard data={special} isMe={isMe} />;
+                } else if (special?.__type === 'image_attachment') {
+                  content = (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: isMe ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>{isMe ? 'You' : senderName}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{timeStr}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {(special.urls || []).map((url, i) => (
+                          <img key={i} src={url} alt="" onClick={() => window.open(url, '_blank')}
+                            style={{ maxWidth: 220, maxHeight: 200, borderRadius: 8, objectFit: 'cover', cursor: 'pointer', border: '1px solid var(--ion-border-color)' }} />
+                        ))}
+                      </div>
+                      {special.caption && <p style={{ margin: '4px 0 0', fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{special.caption}</p>}
+                    </>
+                  );
                 } else {
                   content = (
                     <>
@@ -799,7 +849,21 @@ export default function Messages() {
 
             {/* Input */}
             <style>{`.msg-input textarea { caret-color: var(--ion-color-success) !important; }`}</style>
+            <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: 'none' }} />
             <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+              {pendingImages.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, padding: '8px 16px 0', flexWrap: 'wrap' }}>
+                  {pendingImages.map((img, idx) => (
+                    <div key={idx} style={{ position: 'relative', flexShrink: 0 }}>
+                      <img src={img.previewUrl} alt="" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--ion-border-color)', display: 'block' }} />
+                      <IonButton fill="clear" size="small" color="medium" onClick={() => removePendingImage(idx)}
+                        style={{ '--border-radius': '50%', position: 'absolute', top: -8, right: -8, '--padding-start': '0', '--padding-end': '0', width: 22, height: 22, '--min-height': '22px' }}>
+                        <IonIcon slot="icon-only" name="close-circle" style={{ fontSize: 18 }} />
+                      </IonButton>
+                    </div>
+                  ))}
+                </div>
+              )}
               <IonTextarea
                 className="msg-input"
                 placeholder="Write your message here"
@@ -812,17 +876,20 @@ export default function Messages() {
                 style={{ '--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--padding-top': '12px', '--padding-bottom': '8px', '--color': 'var(--ion-text-color)', '--highlight-color-focused': 'transparent', '--highlight-height': '0px', fontSize: '0.9rem', width: '100%' }}
               />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px' }}>
-                <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me} style={{ '--border-radius': '50%' }}>
+                <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me} style={{ '--border-radius': '50%' }} onClick={() => imageInputRef.current?.click()}>
                   <IonIcon slot="icon-only" name="image-outline" />
                 </IonButton>
                 <IonButton
                   color="success"
                   size="small"
                   onClick={handleSend}
-                  disabled={!input.trim() || activeConvo.is_blocked_by_me}
+                  disabled={(!input.trim() && pendingImages.length === 0) || activeConvo.is_blocked_by_me || uploadingImages}
                   style={{ '--border-radius': '8px', '--color': btnTextColor, fontWeight: 700, letterSpacing: '0.05em' }}
                 >
-                  <IonIcon slot="start" name="send-outline" style={{ color: btnTextColor }} />
+                  {uploadingImages
+                    ? <IonSpinner slot="start" name="crescent" style={{ width: 14, height: 14, color: btnTextColor }} />
+                    : <IonIcon slot="start" name="send-outline" style={{ color: btnTextColor }} />
+                  }
                   SEND
                 </IonButton>
               </div>
