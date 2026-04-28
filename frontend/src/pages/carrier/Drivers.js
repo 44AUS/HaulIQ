@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonModal } from '@ionic/react';
+import { IonSpinner, IonModal, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { useThemeMode } from '../../context/ThemeContext';
 import { driversApi, messagesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -32,6 +33,8 @@ function Avatar({ name }) {
 
 export default function Drivers() {
   const navigate = useNavigate();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
   const [drivers, setDrivers]           = useState([]);
   const [loading, setLoading]           = useState(true);
   const [filter, setFilter]             = useState('enabled');
@@ -106,23 +109,17 @@ export default function Drivers() {
         {/* Filter row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
           <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Employees</h3>
-          <div style={{ display: 'flex', backgroundColor: 'var(--ion-color-light)', borderRadius: 10, padding: 3, gap: 2 }}>
+          <IonSegment mode="ios" value={filter} onIonChange={e => setFilter(String(e.detail.value))}
+            style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 34, width: 'auto' }}>
             {['enabled', 'disabled'].map(v => (
-              <button
-                key={v}
-                onClick={() => setFilter(v)}
-                style={{
-                  padding: '5px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: '0.78rem', fontWeight: 600, textTransform: 'capitalize',
-                  backgroundColor: filter === v ? 'var(--ion-card-background)' : 'transparent',
-                  color: filter === v ? 'var(--ion-text-color)' : 'var(--ion-color-medium)',
-                  boxShadow: filter === v ? '0 1px 4px rgba(0,0,0,0.15)' : 'none',
-                }}
-              >
-                {v.charAt(0).toUpperCase() + v.slice(1)}
-              </button>
+              <IonSegmentButton key={v} value={v}
+                style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 28 }}>
+                <IonLabel style={{ fontSize: '0.78rem', fontWeight: 600, textTransform: 'capitalize', margin: '4px 0' }}>
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </IonLabel>
+              </IonSegmentButton>
             ))}
-          </div>
+          </IonSegment>
         </div>
 
         {/* List */}
@@ -136,9 +133,9 @@ export default function Drivers() {
               const groupDrivers = visibleDrivers.filter(d => (d.driver_level || 'level_1') === group.key);
               return (
                 <div key={group.key}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-color-light)' }}>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--ion-color-medium)', letterSpacing: '0.04em' }}>{group.label}</span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--ion-color-medium)' }}>{groupDrivers.length}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 24px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)' }}>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', letterSpacing: '0.04em' }}>{group.label}</span>
+                    <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{groupDrivers.length}</span>
                   </div>
                   {groupDrivers.length === 0 ? (
                     <div style={{ padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
@@ -206,7 +203,7 @@ export default function Drivers() {
                   <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#2e7d32' }}>Invite created for {newInvite.name}!</p>
                   <p style={{ margin: 0, fontSize: '0.72rem', color: '#2e7d32' }}>Share this link with them to set up their account.</p>
                 </div>
-                <div style={{ backgroundColor: 'var(--ion-color-light)', borderRadius: 6, padding: 12 }}>
+                <div style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 6, padding: 12 }}>
                   <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 4 }}>Invite Link</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontFamily: 'monospace', wordBreak: 'break-all', flex: 1, fontSize: '0.7rem', color: 'var(--ion-text-color)' }}>
