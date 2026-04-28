@@ -612,8 +612,8 @@ export default function Messages() {
 
             {/* New Message button */}
             {user?.role !== 'driver' && (
-              <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-                <IonButton expand="block" size="small" onClick={() => setComposing(v => !v)}>
+              <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, minHeight: 60, display: 'flex', alignItems: 'center', backgroundColor: 'var(--ion-background-color)' }}>
+                <IonButton expand="block" size="small" onClick={() => setComposing(v => !v)} style={{ flex: 1 }}>
                   <IonIcon slot="start" name="create-outline" />
                   New Message
                 </IonButton>
