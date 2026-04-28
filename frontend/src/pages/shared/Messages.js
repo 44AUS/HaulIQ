@@ -517,12 +517,6 @@ export default function Messages() {
         {showList && (
           <div style={{ width: isMobile ? '100%' : LIST_WIDTH, flexShrink: 0, borderRight: isMobile ? 'none' : '1px solid var(--ion-border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-            {/* Header */}
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <IonIcon name="chatbubble-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
-              <span style={{ fontWeight: 700, fontSize: '0.9rem', flex: 1, color: 'var(--ion-text-color)' }}>Message Center</span>
-            </div>
-
             {/* New Message button */}
             {user?.role !== 'driver' && (
               <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
