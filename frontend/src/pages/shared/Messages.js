@@ -806,7 +806,7 @@ export default function Messages() {
             <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, height: 60 }}>
               {/* Hamburger / back */}
               <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)} style={{ '--border-radius': '50%' }}>
-                <IonIcon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
+                <ion-icon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
               </IonButton>
 
               {/* Avatar — only when a convo is selected */}
