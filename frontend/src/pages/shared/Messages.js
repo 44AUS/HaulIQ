@@ -755,7 +755,7 @@ export default function Messages() {
                 const directConvos  = applyOrder(filteredConvos.filter(c => !pinnedIds.includes(c.id) && !c.load_id));
                 const SectionHeader = ({ label }) => (
                   <div style={{ padding: '5px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)', borderTop: '1px solid var(--ion-border-color)' }}>
-                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)' }}>{label}</span>
                   </div>
                 );
                 return (
