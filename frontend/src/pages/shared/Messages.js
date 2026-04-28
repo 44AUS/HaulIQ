@@ -124,7 +124,7 @@ function DocViewer({ doc, onClose }) {
           </span>
           <span style={{ fontWeight: 600, fontSize: '0.875rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{doc.file_name}</span>
           {doc.page_count > 1 && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', flexShrink: 0 }}>{page + 1} / {doc.page_count}</span>}
-          <IonButton fill="clear" color="medium" size="small" onClick={onClose}>
+          <IonButton fill="clear" color="medium" size="small" onClick={onClose} style={{ '--border-radius': '50%' }}>
             <IonIcon slot="icon-only" name="close-outline" />
           </IonButton>
         </div>
@@ -166,7 +166,7 @@ function LoadDocsModal({ loadId, onClose, onView }) {
           <IonIcon name="folder-open-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
           <span style={{ fontWeight: 700, fontSize: '0.875rem', flex: 1, color: 'var(--ion-text-color)' }}>Load Documents</span>
           <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginRight: 4 }}>Load #{String(loadId).slice(0, 8)}</span>
-          <IonButton fill="clear" color="medium" size="small" onClick={onClose}>
+          <IonButton fill="clear" color="medium" size="small" onClick={onClose} style={{ '--border-radius': '50%' }}>
             <IonIcon slot="icon-only" name="close-outline" />
           </IonButton>
         </div>
@@ -534,7 +534,7 @@ export default function Messages() {
               <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: '8px 12px', backgroundColor: 'rgba(0,0,0,0.03)', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, flex: 1, color: 'var(--ion-text-color)' }}>New Message</span>
-                  <IonButton fill="clear" color="medium" size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
+                  <IonButton fill="clear" color="medium" size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }} style={{ '--border-radius': '50%' }}>
                     <IonIcon slot="icon-only" name="close-outline" />
                   </IonButton>
                 </div>
@@ -625,7 +625,7 @@ export default function Messages() {
             {/* Chat header */}
             <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, minHeight: 60 }}>
               {/* Hamburger / back */}
-              <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)}>
+              <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)} style={{ '--border-radius': '50%' }}>
                 <IonIcon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
               </IonButton>
 
@@ -661,20 +661,20 @@ export default function Messages() {
                 </IonButton>
               )}
               {activeConvo.load_id && (
-                <IonButton fill="clear" color="medium" routerLink={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load">
+                <IonButton fill="clear" color="medium" routerLink={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load" style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="car-sport-outline" />
                 </IonButton>
               )}
               {activeConvo.load_id && (
-                <IonButton fill="clear" color="medium" title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)}>
+                <IonButton fill="clear" color="medium" title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)} style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="folder-open-outline" />
                 </IonButton>
               )}
-              <IonButton fill="clear" color="medium" title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)}>
+              <IonButton fill="clear" color="medium" title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)} style={{ '--border-radius': '50%' }}>
                 <IonIcon slot="icon-only" name="trash-outline" />
               </IonButton>
               {otherParty && (
-                <IonButton fill="clear" color={activeConvo.is_blocked_by_me ? 'danger' : 'medium'} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} disabled={blockLoading} onClick={() => handleToggleBlock(otherParty.id)}>
+                <IonButton fill="clear" color={activeConvo.is_blocked_by_me ? 'danger' : 'medium'} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} disabled={blockLoading} onClick={() => handleToggleBlock(otherParty.id)} style={{ '--border-radius': '50%' }}>
                   {blockLoading
                     ? <IonSpinner slot="icon-only" name="crescent" style={{ width: 14, height: 14 }} />
                     : <IonIcon slot="icon-only" name={activeConvo.is_blocked_by_me ? 'shield-outline' : 'ban-outline'} />
@@ -780,7 +780,7 @@ export default function Messages() {
                 style={{ '--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--padding-top': '12px', '--padding-bottom': '8px', '--color': 'var(--ion-text-color)', '--highlight-color-focused': 'transparent', '--highlight-height': '0px', fontSize: '0.9rem', width: '100%' }}
               />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px' }}>
-                <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me}>
+                <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me} style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="image-outline" />
                 </IonButton>
                 <IonButton
