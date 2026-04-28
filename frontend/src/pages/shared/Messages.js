@@ -271,6 +271,19 @@ export default function Messages() {
   const [loadDocs, setLoadDocs] = useState(null);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [listVisible, setListVisible] = useState(true);
+  const [hoveredConvoId, setHoveredConvoId] = useState(null);
+  const [pinnedIds, setPinnedIds] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('hauliq_pinned_convos') || '[]'); } catch { return []; }
+  });
+
+  const togglePin = (id, e) => {
+    e.stopPropagation();
+    setPinnedIds(prev => {
+      const next = prev.includes(id) ? prev.filter(p => p !== id) : [id, ...prev];
+      localStorage.setItem('hauliq_pinned_convos', JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     messagesApi.presence().catch(() => {});
@@ -470,11 +483,13 @@ export default function Messages() {
   const showChat = !!activeConvoId;
 
   const renderConvo = (c) => {
-    const label      = getConvoLabel(c);
-    const unread     = hasUnread(c);
-    const isActive   = activeConvoId === c.id;
-    const otherRole  = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-    const otherId    = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+    const label       = getConvoLabel(c);
+    const unread      = hasUnread(c);
+    const isActive    = activeConvoId === c.id;
+    const isPinned    = pinnedIds.includes(c.id);
+    const isHovered   = hoveredConvoId === c.id;
+    const otherRole   = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+    const otherId     = otherRole === 'broker' ? c.broker_id : c.carrier_id;
     const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
     const displayName = c.load_id ? `Load #${c.load_id.slice(0, 8).toUpperCase()} — ${label}` : label;
 
@@ -484,13 +499,15 @@ export default function Messages() {
         button
         detail={false}
         onClick={() => setActiveConvoId(c.id)}
+        onMouseEnter={() => setHoveredConvoId(c.id)}
+        onMouseLeave={() => setHoveredConvoId(null)}
         style={{
           '--background':               isActive ? 'rgba(var(--ion-color-primary-rgb),0.08)' : 'transparent',
           '--background-hover':         'rgba(0,0,0,0.04)',
           '--background-hover-opacity': '1',
           '--min-height':               '60px',
           '--padding-start':            '16px',
-          '--padding-end':              '12px',
+          '--padding-end':              '4px',
           '--inner-padding-end':        '0',
         }}
       >
@@ -513,6 +530,11 @@ export default function Messages() {
             </span>
           </div>
         </IonLabel>
+        <div slot="end" style={{ opacity: isHovered || isPinned ? 1 : 0, transition: 'opacity 0.15s' }}>
+          <IonButton fill="clear" color={isPinned ? 'primary' : 'medium'} size="small" onClick={(e) => togglePin(c.id, e)} style={{ '--border-radius': '50%' }} title={isPinned ? 'Unpin' : 'Pin'}>
+            <IonIcon slot="icon-only" name={isPinned ? 'pin' : 'pin-outline'} />
+          </IonButton>
+        </div>
       </IonItem>
     );
   };
@@ -597,11 +619,38 @@ export default function Messages() {
                     <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Use New Message to start one</span>
                   )}
                 </div>
-              ) : (
-                <IonList lines="full" style={{ padding: 0 }}>
-                  {filteredConvos.map(renderConvo)}
-                </IonList>
-              )}
+              ) : (() => {
+                const pinnedConvos  = filteredConvos.filter(c => pinnedIds.includes(c.id));
+                const loadConvos    = filteredConvos.filter(c => !pinnedIds.includes(c.id) && c.load_id);
+                const directConvos  = filteredConvos.filter(c => !pinnedIds.includes(c.id) && !c.load_id);
+                const SectionHeader = ({ label }) => (
+                  <div style={{ padding: '5px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)', borderTop: '1px solid var(--ion-border-color)' }}>
+                    <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+                  </div>
+                );
+                return (
+                  <>
+                    {pinnedConvos.length > 0 && (
+                      <>
+                        <SectionHeader label="Pinned" />
+                        <IonList lines="full" style={{ padding: 0 }}>{pinnedConvos.map(renderConvo)}</IonList>
+                      </>
+                    )}
+                    {loadConvos.length > 0 && (
+                      <>
+                        <SectionHeader label="Load Conversations" />
+                        <IonList lines="full" style={{ padding: 0 }}>{loadConvos.map(renderConvo)}</IonList>
+                      </>
+                    )}
+                    {directConvos.length > 0 && (
+                      <>
+                        <SectionHeader label="Direct Messages" />
+                        <IonList lines="full" style={{ padding: 0 }}>{directConvos.map(renderConvo)}</IonList>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
