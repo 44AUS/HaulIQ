@@ -4,6 +4,7 @@ import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
   IonReorderGroup, IonReorder, IonProgressBar, IonSegment, IonSegmentButton,
+  IonHeader, IonToolbar, IonTitle, IonButtons, IonContent,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -1054,60 +1055,74 @@ export default function Messages() {
       </div>
 
       {/* ── Select Connection / Employee Modal ── */}
-      <IonModal isOpen={selectOpen} onDidDismiss={() => { setSelectOpen(false); setSelectQuery(''); }} style={{ '--height': '70%', '--border-radius': '16px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ion-card-background)' }}>
-          <div style={{ padding: '16px 16px 8px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flex: 1, fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>
+      <style>{`
+        .select-contact-modal { --border-radius: 0px; }
+        @media (min-width: 768px) {
+          .select-contact-modal { --width: 480px; --max-height: 85vh; --border-radius: 12px; }
+        }
+      `}</style>
+      <IonModal isOpen={selectOpen} onDidDismiss={() => { setSelectOpen(false); setSelectQuery(''); }} className="select-contact-modal">
+        <IonHeader>
+          <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
+            <IonButtons slot="start">
+              <IonButton fill="clear" shape="round" onClick={() => setSelectOpen(false)}>
+                <ion-icon slot="icon-only" name="close-outline" />
+              </IonButton>
+            </IonButtons>
+            <IonTitle style={{ fontWeight: 700 }}>
               {listTab === 'employees' ? 'Select Employee' : 'Select Connection'}
-            </span>
-            <IonButton fill="clear" color="medium" size="small" onClick={() => setSelectOpen(false)} style={{ '--border-radius': '50%' }}>
-              <IonIcon slot="icon-only" name="close-outline" />
-            </IonButton>
-          </div>
-          <div style={{ padding: '8px 12px' }}>
+            </IonTitle>
+          </IonToolbar>
+          <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
             <IonSearchbar
               value={selectQuery}
               onIonInput={e => setSelectQuery(e.detail.value || '')}
               placeholder={listTab === 'employees' ? 'Search employees…' : 'Search connections…'}
-              style={{ '--border-radius': '8px', '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))', padding: 0 }}
+              style={{ '--border-radius': '8px', '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))' }}
             />
-          </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {selectLoading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
-                <IonSpinner name="crescent" />
+          </IonToolbar>
+        </IonHeader>
+        <IonContent style={{ '--background': 'var(--ion-card-background)' }}>
+          {selectLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+              <IonSpinner name="crescent" />
+            </div>
+          ) : (() => {
+            const q = selectQuery.toLowerCase();
+            const filtered = selectList.filter(c =>
+              (c.name || c.company || '').toLowerCase().includes(q) ||
+              (c.company || '').toLowerCase().includes(q)
+            );
+            if (!filtered.length) return (
+              <div style={{ textAlign: 'center', padding: 32, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
+                {selectQuery ? 'No matches found' : (listTab === 'employees' ? 'No employees found' : 'No connections found')}
               </div>
-            ) : (() => {
-              const q = selectQuery.toLowerCase();
-              const filtered = selectList.filter(c =>
-                (c.name || c.company || '').toLowerCase().includes(q) ||
-                (c.company || '').toLowerCase().includes(q)
-              );
-              if (!filtered.length) return (
-                <div style={{ textAlign: 'center', padding: 32, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
-                  {selectQuery ? 'No matches found' : (listTab === 'employees' ? 'No employees found' : 'No connections found')}
+            );
+            return filtered.map(contact => {
+              const name = contact.name || contact.company || '?';
+              return (
+                <div key={contact.user_id || contact.id}
+                  className="ion-activatable"
+                  onClick={() => handleSelectContact(contact)}
+                  style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12, position: 'relative', overflow: 'hidden' }}
+                >
+                  <IonRippleEffect />
+                  <UserAvatar name={name} src={contact.avatar_url} size={40} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+                    {contact.company && contact.name && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{contact.company}</div>
+                    )}
+                    {contact.role && (
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', textTransform: 'capitalize' }}>{contact.role}</div>
+                    )}
+                  </div>
+                  <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
                 </div>
               );
-              return (
-                <IonList lines="full" style={{ padding: 0 }}>
-                  {filtered.map(contact => (
-                    <IonItem key={contact.user_id || contact.id} button detail={false} onClick={() => handleSelectContact(contact)}
-                      style={{ '--min-height': '60px', '--padding-start': '16px' }}>
-                      <div slot="start" style={{ marginRight: 12 }}>
-                        <UserAvatar name={contact.name || contact.company || '?'} src={contact.avatar_url} size={40} />
-                      </div>
-                      <IonLabel>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>{contact.name || contact.company}</div>
-                        {contact.company && contact.name && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{contact.company}</div>}
-                        {contact.role && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', textTransform: 'capitalize' }}>{contact.role}</div>}
-                      </IonLabel>
-                    </IonItem>
-                  ))}
-                </IonList>
-              );
-            })()}
-          </div>
-        </div>
+            });
+          })()}
+        </IonContent>
       </IonModal>
 
       {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
