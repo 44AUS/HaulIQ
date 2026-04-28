@@ -741,25 +741,31 @@ export default function Messages() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: '8px 12px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+            <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
               <IonTextarea
-                placeholder="Type a message..."
+                placeholder="Write your message here"
                 value={input}
                 onIonInput={e => { setInput(String(e.detail.value ?? '')); if (activeConvoId) handleTyping(activeConvoId); }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 disabled={activeConvo.is_blocked_by_me}
                 autoGrow
-                rows={1}
-                style={{ flex: 1, '--background': 'var(--ion-input-background, rgba(0,0,0,0.04))', '--border-radius': '6px', '--padding-start': '12px', '--padding-end': '12px', '--color': 'var(--ion-text-color)', fontSize: '0.875rem', border: '1px solid var(--ion-border-color)', borderRadius: 6 }}
+                rows={3}
+                style={{ '--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--padding-top': '12px', '--padding-bottom': '8px', '--color': 'var(--ion-text-color)', fontSize: '0.9rem', width: '100%' }}
               />
-              <IonButton
-                color="success"
-                onClick={handleSend}
-                disabled={!input.trim() || activeConvo.is_blocked_by_me}
-                style={{ '--border-radius': '8px', width: 40, height: 40, '--padding-start': '0', '--padding-end': '0', flexShrink: 0 }}
-              >
-                <IonIcon slot="icon-only" name="send-outline" />
-              </IonButton>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px' }}>
+                <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me}>
+                  <IonIcon slot="icon-only" name="image-outline" />
+                </IonButton>
+                <IonButton
+                  color="success"
+                  onClick={handleSend}
+                  disabled={!input.trim() || activeConvo.is_blocked_by_me}
+                  style={{ '--border-radius': '8px', fontWeight: 700, letterSpacing: '0.05em' }}
+                >
+                  <IonIcon slot="start" name="send-outline" />
+                  SEND
+                </IonButton>
+              </div>
             </div>
           </div>
         ) : !isMobile ? (
