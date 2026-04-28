@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
-  IonRippleEffect, IonAvatar, IonButton, IonInput, IonSearchbar,
+  IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
@@ -741,16 +741,19 @@ export default function Messages() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: '8px 12px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <IonInput
+            <div style={{ padding: '8px 12px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+              <IonTextarea
                 placeholder="Type a message..."
                 value={input}
                 onIonInput={e => { setInput(String(e.detail.value ?? '')); if (activeConvoId) handleTyping(activeConvoId); }}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSend(); }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 disabled={activeConvo.is_blocked_by_me}
+                autoGrow
+                rows={1}
                 style={{ flex: 1, '--background': 'var(--ion-input-background, rgba(0,0,0,0.04))', '--border-radius': '6px', '--padding-start': '12px', '--padding-end': '12px', '--color': 'var(--ion-text-color)', fontSize: '0.875rem', border: '1px solid var(--ion-border-color)', borderRadius: 6 }}
               />
               <IonButton
+                color="success"
                 onClick={handleSend}
                 disabled={!input.trim() || activeConvo.is_blocked_by_me}
                 style={{ '--border-radius': '8px', width: 40, height: 40, '--padding-start': '0', '--padding-end': '0', flexShrink: 0 }}
