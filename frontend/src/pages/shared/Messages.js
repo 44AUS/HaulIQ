@@ -1080,10 +1080,11 @@ export default function Messages() {
           </IonToolbar>
           <IonToolbar style={{ '--background': 'var(--ion-card-background)' }}>
             <IonSearchbar
+              mode="md"
               value={selectQuery}
               onIonInput={e => setSelectQuery(e.detail.value || '')}
               placeholder={listTab === 'employees' ? 'Search employees…' : 'Search connections…'}
-              style={{ '--border-radius': '8px', '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))' }}
+              style={{ '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))' }}
             />
           </IonToolbar>
         </IonHeader>
