@@ -4,6 +4,19 @@ import { messagesApi } from '../services/api';
 
 const MinimizedChatsContext = createContext(null);
 
+const STORAGE_KEY = 'hauliq-minimized-convos';
+
+function saveToStorage(convos) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(convos.map(mc => ({ id: mc.id, convo: mc.convo }))));
+  } catch {}
+}
+
+function loadFromStorage() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+
 export function MinimizedChatsProvider({ children }) {
   const { user } = useAuth();
   const [minimizedConvos, setMinimizedConvos] = useState([]);
@@ -12,9 +25,44 @@ export function MinimizedChatsProvider({ children }) {
   const [miniSending, setMiniSending] = useState({});
   const minimizedRef = useRef([]);
   const openMiniRef = useRef(null);
+  const restoredRef = useRef(false);
 
   useEffect(() => { minimizedRef.current = minimizedConvos; }, [minimizedConvos]);
   useEffect(() => { openMiniRef.current = openMiniId; }, [openMiniId]);
+
+  // Persist minimized list whenever it changes
+  useEffect(() => { saveToStorage(minimizedConvos); }, [minimizedConvos]);
+
+  // Restore from localStorage on login; clear on logout
+  useEffect(() => {
+    if (!user?.id) {
+      if (restoredRef.current) {
+        setMinimizedConvos([]);
+        setOpenMiniId(null);
+        localStorage.removeItem(STORAGE_KEY);
+        restoredRef.current = false;
+      }
+      return;
+    }
+    if (restoredRef.current) return;
+    restoredRef.current = true;
+    const stored = loadFromStorage();
+    if (!stored.length) return;
+    stored.forEach(({ id, convo }) => {
+      messagesApi.conversation(id)
+        .then(data => {
+          const messages = data.messages || (Array.isArray(data) ? data : []);
+          setMinimizedConvos(prev =>
+            prev.find(m => m.id === id) ? prev : [...prev, { id, convo, messages, unreadCount: 0 }]
+          );
+        })
+        .catch(() => {
+          setMinimizedConvos(prev =>
+            prev.find(m => m.id === id) ? prev : [...prev, { id, convo, messages: [], unreadCount: 0 }]
+          );
+        });
+    });
+  }, [user?.id]); // eslint-disable-line
 
   useEffect(() => {
     const poll = setInterval(() => {
