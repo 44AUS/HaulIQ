@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  IonList, IonItem, IonLabel, IonBadge,
+  IonList, IonItem, IonLabel, IonBadge, IonButton,
   IonAvatar, IonPopover, IonChip, IonText,
 } from '@ionic/react';
 import IonIcon from '../IonIcon';
@@ -205,26 +205,15 @@ export default function Sidebar({ onNavigate, onClose }) {
 
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'center', minHeight: 60, padding: '0 8px', flexShrink: 0 }}>
-        <button
-          onClick={() => { onClose?.(); const m = document.querySelector('ion-menu'); if (m) m.close(); }}
-          style={{ width: 40, height: 40, background: 'none', border: 'none', cursor: 'pointer', color: iconColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-        >
-          <IonIcon name="close-outline" style={{ fontSize: 22, pointerEvents: 'none' }} />
-        </button>
+        <IonButton fill="clear" style={{ '--color': iconColor, '--border-radius': '50%' }} onClick={() => { onClose?.(); const m = document.querySelector('ion-menu'); if (m) m.close(); }}>
+          <IonIcon slot="icon-only" name="close-outline" style={{ fontSize: 22 }} />
+        </IonButton>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
           <img src="/urload-logo.png" alt="Urload" style={{ height: 30, width: 'auto' }} />
         </div>
-        <button
-          onClick={toggleTheme}
-          title={isDark ? 'Light mode' : 'Dark mode'}
-          style={{ width: 40, height: 40, background: 'none', border: 'none', cursor: 'pointer', color: iconColor, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-        >
-          <IonIcon name={isDark ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 20, pointerEvents: 'none' }} />
-        </button>
+        <IonButton fill="clear" title={isDark ? 'Light mode' : 'Dark mode'} style={{ '--color': iconColor, '--border-radius': '50%' }} onClick={toggleTheme}>
+          <IonIcon slot="icon-only" name={isDark ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 20 }} />
+        </IonButton>
       </div>
 
       {/* User identity block */}
@@ -375,14 +364,11 @@ export default function Sidebar({ onNavigate, onClose }) {
       {/* Message Center */}
       {messagesPath && (
         <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
-          <button
-            onClick={() => handleNav(messagesPath)}
-            style={{ width: '100%', background: 'none', border: `1px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)'}`, borderRadius: 8, padding: '6px 12px', cursor: 'pointer', color: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-          >
-            <IonIcon name="chatbubble-outline" fontSize="small" />
+          <IonButton expand="block" fill="outline" style={{ '--border-radius': '8px', '--color': isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', '--border-color': isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)', fontWeight: 600, fontSize: '0.8rem' }} onClick={() => handleNav(messagesPath)}>
+            <IonIcon slot="start" name="chatbubble-outline" />
             Message Center
-            {unread > 0 && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
-          </button>
+            {unread > 0 && <span slot="end" style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
+          </IonButton>
         </div>
       )}
 
