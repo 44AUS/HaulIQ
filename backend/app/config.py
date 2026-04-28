@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # JWT
     secret_key: str = "change-me-in-production-use-openssl-rand-hex-32"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = 43200  # 30 days
     refresh_token_expire_days: int = 30
 
     # Adyen
