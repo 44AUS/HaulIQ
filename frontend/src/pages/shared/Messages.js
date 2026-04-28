@@ -599,7 +599,7 @@ export default function Messages() {
                 <>
                   {loadConvos.length > 0 && (
                     <>
-                      <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                      <div style={{ padding: '6px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Load Conversations</span>
                       </div>
                       <IonList lines="full" style={{ padding: 0 }}>
@@ -609,7 +609,7 @@ export default function Messages() {
                   )}
                   {directConvos.length > 0 && (
                     <>
-                      <div style={{ padding: '6px 16px', backgroundColor: 'rgba(0,0,0,0.04)', borderBottom: '1px solid var(--ion-border-color)' }}>
+                      <div style={{ padding: '6px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Direct Messages</span>
                       </div>
                       <IonList lines="full" style={{ padding: 0 }}>
