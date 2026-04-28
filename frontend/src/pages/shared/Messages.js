@@ -3,7 +3,7 @@ import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
-  IonReorderGroup, IonReorder, IonProgressBar,
+  IonReorderGroup, IonReorder, IonProgressBar, IonSegment, IonSegmentButton,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -672,17 +672,19 @@ export default function Messages() {
 
             {/* Tab toggle */}
             <div style={{ padding: '0 10px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
-              <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2, width: '100%' }}>
-                {[
-                  { value: 'main', label: user?.role === 'carrier' ? 'Brokers' : 'Carriers' },
-                  { value: 'employees', label: 'Employees' },
-                ].map(({ value, label }) => (
-                  <button key={value} onClick={() => setListTab(value)}
-                    style={{ flex: 1, background: listTab === value ? 'var(--ion-card-background)' : 'var(--ion-background-color)', color: listTab === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', fontFamily: 'inherit', boxShadow: listTab === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s' }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
+              <IonSegment mode="ios" value={listTab} onIonChange={e => setListTab(String(e.detail.value))}
+                style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 36, width: '100%' }}>
+                <IonSegmentButton value="main"
+                  style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
+                  <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>
+                    {user?.role === 'carrier' ? 'Brokers' : 'Carriers'}
+                  </IonLabel>
+                </IonSegmentButton>
+                <IonSegmentButton value="employees"
+                  style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
+                  <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>Employees</IonLabel>
+                </IonSegmentButton>
+              </IonSegment>
             </div>
 
             {/* Compose panel */}

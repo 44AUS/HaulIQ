@@ -8,7 +8,7 @@ import { useJsApiLoader, GoogleMap, Marker, InfoWindow, TrafficLayer } from '@re
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
-import { IonButton, IonActionSheet, IonPopover, IonList, IonItem, IonLabel, IonCheckbox, IonAvatar } from '@ionic/react';
+import { IonButton, IonActionSheet, IonPopover, IonList, IonItem, IonLabel, IonCheckbox, IonAvatar, IonSegment, IonSegmentButton } from '@ionic/react';
 import IonIcon from '../../components/IonIcon';
 
 const GMAPS_LIBS = ['places'];
@@ -552,14 +552,15 @@ export default function CalendarPage() {
                 <MonthPickerDropdown open={pickerOpen} onClose={() => setPickerOpen(false)} date={date} onSelect={d => { setDate(d); setView('month'); }} anchorRef={pickerAnchorRef} />
               </div>
 
-              <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2 }}>
+              <IonSegment mode="ios" value={view} onIonChange={e => setView(String(e.detail.value))}
+                style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 34 }}>
                 {VIEW_OPTIONS.map(({ value, label }) => (
-                  <button key={value} onClick={() => setView(value)}
-                    style={{ background: view === value ? 'var(--ion-card-background)' : 'var(--ion-background-color)', color: view === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: view === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
-                    {label}
-                  </button>
+                  <IonSegmentButton key={value} value={value}
+                    style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 28, fontSize: '0.78rem', fontWeight: 600 }}>
+                    <IonLabel style={{ fontSize: '0.78rem', fontWeight: 600, whiteSpace: 'nowrap', margin: '4px 0' }}>{label}</IonLabel>
+                  </IonSegmentButton>
                 ))}
-              </div>
+              </IonSegment>
             </div>
 
             <IonButton size="small" color="dark" fill="solid" onClick={() => setFilterOpen(true)} style={{ flexShrink: 0 }}>
