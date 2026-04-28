@@ -521,7 +521,7 @@ export default function Messages() {
 
   return (
     <>
-      <div style={{ position: 'fixed', top: 60, left: 0, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', zIndex: 1 }}>
+      <div style={{ position: 'fixed', top: isMobile ? 108 : 116, left: 0, right: 0, bottom: 0, display: 'flex', overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', zIndex: 1 }}>
 
         {/* ── Conversation list panel ── */}
         {showList && (
