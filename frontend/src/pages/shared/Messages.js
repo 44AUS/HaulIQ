@@ -470,13 +470,13 @@ export default function Messages() {
   const showChat = !!activeConvoId;
 
   const renderConvo = (c) => {
-    const lastMsg  = getLastMsg(c);
-    const unread   = hasUnread(c);
-    const label    = getConvoLabel(c);
-    const otherRole   = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
-    const otherId     = otherRole === 'broker' ? c.broker_id : c.carrier_id;
+    const label      = getConvoLabel(c);
+    const unread     = hasUnread(c);
+    const isActive   = activeConvoId === c.id;
+    const otherRole  = String(c.carrier_id) === String(user?.id) ? 'broker' : 'carrier';
+    const otherId    = otherRole === 'broker' ? c.broker_id : c.carrier_id;
     const otherAvatar = otherRole === 'broker' ? c.broker_avatar_url : c.carrier_avatar_url;
-    const isActive    = activeConvoId === c.id;
+    const displayName = c.load_id ? `Load #${c.load_id.slice(0, 8).toUpperCase()} — ${label}` : label;
 
     return (
       <IonItem
@@ -485,18 +485,18 @@ export default function Messages() {
         detail={false}
         onClick={() => setActiveConvoId(c.id)}
         style={{
-          '--background':              isActive ? 'rgba(0,0,0,0.06)' : 'transparent',
-          '--background-hover':        'rgba(0,0,0,0.04)',
-          '--background-hover-opacity':'1',
-          '--min-height':              '64px',
-          '--padding-start':           '16px',
-          '--padding-end':             '12px',
-          '--inner-padding-end':       '0',
+          '--background':               isActive ? 'rgba(var(--ion-color-primary-rgb),0.08)' : 'transparent',
+          '--background-hover':         'rgba(0,0,0,0.04)',
+          '--background-hover-opacity': '1',
+          '--min-height':               '60px',
+          '--padding-start':            '16px',
+          '--padding-end':              '12px',
+          '--inner-padding-end':        '0',
         }}
       >
-        <div slot="start" style={{ position: 'relative', flexShrink: 0, marginRight: 4 }}>
+        <div slot="start" style={{ position: 'relative', flexShrink: 0, marginRight: 12 }}>
           <Link to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
-            <UserAvatar name={label} src={otherAvatar} size={36} />
+            <UserAvatar name={label} src={otherAvatar} size={42} />
           </Link>
           {c.other_last_active_at && (
             <div style={{ position: 'absolute', bottom: 1, right: 1 }}>
@@ -505,15 +505,13 @@ export default function Messages() {
           )}
         </div>
         <IonLabel style={{ margin: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
-            {unread && <div style={{ width: 7, height: 7, backgroundColor: 'var(--ion-color-primary)', borderRadius: '50%', flexShrink: 0 }} />}
-            {c.is_blocked_by_me && <IonIcon name="ban-outline" style={{ fontSize: 10, color: 'var(--ion-color-danger)' }} />}
-            <span style={{ fontSize: '0.875rem', fontWeight: unread ? 700 : c.load_id ? 600 : 500, color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {c.load_id ? `LOAD #${c.load_id.slice(0, 8).toUpperCase()}` : label}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {unread && <div style={{ width: 8, height: 8, backgroundColor: 'var(--ion-color-primary)', borderRadius: '50%', flexShrink: 0 }} />}
+            {c.is_blocked_by_me && <IonIcon name="ban-outline" style={{ fontSize: 12, color: 'var(--ion-color-danger)', flexShrink: 0 }} />}
+            <span style={{ fontSize: '0.95rem', fontWeight: unread ? 700 : 500, color: isActive ? 'var(--ion-color-primary)' : 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {displayName}
             </span>
           </div>
-          {c.load_id && <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</p>}
-          {lastMsg && <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)', opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{getPreview(lastMsg.body)}</p>}
         </IonLabel>
       </IonItem>
     );
@@ -600,28 +598,9 @@ export default function Messages() {
                   )}
                 </div>
               ) : (
-                <>
-                  {loadConvos.length > 0 && (
-                    <>
-                      <div style={{ padding: '6px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Load Conversations</span>
-                      </div>
-                      <IonList lines="full" style={{ padding: 0 }}>
-                        {loadConvos.map(renderConvo)}
-                      </IonList>
-                    </>
-                  )}
-                  {directConvos.length > 0 && (
-                    <>
-                      <div style={{ padding: '6px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Direct Messages</span>
-                      </div>
-                      <IonList lines="full" style={{ padding: 0 }}>
-                        {directConvos.map(renderConvo)}
-                      </IonList>
-                    </>
-                  )}
-                </>
+                <IonList lines="full" style={{ padding: 0 }}>
+                  {filteredConvos.map(renderConvo)}
+                </IonList>
               )}
             </div>
           </div>
