@@ -908,9 +908,12 @@ export default function Messages() {
             </IonList> : (
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <IonIcon name="chatbubble-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
-                  <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Select a conversation</p>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>or use New Message to start one</span>
+                  <IonIcon name="chatbubbles-outline" style={{ fontSize: 48, color: isDark ? '#ffffff' : '#333333', display: 'block', marginBottom: 14 }} />
+                  <p style={{ margin: '0 0 20px', fontSize: '0.95rem', fontWeight: 500, color: isDark ? '#ffffff' : '#333333' }}>Select a conversation</p>
+                  <IonButton fill="outline" color={isDark ? 'light' : 'dark'} onClick={() => setComposing(v => !v)}>
+                    <IonIcon slot="start" name="add-outline" />
+                    Create a Message
+                  </IonButton>
                 </div>
               </div>
             )}
