@@ -883,6 +883,14 @@ export default function Messages() {
                         special?.__type ? content : <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: 'var(--ion-text-color)', whiteSpace: 'pre-wrap' }}>{msg.body}</p>
                       ) : content}
                     </IonLabel>
+                    {!special && (
+                      <div slot="end" style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.15s', alignSelf: 'center', flexShrink: 0 }}>
+                        <IonButton fill="clear" color="medium" size="small" style={{ '--border-radius': '50%' }}
+                          onClick={() => navigator.clipboard.writeText(msg.body).catch(() => {})}>
+                          <IonIcon slot="icon-only" name="copy-outline" style={{ fontSize: 16 }} />
+                        </IonButton>
+                      </div>
+                    )}
                   </IonItem>
                 );
               })}
