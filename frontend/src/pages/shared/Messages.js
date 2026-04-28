@@ -872,6 +872,11 @@ export default function Messages() {
                   <IonIcon slot="icon-only" name="remove-outline" />
                 </IonButton>
               )}
+              {showChat && (
+                <IonButton fill="clear" color="medium" title="Close conversation" onClick={() => { setActiveConvoId(null); setActiveMessages([]); }} style={{ '--border-radius': '50%' }}>
+                  <IonIcon slot="icon-only" name="close-outline" />
+                </IonButton>
+              )}
               {!showChat && user?.role !== 'driver' && (
                 <IonButton fill="clear" color="medium" onClick={openSelectModal} style={{ '--border-radius': '8px' }}>
                   <IonIcon slot="start" name="person-outline" />
