@@ -8,7 +8,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useMinimizedChats } from '../../context/MinimizedChatsContext';
-import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
+import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi, driversApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
 function parseSpecial(body) {
@@ -274,6 +274,10 @@ export default function Messages() {
   const { minimize: minimizeConvo } = useMinimizedChats();
   const [listVisible, setListVisible] = useState(true);
   const [listTab, setListTab] = useState('main');
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [selectQuery, setSelectQuery] = useState('');
+  const [selectList, setSelectList] = useState([]);
+  const [selectLoading, setSelectLoading] = useState(false);
   const [hoveredConvoId, setHoveredConvoId] = useState(null);
   const [pinnedIds, setPinnedIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('hauliq_pinned_convos') || '[]'); } catch { return []; }
@@ -526,6 +530,33 @@ export default function Messages() {
       URL.revokeObjectURL(prev[idx].previewUrl);
       return prev.filter((_, i) => i !== idx);
     });
+  };
+
+  const openSelectModal = async () => {
+    setSelectOpen(true);
+    setSelectQuery('');
+    setSelectLoading(true);
+    try {
+      if (listTab === 'employees') {
+        const data = await driversApi.list();
+        setSelectList(Array.isArray(data) ? data : []);
+      } else {
+        const data = await networkApi.list();
+        setSelectList(Array.isArray(data) ? data : []);
+      }
+    } catch { setSelectList([]); }
+    finally { setSelectLoading(false); }
+  };
+
+  const handleSelectContact = (contact) => {
+    setSelectOpen(false);
+    setSelectQuery('');
+    const uid = contact.user_id || contact.id;
+    const existing = conversations.find(c => (c.carrier_id === uid || c.broker_id === uid) && !c.load_id);
+    if (existing) { setActiveConvoId(existing.id); return; }
+    messagesApi.direct(uid)
+      .then(convo => { setConversations(prev => [convo, ...prev]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
+      .catch(() => {});
   };
 
   const handleStartDirect = (contact) => {
@@ -789,6 +820,9 @@ export default function Messages() {
                 </Link>
               )}
 
+              {/* Spacer when no convo selected */}
+              {!showChat && <div style={{ flex: 1 }} />}
+
               {/* Name + subtitle — only when a convo is selected */}
               {showChat && <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
@@ -834,6 +868,12 @@ export default function Messages() {
               {showChat && (
                 <IonButton fill="clear" color="medium" title="Minimize" onClick={handleMinimize} style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="remove-outline" />
+                </IonButton>
+              )}
+              {!showChat && user?.role !== 'driver' && (
+                <IonButton fill="clear" color="medium" onClick={openSelectModal} style={{ '--border-radius': '8px' }}>
+                  <IonIcon slot="start" name="person-outline" />
+                  {listTab === 'employees' ? 'Select Employee' : 'Select Connection'}
                 </IonButton>
               )}
             </div>
@@ -1011,6 +1051,63 @@ export default function Messages() {
           </div>
         )}
       </div>
+
+      {/* ── Select Connection / Employee Modal ── */}
+      <IonModal isOpen={selectOpen} onDidDismiss={() => { setSelectOpen(false); setSelectQuery(''); }} style={{ '--height': '70%', '--border-radius': '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: 'var(--ion-card-background)' }}>
+          <div style={{ padding: '16px 16px 8px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ flex: 1, fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>
+              {listTab === 'employees' ? 'Select Employee' : 'Select Connection'}
+            </span>
+            <IonButton fill="clear" color="medium" size="small" onClick={() => setSelectOpen(false)} style={{ '--border-radius': '50%' }}>
+              <IonIcon slot="icon-only" name="close-outline" />
+            </IonButton>
+          </div>
+          <div style={{ padding: '8px 12px' }}>
+            <IonSearchbar
+              value={selectQuery}
+              onIonInput={e => setSelectQuery(e.detail.value || '')}
+              placeholder={listTab === 'employees' ? 'Search employees…' : 'Search connections…'}
+              style={{ '--border-radius': '8px', '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))', padding: 0 }}
+            />
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto' }}>
+            {selectLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+                <IonSpinner name="crescent" />
+              </div>
+            ) : (() => {
+              const q = selectQuery.toLowerCase();
+              const filtered = selectList.filter(c =>
+                (c.name || c.company || '').toLowerCase().includes(q) ||
+                (c.company || '').toLowerCase().includes(q)
+              );
+              if (!filtered.length) return (
+                <div style={{ textAlign: 'center', padding: 32, color: 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
+                  {selectQuery ? 'No matches found' : (listTab === 'employees' ? 'No employees found' : 'No connections found')}
+                </div>
+              );
+              return (
+                <IonList lines="full" style={{ padding: 0 }}>
+                  {filtered.map(contact => (
+                    <IonItem key={contact.user_id || contact.id} button detail={false} onClick={() => handleSelectContact(contact)}
+                      style={{ '--min-height': '60px', '--padding-start': '16px' }}>
+                      <div slot="start" style={{ marginRight: 12 }}>
+                        <UserAvatar name={contact.name || contact.company || '?'} src={contact.avatar_url} size={40} />
+                      </div>
+                      <IonLabel>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--ion-text-color)' }}>{contact.name || contact.company}</div>
+                        {contact.company && contact.name && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{contact.company}</div>}
+                        {contact.role && <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', textTransform: 'capitalize' }}>{contact.role}</div>}
+                      </IonLabel>
+                    </IonItem>
+                  ))}
+                </IonList>
+              );
+            })()}
+          </div>
+        </div>
+      </IonModal>
 
       {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
       {docsModalLoadId && (
