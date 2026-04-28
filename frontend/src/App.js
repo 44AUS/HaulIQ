@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Capacitor } from '@capacitor/core';
 import { IonApp, IonSpinner } from '@ionic/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { MessagingProvider } from './context/MessagingContext';
@@ -249,7 +250,7 @@ function AdminRoutes() {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={Capacitor.isNativePlatform() ? <Navigate to="/login" replace /> : <Landing />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/contact" element={<Contact />} />
