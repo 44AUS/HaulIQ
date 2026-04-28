@@ -3,6 +3,7 @@ import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
+  IonReorderGroup, IonReorder,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -274,6 +275,35 @@ export default function Messages() {
   const [pinnedIds, setPinnedIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('hauliq_pinned_convos') || '[]'); } catch { return []; }
   });
+  const [convoOrder, setConvoOrder] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('hauliq_convo_order') || '[]'); } catch { return []; }
+  });
+
+  const applyOrder = (arr) => {
+    if (!convoOrder.length) return arr;
+    return [...arr].sort((a, b) => {
+      const ia = convoOrder.indexOf(a.id);
+      const ib = convoOrder.indexOf(b.id);
+      if (ia === -1 && ib === -1) return 0;
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+  };
+
+  const handleSectionReorder = (e, sectionItems) => {
+    const reorderedSection = e.detail.complete([...sectionItems]);
+    const sectionIds = new Set(sectionItems.map(c => c.id));
+    const reorderedIds = reorderedSection.map(c => c.id);
+    setConvoOrder(prev => {
+      const base = prev.length ? prev : conversations.map(c => c.id);
+      let ri = 0;
+      const next = base.map(id => sectionIds.has(id) ? reorderedIds[ri++] : id);
+      reorderedIds.slice(ri).forEach(id => next.push(id));
+      localStorage.setItem('hauliq_convo_order', JSON.stringify(next));
+      return next;
+    });
+  };
 
   const togglePin = (id, e) => {
     e.stopPropagation();
@@ -435,14 +465,24 @@ export default function Messages() {
     if (pendingImages.length > 0) {
       setUploadingImages(true);
       try {
-        const urls = await Promise.all(pendingImages.map(p => messagesApi.uploadImage(p.file).then(r => r.url)));
-        const body = JSON.stringify({ __type: 'image_attachment', urls, caption: input.trim() || undefined });
+        const toBase64 = (file) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve(ev.target.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        const images = await Promise.all(
+          pendingImages.map(p => toBase64(p.file).then(data => ({ data, name: p.file.name })))
+        );
+        const body = JSON.stringify({ __type: 'image_attachment', images, caption: input.trim() || undefined });
         const msg = await messagesApi.send(activeConvo.load_id || null, recipientId, body);
         setActiveMessages(prev => [...prev, msg]);
         setPendingImages(prev => { prev.forEach(p => URL.revokeObjectURL(p.previewUrl)); return []; });
         setInput('');
-      } catch { /* upload failed — keep images so user can retry */ }
-      finally { setUploadingImages(false); }
+      } catch (err) {
+        console.error('Image send failed:', err);
+        alert('Failed to send image: ' + (err?.message || 'Unknown error'));
+      } finally { setUploadingImages(false); }
       return;
     }
 
@@ -558,10 +598,13 @@ export default function Messages() {
             </span>
           </div>
         </IonLabel>
-        <div slot="end" style={{ opacity: isHovered || isPinned ? 1 : 0, transition: 'opacity 0.15s' }}>
-          <IonButton fill="clear" color={isPinned ? 'primary' : 'medium'} size="small" onClick={(e) => togglePin(c.id, e)} style={{ '--border-radius': '50%' }} title={isPinned ? 'Unpin' : 'Pin'}>
-            <IonIcon slot="icon-only" name={isPinned ? 'pin' : 'pin-outline'} />
-          </IonButton>
+        <div slot="end" style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ opacity: isHovered || isPinned ? 1 : 0, transition: 'opacity 0.15s' }}>
+            <IonButton fill="clear" color={isPinned ? 'primary' : 'medium'} size="small" onClick={(e) => togglePin(c.id, e)} style={{ '--border-radius': '50%' }} title={isPinned ? 'Unpin' : 'Pin'}>
+              <IonIcon slot="icon-only" name={isPinned ? 'pin' : 'pin-outline'} />
+            </IonButton>
+          </div>
+          <IonReorder />
         </div>
       </IonItem>
     );
@@ -648,9 +691,9 @@ export default function Messages() {
                   )}
                 </div>
               ) : (() => {
-                const pinnedConvos  = filteredConvos.filter(c => pinnedIds.includes(c.id));
-                const loadConvos    = filteredConvos.filter(c => !pinnedIds.includes(c.id) && c.load_id);
-                const directConvos  = filteredConvos.filter(c => !pinnedIds.includes(c.id) && !c.load_id);
+                const pinnedConvos  = applyOrder(filteredConvos.filter(c => pinnedIds.includes(c.id)));
+                const loadConvos    = applyOrder(filteredConvos.filter(c => !pinnedIds.includes(c.id) && c.load_id));
+                const directConvos  = applyOrder(filteredConvos.filter(c => !pinnedIds.includes(c.id) && !c.load_id));
                 const SectionHeader = ({ label }) => (
                   <div style={{ padding: '5px 16px', backgroundColor: 'var(--ion-background-color)', borderBottom: '1px solid var(--ion-border-color)', borderTop: '1px solid var(--ion-border-color)' }}>
                     <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--ion-color-medium)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
@@ -661,19 +704,31 @@ export default function Messages() {
                     {pinnedConvos.length > 0 && (
                       <>
                         <SectionHeader label="Pinned" />
-                        <IonList lines="full" style={{ padding: 0 }}>{pinnedConvos.map(renderConvo)}</IonList>
+                        <IonList lines="full" style={{ padding: 0 }}>
+                          <IonReorderGroup disabled={false} onIonItemReorder={e => handleSectionReorder(e, pinnedConvos)}>
+                            {pinnedConvos.map(renderConvo)}
+                          </IonReorderGroup>
+                        </IonList>
                       </>
                     )}
                     {loadConvos.length > 0 && (
                       <>
                         <SectionHeader label="Load Conversations" />
-                        <IonList lines="full" style={{ padding: 0 }}>{loadConvos.map(renderConvo)}</IonList>
+                        <IonList lines="full" style={{ padding: 0 }}>
+                          <IonReorderGroup disabled={false} onIonItemReorder={e => handleSectionReorder(e, loadConvos)}>
+                            {loadConvos.map(renderConvo)}
+                          </IonReorderGroup>
+                        </IonList>
                       </>
                     )}
                     {directConvos.length > 0 && (
                       <>
                         <SectionHeader label="Direct Messages" />
-                        <IonList lines="full" style={{ padding: 0 }}>{directConvos.map(renderConvo)}</IonList>
+                        <IonList lines="full" style={{ padding: 0 }}>
+                          <IonReorderGroup disabled={false} onIonItemReorder={e => handleSectionReorder(e, directConvos)}>
+                            {directConvos.map(renderConvo)}
+                          </IonReorderGroup>
+                        </IonList>
                       </>
                     )}
                   </>
@@ -783,8 +838,8 @@ export default function Messages() {
                         <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{timeStr}</span>
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {(special.urls || []).map((url, i) => (
-                          <img key={i} src={url} alt="" onClick={() => window.open(url, '_blank')}
+                        {(special.images || []).map((img, i) => (
+                          <img key={i} src={img.data || img} alt="" onClick={() => { const w = window.open(); w.document.write(`<img src="${img.data || img}" style="max-width:100%">`); }}
                             style={{ maxWidth: 220, maxHeight: 200, borderRadius: 8, objectFit: 'cover', cursor: 'pointer', border: '1px solid var(--ion-border-color)' }} />
                         ))}
                       </div>
