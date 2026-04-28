@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonRippleEffect } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { networkApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -27,10 +27,12 @@ function ConnectionRow({ conn, onRemove, userRole }) {
   return (
     <div
       onClick={() => navigate(profilePath(conn))}
-      style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12 }}
+      className="ion-activatable"
+      style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12, position: 'relative', overflow: 'hidden' }}
       onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'}
       onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}
     >
+      <IonRippleEffect />
       <div style={avatarStyle()}>
         {conn.avatar_url ? <img src={conn.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials(conn.name)}
       </div>
@@ -82,9 +84,10 @@ function SuggestRow({ user, onConnect, connecting }) {
   const navigate = useNavigate();
   const status = user.connection_status;
   return (
-    <div onClick={() => navigate(profilePath(user))} style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12 }}
+    <div onClick={() => navigate(profilePath(user))} className="ion-activatable" style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12, position: 'relative', overflow: 'hidden' }}
       onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.03)'}
       onMouseLeave={e => e.currentTarget.style.backgroundColor = ''}>
+      <IonRippleEffect />
       <div style={avatarStyle('#374151')}>
         {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials(user.name)}
       </div>

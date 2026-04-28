@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonModal, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
+import { IonSpinner, IonModal, IonSegment, IonSegmentButton, IonLabel, IonRippleEffect } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { driversApi, messagesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -145,7 +145,8 @@ export default function Drivers() {
                     groupDrivers.map(driver => {
                       const online = isOnline(driver.last_active_at);
                       return (
-                        <div key={driver.id} style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12 }}>
+                        <div key={driver.id} className="ion-activatable" style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', gap: 12, position: 'relative', overflow: 'hidden' }}>
+                          <IonRippleEffect />
                           <div style={{ position: 'relative', flexShrink: 0 }}>
                             <Avatar name={driver.name} />
                             <span style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', backgroundColor: online ? '#2e7d32' : '#d32f2f', border: '2px solid var(--ion-card-background)', display: 'inline-block' }} />
