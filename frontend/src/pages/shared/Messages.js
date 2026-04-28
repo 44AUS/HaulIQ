@@ -5,6 +5,7 @@ import {
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
+import { useThemeMode } from '../../context/ThemeContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -231,6 +232,9 @@ const LIST_WIDTH = 300;
 
 export default function Messages() {
   const { user } = useAuth();
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+  const btnTextColor = isDark ? '#ffffff' : '#1a1a1a';
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
@@ -813,11 +817,12 @@ export default function Messages() {
                 </IonButton>
                 <IonButton
                   color="success"
+                  size="small"
                   onClick={handleSend}
                   disabled={!input.trim() || activeConvo.is_blocked_by_me}
-                  style={{ '--border-radius': '8px', fontWeight: 700, letterSpacing: '0.05em' }}
+                  style={{ '--border-radius': '8px', '--color': btnTextColor, fontWeight: 700, letterSpacing: '0.05em' }}
                 >
-                  <IonIcon slot="start" name="send-outline" />
+                  <IonIcon slot="start" name="send-outline" style={{ color: btnTextColor }} />
                   SEND
                 </IonButton>
               </div>
