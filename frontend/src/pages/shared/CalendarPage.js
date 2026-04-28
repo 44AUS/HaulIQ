@@ -555,7 +555,7 @@ export default function CalendarPage() {
               <div style={{ display: 'flex', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', borderRadius: 10, padding: 3, gap: 2 }}>
                 {VIEW_OPTIONS.map(({ value, label }) => (
                   <button key={value} onClick={() => setView(value)}
-                    style={{ background: view === value ? (isDark ? 'rgba(255,255,255,0.15)' : '#ffffff') : 'transparent', color: view === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: view === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
+                    style={{ background: view === value ? 'var(--ion-card-background)' : 'transparent', color: view === value ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', border: 'none', borderRadius: 8, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'inherit', boxShadow: view === value ? '0 1px 4px rgba(0,0,0,0.15)' : 'none', transition: 'all 0.15s', whiteSpace: 'nowrap' }}>
                     {label}
                   </button>
                 ))}
