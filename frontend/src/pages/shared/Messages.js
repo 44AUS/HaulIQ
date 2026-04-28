@@ -685,8 +685,10 @@ export default function Messages() {
 
             {/* Messages */}
             <IonList lines="none" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
-              {activeMessages.map(msg => {
+              {activeMessages.map((msg, idx) => {
                 const isMe = msg.sender_id === user?.id;
+                const prevMsg = activeMessages[idx - 1];
+                const isGrouped = prevMsg && prevMsg.sender_id === msg.sender_id;
                 const special = parseSpecial(msg.body);
                 const senderName   = getSenderName(msg.sender_id, activeConvo);
                 const senderAvatar = getSenderAvatar(msg.sender_id, activeConvo);
@@ -729,13 +731,19 @@ export default function Messages() {
                       '--inner-padding-end': '0',
                       '--min-height': '0',
                       alignItems: 'flex-start',
+                      marginTop: isGrouped ? 0 : 4,
                     }}
                   >
-                    <div slot="start" style={{ marginTop: 12, marginRight: 12, flexShrink: 0 }}>
-                      <UserAvatar name={senderName} src={senderAvatar} size={36} />
+                    <div slot="start" style={{ marginTop: isGrouped ? 6 : 12, marginRight: 12, flexShrink: 0 }}>
+                      {isGrouped
+                        ? <div style={{ width: 36 }} />
+                        : <UserAvatar name={senderName} src={senderAvatar} size={36} />
+                      }
                     </div>
-                    <IonLabel style={{ margin: '10px 0', whiteSpace: 'normal' }}>
-                      {content}
+                    <IonLabel style={{ margin: isGrouped ? '4px 0' : '10px 0', whiteSpace: 'normal' }}>
+                      {isGrouped ? (
+                        special?.__type ? content : <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: 'var(--ion-text-color)', whiteSpace: 'pre-wrap' }}>{msg.body}</p>
+                      ) : content}
                     </IonLabel>
                   </IonItem>
                 );
