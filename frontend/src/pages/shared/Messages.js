@@ -1084,7 +1084,13 @@ export default function Messages() {
               value={selectQuery}
               onIonInput={e => setSelectQuery(e.detail.value || '')}
               placeholder={listTab === 'employees' ? 'Search employees…' : 'Search connections…'}
-              style={{ '--box-shadow': 'none', '--background': 'var(--ion-color-step-50, rgba(0,0,0,0.05))' }}
+              style={{
+                '--background': isDark ? 'var(--ion-background-color)' : '#ffffff',
+                '--color': isDark ? '#ffffff' : '#000000',
+                '--placeholder-color': isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                '--icon-color': isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)',
+                '--box-shadow': 'none',
+              }}
             />
           </IonToolbar>
         </IonHeader>
