@@ -111,6 +111,8 @@ function MonthPickerDropdown({ open, onClose, date, onSelect, anchorRef }) {
 }
 
 function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState([]);
   const toggleAll = () => setPending([]);
@@ -121,37 +123,43 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
 
   return (
     <>
-      <IonButton
+      <IonSegment
+        mode="ios"
+        value="assigned"
         id="assigned-driver-trigger"
-        size="small"
         onClick={() => { setPending(selectedDrivers); setOpen(true); }}
-        style={{ '--background': selectedDrivers.length > 0 ? 'var(--ion-color-primary)' : 'rgba(255,255,255,0.1)', '--color': '#fff', '--border-color': 'transparent', '--padding-start': '10px', '--padding-end': '10px' }}
+        style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 34, width: 'auto', cursor: 'pointer' }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Assigned</span>
-          {selectedDriverObjs.length > 0 && (
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              {selectedDriverObjs.slice(0, 4).map((d, i) => {
-                const name = d.full_name || 'D';
-                return (
-                  <span key={d.id} style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#fff', marginLeft: i === 0 ? 0 : 4, overflow: 'hidden', flexShrink: 0 }}>
-                    {d.avatar_url
-                      ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : name[0]?.toUpperCase()
-                    }
-                  </span>
-                );
-              })}
-              {selectedDriverObjs.length > 4 && (
-                <span style={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.25)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700, color: '#fff', marginLeft: 4, flexShrink: 0 }}>
-                  +{selectedDriverObjs.length - 4}
+        <IonSegmentButton value="assigned"
+          style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 28 }}>
+          <IonLabel style={{ margin: '4px 0' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600 }}>Assigned</span>
+              {selectedDriverObjs.length > 0 && (
+                <span style={{ display: 'flex', alignItems: 'center' }}>
+                  {selectedDriverObjs.slice(0, 4).map((d, i) => {
+                    const name = d.full_name || 'D';
+                    return (
+                      <span key={d.id} style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.3)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontWeight: 700, color: '#fff', marginLeft: i === 0 ? 0 : 3, overflow: 'hidden', flexShrink: 0 }}>
+                        {d.avatar_url
+                          ? <img src={d.avatar_url} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : name[0]?.toUpperCase()
+                        }
+                      </span>
+                    );
+                  })}
+                  {selectedDriverObjs.length > 4 && (
+                    <span style={{ width: 18, height: 18, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.25)', border: '1.5px solid rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.5rem', fontWeight: 700, color: '#fff', marginLeft: 3, flexShrink: 0 }}>
+                      +{selectedDriverObjs.length - 4}
+                    </span>
+                  )}
                 </span>
               )}
+              <IonIcon name="chevron-down-outline" style={{ fontSize: 12 }} />
             </span>
-          )}
-          <IonIcon name="chevron-down-outline" style={{ fontSize: 13 }} />
-        </span>
-      </IonButton>
+          </IonLabel>
+        </IonSegmentButton>
+      </IonSegment>
 
       <IonPopover
         trigger="assigned-driver-trigger"
