@@ -3,7 +3,7 @@ import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
-  IonReorderGroup, IonReorder,
+  IonReorderGroup, IonReorder, IonProgressBar,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -268,6 +268,7 @@ export default function Messages() {
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
   const [pendingImages, setPendingImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [sending, setSending] = useState(false);
   const imageInputRef = useRef(null);
   const [listVisible, setListVisible] = useState(true);
   const [hoveredConvoId, setHoveredConvoId] = useState(null);
@@ -485,9 +486,11 @@ export default function Messages() {
       return;
     }
 
+    setSending(true);
     messagesApi.send(activeConvo.load_id || null, recipientId, input.trim())
       .then(msg => { setActiveMessages(prev => [...prev, msg]); setInput(''); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSending(false));
   };
 
   const handleImageSelect = (e) => {
@@ -915,7 +918,11 @@ export default function Messages() {
             {/* Input — only when a convo is selected */}
             {showChat && <><style>{`.msg-input textarea { caret-color: var(--ion-color-success) !important; }`}</style>
             <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: 'none' }} />
-            <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+              {(sending || uploadingImages)
+                ? <IonProgressBar type="indeterminate" color="success" style={{ height: 2 }} />
+                : <div style={{ height: 1, backgroundColor: 'var(--ion-border-color)', flexShrink: 0 }} />
+              }
               {pendingImages.length > 0 && (
                 <div style={{ display: 'flex', gap: 8, padding: '8px 16px 0', flexWrap: 'wrap' }}>
                   {pendingImages.map((img, idx) => (
