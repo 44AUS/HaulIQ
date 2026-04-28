@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useSearchParams, Link } from 'react-router-dom';
-import { IonSpinner, IonModal, IonList, IonItem, IonLabel, IonRippleEffect } from '@ionic/react';
+import {
+  IonSpinner, IonModal, IonList, IonItem, IonLabel,
+  IonRippleEffect, IonAvatar, IonButton, IonInput, IonSearchbar,
+} from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { messagesApi, networkApi, locationsApi, blocksApi, documentsApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
@@ -22,9 +25,12 @@ function getPreview(body) {
 function UserAvatar({ name, src, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size < 30 ? 11 : 13, fontWeight: 700, color: '#fff', flexShrink: 0, overflow: 'hidden' }}>
-      {src ? <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initials}
-    </div>
+    <IonAvatar style={{ width: size, height: size, minWidth: size, flexShrink: 0 }}>
+      {src
+        ? <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : <div style={{ width: '100%', height: '100%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size < 30 ? 11 : 13, fontWeight: 700, color: '#fff' }}>{initials}</div>
+      }
+    </IonAvatar>
   );
 }
 
@@ -47,9 +53,10 @@ function LocationRequestCard({ data, isMe, onShare }) {
         {isMe ? 'You asked the carrier to share their location.' : 'The broker is asking for your current location.'}
       </p>
       {!isMe && (
-        <button onClick={() => onShare(data.booking_id)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit' }}>
-          <IonIcon name="location-outline" style={{ fontSize: 13 }} /> Share My Location
-        </button>
+        <IonButton expand="block" size="small" onClick={() => onShare(data.booking_id)}>
+          <IonIcon slot="start" name="location-outline" />
+          Share My Location
+        </IonButton>
       )}
     </div>
   );
@@ -69,10 +76,10 @@ function LocationShareCard({ data, isMe }) {
         <span style={{ color: '#2dd36f', fontWeight: 700 }}>{city}</span>
       </p>
       {data.lat && data.lng && (
-        <Link to={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: '#2dd36f', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none' }}>
-          <IonIcon name="location-outline" style={{ fontSize: 13 }} /> View Map
-        </Link>
+        <IonButton expand="block" size="small" color="success" routerLink={`/map/${data.lat}/${data.lng}/${encodeURIComponent(city)}/${encodeURIComponent(data.carrier_name || 'Carrier')}`}>
+          <IonIcon slot="start" name="location-outline" />
+          View Map
+        </IonButton>
       )}
     </div>
   );
@@ -96,9 +103,10 @@ function DocUploadCard({ data, isMe, onView, isDeleted }) {
       <div style={{ fontWeight: 500, fontSize: '0.875rem', color: isDeleted ? 'var(--ion-color-medium)' : isMe ? '#fff' : 'var(--ion-text-color)', textDecoration: isDeleted ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>{data.file_name}</div>
       <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginBottom: 8 }}>{data.uploader_name} · {data.uploader_role}</div>
       {!isDeleted && (
-        <button onClick={onView} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, width: '100%', backgroundColor: isMe ? 'rgba(255,255,255,0.2)' : 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 5, padding: '6px 0', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, fontFamily: 'inherit' }}>
-          <IonIcon name="document-text-outline" style={{ fontSize: 12 }} /> View Document
-        </button>
+        <IonButton expand="block" size="small" fill={isMe ? 'outline' : 'solid'} color={isMe ? 'light' : 'primary'} onClick={onView}>
+          <IonIcon slot="start" name="document-text-outline" />
+          View Document
+        </IonButton>
       )}
     </div>
   );
@@ -110,28 +118,26 @@ function DocViewer({ doc, onClose }) {
   return (
     <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '720px', '--height': 'auto', '--max-height': '90vh', '--border-radius': '12px' }}>
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px 8px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '1px 6px', borderRadius: 8, backgroundColor: (DOC_TYPE_COLORS[doc.doc_type] || DOC_TYPE_COLORS.other).bg, color: (DOC_TYPE_COLORS[doc.doc_type] || DOC_TYPE_COLORS.other).color }}>
             {(doc.doc_type || 'other').replace('_', ' ').toUpperCase()}
           </span>
           <span style={{ fontWeight: 600, fontSize: '0.875rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ion-text-color)' }}>{doc.file_name}</span>
           {doc.page_count > 1 && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', flexShrink: 0 }}>{page + 1} / {doc.page_count}</span>}
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
-            <IonIcon name="close-outline" style={{ fontSize: 18 }} />
-          </button>
+          <IonButton fill="clear" color="medium" size="small" onClick={onClose}>
+            <IonIcon slot="icon-only" name="close-outline" />
+          </IonButton>
         </div>
         <div style={{ flex: 1, overflow: 'auto', backgroundColor: '#111', position: 'relative' }}>
           <img src={doc.pages[page]} alt="" style={{ width: '100%', display: 'block', maxHeight: '72vh', objectFit: 'contain' }} />
           {doc.page_count > 1 && (
             <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 8 }}>
-              {[
-                { disabled: page === 0, onClick: () => setPage(p => p - 1), icon: 'chevron-back-outline' },
-                { disabled: page >= doc.page_count - 1, onClick: () => setPage(p => p + 1), icon: 'chevron-forward-outline' },
-              ].map((btn, i) => (
-                <button key={i} disabled={btn.disabled} onClick={btn.onClick} style={{ background: btn.disabled ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.6)', border: 'none', cursor: btn.disabled ? 'default' : 'pointer', color: btn.disabled ? 'rgba(255,255,255,0.3)' : '#fff', borderRadius: 6, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <IonIcon name={btn.icon} style={{ fontSize: 16 }} />
-                </button>
-              ))}
+              <IonButton disabled={page === 0} onClick={() => setPage(p => p - 1)} color="dark" size="small">
+                <IonIcon slot="icon-only" name="chevron-back-outline" />
+              </IonButton>
+              <IonButton disabled={page >= doc.page_count - 1} onClick={() => setPage(p => p + 1)} color="dark" size="small">
+                <IonIcon slot="icon-only" name="chevron-forward-outline" />
+              </IonButton>
             </div>
           )}
         </div>
@@ -156,13 +162,13 @@ function LoadDocsModal({ loadId, onClose, onView }) {
   return (
     <IonModal isOpen onDidDismiss={onClose} style={{ '--width': '500px', '--height': 'auto', '--max-height': '80vh', '--border-radius': '12px' }}>
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 8px 8px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
           <IonIcon name="folder-open-outline" style={{ fontSize: 17, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
           <span style={{ fontWeight: 700, fontSize: '0.875rem', flex: 1, color: 'var(--ion-text-color)' }}>Load Documents</span>
-          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginRight: 8 }}>Load #{String(loadId).slice(0, 8)}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
-            <IonIcon name="close-outline" style={{ fontSize: 18 }} />
-          </button>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginRight: 4 }}>Load #{String(loadId).slice(0, 8)}</span>
+          <IonButton fill="clear" color="medium" size="small" onClick={onClose}>
+            <IonIcon slot="icon-only" name="close-outline" />
+          </IonButton>
         </div>
         <div style={{ padding: '8px 16px 16px', overflowY: 'auto' }}>
           {loadingDocs ? (
@@ -185,7 +191,7 @@ function LoadDocsModal({ loadId, onClose, onView }) {
                     <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{doc.uploader_name}</span>
                   </div>
                 </div>
-                <button onClick={() => onView(doc)} style={{ border: '1px solid var(--ion-border-color)', background: 'none', color: 'var(--ion-text-color)', borderRadius: 5, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem', fontFamily: 'inherit' }}>View</button>
+                <IonButton fill="outline" size="small" onClick={() => onView(doc)}>View</IonButton>
               </div>
             );
           })}
@@ -438,7 +444,6 @@ export default function Messages() {
     ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
     : network;
 
-  // Apply topbar search filter
   const filteredConvos = query
     ? conversations.filter(c => {
         const q = query.toLowerCase();
@@ -452,7 +457,6 @@ export default function Messages() {
 
   const otherParty = getOtherParty(activeConvo);
 
-  // Mobile: show list when no convo selected, show chat when selected
   const showList = !isMobile || !activeConvoId;
   const showChat = !!activeConvoId;
 
@@ -481,7 +485,7 @@ export default function Messages() {
           '--inner-padding-end':       '0',
         }}
       >
-        <div slot="start" style={{ position: 'relative', width: 36, height: 36, flexShrink: 0, marginRight: 4 }}>
+        <div slot="start" style={{ position: 'relative', flexShrink: 0, marginRight: 4 }}>
           <Link to={otherRole === 'carrier' ? `/c/${otherId?.slice(0,8)}` : `/b/${String(otherId||'').slice(0,8)}`} onClick={e => e.stopPropagation()}>
             <UserAvatar name={label} src={otherAvatar} size={36} />
           </Link>
@@ -523,33 +527,32 @@ export default function Messages() {
             {/* New Message button */}
             {user?.role !== 'driver' && (
               <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-                <button
-                  onClick={() => setComposing(v => !v)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 0', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.78rem', letterSpacing: '0.04em' }}
-                >
-                  <IonIcon name="create-outline" style={{ fontSize: 14 }} /> New Message
-                </button>
+                <IonButton expand="block" size="small" onClick={() => setComposing(v => !v)}>
+                  <IonIcon slot="start" name="create-outline" />
+                  New Message
+                </IonButton>
               </div>
             )}
 
             {/* Compose panel */}
             {composing && (
-              <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: 12, backgroundColor: 'rgba(0,0,0,0.03)', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: '8px 12px', backgroundColor: 'rgba(0,0,0,0.03)', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, flex: 1, color: 'var(--ion-text-color)' }}>New Message</span>
-                  <button onClick={() => { setComposing(false); setNetworkQuery(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 2, display: 'flex' }}>
-                    <IonIcon name="close-outline" style={{ fontSize: 14 }} />
-                  </button>
+                  <IonButton fill="clear" color="medium" size="small" onClick={() => { setComposing(false); setNetworkQuery(''); }}>
+                    <IonIcon slot="icon-only" name="close-outline" />
+                  </IonButton>
                 </div>
-                <div style={{ position: 'relative', marginBottom: 8 }}>
-                  <IonIcon name="search-outline" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 13, color: 'var(--ion-color-medium)', pointerEvents: 'none' }} />
-                  <input autoFocus placeholder="Search your network..." value={networkQuery} onChange={e => setNetworkQuery(e.target.value)}
-                    style={{ width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.78rem', padding: '6px 8px 6px 26px', outline: 'none', fontFamily: 'inherit' }} />
-                </div>
+                <IonSearchbar
+                  placeholder="Search your network..."
+                  value={networkQuery}
+                  onIonInput={e => setNetworkQuery(e.detail.value || '')}
+                  style={{ '--border-radius': '6px', '--box-shadow': 'none', '--background': 'var(--ion-input-background, rgba(0,0,0,0.04))', padding: 0, height: 36 }}
+                />
                 {filteredNetwork.length === 0 ? (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', padding: '0 4px' }}>{network.length === 0 ? 'No connections yet.' : 'No matches.'}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', padding: '4px 4px 0', display: 'block' }}>{network.length === 0 ? 'No connections yet.' : 'No matches.'}</span>
                 ) : (
-                  <div style={{ maxHeight: 160, overflowY: 'auto' }}>
+                  <div style={{ maxHeight: 160, overflowY: 'auto', marginTop: 4 }}>
                     {filteredNetwork.map(contact => (
                       <div key={contact.user_id} onClick={() => handleStartDirect(contact)}
                         className="ion-activatable"
@@ -582,13 +585,13 @@ export default function Messages() {
                     {query ? 'No conversations match your search' : 'No conversations yet'}
                   </p>
                   {!query && user?.role === 'driver' && user?.carrier_id ? (
-                    <button onClick={() => {
+                    <IonButton size="small" onClick={() => {
                       messagesApi.direct(user.carrier_id)
                         .then(convo => { setConversations([convo]); setActiveConvoId(convo.id); setActiveMessages(convo.messages || []); })
                         .catch(() => {});
-                    }} style={{ backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', cursor: 'pointer', fontWeight: 700, fontFamily: 'inherit', fontSize: '0.825rem', marginTop: 4 }}>
+                    }}>
                       Message your carrier
-                    </button>
+                    </IonButton>
                   ) : !query && (
                     <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Use New Message to start one</span>
                   )}
@@ -625,14 +628,14 @@ export default function Messages() {
         {showChat ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
             {/* Chat header */}
-            <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <div style={{ padding: '4px 8px 4px 4px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
               {isMobile && (
-                <button onClick={() => setActiveConvoId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4 }}>
-                  <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} />
-                </button>
+                <IonButton fill="clear" color="medium" onClick={() => setActiveConvoId(null)}>
+                  <IonIcon slot="icon-only" name="arrow-back-outline" />
+                </IonButton>
               )}
               {otherParty && (
-                <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none' }}>
+                <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none', marginLeft: isMobile ? 0 : 8 }}>
                   <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
                   {activeConvo.other_last_active_at && (
                     <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
@@ -641,7 +644,7 @@ export default function Messages() {
                   )}
                 </Link>
               )}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1, minWidth: 0, marginLeft: 8 }}>
                 {otherParty ? (
                   <Link to={getProfileLink(otherParty)} style={{ textDecoration: 'none', color: 'var(--ion-text-color)', fontWeight: 700, fontSize: '0.875rem', display: 'block' }}>{otherParty.name}</Link>
                 ) : (
@@ -652,27 +655,31 @@ export default function Messages() {
                 )}
               </div>
               {user?.role === 'broker' && activeConvo.active_booking_id && (
-                <Link to={`/broker/track/${activeConvo.active_booking_id}`} style={{ display: 'flex', alignItems: 'center', gap: 5, border: '1px solid #2dd36f', color: '#2dd36f', background: 'none', borderRadius: 6, padding: '5px 10px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>
-                  <IonIcon name="navigate-outline" style={{ fontSize: 13 }} /> Locate Load
-                </Link>
+                <IonButton fill="outline" color="success" size="small" routerLink={`/broker/track/${activeConvo.active_booking_id}`}>
+                  <IonIcon slot="start" name="navigate-outline" />
+                  Locate Load
+                </IonButton>
               )}
               {activeConvo.load_id && (
-                <Link to={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load" onClick={e => e.stopPropagation()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', flexShrink: 0 }}>
-                  <IonIcon name="car-sport-outline" style={{ fontSize: 17 }} />
-                </Link>
+                <IonButton fill="clear" color="medium" routerLink={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load">
+                  <IonIcon slot="icon-only" name="car-sport-outline" />
+                </IonButton>
               )}
               {activeConvo.load_id && (
-                <button title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
-                  <IonIcon name="folder-open-outline" style={{ fontSize: 17 }} />
-                </button>
+                <IonButton fill="clear" color="medium" title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)}>
+                  <IonIcon slot="icon-only" name="folder-open-outline" />
+                </IonButton>
               )}
-              <button title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
-                <IonIcon name="trash-outline" style={{ fontSize: 17 }} />
-              </button>
+              <IonButton fill="clear" color="medium" title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)}>
+                <IonIcon slot="icon-only" name="trash-outline" />
+              </IonButton>
               {otherParty && (
-                <button onClick={() => handleToggleBlock(otherParty.id)} disabled={blockLoading} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: activeConvo.is_blocked_by_me ? 'var(--ion-color-danger)' : 'var(--ion-color-medium)', padding: 4, display: 'flex', borderRadius: 4, flexShrink: 0 }}>
-                  {blockLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : <IonIcon name={activeConvo.is_blocked_by_me ? 'shield-outline' : 'ban-outline'} style={{ fontSize: 17 }} />}
-                </button>
+                <IonButton fill="clear" color={activeConvo.is_blocked_by_me ? 'danger' : 'medium'} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} disabled={blockLoading} onClick={() => handleToggleBlock(otherParty.id)}>
+                  {blockLoading
+                    ? <IonSpinner slot="icon-only" name="crescent" style={{ width: 14, height: 14 }} />
+                    : <IonIcon slot="icon-only" name={activeConvo.is_blocked_by_me ? 'shield-outline' : 'ban-outline'} />
+                  }
+                </IonButton>
               )}
             </div>
 
@@ -741,19 +748,22 @@ export default function Messages() {
             </div>
 
             {/* Input */}
-            <div style={{ padding: 12, borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, flexShrink: 0 }}>
-              <input
+            <div style={{ padding: '8px 12px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <IonInput
                 placeholder="Type a message..."
                 value={input}
-                onChange={e => { setInput(e.target.value); if (activeConvoId) handleTyping(activeConvoId); }}
-                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                onIonInput={e => { setInput(String(e.detail.value ?? '')); if (activeConvoId) handleTyping(activeConvoId); }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) handleSend(); }}
                 disabled={activeConvo.is_blocked_by_me}
-                style={{ flex: 1, backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' }}
+                style={{ flex: 1, '--background': 'var(--ion-input-background, rgba(0,0,0,0.04))', '--border-radius': '6px', '--padding-start': '12px', '--padding-end': '12px', '--color': 'var(--ion-text-color)', fontSize: '0.875rem', border: '1px solid var(--ion-border-color)', borderRadius: 6 }}
               />
-              <button onClick={handleSend} disabled={!input.trim() || activeConvo.is_blocked_by_me}
-                style={{ backgroundColor: !input.trim() || activeConvo.is_blocked_by_me ? 'rgba(0,0,0,0.12)' : 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 8, width: 40, height: 40, cursor: !input.trim() || activeConvo.is_blocked_by_me ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <IonIcon name="send-outline" style={{ fontSize: 16 }} />
-              </button>
+              <IonButton
+                onClick={handleSend}
+                disabled={!input.trim() || activeConvo.is_blocked_by_me}
+                style={{ '--border-radius': '8px', width: 40, height: 40, '--padding-start': '0', '--padding-end': '0', flexShrink: 0 }}
+              >
+                <IonIcon slot="icon-only" name="send-outline" />
+              </IonButton>
             </div>
           </div>
         ) : !isMobile ? (
