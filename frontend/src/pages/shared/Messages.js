@@ -794,8 +794,10 @@ export default function Messages() {
             </IonList>
 
             {/* Input */}
+            <style>{`.msg-input textarea { caret-color: var(--ion-color-success) !important; }`}</style>
             <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
               <IonTextarea
+                className="msg-input"
                 placeholder="Write your message here"
                 value={input}
                 onIonInput={e => { setInput(String(e.detail.value ?? '')); if (activeConvoId) handleTyping(activeConvoId); }}
