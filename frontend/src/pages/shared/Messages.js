@@ -216,23 +216,22 @@ function TypingIndicator() {
 
 function getPresenceInfo(isoString) {
   if (!isoString) return null;
-  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffMs  = Date.now() - new Date(isoString).getTime();
   const diffMin = Math.floor(diffMs / 60000);
   const diffHr  = Math.floor(diffMs / 3600000);
-  if (diffMin < 5)  return { label: 'Active now',              color: '#44b700' };
-  if (diffMin < 60) return { label: `Active ${diffMin}m ago`,  color: '#44b700' };
-  if (diffHr < 24)  return { label: `Active ${diffHr}h ago`,   color: '#bdbdbd' };
+  if (diffMin < 5)  return { label: 'Active now',             color: '#2dd36f' };
+  if (diffMin < 60) return { label: `Active ${diffMin}m ago`, color: '#ffce00' };
+  if (diffHr < 24)  return { label: `Active ${diffHr}h ago`,  color: '#eb445a' };
   const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 1) return { label: 'Active yesterday',      color: '#bdbdbd' };
-  return { label: `Active ${diffDays}d ago`, color: '#bdbdbd' };
+  if (diffDays === 1) return { label: 'Active yesterday',     color: '#eb445a' };
+  return null;
 }
 
 function PresenceDot({ lastActiveAt, size = 10 }) {
   const info = getPresenceInfo(lastActiveAt);
   if (!info) return null;
-  const isActive = info.color === '#44b700';
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: info.color, boxShadow: isActive ? `0 0 0 2px var(--ion-card-background), 0 0 0 3px ${info.color}` : 'none', flexShrink: 0 }} />
+    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: info.color, border: '2px solid var(--ion-card-background)', flexShrink: 0 }} />
   );
 }
 
@@ -490,8 +489,8 @@ export default function Messages() {
             <UserAvatar name={label} src={otherAvatar} size={36} />
           </Link>
           {c.other_last_active_at && (
-            <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
-              <PresenceDot lastActiveAt={c.other_last_active_at} size={9} />
+            <div style={{ position: 'absolute', bottom: 1, right: 1 }}>
+              <PresenceDot lastActiveAt={c.other_last_active_at} size={10} />
             </div>
           )}
         </div>
@@ -638,7 +637,7 @@ export default function Messages() {
                 <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none', marginLeft: isMobile ? 0 : 8 }}>
                   <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
                   {activeConvo.other_last_active_at && (
-                    <div style={{ position: 'absolute', bottom: -1, right: -1, border: '2px solid var(--ion-card-background)', borderRadius: '50%' }}>
+                    <div style={{ position: 'absolute', bottom: 1, right: 1 }}>
                       <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={10} />
                     </div>
                   )}
