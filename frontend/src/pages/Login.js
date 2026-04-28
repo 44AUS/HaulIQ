@@ -67,7 +67,7 @@ export default function Login() {
 
             <AuthHeader lang={lang} setLang={handleLang} mode={mode} toggleMode={toggleTheme} />
 
-            <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 14, border: '1px solid var(--ion-border-color)', boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 60px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 14, boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 60px rgba(0,0,0,0.15)', overflow: 'hidden' }}>
               <div style={{ padding: '32px 32px 24px' }}>
                 <h2 style={{ margin: '0 0 4px', color: 'var(--ion-text-color)', fontWeight: 800, fontSize: '1.25rem', lineHeight: 1.2 }}>{t.title}</h2>
                 <p style={{ margin: 0, color: 'var(--ion-color-medium)', fontSize: '0.875rem', lineHeight: 1.65 }}>{t.sub}</p>
