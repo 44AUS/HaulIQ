@@ -268,6 +268,7 @@ export default function Messages() {
   const [viewerDoc, setViewerDoc] = useState(null);
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
   const [loadDocs, setLoadDocs] = useState(null);
+  const [hoveredMsgId, setHoveredMsgId] = useState(null);
 
   useEffect(() => {
     messagesApi.presence().catch(() => {});
@@ -717,11 +718,15 @@ export default function Messages() {
                   );
                 }
 
+                const isHovered = hoveredMsgId === msg.id;
+
                 return (
                   <IonItem
                     key={msg.id}
                     button
                     detail={false}
+                    onMouseEnter={() => setHoveredMsgId(msg.id)}
+                    onMouseLeave={() => setHoveredMsgId(null)}
                     style={{
                       '--background': isMe ? 'rgba(var(--ion-color-primary-rgb), 0.04)' : 'transparent',
                       '--background-hover': 'rgba(0,0,0,0.04)',
@@ -734,9 +739,9 @@ export default function Messages() {
                       marginTop: isGrouped ? 0 : 4,
                     }}
                   >
-                    <div slot="start" style={{ marginTop: isGrouped ? 6 : 12, marginRight: 12, flexShrink: 0 }}>
+                    <div slot="start" style={{ marginTop: isGrouped ? 6 : 12, marginRight: 12, flexShrink: 0, width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isGrouped
-                        ? <div style={{ width: 36 }} />
+                        ? <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)', opacity: isHovered ? 1 : 0, transition: 'opacity 0.15s', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>{timeStr}</span>
                         : <UserAvatar name={senderName} src={senderAvatar} size={36} />
                       }
                     </div>
