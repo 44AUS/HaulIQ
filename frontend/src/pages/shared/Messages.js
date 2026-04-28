@@ -1058,7 +1058,7 @@ export default function Messages() {
       <style>{`
         .select-contact-modal { --border-radius: 0px; }
         @media (min-width: 768px) {
-          .select-contact-modal { --width: 480px; --max-height: 85vh; --border-radius: 12px; }
+          .select-contact-modal { --width: 580px; --max-height: 85vh; --border-radius: 0px; }
         }
       `}</style>
       <IonModal isOpen={selectOpen} onDidDismiss={() => { setSelectOpen(false); setSelectQuery(''); }} className="select-contact-modal">
