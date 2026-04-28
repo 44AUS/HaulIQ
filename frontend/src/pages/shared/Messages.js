@@ -731,17 +731,17 @@ export default function Messages() {
         )}
 
         {/* ── Chat area ── */}
-        {showChat ? (
+        {(showChat || !isMobile) && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
-            {/* Chat header */}
+            {/* Chat header — always visible */}
             <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, height: 60 }}>
               {/* Hamburger / back */}
               <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)} style={{ '--border-radius': '50%' }}>
                 <IonIcon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
               </IonButton>
 
-              {/* Avatar */}
-              {otherParty && (
+              {/* Avatar — only when a convo is selected */}
+              {showChat && otherParty && (
                 <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none' }}>
                   <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={38} />
                   {activeConvo.other_last_active_at && (
@@ -752,8 +752,8 @@ export default function Messages() {
                 </Link>
               )}
 
-              {/* Name + subtitle */}
-              <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Name + subtitle — only when a convo is selected */}
+              {showChat && <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
                   {otherParty?.name || getConvoLabel(activeConvo)}
                 </div>
@@ -762,29 +762,31 @@ export default function Messages() {
                     ? `Load #${activeConvo.load_id.slice(0, 8).toUpperCase()}`
                     : getPresenceInfo(activeConvo.other_last_active_at)?.label || (otherParty?.role || '')}
                 </div>
-              </div>
+              </div>}
 
-              {/* Action buttons */}
-              {user?.role === 'broker' && activeConvo.active_booking_id && (
+              {/* Action buttons — only when a convo is selected */}
+              {showChat && user?.role === 'broker' && activeConvo.active_booking_id && (
                 <IonButton fill="outline" color="success" size="small" routerLink={`/broker/track/${activeConvo.active_booking_id}`}>
                   <IonIcon slot="start" name="navigate-outline" />
                   Locate Load
                 </IonButton>
               )}
-              {activeConvo.load_id && (
+              {showChat && activeConvo.load_id && (
                 <IonButton fill="clear" color="medium" routerLink={`/${user?.role}/loads/${activeConvo.load_id}`} title="View load" style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="car-sport-outline" />
                 </IonButton>
               )}
-              {activeConvo.load_id && (
+              {showChat && activeConvo.load_id && (
                 <IonButton fill="clear" color="medium" title="View load documents" onClick={() => setDocsModalLoadId(activeConvo.load_id)} style={{ '--border-radius': '50%' }}>
                   <IonIcon slot="icon-only" name="folder-open-outline" />
                 </IonButton>
               )}
-              <IonButton fill="clear" color="medium" title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)} style={{ '--border-radius': '50%' }}>
-                <IonIcon slot="icon-only" name="trash-outline" />
-              </IonButton>
-              {otherParty && (
+              {showChat && (
+                <IonButton fill="clear" color="medium" title="Delete conversation" disabled={deletingId === activeConvoId} onClick={(e) => handleDeleteConvo(e, activeConvoId)} style={{ '--border-radius': '50%' }}>
+                  <IonIcon slot="icon-only" name="trash-outline" />
+                </IonButton>
+              )}
+              {showChat && otherParty && (
                 <IonButton fill="clear" color={activeConvo.is_blocked_by_me ? 'danger' : 'medium'} title={activeConvo.is_blocked_by_me ? 'Unblock user' : 'Block user'} disabled={blockLoading} onClick={() => handleToggleBlock(otherParty.id)} style={{ '--border-radius': '50%' }}>
                   {blockLoading
                     ? <IonSpinner slot="icon-only" name="crescent" style={{ width: 14, height: 14 }} />
@@ -794,15 +796,15 @@ export default function Messages() {
               )}
             </div>
 
-            {activeConvo.is_blocked_by_me && (
+            {showChat && activeConvo.is_blocked_by_me && (
               <div style={{ margin: '12px 16px 0', padding: '8px 16px', borderRadius: 8, backgroundColor: 'rgba(235,68,90,0.15)', border: '1px solid var(--ion-color-danger)', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                 <IonIcon name="ban-outline" style={{ fontSize: 13, color: 'var(--ion-color-danger)' }} />
                 <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-danger)' }}>You have blocked this user. They can no longer message you.</span>
               </div>
             )}
 
-            {/* Messages */}
-            <IonList lines="none" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
+            {/* Messages + input — only when a convo is selected */}
+            {showChat ? <IonList lines="none" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
               {activeMessages.map((msg, idx) => {
                 const isMe = msg.sender_id === user?.id;
                 const prevMsg = activeMessages[idx - 1];
@@ -900,10 +902,18 @@ export default function Messages() {
                 </IonItem>
               )}
               <div ref={messagesEndRef} />
-            </IonList>
+            </IonList> : (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <IonIcon name="chatbubble-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
+                  <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Select a conversation</p>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>or use New Message to start one</span>
+                </div>
+              </div>
+            )}
 
-            {/* Input */}
-            <style>{`.msg-input textarea { caret-color: var(--ion-color-success) !important; }`}</style>
+            {/* Input — only when a convo is selected */}
+            {showChat && <><style>{`.msg-input textarea { caret-color: var(--ion-color-success) !important; }`}</style>
             <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={handleImageSelect} style={{ display: 'none' }} />
             <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
               {pendingImages.length > 0 && (
@@ -948,17 +958,9 @@ export default function Messages() {
                   SEND
                 </IonButton>
               </div>
-            </div>
+            </div></>}
           </div>
-        ) : !isMobile ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
-              <IonIcon name="chatbubble-outline" style={{ fontSize: 44, color: 'var(--ion-color-medium)', display: 'block', marginBottom: 12 }} />
-              <p style={{ margin: '0 0 4px', fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>Select a conversation</p>
-              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', opacity: 0.7 }}>or use New Message to start one</span>
-            </div>
-          </div>
-        ) : null}
+        )}
       </div>
 
       {viewerDoc && <DocViewer doc={viewerDoc} onClose={() => setViewerDoc(null)} />}
