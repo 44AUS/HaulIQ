@@ -269,6 +269,7 @@ export default function Messages() {
   const [docsModalLoadId, setDocsModalLoadId] = useState(null);
   const [loadDocs, setLoadDocs] = useState(null);
   const [hoveredMsgId, setHoveredMsgId] = useState(null);
+  const [listVisible, setListVisible] = useState(true);
 
   useEffect(() => {
     messagesApi.presence().catch(() => {});
@@ -457,7 +458,7 @@ export default function Messages() {
 
   const otherParty = getOtherParty(activeConvo);
 
-  const showList = !isMobile || !activeConvoId;
+  const showList = isMobile ? !activeConvoId : listVisible;
   const showChat = !!activeConvoId;
 
   const renderConvo = (c) => {
@@ -622,15 +623,16 @@ export default function Messages() {
         {showChat ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
             {/* Chat header */}
-            <div style={{ padding: '4px 8px 4px 4px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-              {isMobile && (
-                <IonButton fill="clear" color="medium" onClick={() => setActiveConvoId(null)}>
-                  <IonIcon slot="icon-only" name="arrow-back-outline" />
-                </IonButton>
-              )}
+            <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, minHeight: 60 }}>
+              {/* Hamburger / back */}
+              <IonButton fill="clear" color="medium" onClick={isMobile ? () => setActiveConvoId(null) : () => setListVisible(v => !v)}>
+                <IonIcon slot="icon-only" name={isMobile ? 'arrow-back-outline' : 'menu-outline'} />
+              </IonButton>
+
+              {/* Avatar */}
               {otherParty && (
-                <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none', marginLeft: isMobile ? 0 : 8 }}>
-                  <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={36} />
+                <Link to={getProfileLink(otherParty)} style={{ flexShrink: 0, position: 'relative', textDecoration: 'none' }}>
+                  <UserAvatar name={otherParty.name} src={otherParty.avatar_url} size={38} />
                   {activeConvo.other_last_active_at && (
                     <div style={{ position: 'absolute', bottom: 1, right: 1 }}>
                       <PresenceDot lastActiveAt={activeConvo.other_last_active_at} size={10} />
@@ -638,16 +640,20 @@ export default function Messages() {
                   )}
                 </Link>
               )}
-              <div style={{ flex: 1, minWidth: 0, marginLeft: 8 }}>
-                {otherParty ? (
-                  <Link to={getProfileLink(otherParty)} style={{ textDecoration: 'none', color: 'var(--ion-text-color)', fontWeight: 700, fontSize: '0.875rem', display: 'block' }}>{otherParty.name}</Link>
-                ) : (
-                  <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>{getConvoLabel(activeConvo)}</span>
-                )}
-                {activeConvo.other_last_active_at && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{getPresenceInfo(activeConvo.other_last_active_at)?.label}</span>
-                )}
+
+              {/* Name + subtitle */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+                  {otherParty?.name || getConvoLabel(activeConvo)}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+                  {activeConvo.load_id
+                    ? `Load #${activeConvo.load_id.slice(0, 8).toUpperCase()}`
+                    : getPresenceInfo(activeConvo.other_last_active_at)?.label || (otherParty?.role || '')}
+                </div>
               </div>
+
+              {/* Action buttons */}
               {user?.role === 'broker' && activeConvo.active_booking_id && (
                 <IonButton fill="outline" color="success" size="small" routerLink={`/broker/track/${activeConvo.active_booking_id}`}>
                   <IonIcon slot="start" name="navigate-outline" />
