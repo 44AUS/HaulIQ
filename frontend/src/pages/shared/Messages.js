@@ -250,6 +250,7 @@ export default function Messages() {
   }, []);
 
   const query = searchParams.get('q') || '';
+  const activeTab = searchParams.get('tab') || 'contacts';
 
   const [conversations, setConversations] = useState([]);
   const [activeConvoId, setActiveConvoId] = useState(null);
@@ -445,13 +446,20 @@ export default function Messages() {
     ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
     : network;
 
+  // Tab split: employees tab shows driver/employee conversations, contacts tab shows broker/carrier
+  const isEmployeeConvo = (c) => c.other_role === 'driver' || c.other_role === 'employee';
+
+  const tabConvos = conversations.filter(c =>
+    activeTab === 'employees' ? isEmployeeConvo(c) : !isEmployeeConvo(c)
+  );
+
   const filteredConvos = query
-    ? conversations.filter(c => {
+    ? tabConvos.filter(c => {
         const q = query.toLowerCase();
         return getConvoLabel(c).toLowerCase().includes(q)
           || (getLastMsg(c)?.body || '').toLowerCase().includes(q);
       })
-    : conversations;
+    : tabConvos;
 
   const loadConvos   = filteredConvos.filter(c => c.load_id);
   const directConvos = filteredConvos.filter(c => !c.load_id);

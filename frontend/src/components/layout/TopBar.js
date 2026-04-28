@@ -53,7 +53,7 @@ const ADMIN_NAV = [
 const IMMERSIVE_CONFIG = {
   network:        { title: 'Network',         tabs: [{ key: 'connections', label: 'Connections' }, { key: 'know', label: 'People You May Know' }] },
   billing:        { title: 'Billing',         tabs: [{ key: 'plans', label: 'Subscription Plans' }, { key: 'referrals', label: 'Referrals' }] },
-  messages:       { title: 'Message Center',  tabs: [] },
+  messages:       { title: 'Message Center',  tabs: [{ key: 'contacts', label: 'Brokers & Carriers' }, { key: 'employees', label: 'Employees' }] },
   analytics:      { title: 'Analytics',       tabs: [{ key: 'loads', label: 'Loads' }, { key: 'payments', label: 'Payments' }, { key: 'drivers', label: 'Drivers' }, { key: 'imports', label: 'Imports' }] },
   tools:          { title: 'Tools',           tabs: [{ key: 'brain', label: 'Earnings Brain' }, { key: 'calculator', label: 'Profit Calculator' }] },
   drivers:        { title: 'My Drivers',      tabs: [] },
