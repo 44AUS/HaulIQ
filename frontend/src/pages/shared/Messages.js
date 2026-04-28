@@ -684,61 +684,69 @@ export default function Messages() {
             )}
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <IonList lines="none" style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
               {activeMessages.map(msg => {
                 const isMe = msg.sender_id === user?.id;
                 const special = parseSpecial(msg.body);
                 const senderName   = getSenderName(msg.sender_id, activeConvo);
                 const senderAvatar = getSenderAvatar(msg.sender_id, activeConvo);
+                const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                if (special?.__type === 'location_request') return (
-                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                    {sharingLocation === special.booking_id
-                      ? <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IonSpinner name="crescent" style={{ width: 13, height: 13 }} /><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Getting your location…</span></div>
-                      : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />}
-                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  </div>
-                );
-
-                if (special?.__type === 'doc_upload') {
+                let content;
+                if (special?.__type === 'location_request') {
+                  content = sharingLocation === special.booking_id
+                    ? <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><IonSpinner name="crescent" style={{ width: 13, height: 13 }} /><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Getting your location…</span></div>
+                    : <LocationRequestCard data={special} isMe={isMe} onShare={handleShareLocation} />;
+                } else if (special?.__type === 'doc_upload') {
                   const isDocDeleted = loadDocs !== null && !loadDocs.some(d => String(d.id) === String(special.doc_id));
-                  return (
-                    <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                      {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                      <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />
-                      {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                    </div>
+                  content = <DocUploadCard data={special} isMe={isMe} onView={() => handleViewDoc(special)} isDeleted={isDocDeleted} />;
+                } else if (special?.__type === 'location_share') {
+                  content = <LocationShareCard data={special} isMe={isMe} />;
+                } else {
+                  content = (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: isMe ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>{isMe ? 'You' : senderName}</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{timeStr}</span>
+                        {isMe && <IonIcon name={msg.is_read ? 'checkmark-done-outline' : 'checkmark-outline'} style={{ fontSize: 11, color: 'var(--ion-color-medium)' }} />}
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: 'var(--ion-text-color)', whiteSpace: 'pre-wrap' }}>{msg.body}</p>
+                    </>
                   );
                 }
 
-                if (special?.__type === 'location_share') return (
-                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                    <LocationShareCard data={special} isMe={isMe} />
-                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  </div>
-                );
-
                 return (
-                  <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-end', gap: 8, justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
-                    {!isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                    <div style={{ maxWidth: '72%', padding: '10px 16px', borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px', backgroundColor: isMe ? 'var(--ion-color-primary)' : 'rgba(0,0,0,0.07)' }}>
-                      <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: isMe ? '#fff' : 'var(--ion-text-color)' }}>{msg.body}</p>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, justifyContent: 'flex-end' }}>
-                        <span style={{ fontSize: '0.625rem', color: isMe ? 'rgba(255,255,255,0.6)' : 'var(--ion-color-medium)' }}>
-                          {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                        {isMe && <IonIcon name={msg.is_read ? 'checkmark-done-outline' : 'checkmark-outline'} style={{ fontSize: 11, color: msg.is_read ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.5)' }} />}
-                      </div>
+                  <IonItem
+                    key={msg.id}
+                    button
+                    detail={false}
+                    style={{
+                      '--background': isMe ? 'rgba(var(--ion-color-primary-rgb), 0.04)' : 'transparent',
+                      '--background-hover': 'rgba(0,0,0,0.04)',
+                      '--background-hover-opacity': '1',
+                      '--padding-start': '16px',
+                      '--padding-end': '16px',
+                      '--inner-padding-end': '0',
+                      '--min-height': '0',
+                      alignItems: 'flex-start',
+                    }}
+                  >
+                    <div slot="start" style={{ marginTop: 12, marginRight: 12, flexShrink: 0 }}>
+                      <UserAvatar name={senderName} src={senderAvatar} size={36} />
                     </div>
-                    {isMe && <UserAvatar name={senderName} src={senderAvatar} size={26} />}
-                  </div>
+                    <IonLabel style={{ margin: '10px 0', whiteSpace: 'normal' }}>
+                      {content}
+                    </IonLabel>
+                  </IonItem>
                 );
               })}
-              {otherIsTyping && <TypingIndicator />}
+              {otherIsTyping && (
+                <IonItem lines="none" style={{ '--background': 'transparent', '--padding-start': '16px', '--min-height': '0' }}>
+                  <div slot="start" style={{ marginTop: 8, marginRight: 12 }}><TypingIndicator /></div>
+                </IonItem>
+              )}
               <div ref={messagesEndRef} />
-            </div>
+            </IonList>
 
             {/* Input */}
             <div style={{ borderTop: '1px solid var(--ion-border-color)', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
@@ -750,7 +758,7 @@ export default function Messages() {
                 disabled={activeConvo.is_blocked_by_me}
                 autoGrow
                 rows={3}
-                style={{ '--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--padding-top': '12px', '--padding-bottom': '8px', '--color': 'var(--ion-text-color)', fontSize: '0.9rem', width: '100%' }}
+                style={{ '--background': 'transparent', '--padding-start': '16px', '--padding-end': '16px', '--padding-top': '12px', '--padding-bottom': '8px', '--color': 'var(--ion-text-color)', '--highlight-color-focused': 'transparent', '--highlight-height': '0px', fontSize: '0.9rem', width: '100%' }}
               />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 8px 8px' }}>
                 <IonButton fill="clear" color="medium" disabled={activeConvo.is_blocked_by_me}>
