@@ -1,10 +1,14 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { IonButton, IonSpinner } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useMinimizedChats } from '../../context/MinimizedChatsContext';
 import IonIcon from '../IonIcon';
+
+const AVATAR_SIZE = 56;
+const STACK_THRESHOLD = 48;
+const DRAG_THRESHOLD = 4;
 
 function MiniAvatar({ name, src, size = 40 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -31,46 +35,165 @@ function parseSpecial(body) {
   return null;
 }
 
+function loadPositions() {
+  try { return JSON.parse(localStorage.getItem('hauliq-mini-positions') || '{}'); }
+  catch { return {}; }
+}
+
+function getDefaultPos(idx) {
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 400;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+  return {
+    x: vw - AVATAR_SIZE - 24,
+    y: vh - AVATAR_SIZE - 32 - idx * (AVATAR_SIZE + 8),
+  };
+}
+
+function clampPos(x, y) {
+  return {
+    x: Math.max(0, Math.min(window.innerWidth - AVATAR_SIZE, x)),
+    y: Math.max(0, Math.min(window.innerHeight - AVATAR_SIZE, y)),
+  };
+}
+
 export default function MinimizedChatsFAB() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { minimizedConvos, openMiniId, miniInputs, miniSending, setMiniInputs, restore, close, sendMini, openMini } = useMinimizedChats();
   const miniScrollRef = useRef(null);
 
-  const handleRestore = (id) => {
+  const posRef = useRef(loadPositions());
+  const [positions, setPositionsState] = useState(() => posRef.current);
+  const draggingRef = useRef(null);
+
+  const setPositions = useCallback((updater) => {
+    setPositionsState(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      posRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const handleRestore = useCallback((id) => {
     restore(id, (found) => {
       window.dispatchEvent(new CustomEvent('hauliq-restore-mini', { detail: found }));
       const role = user?.role || 'carrier';
       navigate(`/${role}/messages?conv=${found.id}`);
     });
-  };
+  }, [restore, user, navigate]);
 
   useEffect(() => {
     if (miniScrollRef.current) miniScrollRef.current.scrollTop = miniScrollRef.current.scrollHeight;
   }, [openMiniId, minimizedConvos]);
 
-  if (!minimizedConvos.length) return null;
+  // Assign default positions to convos that don't have one yet
+  useEffect(() => {
+    let updated = { ...posRef.current };
+    let changed = false;
+    minimizedConvos.forEach((mc, idx) => {
+      if (!updated[mc.id]) {
+        updated[mc.id] = getDefaultPos(idx);
+        changed = true;
+      }
+    });
+    if (changed) {
+      localStorage.setItem('hauliq-mini-positions', JSON.stringify(updated));
+      setPositions(updated);
+    }
+  }, [minimizedConvos, setPositions]);
 
-  const fabRight = (idx) => 108 + idx * 72;
+  const handlePointerDown = useCallback((e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
+    const startPos = posRef.current[id] || getDefaultPos(0);
+
+    draggingRef.current = {
+      id,
+      startClientX,
+      startClientY,
+      startPosX: startPos.x,
+      startPosY: startPos.y,
+      moved: false,
+    };
+
+    const onMove = (ev) => {
+      if (!draggingRef.current || draggingRef.current.id !== id) return;
+      const dx = ev.clientX - draggingRef.current.startClientX;
+      const dy = ev.clientY - draggingRef.current.startClientY;
+      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+        draggingRef.current.moved = true;
+      }
+      const { x, y } = clampPos(draggingRef.current.startPosX + dx, draggingRef.current.startPosY + dy);
+      setPositions(prev => ({ ...prev, [id]: { x, y } }));
+    };
+
+    const onUp = () => {
+      if (!draggingRef.current) return;
+      const wasMoved = draggingRef.current.moved;
+      draggingRef.current = null;
+      localStorage.setItem('hauliq-mini-positions', JSON.stringify(posRef.current));
+      if (!wasMoved) openMini(id);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    };
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  }, [openMini, setPositions]);
+
+  if (!minimizedConvos.length) return null;
 
   return createPortal(
     <>
       {minimizedConvos.map((mc, idx) => {
         const op = getOtherParty(mc.convo, user?.id);
         const isOpen = openMiniId === mc.id;
-        const fr = fabRight(idx);
+        const pos = positions[mc.id] || getDefaultPos(idx);
+
+        // Count how many earlier avatars are stacked near this one
+        let stackRank = 0;
+        minimizedConvos.forEach((other, otherIdx) => {
+          if (other.id === mc.id || otherIdx >= idx) return;
+          const op2 = positions[other.id];
+          if (!op2) return;
+          if (Math.abs(op2.x - pos.x) < STACK_THRESHOLD && Math.abs(op2.y - pos.y) < STACK_THRESHOLD) stackRank++;
+        });
+
+        const offsetX = stackRank * 5;
+        const offsetY = stackRank * -5;
+
+        // Popup: appear above and aligned to avatar, clamped to viewport
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const popupW = 320;
+        const popupH = 420;
+        const popupLeft = Math.max(8, Math.min(vw - popupW - 8, pos.x + offsetX - popupW + AVATAR_SIZE));
+        const popupTop = Math.max(8, Math.min(vh - popupH - 8, pos.y + offsetY - popupH - 12));
 
         return (
           <div key={mc.id}>
-            {/* FAB bubble */}
+            {/* Draggable FAB bubble */}
             <div
-              onClick={() => openMini(mc.id)}
+              onPointerDown={(e) => handlePointerDown(e, mc.id)}
               title={op?.name || 'Chat'}
-              style={{ position: 'fixed', bottom: 32, right: fr, zIndex: 99998, cursor: 'pointer', width: 56, height: 56 }}
+              style={{
+                position: 'fixed',
+                left: pos.x + offsetX,
+                top: pos.y + offsetY,
+                zIndex: 99998 + idx,
+                cursor: 'grab',
+                width: AVATAR_SIZE,
+                height: AVATAR_SIZE,
+                userSelect: 'none',
+                touchAction: 'none',
+              }}
             >
-              <div style={{ position: 'relative', width: 56, height: 56 }}>
-                <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', border: '2px solid #fff', boxShadow: '0 4px 24px rgba(0,0,0,0.35)' }}>
-                  <MiniAvatar name={op?.name || '?'} src={op?.avatar_url} size={56} />
+              <div style={{ position: 'relative', width: AVATAR_SIZE, height: AVATAR_SIZE }}>
+                <div style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: '50%', overflow: 'hidden', border: '2px solid #fff', boxShadow: '0 4px 24px rgba(0,0,0,0.35)' }}>
+                  <MiniAvatar name={op?.name || '?'} src={op?.avatar_url} size={AVATAR_SIZE} />
                 </div>
                 {mc.unreadCount > 0 && (
                   <div style={{ position: 'absolute', top: -2, right: -2, backgroundColor: 'var(--ion-color-danger)', color: '#fff', borderRadius: '50%', minWidth: 18, height: 18, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', border: '2px solid #fff', boxSizing: 'border-box' }}>
@@ -82,7 +205,7 @@ export default function MinimizedChatsFAB() {
 
             {/* Mini chat popup */}
             {isOpen && (
-              <div style={{ position: 'fixed', bottom: 100, right: Math.max(fr - 132, 8), zIndex: 99999, width: 320, height: 420, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.4)', border: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-card-background)' }}>
+              <div style={{ position: 'fixed', left: popupLeft, top: popupTop, zIndex: 99999 + idx, width: popupW, height: popupH, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.4)', border: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-card-background)' }}>
                 {/* Mini header */}
                 <div style={{ backgroundColor: 'var(--ion-background-color)', padding: '0 8px 0 12px', height: 48, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, borderBottom: '1px solid var(--ion-border-color)' }}>
                   <MiniAvatar name={op?.name || '?'} src={op?.avatar_url} size={28} />
