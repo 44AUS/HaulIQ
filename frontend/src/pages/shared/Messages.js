@@ -13,14 +13,6 @@ function parseSpecial(body) {
   return null;
 }
 
-function getPreview(body) {
-  const obj = parseSpecial(body);
-  if (!obj) return body;
-  if (obj.__type === 'doc_upload') return `📄 Document uploaded: ${obj.file_name}`;
-  if (obj.__type === 'location_share') return `📍 Location shared`;
-  if (obj.__type === 'location_request') return `📍 Location requested`;
-  return body;
-}
 
 function UserAvatar({ name, src, size = 32 }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -474,8 +466,6 @@ export default function Messages() {
       })
     : tabConvos;
 
-  const loadConvos   = filteredConvos.filter(c => c.load_id);
-  const directConvos = filteredConvos.filter(c => !c.load_id);
 
   const otherParty = getOtherParty(activeConvo);
 
