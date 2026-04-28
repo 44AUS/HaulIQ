@@ -1070,7 +1070,7 @@ export default function Messages() {
         <IonHeader>
           <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
             <IonButtons slot="start">
-              <IonButton fill="clear" shape="round" onClick={() => setSelectOpen(false)}>
+              <IonButton fill="clear" shape="round" onClick={() => setSelectOpen(false)} style={{ '--color': 'var(--ion-text-color)' }}>
                 <ion-icon slot="icon-only" name="close-outline" />
               </IonButton>
             </IonButtons>
