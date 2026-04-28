@@ -270,6 +270,13 @@ export default function Messages() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [sending, setSending] = useState(false);
   const imageInputRef = useRef(null);
+  const [minimizedConvos, setMinimizedConvos] = useState([]);
+  const [openMiniId, setOpenMiniId] = useState(null);
+  const [miniInputs, setMiniInputs] = useState({});
+  const [miniSending, setMiniSending] = useState({});
+  const miniScrollRef = useRef(null);
+  const minimizedRef = useRef(minimizedConvos);
+  const openMiniRef = useRef(openMiniId);
   const [listVisible, setListVisible] = useState(true);
   const [hoveredConvoId, setHoveredConvoId] = useState(null);
   const [pinnedIds, setPinnedIds] = useState(() => {
@@ -313,6 +320,66 @@ export default function Messages() {
       return next;
     });
   };
+
+  useEffect(() => { minimizedRef.current = minimizedConvos; }, [minimizedConvos]);
+  useEffect(() => { openMiniRef.current = openMiniId; }, [openMiniId]);
+
+  const handleMinimize = () => {
+    if (!activeConvo) return;
+    setMinimizedConvos(prev =>
+      prev.find(m => m.id === activeConvoId)
+        ? prev
+        : [...prev, { id: activeConvoId, convo: activeConvo, messages: activeMessages, unreadCount: 0 }]
+    );
+    setActiveConvoId(null);
+    setActiveMessages([]);
+  };
+
+  const handleRestore = (id) => {
+    const found = minimizedRef.current.find(m => m.id === id);
+    setMinimizedConvos(prev => prev.filter(m => m.id !== id));
+    setOpenMiniId(null);
+    if (found) { setActiveConvoId(id); setActiveMessages(found.messages); }
+  };
+
+  const handleMiniClose = (id) => {
+    setMinimizedConvos(prev => prev.filter(m => m.id !== id));
+    if (openMiniId === id) setOpenMiniId(null);
+  };
+
+  const handleMiniSend = async (mc) => {
+    const text = (miniInputs[mc.id] || '').trim();
+    if (!text) return;
+    const recipientId = user?.role === 'carrier' ? mc.convo.broker_id : mc.convo.carrier_id;
+    setMiniSending(prev => ({ ...prev, [mc.id]: true }));
+    try {
+      const msg = await messagesApi.send(mc.convo.load_id || null, recipientId, text);
+      setMinimizedConvos(prev => prev.map(m => m.id === mc.id ? { ...m, messages: [...m.messages, msg] } : m));
+      setMiniInputs(prev => ({ ...prev, [mc.id]: '' }));
+    } catch {}
+    finally { setMiniSending(prev => ({ ...prev, [mc.id]: false })); }
+  };
+
+  // Poll minimized convos for new messages
+  useEffect(() => {
+    const poll = setInterval(() => {
+      minimizedRef.current.forEach(mc => {
+        messagesApi.conversation(mc.id).then(data => {
+          const incoming = data.messages || (Array.isArray(data) ? data : []);
+          setMinimizedConvos(prev => prev.map(m => {
+            if (m.id !== mc.id) return m;
+            const newCount = Math.max(0, incoming.length - m.messages.length);
+            return { ...m, messages: incoming, unreadCount: openMiniRef.current === mc.id ? 0 : m.unreadCount + newCount };
+          }));
+        }).catch(() => {});
+      });
+    }, 3000);
+    return () => clearInterval(poll);
+  }, []); // eslint-disable-line
+
+  useEffect(() => {
+    if (miniScrollRef.current) miniScrollRef.current.scrollTop = miniScrollRef.current.scrollHeight;
+  }, [openMiniId, minimizedConvos]);
 
   useEffect(() => {
     messagesApi.presence().catch(() => {});
@@ -797,6 +864,11 @@ export default function Messages() {
                   }
                 </IonButton>
               )}
+              {showChat && (
+                <IonButton fill="clear" color="medium" title="Minimize" onClick={handleMinimize} style={{ '--border-radius': '50%' }}>
+                  <IonIcon slot="icon-only" name="remove-outline" />
+                </IonButton>
+              )}
             </div>
 
             {showChat && activeConvo.is_blocked_by_me && (
@@ -977,6 +1049,109 @@ export default function Messages() {
       {docsModalLoadId && (
         <LoadDocsModal loadId={docsModalLoadId} onClose={() => setDocsModalLoadId(null)} onView={(doc) => { setDocsModalLoadId(null); setViewerDoc(doc); }} />
       )}
+
+      {/* ── Minimized chat FABs ── */}
+      {minimizedConvos.map((mc, idx) => {
+        const op = getOtherParty(mc.convo);
+        const fabRight = 108 + idx * 72;
+        const isOpen = openMiniId === mc.id;
+        const miniMsgs = mc.messages;
+        return (
+          <div key={mc.id}>
+            {/* FAB bubble */}
+            <div
+              onClick={() => { setOpenMiniId(isOpen ? null : mc.id); setMinimizedConvos(prev => prev.map(m => m.id === mc.id ? { ...m, unreadCount: 0 } : m)); }}
+              style={{ position: 'fixed', bottom: 32, right: fabRight, zIndex: 99998, cursor: 'pointer', width: 56, height: 56 }}
+              title={op?.name || 'Chat'}
+            >
+              <div style={{ position: 'relative', width: 56, height: 56 }}>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', border: '2px solid #fff', boxShadow: '0 4px 24px rgba(0,0,0,0.35)' }}>
+                  <UserAvatar name={op?.name || '?'} src={op?.avatar_url} size={56} />
+                </div>
+                {mc.unreadCount > 0 && (
+                  <div style={{ position: 'absolute', top: -2, right: -2, backgroundColor: 'var(--ion-color-danger)', color: '#fff', borderRadius: '50%', minWidth: 18, height: 18, fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', border: '2px solid #fff', boxSizing: 'border-box' }}>
+                    {mc.unreadCount > 9 ? '9+' : mc.unreadCount}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Mini chat popup */}
+            {isOpen && (
+              <div style={{ position: 'fixed', bottom: 100, right: fabRight - 132, zIndex: 99999, width: 320, height: 420, borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 8px 40px rgba(0,0,0,0.4)', border: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-card-background)' }}>
+                {/* Mini header */}
+                <div style={{ backgroundColor: 'var(--ion-background-color)', padding: '0 8px 0 12px', height: 48, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, borderBottom: '1px solid var(--ion-border-color)' }}>
+                  <UserAvatar name={op?.name || '?'} src={op?.avatar_url} size={28} />
+                  <span style={{ flex: 1, fontWeight: 700, fontSize: '0.85rem', color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{op?.name || getConvoLabel(mc.convo)}</span>
+                  <IonButton fill="clear" color="medium" size="small" title="Expand" onClick={() => handleRestore(mc.id)} style={{ '--border-radius': '50%' }}>
+                    <IonIcon slot="icon-only" name="expand-outline" style={{ fontSize: 16 }} />
+                  </IonButton>
+                  <IonButton fill="clear" color="medium" size="small" title="Close" onClick={() => handleMiniClose(mc.id)} style={{ '--border-radius': '50%' }}>
+                    <IonIcon slot="icon-only" name="close-outline" style={{ fontSize: 16 }} />
+                  </IonButton>
+                </div>
+
+                {/* Mini messages */}
+                <div ref={miniScrollRef} style={{ flex: 1, overflowY: 'auto' }}>
+                  {miniMsgs.map((msg, i) => {
+                    const isMe = msg.sender_id === user?.id;
+                    const special = parseSpecial(msg.body);
+                    const timeStr = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const prevMsg = miniMsgs[i - 1];
+                    const grouped = prevMsg && prevMsg.sender_id === msg.sender_id;
+                    const senderName = isMe ? (user?.name || 'You') : (op?.name || '?');
+                    const senderAvatar = isMe ? user?.avatar_url : op?.avatar_url;
+                    return (
+                      <div key={msg.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: grouped ? '2px 12px' : '8px 12px 2px', backgroundColor: isMe ? 'rgba(var(--ion-color-primary-rgb),0.04)' : 'transparent' }}>
+                        <div style={{ width: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}>
+                          {grouped
+                            ? <span style={{ fontSize: '0.55rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{timeStr}</span>
+                            : <UserAvatar name={senderName} src={senderAvatar} size={28} />
+                          }
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          {!grouped && (
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                              <span style={{ fontWeight: 700, fontSize: '0.78rem', color: isMe ? 'var(--ion-color-primary)' : 'var(--ion-text-color)' }}>{isMe ? 'You' : senderName}</span>
+                              <span style={{ fontSize: '0.62rem', color: 'var(--ion-color-medium)' }}>{timeStr}</span>
+                            </div>
+                          )}
+                          {special?.__type === 'image_attachment' ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                              {(special.images || []).map((img, ii) => (
+                                <img key={ii} src={img.data || img} alt="" style={{ maxWidth: 120, maxHeight: 100, borderRadius: 6, objectFit: 'cover', cursor: 'pointer' }} onClick={() => { const w = window.open(); w.document.write(`<img src="${img.data || img}" style="max-width:100%">`); }} />
+                              ))}
+                            </div>
+                          ) : (
+                            <p style={{ margin: 0, fontSize: '0.82rem', lineHeight: 1.45, color: 'var(--ion-text-color)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.body}</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mini input */}
+                <div style={{ flexShrink: 0, borderTop: '1px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', padding: '6px 8px', gap: 6 }}>
+                  <input
+                    value={miniInputs[mc.id] || ''}
+                    onChange={e => setMiniInputs(prev => ({ ...prev, [mc.id]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleMiniSend(mc); } }}
+                    placeholder="Message…"
+                    style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ion-text-color)', fontSize: '0.85rem', padding: '4px 0' }}
+                  />
+                  <IonButton fill="clear" color="success" size="small" disabled={!(miniInputs[mc.id] || '').trim() || miniSending[mc.id]} onClick={() => handleMiniSend(mc)} style={{ '--border-radius': '50%' }}>
+                    {miniSending[mc.id]
+                      ? <IonSpinner slot="icon-only" name="crescent" style={{ width: 14, height: 14 }} />
+                      : <IonIcon slot="icon-only" name="send-outline" style={{ fontSize: 16 }} />
+                    }
+                  </IonButton>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </>
   );
 }
