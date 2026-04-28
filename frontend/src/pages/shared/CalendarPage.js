@@ -569,20 +569,22 @@ export default function CalendarPage() {
         </div>
 
         {/* Row 2: nav + assigned + revenue */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <IonButton fill="clear" shape="round" size="small" onClick={prev}>
-              <IonIcon slot="icon-only" name="chevron-back-outline" />
-            </IonButton>
-            <IonButton fill="clear" size="small" onClick={() => setDate(new Date())}>Today</IonButton>
-            <IonButton fill="clear" shape="round" size="small" onClick={next}>
-              <IonIcon slot="icon-only" name="chevron-forward-outline" />
-            </IonButton>
-            {user?.role === 'carrier' && <AssignedDropdown drivers={drivers} selectedDrivers={selectedDrivers} onApply={setSelectedDrivers} />}
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--ion-text-color)', lineHeight: 1.3 }}>{MONTH_FULL[date.getMonth()]}</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#2dd36f', lineHeight: 1.2 }}>${monthRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+        <div className="cal-toprow-scroll" style={{ flexShrink: 0, borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 24px', minWidth: 'max-content', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <IonButton fill="clear" shape="round" size="small" onClick={prev}>
+                <IonIcon slot="icon-only" name="chevron-back-outline" />
+              </IonButton>
+              <IonButton fill="clear" size="small" onClick={() => setDate(new Date())}>Today</IonButton>
+              <IonButton fill="clear" shape="round" size="small" onClick={next}>
+                <IonIcon slot="icon-only" name="chevron-forward-outline" />
+              </IonButton>
+              {user?.role === 'carrier' && <AssignedDropdown drivers={drivers} selectedDrivers={selectedDrivers} onApply={setSelectedDrivers} />}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--ion-text-color)', lineHeight: 1.3 }}>{MONTH_FULL[date.getMonth()]}</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#2dd36f', lineHeight: 1.2 }}>${monthRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            </div>
           </div>
         </div>
 
