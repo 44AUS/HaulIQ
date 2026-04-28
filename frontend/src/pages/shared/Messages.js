@@ -952,17 +952,17 @@ export default function Messages() {
                       '--padding-end': '16px',
                       '--inner-padding-end': '0',
                       '--min-height': '0',
-                      alignItems: 'flex-start',
+                      alignItems: isGrouped ? 'center' : 'flex-start',
                       marginTop: isGrouped ? 0 : 4,
                     }}
                   >
-                    <div slot="start" style={{ marginTop: isGrouped ? 6 : 12, marginRight: 12, flexShrink: 0, width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div slot="start" style={{ marginTop: isGrouped ? 0 : 12, marginRight: 12, flexShrink: 0, width: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {isGrouped
                         ? <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)', opacity: isHovered ? 1 : 0, transition: 'opacity 0.15s', whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>{timeStr}</span>
                         : <UserAvatar name={senderName} src={senderAvatar} size={36} />
                       }
                     </div>
-                    <IonLabel style={{ margin: isGrouped ? '4px 0' : '10px 0', whiteSpace: 'normal' }}>
+                    <IonLabel style={{ margin: isGrouped ? '2px 0' : '10px 0', whiteSpace: 'normal' }}>
                       {isGrouped ? (
                         special?.__type ? content : <p style={{ margin: 0, fontSize: '0.875rem', lineHeight: 1.5, color: 'var(--ion-text-color)', whiteSpace: 'pre-wrap' }}>{msg.body}</p>
                       ) : content}
