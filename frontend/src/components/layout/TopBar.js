@@ -208,7 +208,7 @@ function NotificationsPanel({ onClose, onCountChange }) {
         <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Notifications</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <IonButton fill="clear" color="medium" style={{ '--border-radius': '50%' }} onClick={() => setShowPrefs(true)}>
-            <IonIcon slot="icon-only" name="funnel-outline" style={{ fontSize: 18 }} />
+            <IonIcon slot="icon-only" name="options-outline" style={{ fontSize: 18 }} />
           </IonButton>
           <IonButton fill="clear" color="medium" style={{ '--border-radius': '50%' }} onClick={onClose}>
             <IonIcon slot="icon-only" name="close-outline" style={{ fontSize: 20 }} />
