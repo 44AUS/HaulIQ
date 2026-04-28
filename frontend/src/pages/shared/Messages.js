@@ -3,7 +3,7 @@ import { useLocation, useSearchParams, Link } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonList, IonItem, IonLabel,
   IonRippleEffect, IonAvatar, IonButton, IonTextarea, IonSearchbar,
-  IonReorderGroup, IonReorder, IonProgressBar,
+  IonReorderGroup, IonReorder, IonProgressBar, IonSegment, IonSegmentButton,
 } from '@ionic/react';
 import { useAuth } from '../../context/AuthContext';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -273,6 +273,7 @@ export default function Messages() {
   const imageInputRef = useRef(null);
   const { minimize: minimizeConvo } = useMinimizedChats();
   const [listVisible, setListVisible] = useState(true);
+  const [listTab, setListTab] = useState('main');
   const [hoveredConvoId, setHoveredConvoId] = useState(null);
   const [pinnedIds, setPinnedIds] = useState(() => {
     try { return JSON.parse(localStorage.getItem('hauliq_pinned_convos') || '[]'); } catch { return []; }
@@ -550,13 +551,19 @@ export default function Messages() {
     ? network.filter(n => n.name.toLowerCase().includes(networkQuery.toLowerCase()) || (n.company || '').toLowerCase().includes(networkQuery.toLowerCase()))
     : network;
 
+  const isEmployeeConvo = (c) => c.other_role === 'driver' || c.other_role === 'employee';
+
+  const tabConvos = conversations.filter(c =>
+    listTab === 'employees' ? isEmployeeConvo(c) : !isEmployeeConvo(c)
+  );
+
   const filteredConvos = query
-    ? conversations.filter(c => {
+    ? tabConvos.filter(c => {
         const q = query.toLowerCase();
         return getConvoLabel(c).toLowerCase().includes(q)
           || (getLastMsg(c)?.body || '').toLowerCase().includes(q);
       })
-    : conversations;
+    : tabConvos;
 
 
   const otherParty = getOtherParty(activeConvo);
@@ -632,15 +639,23 @@ export default function Messages() {
         {showList && (
           <div style={{ width: isMobile ? '100%' : LIST_WIDTH, flexShrink: 0, borderRight: isMobile ? 'none' : '1px solid var(--ion-border-color)', display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-            {/* New Message button */}
-            {user?.role !== 'driver' && (
-              <div style={{ padding: '0 12px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
-                <IonButton expand="block" size="small" onClick={() => setComposing(v => !v)} style={{ flex: 1 }}>
-                  <IonIcon slot="start" name="create-outline" />
-                  New Message
-                </IonButton>
-              </div>
-            )}
+            {/* Segment tabs */}
+            <div style={{ padding: '0 10px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
+              <IonSegment
+                value={listTab}
+                onIonChange={e => setListTab(e.detail.value)}
+                style={{ '--background': 'var(--ion-color-step-100, rgba(0,0,0,0.08))', borderRadius: 10 }}
+              >
+                <IonSegmentButton value="main" style={{ '--border-radius': '8px', '--indicator-color': 'var(--ion-background-color)', minHeight: 36 }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                    {user?.role === 'carrier' ? 'Brokers' : 'Carriers'}
+                  </span>
+                </IonSegmentButton>
+                <IonSegmentButton value="employees" style={{ '--border-radius': '8px', '--indicator-color': 'var(--ion-background-color)', minHeight: 36 }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Employees</span>
+                </IonSegmentButton>
+              </IonSegment>
+            </div>
 
             {/* Compose panel */}
             {composing && (
