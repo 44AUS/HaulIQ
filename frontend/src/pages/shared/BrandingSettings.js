@@ -1,6 +1,8 @@
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonSkeletonText } from '@ionic/react';
+import { IonSkeletonText, IonRippleEffect } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 
@@ -25,28 +27,40 @@ function blendWhite(hex, pct) {
   } catch { return hex; }
 }
 
+function resizeImageToDataUrl(file, maxSize = 256) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = url;
+  });
+}
+
 function MobileAppPreview({ color }) {
   const rows = ['call-outline', 'mail-outline', 'chatbox-outline'];
   return (
     <div style={{ border: '1px solid var(--ion-border-color)', borderRadius: 8, overflow: 'hidden', flex: 1, minWidth: 220 }}>
-      {/* Primary toolbar */}
       <div style={{ backgroundColor: color, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
         <IonIcon name="chevron-back-outline" style={{ color: '#fff', fontSize: 20, flexShrink: 0 }} />
         <IonSkeletonText animated style={{ width: 100, height: 13, borderRadius: 4, flex: 'none', '--background': 'rgba(255,255,255,0.25)', '--background-rgb': '255,255,255' }} />
         <div style={{ flex: 1 }} />
         <IonIcon name="ellipsis-vertical-outline" style={{ color: '#fff', fontSize: 20, flexShrink: 0 }} />
       </div>
-
-      {/* Segment toolbar */}
       <div style={{ backgroundColor: blendWhite(color, 0.15), display: 'flex' }}>
         {[0, 1, 2, 3, 4].map(i => (
-          <div key={i} style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 4px', borderBottom: i === 0 ? `2px solid #fff` : '2px solid transparent' }}>
+          <div key={i} style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '8px 4px', borderBottom: i === 0 ? '2px solid #fff' : '2px solid transparent' }}>
             <IonSkeletonText animated style={{ width: 42, height: 10, borderRadius: 4, '--background': 'rgba(255,255,255,0.3)', '--background-rgb': '255,255,255' }} />
           </div>
         ))}
       </div>
-
-      {/* List card — icon start */}
       <div style={{ backgroundColor: 'var(--ion-card-background)', margin: 8, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--ion-border-color)' }}>
         {rows.map((icon, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderBottom: i < rows.length - 1 ? '1px solid var(--ion-border-color)' : 'none' }}>
@@ -59,8 +73,6 @@ function MobileAppPreview({ color }) {
           </div>
         ))}
       </div>
-
-      {/* Segment card with icons */}
       <div style={{ backgroundColor: 'var(--ion-card-background)', margin: 8, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--ion-border-color)' }}>
         <div style={{ display: 'flex' }}>
           {[{ icon: 'call-outline', active: true }, { icon: 'mail-outline' }, { icon: 'chatbox-outline' }].map(({ icon, active }, i) => (
@@ -71,8 +83,6 @@ function MobileAppPreview({ color }) {
           ))}
         </div>
       </div>
-
-      {/* List card — icon end */}
       <div style={{ backgroundColor: 'var(--ion-card-background)', margin: 8, borderRadius: 6, overflow: 'hidden', border: '1px solid var(--ion-border-color)' }}>
         {rows.map((icon, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px', borderBottom: i < rows.length - 1 ? '1px solid var(--ion-border-color)' : 'none' }}>
@@ -89,11 +99,10 @@ function MobileAppPreview({ color }) {
   );
 }
 
-function BusinessCardPreview({ color }) {
+function BusinessCardPreview({ color, logoUrl, onLogoClick }) {
   const steps = [0, 0.08, 0.16, 0.24, 0.32, 0.40, 0.48, 0.56, 0.64, 0.72].map(p => blendWhite(color, p));
   return (
     <div style={{ flex: 1, minWidth: 220, borderRadius: 8, overflow: 'hidden', border: '1px solid var(--ion-border-color)', position: 'relative', minHeight: 320 }}>
-      {/* SVG wave background */}
       <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1600 800"
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
         <rect width="1600" height="800" fill={steps[0]} />
@@ -110,13 +119,25 @@ function BusinessCardPreview({ color }) {
           <path d="M1315.3 72.4c75.3-12.6 148.9-37.1 216.8-72.4h-723C966.8 71 1144.7 101 1315.3 72.4z" fill={steps[9]} />
         </g>
       </svg>
-
-      {/* Business card floating over waves */}
       <div style={{ position: 'relative', zIndex: 1, padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, padding: '20px 20px 16px', width: '100%', boxShadow: '0 8px 32px rgba(0,0,0,0.22)' }}>
-          {/* Logo circle */}
-          <div style={{ width: 72, height: 72, borderRadius: '50%', backgroundColor: 'var(--ion-color-light)', margin: '0 auto 14px', border: '2px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IonIcon name="business-outline" style={{ fontSize: 28, color: 'var(--ion-color-medium)' }} />
+          {/* Clickable logo */}
+          <div
+            onClick={onLogoClick}
+            className="ion-activatable"
+            title="Click to change logo"
+            style={{ width: 72, height: 72, borderRadius: '50%', backgroundColor: 'var(--ion-color-light)', margin: '0 auto 14px', border: '2px solid var(--ion-border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', position: 'relative', flexShrink: 0 }}
+          >
+            <IonRippleEffect />
+            {logoUrl
+              ? <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <>
+                  <IonIcon name="business-outline" style={{ fontSize: 28, color: 'var(--ion-color-medium)' }} />
+                  <div style={{ position: 'absolute', bottom: 2, right: 2, width: 18, height: 18, borderRadius: '50%', backgroundColor: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <IonIcon name="camera-outline" style={{ fontSize: 10, color: '#fff' }} />
+                  </div>
+                </>
+            }
           </div>
           <IonSkeletonText animated style={{ width: '65%', height: 11, borderRadius: 4, margin: '0 auto 6px' }} />
           <IonSkeletonText animated style={{ width: '50%', height: 9, borderRadius: 4, margin: '0 auto 14px' }} />
@@ -140,7 +161,10 @@ function SectionHeader({ label }) {
 export default function BrandingSettings({ embedded = false }) {
   const navigate = useNavigate();
   const { brandColor, setBrandColor } = useThemeMode();
+  const { user, updateUser } = useAuth();
   const currentColor = brandColor || DEFAULT_COLOR;
+  const logoInputRef = useRef(null);
+  const [logoUploading, setLogoUploading] = useState(false);
 
   const persistColor = (color) => {
     setBrandColor(color || null);
@@ -149,12 +173,27 @@ export default function BrandingSettings({ embedded = false }) {
 
   const handleReset = () => persistColor(null);
 
+  const handleLogoClick = () => logoInputRef.current?.click();
+
+  const handleLogoFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+    setLogoUploading(true);
+    try {
+      const dataUrl = await resizeImageToDataUrl(file, 256);
+      await authApi.update({ avatar_url: dataUrl });
+      updateUser({ avatar_url: dataUrl });
+    } catch {}
+    finally { setLogoUploading(false); }
+  };
+
   return (
     <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, width: '100%', maxWidth: 1200, margin: '0 auto', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
         {/* Card header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px' }}>
           {!embedded && (
             <button onClick={() => navigate('/preferences')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-medium)', display: 'flex', alignItems: 'center', padding: 4, borderRadius: 4 }}>
               <IonIcon name="arrow-back-outline" style={{ fontSize: 18 }} />
@@ -163,23 +202,28 @@ export default function BrandingSettings({ embedded = false }) {
           <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Branding</span>
         </div>
 
-        {/* Content */}
         <div>
-
           <SectionHeader label="DESIGN ELEMENTS" />
 
           {/* Logo row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <IonIcon name="color-palette-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+          <div className="ion-activatable" onClick={handleLogoClick} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+            <IonRippleEffect />
+            <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+              {user?.avatar_url
+                ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <IonIcon name="color-palette-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+              }
             </div>
-            <span style={{ flex: 1, fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Logo / Icon</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Coming soon</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Logo / Icon</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>{logoUploading ? 'Uploading…' : 'Tap to upload your business logo'}</div>
+            </div>
             <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
           </div>
 
           {/* Primary color row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div className="ion-activatable" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+            <IonRippleEffect />
             <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer' }}>
               <input type="color" value={currentColor} onChange={e => persistColor(e.target.value)} style={{ position: 'absolute', inset: 0, width: '200%', height: '200%', opacity: 0, cursor: 'pointer', border: 'none' }} />
             </div>
@@ -192,7 +236,6 @@ export default function BrandingSettings({ embedded = false }) {
 
           <SectionHeader label="COLOR PICKER" />
 
-          {/* Picker + presets */}
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
               <div style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
@@ -212,42 +255,40 @@ export default function BrandingSettings({ embedded = false }) {
                   key={color}
                   title={color}
                   onClick={() => persistColor(color)}
-                  style={{
-                    width: 32, height: 32, borderRadius: 6, backgroundColor: color, cursor: 'pointer',
-                    border: `2px solid ${currentColor === color ? 'var(--ion-color-primary)' : 'transparent'}`,
-                    outline: currentColor === color ? '2px solid var(--ion-color-primary)' : 'none',
-                    outlineOffset: 1,
-                    transition: 'transform 0.1s',
-                  }}
-                />
+                  className="ion-activatable"
+                  style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: color, cursor: 'pointer', position: 'relative', overflow: 'hidden', border: `2px solid ${currentColor === color ? 'var(--ion-color-primary)' : 'transparent'}`, outline: currentColor === color ? '2px solid var(--ion-color-primary)' : 'none', outlineOffset: 1 }}
+                >
+                  <IonRippleEffect />
+                </div>
               ))}
             </div>
           </div>
 
           <SectionHeader label="LIVE PREVIEW" />
 
-          {/* Two-panel preview */}
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <MobileAppPreview color={currentColor} />
-            <BusinessCardPreview color={currentColor} />
+            <BusinessCardPreview color={currentColor} logoUrl={user?.avatar_url} onLogoClick={handleLogoClick} />
           </div>
 
-          {/* Reset row */}
           <div style={{ padding: '14px 24px' }}>
-            <button
+            <div
               onClick={handleReset}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', color: 'var(--ion-text-color)', fontWeight: 600, fontSize: '0.875rem', fontFamily: 'inherit' }}
+              className="ion-activatable"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', color: 'var(--ion-text-color)', fontWeight: 600, fontSize: '0.875rem', position: 'relative', overflow: 'hidden' }}
             >
+              <IonRippleEffect />
               <IonIcon name="reload-outline" style={{ fontSize: 16 }} />
               Reset to Default
-            </button>
+            </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 10, marginBottom: 0 }}>
               Changes apply instantly to the navigation bar and are saved to your account.
             </p>
           </div>
-
         </div>
       </div>
+
+      <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={handleLogoFile} />
     </div>
   );
 }
