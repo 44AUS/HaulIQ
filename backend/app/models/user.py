@@ -35,6 +35,7 @@ class User(Base):
     mc_number      = Column(String(50), nullable=True)
     dot_number     = Column(String(50), nullable=True)
     avatar_url        = Column(String, nullable=True)
+    logo_url          = Column(String, nullable=True)
     is_active         = Column(Boolean, default=True)
     is_verified       = Column(Boolean, default=False)
     # Business address (from Google Places)

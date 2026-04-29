@@ -79,10 +79,16 @@ async def lifespan(app: FastAPI):
                 conn.commit()
             except Exception:
                 conn.rollback()
-    # Add avatar_url to users table if not present
+    # Add avatar_url / logo_url to users table if not present
     with engine.connect() as conn:
         try:
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT"))
+            conn.commit()
+        except Exception:
+            conn.rollback()
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS logo_url TEXT"))
             conn.commit()
         except Exception:
             conn.rollback()

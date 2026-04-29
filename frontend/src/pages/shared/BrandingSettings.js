@@ -182,8 +182,8 @@ export default function BrandingSettings({ embedded = false }) {
     setLogoUploading(true);
     try {
       const dataUrl = await resizeImageToDataUrl(file, 256);
-      await authApi.update({ avatar_url: dataUrl });
-      updateUser({ avatar_url: dataUrl });
+      await authApi.update({ logo_url: dataUrl });
+      updateUser({ logo_url: dataUrl });
     } catch {}
     finally { setLogoUploading(false); }
   };
@@ -209,8 +209,8 @@ export default function BrandingSettings({ embedded = false }) {
           <div className="ion-activatable" onClick={handleLogoClick} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
             <IonRippleEffect />
             <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--ion-background-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-              {user?.avatar_url
-                ? <img src={user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {user?.logo_url
+                ? <img src={user.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 : <IonIcon name="color-palette-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
               }
             </div>
@@ -268,7 +268,7 @@ export default function BrandingSettings({ embedded = false }) {
 
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <MobileAppPreview color={currentColor} />
-            <BusinessCardPreview color={currentColor} logoUrl={user?.avatar_url} onLogoClick={handleLogoClick} />
+            <BusinessCardPreview color={currentColor} logoUrl={user?.logo_url} onLogoClick={handleLogoClick} />
           </div>
 
           <div style={{ padding: '14px 24px' }}>

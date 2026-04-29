@@ -42,6 +42,7 @@ class UserUpdate(BaseModel):
     dot_number: Optional[str] = None
     password: Optional[str] = None
     avatar_url: Optional[str] = None
+    logo_url: Optional[str] = None
     brand_color: Optional[str] = None
 
 
@@ -56,6 +57,7 @@ class UserOut(BaseModel):
     mc_number: Optional[str]
     dot_number: Optional[str]
     avatar_url: Optional[str] = None
+    logo_url: Optional[str] = None
     is_active: bool
     business_address:  Optional[str] = None
     business_city:     Optional[str] = None
