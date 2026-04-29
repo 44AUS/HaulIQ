@@ -239,7 +239,13 @@ export default function BrandingSettings({ embedded = false }) {
 
       <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={handleLogoFile} />
 
-      <IonModal isOpen={colorModalOpen} onDidDismiss={() => setColorModalOpen(false)} style={{ '--width': '420px', '--border-radius': '0px' }}>
+      <style>{`
+        .brand-color-modal { --border-radius: 0px; }
+        @media (min-width: 768px) {
+          .brand-color-modal { --width: 420px; --max-height: 90vh; }
+        }
+      `}</style>
+      <IonModal isOpen={colorModalOpen} onDidDismiss={() => setColorModalOpen(false)} className="brand-color-modal">
         <IonHeader>
           <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
             <IonButtons slot="start">
