@@ -879,7 +879,7 @@ export default function Messages() {
               )}
               {!showChat && user?.role !== 'driver' && (
                 <IonButton fill="clear" color="medium" onClick={openSelectModal} style={{ '--border-radius': '8px' }}>
-                  <IonIcon slot="start" name="person-outline" />
+                  <IonIcon slot="start" name="person-outline" style={{ marginRight: 6 }} />
                   {listTab === 'employees' ? 'Select Employee' : 'Select Connection'}
                 </IonButton>
               )}
@@ -997,7 +997,7 @@ export default function Messages() {
                   <IonIcon name="chatbubbles-outline" style={{ fontSize: 48, color: isDark ? '#ffffff' : '#333333', display: 'block', marginBottom: 14 }} />
                   <p style={{ margin: '0 0 20px', fontSize: '0.95rem', fontWeight: 500, color: isDark ? '#ffffff' : '#333333' }}>Select a conversation</p>
                   <IonButton fill="outline" color={isDark ? 'light' : 'dark'} onClick={openSelectModal}>
-                    <IonIcon slot="start" name="add-outline" />
+                    <IonIcon slot="start" name="add-outline" style={{ marginRight: 6 }} />
                     Create a Message
                   </IonButton>
                 </div>
