@@ -223,7 +223,6 @@ export default function BrandingSettings({ embedded = false }) {
               <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Primary Color</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Navigation bar color</div>
             </div>
-            <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--ion-color-medium)' }}>{currentColor.toUpperCase()}</span>
             <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
           </div>
 
