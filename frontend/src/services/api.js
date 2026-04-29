@@ -149,6 +149,7 @@ export const analyticsApi = {
   markRead: (id) => request(`/api/analytics/insights/${id}/read`, { method: 'PATCH' }),
   refresh:  () => request('/api/analytics/insights/refresh', { method: 'POST' }),
   broker:   () => request('/api/analytics/broker'),
+  pipeline: (dateFrom, dateTo) => request(`/api/analytics/pipeline?date_from=${dateFrom}&date_to=${dateTo}`),
 };
 
 // ─── Subscriptions ────────────────────────────────────────────────────────────

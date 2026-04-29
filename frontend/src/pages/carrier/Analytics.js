@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { analyticsApi, driversApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
+import ReactApexChart from 'react-apexcharts';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, Legend,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -70,6 +71,149 @@ const VERDICT = {
   'Okay':   { bg: 'rgba(237,108,2,0.12)',  color: '#ed6c02' },
   'Avoid':  { bg: 'rgba(211,47,47,0.12)',  color: '#d32f2f' },
 };
+
+const fmtAmt = (v) => `$${Number(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+function daysAgoStr(n) {
+  const d = new Date(); d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+function fmtDateDisplay(iso) {
+  const [y, m, d] = iso.split('-');
+  return `${parseInt(m)}/${parseInt(d)}/${String(y).slice(2)}`;
+}
+
+function LoadsPipelineCard() {
+  const [dateFrom, setDateFrom] = useState(daysAgoStr(7));
+  const [dateTo,   setDateTo]   = useState(todayStr());
+  const [data,     setData]     = useState([]);
+  const [loading,  setLoading]  = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    analyticsApi.pipeline(dateFrom, dateTo)
+      .then(d => setData(Array.isArray(d) ? d : []))
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, [dateFrom, dateTo]);
+
+  const stages      = data.map(d => d.stage);
+  const counts      = data.map(d => d.count);
+  const amountPaid  = data.map(d => d.amount_paid);
+  const totals      = data.map(d => d.total);
+
+  const options = {
+    chart: {
+      type: 'bar',
+      toolbar: { show: false },
+      background: 'transparent',
+      fontFamily: 'inherit',
+    },
+    theme: { mode: 'dark' },
+    plotOptions: {
+      bar: { columnWidth: '40%', borderRadius: 3, dataLabels: { position: 'top' } },
+    },
+    dataLabels: {
+      enabled: true,
+      enabledOnSeries: [0],
+      formatter: (val) => (val > 0 ? val : ''),
+      offsetY: -20,
+      style: { fontSize: '12px', colors: ['var(--ion-text-color)'] },
+    },
+    stroke: { width: [0, 2, 2], curve: 'smooth' },
+    xaxis: {
+      categories: stages,
+      axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
+      axisTicks:  { show: true, color: 'rgba(255,255,255,0.1)' },
+      labels: { style: { colors: 'var(--ion-color-medium)', fontSize: '12px' } },
+    },
+    yaxis: [
+      {
+        seriesName: '# of Loads',
+        title: { text: '# of Loads', style: { color: 'var(--ion-color-medium)', fontSize: '11px' } },
+        labels: {
+          style: { colors: 'var(--ion-color-medium)', fontSize: '11px' },
+          formatter: (v) => Math.round(v),
+        },
+        min: 0,
+      },
+      {
+        seriesName: 'Amount Paid',
+        opposite: true,
+        title: { text: 'Amount', style: { color: 'var(--ion-color-medium)', fontSize: '11px' } },
+        labels: {
+          style: { colors: 'var(--ion-color-medium)', fontSize: '11px' },
+          formatter: (v) => fmtAmt(v),
+        },
+        min: 0,
+      },
+      { seriesName: 'Amount Paid', opposite: true, show: false },
+    ],
+    colors: ['#2979FF', '#00C853', '#E040FB'],
+    legend: {
+      show: true,
+      position: 'top',
+      horizontalAlign: 'center',
+      labels: { colors: 'var(--ion-color-medium)' },
+    },
+    grid: {
+      borderColor: 'rgba(255,255,255,0.08)',
+      strokeDashArray: 0,
+    },
+    tooltip: {
+      theme: 'dark',
+      y: [
+        { formatter: (v) => v },
+        { formatter: (v) => fmtAmt(v) },
+        { formatter: (v) => fmtAmt(v) },
+      ],
+    },
+  };
+
+  const series = [
+    { name: '# of Loads',   type: 'bar',  data: counts },
+    { name: 'Amount Paid',  type: 'line', data: amountPaid },
+    { name: 'Total',        type: 'line', data: totals },
+  ];
+
+  return (
+    <div style={cardStyle}>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', flex: 1 }}>Loads Pipeline</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>Date Range</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '4px 10px', backgroundColor: 'var(--ion-background-color)' }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              style={{ border: 'none', background: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.8rem', outline: 'none', fontFamily: 'inherit' }}
+            />
+            <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.8rem' }}>–</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              style={{ border: 'none', background: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.8rem', outline: 'none', fontFamily: 'inherit' }}
+            />
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: '8px 4px 8px 0' }}>
+        {loading ? (
+          <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 28, height: 28, border: '3px solid var(--ion-color-medium)', borderTopColor: 'var(--ion-color-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          </div>
+        ) : (
+          <ReactApexChart options={options} series={series} type="bar" height={320} />
+        )}
+      </div>
+    </div>
+  );
+}
 
 function LoadsTab({ summary, loading, error }) {
   if (loading) return <SkeletonCards />;
@@ -367,7 +511,7 @@ export default function CarrierAnalytics() {
   return (
     <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1200, margin: '0 auto' }}>
-        {activeTab === 'loads'    && <LoadsTab    summary={summary} loading={loading} error={error} />}
+        {activeTab === 'loads'    && <><LoadsPipelineCard /><LoadsTab    summary={summary} loading={loading} error={error} /></>}
         {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
         {activeTab === 'drivers'  && <DriversTab />}
         {activeTab === 'imports'  && <ImportsTab />}

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from uuid import UUID
 from datetime import datetime, timedelta
+from typing import Optional
 
 from app.database import get_db
 from app.models.analytics import LoadHistory, DriverInsight, LaneStats
@@ -325,3 +326,54 @@ def get_broker_analytics(
         "weekly": weekly,
         "top_carriers": top_carriers,
     }
+
+
+# ─── GET /api/analytics/pipeline ──────────────────────────────────────────────
+@router.get("/pipeline", summary="Loads pipeline: count and amounts by stage with date range")
+def get_loads_pipeline(
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models.load import Load
+    from app.models.booking import Booking, BookingStatus
+
+    # Default to last 7 days
+    now = datetime.utcnow()
+    try:
+        dt_from = datetime.strptime(date_from, "%Y-%m-%d") if date_from else now - timedelta(days=7)
+        dt_to   = datetime.strptime(date_to,   "%Y-%m-%d") if date_to   else now
+    except ValueError:
+        dt_from = now - timedelta(days=7)
+        dt_to   = now
+
+    # Carrier sees their bookings; broker sees their loads' bookings
+    if current_user.role == "carrier":
+        bookings_q = db.query(Booking).filter(Booking.carrier_id == current_user.id)
+    else:
+        from app.models.broker import Broker
+        broker = db.query(Broker).filter(Broker.user_id == current_user.id).first()
+        load_ids = [l.id for l in db.query(Load).filter(Load.broker_id == broker.id).all()] if broker else []
+        bookings_q = db.query(Booking).filter(Booking.load_id.in_(load_ids))
+
+    bookings_q = bookings_q.filter(Booking.created_at >= dt_from, Booking.created_at <= dt_to)
+    bookings = bookings_q.all()
+
+    stages = [
+        ("Quote",       [BookingStatus.pending]),
+        ("Scheduled",   [BookingStatus.approved]),
+        ("In Progress", [BookingStatus.in_transit]),
+        ("Completed",   [BookingStatus.completed]),
+        ("Cancelled",   [BookingStatus.cancelled]),
+    ]
+
+    result = []
+    for label, statuses in stages:
+        group = [b for b in bookings if b.status in statuses]
+        count = len(group)
+        amount_paid = sum(float(b.carrier_amount or 0) for b in group if b.status == BookingStatus.completed)
+        total       = sum(float(b.carrier_amount or 0) for b in group)
+        result.append({"stage": label, "count": count, "amount_paid": amount_paid, "total": total})
+
+    return result
