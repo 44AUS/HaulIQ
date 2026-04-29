@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonSkeletonText, IonRippleEffect } from '@ionic/react';
+import {
+  IonSkeletonText, IonRippleEffect,
+  IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
+} from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
@@ -155,6 +158,7 @@ export default function BrandingSettings({ embedded = false }) {
   const currentColor = brandColor || DEFAULT_COLOR;
   const logoInputRef = useRef(null);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [colorModalOpen, setColorModalOpen] = useState(false);
 
   const persistColor = (color) => {
     setBrandColor(color || null);
@@ -212,46 +216,15 @@ export default function BrandingSettings({ embedded = false }) {
           </div>
 
           {/* Primary color row */}
-          <div className="ion-activatable" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
+          <div className="ion-activatable" onClick={() => setColorModalOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', position: 'relative', overflow: 'hidden', cursor: 'pointer' }}>
             <IonRippleEffect />
-            <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer' }}>
-              <input type="color" value={currentColor} onChange={e => persistColor(e.target.value)} style={{ position: 'absolute', inset: 0, width: '200%', height: '200%', opacity: 0, cursor: 'pointer', border: 'none' }} />
-            </div>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>Primary Color</div>
               <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Navigation bar color</div>
             </div>
             <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--ion-color-medium)' }}>{currentColor.toUpperCase()}</span>
-          </div>
-
-          <SectionHeader label="COLOR PICKER" />
-
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
-              <div style={{ width: 64, height: 64, borderRadius: 8, backgroundColor: currentColor, border: '2px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', position: 'relative', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-                <input type="color" value={currentColor} onChange={e => persistColor(e.target.value)} style={{ position: 'absolute', inset: '-10px', width: 'calc(100% + 20px)', height: 'calc(100% + 20px)', opacity: 0, cursor: 'pointer', border: 'none' }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', marginBottom: 4 }}>Pick any color</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Click the swatch to open the color picker — changes apply instantly</div>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--ion-color-medium)', marginTop: 4 }}>{currentColor.toUpperCase()}</div>
-              </div>
-            </div>
-
-            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, color: 'var(--ion-color-medium)', marginBottom: 8 }}>Presets</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {PRESET_COLORS.map(color => (
-                <div
-                  key={color}
-                  title={color}
-                  onClick={() => persistColor(color)}
-                  className="ion-activatable"
-                  style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: color, cursor: 'pointer', position: 'relative', overflow: 'hidden', border: `2px solid ${currentColor === color ? 'var(--ion-color-primary)' : 'transparent'}`, outline: currentColor === color ? '2px solid var(--ion-color-primary)' : 'none', outlineOffset: 1 }}
-                >
-                  <IonRippleEffect />
-                </div>
-              ))}
-            </div>
+            <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
           </div>
 
           <SectionHeader label="LIVE PREVIEW" />
@@ -261,9 +234,61 @@ export default function BrandingSettings({ embedded = false }) {
             <BusinessCardPreview color={currentColor} logoUrl={user?.logo_url} onLogoClick={handleLogoClick} />
           </div>
 
-          <div style={{ padding: '14px 24px' }}>
+        </div>
+      </div>
+
+      <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={handleLogoFile} />
+
+      <IonModal isOpen={colorModalOpen} onDidDismiss={() => setColorModalOpen(false)} style={{ '--width': '420px', '--border-radius': '0px' }}>
+        <IonHeader>
+          <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
+            <IonButtons slot="start">
+              <IonButton fill="clear" shape="round" onClick={() => setColorModalOpen(false)}>
+                <IonIcon slot="icon-only" name="close-outline" />
+              </IonButton>
+            </IonButtons>
+            <IonTitle style={{ fontWeight: 700 }}>Primary Color</IonTitle>
+            <IonButtons slot="end">
+              <IonButton fill="clear" shape="round" onClick={() => setColorModalOpen(false)} style={{ '--color': 'var(--ion-color-success)' }}>
+                <IonIcon slot="icon-only" name="checkmark-outline" />
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <div style={{ padding: '20px 20px 8px' }}>
+            <input
+              type="color"
+              value={currentColor}
+              onChange={e => persistColor(e.target.value)}
+              style={{ display: 'block', width: '100%', height: 200, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 0 }}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16, padding: '10px 14px', backgroundColor: 'var(--ion-background-color)', borderRadius: 8 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 6, backgroundColor: currentColor, border: '1px solid var(--ion-border-color)', flexShrink: 0 }} />
+              <span style={{ fontFamily: 'monospace', fontSize: '0.95rem', color: 'var(--ion-text-color)', fontWeight: 600 }}>{currentColor.toUpperCase()}</span>
+            </div>
+          </div>
+
+          <div style={{ padding: '16px 20px 0' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, color: 'var(--ion-color-medium)', marginBottom: 10 }}>Presets</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {PRESET_COLORS.map(color => (
+                <div
+                  key={color}
+                  title={color}
+                  onClick={() => persistColor(color)}
+                  className="ion-activatable"
+                  style={{ width: 36, height: 36, borderRadius: 8, backgroundColor: color, cursor: 'pointer', position: 'relative', overflow: 'hidden', border: `2px solid ${currentColor === color ? '#fff' : 'transparent'}`, outline: currentColor === color ? `2px solid ${color}` : 'none', outlineOffset: 2 }}
+                >
+                  <IonRippleEffect />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ padding: '20px 20px' }}>
             <div
-              onClick={handleReset}
+              onClick={() => { handleReset(); }}
               className="ion-activatable"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '8px 16px', cursor: 'pointer', color: 'var(--ion-text-color)', fontWeight: 600, fontSize: '0.875rem', position: 'relative', overflow: 'hidden' }}
             >
@@ -271,14 +296,9 @@ export default function BrandingSettings({ embedded = false }) {
               <IonIcon name="reload-outline" style={{ fontSize: 16 }} />
               Reset to Default
             </div>
-            <p style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', marginTop: 10, marginBottom: 0 }}>
-              Changes apply instantly to the navigation bar and are saved to your account.
-            </p>
           </div>
-        </div>
-      </div>
-
-      <input ref={logoInputRef} type="file" accept="image/*" hidden onChange={handleLogoFile} />
+        </IonContent>
+      </IonModal>
     </div>
   );
 }
