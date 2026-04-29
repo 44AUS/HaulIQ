@@ -463,11 +463,11 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                     </span>
                     <IonIcon name="chevron-down-outline" style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', flexShrink: 0 }} />
                   </div>
-                  <IonPopover isOpen={tabMenuOpen} onDidDismiss={() => setTabMenuOpen(false)} trigger="tab-menu-trigger">
+                  <IonPopover isOpen={tabMenuOpen} onDidDismiss={() => setTabMenuOpen(false)} trigger="tab-menu-trigger" style={{ '--width': '220px', '--border-radius': '12px' }}>
                     <IonList lines="none">
                       {config.tabs.map(({ key, label }) => (
-                        <IonItem key={key} button detail={false} onClick={() => { setTab(key); setTabMenuOpen(false); }} style={{ '--background': activeTab === key ? 'var(--ion-color-step-100)' : 'transparent' }}>
-                          <IonLabel style={{ fontWeight: activeTab === key ? 700 : 500, fontSize: '0.875rem' }}>{label}</IonLabel>
+                        <IonItem key={key} button detail={false} onClick={() => { setTab(key); setTabMenuOpen(false); }} style={{ '--background': activeTab === key ? 'var(--ion-color-step-100)' : 'transparent', '--padding-start': '20px', '--padding-end': '20px', '--inner-padding-end': '0' }}>
+                          <IonLabel style={{ fontWeight: activeTab === key ? 700 : 500, fontSize: '0.9rem' }}>{label}</IonLabel>
                         </IonItem>
                       ))}
                     </IonList>
@@ -630,14 +630,14 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
       </IonHeader>
 
       {/* Mobile nav dropdown */}
-      <IonPopover isOpen={mobileNavOpen} onDidDismiss={() => setMobileNavOpen(false)} trigger="mobile-nav-trigger" style={{ '--min-width': '200px', '--border-radius': '12px' }}>
+      <IonPopover isOpen={mobileNavOpen} onDidDismiss={() => setMobileNavOpen(false)} trigger="mobile-nav-trigger" style={{ '--width': '220px', '--border-radius': '12px' }}>
         <IonList lines="none">
           {nav.map(item => {
             const active = isActive(item.path);
             return (
-              <IonItem key={item.path} button detail={false} onClick={() => { navigate(item.path); setMobileNavOpen(false); }} style={{ '--background': active ? 'var(--ion-color-step-100)' : 'transparent', '--padding-start': '16px', '--padding-end': '16px' }}>
-                <IonIcon name={item.icon} style={{ fontSize: 18, marginRight: 12, color: active ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }} slot="start" />
-                <IonLabel style={{ fontSize: '0.875rem', fontWeight: active ? 700 : 500 }}>{item.label}</IonLabel>
+              <IonItem key={item.path} button detail={false} onClick={() => { navigate(item.path); setMobileNavOpen(false); }} style={{ '--background': active ? 'var(--ion-color-step-100)' : 'transparent', '--padding-start': '20px', '--padding-end': '20px', '--inner-padding-end': '0' }}>
+                <IonIcon name={item.icon} style={{ fontSize: 20, marginRight: 14, color: active ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }} />
+                <IonLabel style={{ fontSize: '0.9rem', fontWeight: active ? 700 : 500 }}>{item.label}</IonLabel>
               </IonItem>
             );
           })}
