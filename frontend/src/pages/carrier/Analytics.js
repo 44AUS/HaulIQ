@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { analyticsApi, driversApi } from '../../services/api';
+import { useThemeMode } from '../../context/ThemeContext';
 import IonIcon from '../../components/IonIcon';
 import ReactApexChart from 'react-apexcharts';
 import {
@@ -87,6 +88,8 @@ function fmtDateDisplay(iso) {
 }
 
 function LoadsPipelineCard() {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
   const [dateFrom, setDateFrom] = useState(daysAgoStr(7));
   const [dateTo,   setDateTo]   = useState(todayStr());
   const [data,     setData]     = useState([]);
@@ -105,6 +108,10 @@ function LoadsPipelineCard() {
   const amountPaid  = data.map(d => d.amount_paid);
   const totals      = data.map(d => d.total);
 
+  const axisColor  = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)';
+  const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+  const labelColor = isDark ? '#aaa' : '#555';
+
   const options = {
     chart: {
       type: 'bar',
@@ -112,7 +119,7 @@ function LoadsPipelineCard() {
       background: 'transparent',
       fontFamily: 'inherit',
     },
-    theme: { mode: 'dark' },
+    theme: { mode: isDark ? 'dark' : 'light' },
     plotOptions: {
       bar: { columnWidth: '40%', borderRadius: 3, dataLabels: { position: 'top' } },
     },
@@ -121,33 +128,27 @@ function LoadsPipelineCard() {
       enabledOnSeries: [0],
       formatter: (val) => (val > 0 ? val : ''),
       offsetY: -20,
-      style: { fontSize: '12px', colors: ['var(--ion-text-color)'] },
+      style: { fontSize: '12px', colors: [isDark ? '#fff' : '#111'] },
     },
     stroke: { width: [0, 2, 2], curve: 'smooth' },
     xaxis: {
       categories: stages,
-      axisBorder: { show: true, color: 'rgba(255,255,255,0.1)' },
-      axisTicks:  { show: true, color: 'rgba(255,255,255,0.1)' },
-      labels: { style: { colors: 'var(--ion-color-medium)', fontSize: '12px' } },
+      axisBorder: { show: true, color: gridColor },
+      axisTicks:  { show: true, color: gridColor },
+      labels: { style: { colors: labelColor, fontSize: '12px' } },
     },
     yaxis: [
       {
         seriesName: '# of Loads',
-        title: { text: '# of Loads', style: { color: 'var(--ion-color-medium)', fontSize: '11px' } },
-        labels: {
-          style: { colors: 'var(--ion-color-medium)', fontSize: '11px' },
-          formatter: (v) => Math.round(v),
-        },
+        title: { text: '# of Loads', style: { color: axisColor, fontSize: '11px' } },
+        labels: { style: { colors: axisColor, fontSize: '11px' }, formatter: (v) => Math.round(v) },
         min: 0,
       },
       {
         seriesName: 'Amount Paid',
         opposite: true,
-        title: { text: 'Amount', style: { color: 'var(--ion-color-medium)', fontSize: '11px' } },
-        labels: {
-          style: { colors: 'var(--ion-color-medium)', fontSize: '11px' },
-          formatter: (v) => fmtAmt(v),
-        },
+        title: { text: 'Amount', style: { color: axisColor, fontSize: '11px' } },
+        labels: { style: { colors: axisColor, fontSize: '11px' }, formatter: (v) => fmtAmt(v) },
         min: 0,
       },
       { seriesName: 'Amount Paid', opposite: true, show: false },
@@ -157,14 +158,11 @@ function LoadsPipelineCard() {
       show: true,
       position: 'top',
       horizontalAlign: 'center',
-      labels: { colors: 'var(--ion-color-medium)' },
+      labels: { colors: labelColor },
     },
-    grid: {
-      borderColor: 'rgba(255,255,255,0.08)',
-      strokeDashArray: 0,
-    },
+    grid: { borderColor: gridColor, strokeDashArray: 0 },
     tooltip: {
-      theme: 'dark',
+      theme: isDark ? 'dark' : 'light',
       y: [
         { formatter: (v) => v },
         { formatter: (v) => fmtAmt(v) },
