@@ -13,7 +13,7 @@ const TT = {
   },
 };
 
-const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8 };
+const cardStyle = { backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' };
 const thStyle   = { padding: '10px 12px', textAlign: 'left', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap' };
 const tdStyle   = { padding: '12px', fontSize: '0.875rem', color: 'var(--ion-text-color)', borderBottom: '1px solid var(--ion-border-color)' };
 
@@ -365,11 +365,13 @@ export default function CarrierAnalytics() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {activeTab === 'loads'    && <LoadsTab    summary={summary} loading={loading} error={error} />}
-      {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
-      {activeTab === 'drivers'  && <DriversTab />}
-      {activeTab === 'imports'  && <ImportsTab />}
+    <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1200, margin: '0 auto' }}>
+        {activeTab === 'loads'    && <LoadsTab    summary={summary} loading={loading} error={error} />}
+        {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
+        {activeTab === 'drivers'  && <DriversTab />}
+        {activeTab === 'imports'  && <ImportsTab />}
+      </div>
     </div>
   );
 }
