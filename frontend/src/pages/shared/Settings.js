@@ -429,11 +429,11 @@ export default function Settings() {
       <Section title="Appearance">
         <Row icon="globe-outline" label="Language">
           <IonSegment mode="ios" value={lang} onIonChange={e => handleLang(String(e.detail.value))}
-            style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 36 }}>
+            style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 30, width: 'auto', marginLeft: 'auto' }}>
             {LANG_OPTIONS.map(o => (
               <IonSegmentButton key={o.key} value={o.key}
-                style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
-                <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>{o.label}</IonLabel>
+                style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '6px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 26, minWidth: 0 }}>
+                <IonLabel style={{ fontSize: '0.72rem', fontWeight: 600, margin: '3px 0' }}>{o.label}</IonLabel>
               </IonSegmentButton>
             ))}
           </IonSegment>
