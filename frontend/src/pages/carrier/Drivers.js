@@ -109,7 +109,7 @@ export default function Drivers() {
         {/* Filter row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 24px', flexShrink: 0 }}>
           <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Employees</h3>
-          <IonSegment mode="md" value={filter} onIonChange={e => setFilter(String(e.detail.value))}
+          <IonSegment mode="ios" value={filter} onIonChange={e => setFilter(String(e.detail.value))}
             style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 34, width: 'auto' }}>
             {['enabled', 'disabled'].map(v => (
               <IonSegmentButton key={v} value={v}

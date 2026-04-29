@@ -234,7 +234,6 @@ export default function Equipment() {
       {/* Tab bar */}
       <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
         <IonSegment
-          mode="md"
           value={activeTab}
           onIonChange={e => setActiveTab(String(e.detail.value))}
           style={{ '--background': 'transparent', flex: '0 0 auto' }}
@@ -411,7 +410,7 @@ export default function Equipment() {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <IonSegment mode="md" value={activeDateTab} onIonChange={e => setActiveDateTab(e.detail.value)} style={{ margin: '12px 16px' }}>
+        <IonSegment value={activeDateTab} onIonChange={e => setActiveDateTab(e.detail.value)} style={{ margin: '12px 16px' }}>
           <IonSegmentButton value="from">
             <IonLabel>
               Available From

@@ -526,7 +526,6 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
             {/* Desktop nav */}
             {!isMobile && (
               <IonSegment
-                mode="md"
                 value={activeNavItem?.path ?? ''}
                 onIonChange={e => { if (e.detail.value) navigate(String(e.detail.value)); }}
                 style={{

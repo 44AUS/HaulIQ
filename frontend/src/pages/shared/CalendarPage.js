@@ -124,7 +124,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
   return (
     <>
       <IonSegment
-        mode="md"
+        mode="ios"
         value="assigned"
         id="assigned-driver-trigger"
         onClick={() => { setPending(selectedDrivers); setOpen(true); }}
@@ -560,7 +560,7 @@ export default function CalendarPage() {
                 <MonthPickerDropdown open={pickerOpen} onClose={() => setPickerOpen(false)} date={date} onSelect={d => { setDate(d); setView('month'); }} anchorRef={pickerAnchorRef} />
               </div>
 
-              <IonSegment mode="md" value={view} onIonChange={e => setView(String(e.detail.value))}
+              <IonSegment mode="ios" value={view} onIonChange={e => setView(String(e.detail.value))}
                 style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 34 }}>
                 {VIEW_OPTIONS.map(({ value, label }) => (
                   <IonSegmentButton key={value} value={value}
