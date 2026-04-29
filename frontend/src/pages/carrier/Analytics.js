@@ -175,7 +175,7 @@ function LoadsPipelineCard() {
 
   return (
     <div style={cardStyle}>
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', flex: 1 }}>Loads Pipeline</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>Date Range</span>
@@ -209,6 +209,168 @@ function LoadsPipelineCard() {
   );
 }
 
+function LoadsCompletedCard() {
+  const { mode } = useThemeMode();
+  const isDark = mode === 'dark';
+  const [dateFrom, setDateFrom] = useState(daysAgoStr(30));
+  const [dateTo,   setDateTo]   = useState(todayStr());
+  const [view,     setView]     = useState('days');
+  const [data,     setData]     = useState([]);
+  const [loading,  setLoading]  = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    analyticsApi.completedTimeline(dateFrom, dateTo, view)
+      .then(d => setData(Array.isArray(d) ? d : []))
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, [dateFrom, dateTo, view]);
+
+  const labels     = data.map(d => d.date);
+  const counts     = data.map(d => d.count);
+  const totals     = data.map(d => d.total);
+  const amountPaid = data.map(d => d.amount_paid);
+
+  const totalJobs = counts.reduce((a, b) => a + b, 0);
+  const totalAmt  = totals.reduce((a, b) => a + b, 0);
+  const totalPaid = amountPaid.reduce((a, b) => a + b, 0);
+
+  const labelColor = isDark ? '#aaa' : '#555';
+  const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+  const baseChart = {
+    background: 'transparent',
+    fontFamily: 'inherit',
+    toolbar: { show: true, autoSelected: 'zoom' },
+    zoom: { enabled: true },
+  };
+
+  const countOptions = {
+    chart: { ...baseChart, id: 'lc-count' },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    colors: ['#2979FF'],
+    stroke: { curve: 'smooth', width: 2 },
+    markers: { size: 4, colors: ['#2979FF'], strokeColors: '#fff', strokeWidth: 2 },
+    dataLabels: {
+      enabled: true,
+      formatter: (v) => (v > 0 ? v : ''),
+      style: { fontSize: '10px', colors: ['#2979FF'] },
+      background: { enabled: false },
+    },
+    xaxis: {
+      categories: labels,
+      axisBorder: { show: false },
+      axisTicks:  { show: false },
+      labels: { style: { colors: labelColor, fontSize: '10px' }, rotate: -30 },
+    },
+    yaxis: {
+      min: 0,
+      labels: { style: { colors: labelColor, fontSize: '11px' }, formatter: (v) => Math.round(v) },
+    },
+    grid: { borderColor: gridColor, strokeDashArray: 3 },
+    tooltip: { theme: isDark ? 'dark' : 'light' },
+    legend: { show: false },
+  };
+
+  const amountOptions = {
+    chart: { ...baseChart, id: 'lc-amount' },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    colors: ['#E040FB', '#00C853'],
+    stroke: { curve: 'smooth', width: 2 },
+    markers: { size: 4, strokeColors: '#fff', strokeWidth: 2 },
+    dataLabels: {
+      enabled: true,
+      formatter: (v) => (v > 0 ? fmtAmt(v) : ''),
+      style: { fontSize: '9px' },
+      background: { enabled: false },
+    },
+    xaxis: {
+      categories: labels,
+      axisBorder: { show: false },
+      axisTicks:  { show: false },
+      labels: { style: { colors: labelColor, fontSize: '10px' }, rotate: -30 },
+    },
+    yaxis: {
+      min: 0,
+      labels: { style: { colors: labelColor, fontSize: '11px' }, formatter: (v) => fmtAmt(v) },
+    },
+    grid: { borderColor: gridColor, strokeDashArray: 3 },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: [{ formatter: (v) => fmtAmt(v) }, { formatter: (v) => fmtAmt(v) }],
+    },
+    legend: { show: true, position: 'top', labels: { colors: labelColor } },
+  };
+
+  return (
+    <div style={cardStyle}>
+      <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)', flex: 1 }}>Loads Completed</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <select
+            value={view}
+            onChange={e => setView(e.target.value)}
+            style={{ border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '4px 8px', backgroundColor: 'var(--ion-background-color)', color: 'var(--ion-text-color)', fontSize: '0.8rem', fontFamily: 'inherit', cursor: 'pointer' }}
+          >
+            <option value="days">Days</option>
+            <option value="weeks">Weeks</option>
+            <option value="months">Months</option>
+          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '4px 10px', backgroundColor: 'var(--ion-background-color)' }}>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              style={{ border: 'none', background: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.8rem', outline: 'none', fontFamily: 'inherit' }}
+            />
+            <span style={{ color: 'var(--ion-color-medium)', fontSize: '0.8rem' }}>–</span>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              style={{ border: 'none', background: 'transparent', color: 'var(--ion-text-color)', fontSize: '0.8rem', outline: 'none', fontFamily: 'inherit' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ height: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, border: '3px solid var(--ion-color-medium)', borderTopColor: 'var(--ion-color-primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 0 }}>
+            <div style={{ flex: '1 1 280px', minWidth: 0, padding: '0 2px 0 4px' }}>
+              <ReactApexChart options={countOptions} series={[{ name: 'Jobs Completed', data: counts }]} type="line" height={280} />
+            </div>
+            <div style={{ flex: '1 1 280px', minWidth: 0, padding: '0 4px 0 2px' }}>
+              <ReactApexChart options={amountOptions} series={[{ name: 'Total', data: totals }, { name: 'Amount Paid', data: amountPaid }]} type="line" height={280} />
+            </div>
+          </div>
+
+          <div style={{ padding: '16px 20px', borderTop: '1px solid var(--ion-border-color)' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ion-color-medium)', marginBottom: 12 }}>Totals</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 16 }}>
+              {[
+                { label: 'Jobs Completed', value: fmtN(totalJobs),   color: 'var(--ion-text-color)' },
+                { label: 'Tax',            value: '$0.00',            color: 'var(--ion-text-color)' },
+                { label: 'Total',          value: fmtAmt(totalAmt),  color: '#00C853' },
+                { label: 'Amount Paid',    value: fmtAmt(totalPaid), color: '#00C853' },
+              ].map(({ label, value, color }) => (
+                <div key={label}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', marginBottom: 2 }}>{label}</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color }}>{value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function LoadsTab({ summary, loading, error }) {
   if (loading) return <SkeletonCards />;
   if (error)   return <div style={{ padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>;
@@ -223,12 +385,6 @@ function LoadsTab({ summary, loading, error }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      <KpiRow items={[
-        { icon: 'cash-outline',        label: 'Total Gross',  value: fmt(summary?.total_gross) },
-        { icon: 'trending-up-outline', label: 'Total Net',    value: fmt(summary?.total_net) },
-        { icon: 'cube-outline',        label: 'Total Miles',  value: fmtN(summary?.total_miles) },
-        { icon: 'location-outline',    label: 'Avg Net/Mile', value: summary?.avg_net_per_mile ? `$${Number(summary.avg_net_per_mile).toFixed(2)}` : '—' },
-      ]} />
 
       {weekly.length > 0 && (
         <>
@@ -505,7 +661,7 @@ export default function CarrierAnalytics() {
   return (
     <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1200, margin: '0 auto' }}>
-        {activeTab === 'loads'    && <><LoadsPipelineCard /><LoadsTab    summary={summary} loading={loading} error={error} /></>}
+        {activeTab === 'loads'    && <><LoadsPipelineCard /><LoadsCompletedCard /><LoadsTab    summary={summary} loading={loading} error={error} /></>}
         {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
         {activeTab === 'drivers'  && <DriversTab />}
         {activeTab === 'imports'  && <ImportsTab />}

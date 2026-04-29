@@ -377,3 +377,81 @@ def get_loads_pipeline(
         result.append({"stage": label, "count": count, "amount_paid": amount_paid, "total": total})
 
     return result
+
+
+# ─── GET /api/analytics/completed-timeline ────────────────────────────────────
+@router.get("/completed-timeline", summary="Completed loads timeline by day/week/month")
+def get_completed_timeline(
+    date_from: Optional[str] = Query(None),
+    date_to:   Optional[str] = Query(None),
+    view:      str           = Query("days"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    from collections import defaultdict
+
+    now = datetime.utcnow()
+    try:
+        dt_from = datetime.strptime(date_from, "%Y-%m-%d") if date_from else now - timedelta(days=30)
+        dt_to   = datetime.strptime(date_to,   "%Y-%m-%d") if date_to   else now
+    except ValueError:
+        dt_from = now - timedelta(days=30)
+        dt_to   = now
+
+    bookings = (
+        db.query(Booking)
+        .filter(
+            Booking.carrier_id == current_user.id,
+            Booking.status == BookingStatus.completed,
+            Booking.updated_at >= dt_from,
+            Booking.updated_at <= dt_to + timedelta(days=1),
+        )
+        .all()
+    )
+
+    buckets = defaultdict(lambda: {"count": 0, "amount_paid": 0.0, "total": 0.0})
+    for bk in bookings:
+        ts = bk.updated_at or bk.created_at
+        if not ts:
+            continue
+        if view == "months":
+            key = ts.strftime("%Y-%m")
+        elif view == "weeks":
+            key = ts.strftime("%Y-W%W")
+        else:
+            key = ts.strftime("%Y-%m-%d")
+        amt = float(bk.carrier_amount or 0)
+        buckets[key]["count"] += 1
+        buckets[key]["amount_paid"] += amt
+        buckets[key]["total"] += amt
+
+    # Build ordered result filling gaps with zeros
+    seen = {}
+    current = dt_from.replace(hour=0, minute=0, second=0, microsecond=0)
+    end     = dt_to.replace(hour=23, minute=59, second=59)
+    while current <= end:
+        if view == "months":
+            key = current.strftime("%Y-%m")
+        elif view == "weeks":
+            key = current.strftime("%Y-W%W")
+        else:
+            key = current.strftime("%Y-%m-%d")
+        if key not in seen:
+            b = buckets.get(key, {"count": 0, "amount_paid": 0.0, "total": 0.0})
+            seen[key] = {
+                "date":        key,
+                "count":       b["count"],
+                "amount_paid": round(b["amount_paid"], 2),
+                "total":       round(b["total"], 2),
+            }
+        if view == "months":
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1, day=1)
+            else:
+                current = current.replace(month=current.month + 1, day=1)
+        elif view == "weeks":
+            current += timedelta(weeks=1)
+        else:
+            current += timedelta(days=1)
+
+    return list(seen.values())
