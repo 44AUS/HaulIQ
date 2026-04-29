@@ -28,7 +28,7 @@ function ComingSoon({ label }) {
 function AllCards({ user, onSelect }) {
   const cards = CARDS.filter(c => !c.carrierOnly || user?.role === 'carrier');
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, padding: 24 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, padding: 24, maxWidth: 1200, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {cards.map(card => (
         <div
           key={card.key}
