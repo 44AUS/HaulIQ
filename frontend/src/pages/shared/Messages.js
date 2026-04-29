@@ -996,7 +996,7 @@ export default function Messages() {
                 <div style={{ textAlign: 'center' }}>
                   <IonIcon name="chatbubbles-outline" style={{ fontSize: 48, color: isDark ? '#ffffff' : '#333333', display: 'block', marginBottom: 14 }} />
                   <p style={{ margin: '0 0 20px', fontSize: '0.95rem', fontWeight: 500, color: isDark ? '#ffffff' : '#333333' }}>Select a conversation</p>
-                  <IonButton fill="outline" color={isDark ? 'light' : 'dark'} onClick={() => setComposing(v => !v)}>
+                  <IonButton fill="outline" color={isDark ? 'light' : 'dark'} onClick={openSelectModal}>
                     <IonIcon slot="start" name="add-outline" />
                     Create a Message
                   </IonButton>
