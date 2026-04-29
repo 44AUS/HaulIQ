@@ -659,7 +659,7 @@ export default function CarrierAnalytics() {
   }, []);
 
   return (
-    <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+    <div style={{ padding: 10 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 1200, margin: '0 auto' }}>
         {activeTab === 'loads'    && <><LoadsPipelineCard /><LoadsCompletedCard /><LoadsTab    summary={summary} loading={loading} error={error} /></>}
         {activeTab === 'payments' && <PaymentsTab summary={summary} loading={loading} error={error} />}
