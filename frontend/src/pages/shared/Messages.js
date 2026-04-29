@@ -690,6 +690,16 @@ export default function Messages() {
               </IonSegment>
             </div>
 
+            {/* Mobile create message button */}
+            {isMobile && user?.role !== 'driver' && (
+              <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+                <IonButton expand="block" fill="outline" color="medium" onClick={openSelectModal}>
+                  <IonIcon slot="start" name="add-outline" style={{ marginRight: 6 }} />
+                  Create a Message
+                </IonButton>
+              </div>
+            )}
+
             {/* Compose panel */}
             {composing && (
               <div style={{ borderBottom: '1px solid var(--ion-border-color)', padding: '8px 12px', backgroundColor: 'rgba(0,0,0,0.03)', flexShrink: 0 }}>
