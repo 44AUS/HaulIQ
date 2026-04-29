@@ -150,8 +150,8 @@ export default function BrandingSettings({ embedded = false }) {
   const handleReset = () => persistColor(null);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: 10, alignItems: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, width: '100%', maxWidth: 1200, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ padding: 10, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, width: '100%', maxWidth: 1200, margin: '0 auto', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
 
         {/* Card header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', flexShrink: 0 }}>
@@ -163,8 +163,8 @@ export default function BrandingSettings({ embedded = false }) {
           <span style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ion-text-color)' }}>Branding</span>
         </div>
 
-        {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        {/* Content */}
+        <div>
 
           <SectionHeader label="DESIGN ELEMENTS" />
 
