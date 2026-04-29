@@ -70,7 +70,7 @@ const FEATURE_TABLE = {
 };
 
 function FeatureValue({ val }) {
-  if (val === true)  return <IonIcon name="checkmark-outline" style={{ fontSize: 15, color: '#2dd36f' }} />;
+  if (val === true)  return <IonIcon name="checkmark-outline" style={{ fontSize: 15, color: 'var(--ion-color-success)' }} />;
   if (val === false) return <IonIcon name="remove-outline" style={{ fontSize: 15, color: 'var(--ion-color-medium)' }} />;
   return <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{val}</span>;
 }

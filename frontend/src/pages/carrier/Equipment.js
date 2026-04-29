@@ -403,7 +403,7 @@ export default function Equipment() {
           </IonButtons>
           <IonTitle style={{ fontWeight: 700 }}>Select Dates</IonTitle>
           <IonButtons slot="end">
-            <IonButton fill="clear" shape="round" onClick={confirmDates} style={{ '--color': '#2dd36f' }}>
+            <IonButton fill="clear" shape="round" onClick={confirmDates} style={{ '--color': 'var(--ion-color-success)' }}>
               <IonIcon slot="icon-only" name="checkmark-outline" />
             </IonButton>
           </IonButtons>
@@ -483,8 +483,8 @@ export default function Equipment() {
           </IonButtons>
           <IonTitle style={{ fontWeight: 700 }}>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
           <IonButtons slot="end">
-            <IonButton fill="clear" shape="round" onClick={handleSave} disabled={saving} style={{ '--color': '#2dd36f', opacity: saving ? 0.6 : 1 }}>
-              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: '#2dd36f' }} /> : <IonIcon slot="icon-only" name="checkmark-outline" />}
+            <IonButton fill="clear" shape="round" onClick={handleSave} disabled={saving} style={{ '--color': 'var(--ion-color-success)', opacity: saving ? 0.6 : 1 }}>
+              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: 'var(--ion-color-success)' }} /> : <IonIcon slot="icon-only" name="checkmark-outline" />}
             </IonButton>
           </IonButtons>
         </IonToolbar>
