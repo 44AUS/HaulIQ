@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { IonToggle, IonToast, IonSpinner, IonBadge, IonReorderGroup, IonReorder, IonItem } from '@ionic/react';
+import { IonToggle, IonToast, IonSpinner, IonBadge, IonReorderGroup, IonReorder, IonItem, IonSegment, IonSegmentButton, IonLabel } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { settingsApi } from '../../services/api';
@@ -426,14 +426,15 @@ export default function Settings() {
       {/* ── Appearance ─────────────────────────────────────────────────────── */}
       <Section title="Appearance">
         <Row icon="globe-outline" label="Language">
-          <div style={{ display: 'flex', gap: 4 }}>
+          <IonSegment mode="ios" value={lang} onIonChange={e => handleLang(String(e.detail.value))}
+            style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 36 }}>
             {LANG_OPTIONS.map(o => (
-              <button key={o.key} onClick={() => handleLang(o.key)}
-                style={{ padding: '5px 12px', borderRadius: 8, border: `1px solid ${lang === o.key ? 'var(--ion-color-primary)' : 'var(--ion-border-color)'}`, background: lang === o.key ? 'var(--ion-color-primary)' : 'none', color: lang === o.key ? '#fff' : 'var(--ion-text-color)', fontWeight: lang === o.key ? 700 : 500, fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s' }}>
-                {o.label}
-              </button>
+              <IonSegmentButton key={o.key} value={o.key}
+                style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
+                <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>{o.label}</IonLabel>
+              </IonSegmentButton>
             ))}
-          </div>
+          </IonSegment>
         </Row>
         <Row icon="moon-outline" label="Dark theme">
           <IonToggle checked={isDark} onIonChange={() => toggleTheme()} style={{ '--handle-width': '20px', '--handle-height': '20px' }} />
