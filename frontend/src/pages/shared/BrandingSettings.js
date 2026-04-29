@@ -146,7 +146,7 @@ function BusinessCardPreview({ color, logoUrl, onLogoClick }) {
 function SectionHeader({ label }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', padding: '6px 24px', borderBottom: '1px solid var(--ion-border-color)', backgroundColor: 'var(--ion-background-color)' }}>
-      <span style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--ion-color-medium)', letterSpacing: '0.04em' }}>{label}</span>
+      <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>{label}</span>
     </div>
   );
 }
@@ -197,7 +197,7 @@ export default function BrandingSettings({ embedded = false }) {
         </div>
 
         <div>
-          <SectionHeader label="DESIGN ELEMENTS" />
+          <SectionHeader label="Design Elements" />
 
           {/* Logo row */}
           <div className="ion-activatable" onClick={handleLogoClick} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '14px 24px', borderBottom: '1px solid var(--ion-border-color)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
@@ -226,8 +226,6 @@ export default function BrandingSettings({ embedded = false }) {
             <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--ion-color-medium)' }}>{currentColor.toUpperCase()}</span>
             <IonIcon name="chevron-forward-outline" style={{ fontSize: 17, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
           </div>
-
-          <SectionHeader label="LIVE PREVIEW" />
 
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--ion-border-color)', display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <MobileAppPreview color={currentColor} />
