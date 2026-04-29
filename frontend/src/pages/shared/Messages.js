@@ -675,7 +675,7 @@ export default function Messages() {
 
             {/* Tab toggle */}
             <div style={{ padding: '0 10px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, height: 60, display: 'flex', alignItems: 'center' }}>
-              <IonSegment mode="ios" value={listTab} onIonChange={e => setListTab(String(e.detail.value))}
+              <IonSegment mode="md" value={listTab} onIonChange={e => setListTab(String(e.detail.value))}
                 style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 36, width: '100%' }}>
                 <IonSegmentButton value="main"
                   style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
