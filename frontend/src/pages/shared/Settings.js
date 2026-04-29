@@ -384,15 +384,17 @@ export default function Settings() {
         )}
 
         {releaseVideoId && (
-          <div style={{ paddingLeft: 20, paddingRight: 20, paddingTop: 16, paddingBottom: 16 }}>
-            <div style={{ width: 600, height: 300, borderRadius: 8, overflow: 'hidden' }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${releaseVideoId}`}
-                title="What's New"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ width: '100%', height: '100%', border: 'none' }}
-              />
+          <div style={{ padding: '16px 20px' }}>
+            <div style={{ maxWidth: 600, width: '100%' }}>
+              <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 8, overflow: 'hidden' }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${releaseVideoId}`}
+                  title="What's New"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+                />
+              </div>
             </div>
           </div>
         )}
