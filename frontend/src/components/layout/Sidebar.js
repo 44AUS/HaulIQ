@@ -365,7 +365,7 @@ export default function Sidebar({ onNavigate, onClose }) {
       {messagesPath && (
         <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
           <IonButton expand="block" fill="outline" style={{ '--border-radius': '8px', '--color': isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.65)', '--border-color': isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)', fontWeight: 600, fontSize: '0.8rem' }} onClick={() => handleNav(messagesPath)}>
-            <IonIcon slot="start" name="chatbubble-outline" />
+            <IonIcon slot="start" name="chatbubble-outline" style={{ marginRight: 6 }} />
             Message Center
             {unread > 0 && <span slot="end" style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: 'var(--ion-color-danger)', flexShrink: 0, display: 'inline-block' }} />}
           </IonButton>
