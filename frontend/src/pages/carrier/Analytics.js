@@ -82,10 +82,6 @@ function daysAgoStr(n) {
   const d = new Date(); d.setDate(d.getDate() - n);
   return d.toISOString().slice(0, 10);
 }
-function fmtDateDisplay(iso) {
-  const [y, m, d] = iso.split('-');
-  return `${parseInt(m)}/${parseInt(d)}/${String(y).slice(2)}`;
-}
 
 function LoadsPipelineCard() {
   const { mode } = useThemeMode();
