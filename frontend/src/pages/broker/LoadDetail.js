@@ -264,7 +264,7 @@ function LoadStatusBar({ status }) {
     { label: 'Quote',       bg: '#9E9E9E' },
     { label: 'Scheduled',   bg: '#1976D2' },
     { label: 'In Progress', bg: '#FDD835' },
-    { label: 'Completed',   bg: '#1B5E20' },
+    { label: 'Completed',   bg: '#4CAF50' },
   ];
   const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
   return (
