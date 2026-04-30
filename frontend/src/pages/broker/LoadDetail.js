@@ -270,17 +270,16 @@ function LoadStatusBar({ status }) {
   return (
     <div style={{ padding: '16px 24px 0' }}>
       <style>{`
-        .lsb { display: flex; width: 100%; }
+        .lsb { display: flex; width: 100%; gap: 4px; }
         .lsb-step {
           flex: 1; display: flex; align-items: center; justify-content: center;
           color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap;
           text-overflow: ellipsis; padding: 6px 0;
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
-          margin-left: -14px; user-select: none;
+          user-select: none;
         }
         .lsb-step:first-child {
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
-          margin-left: 0;
         }
         .lsb-step:last-child {
           clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%);
