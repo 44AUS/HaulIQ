@@ -273,9 +273,10 @@ function LoadStatusBar({ status }) {
         .lsb { display: flex; width: 100%; }
         .lsb-step {
           flex: 1; display: flex; align-items: center; justify-content: center;
-          height: 36px; font-size: 0.75rem; font-weight: 700; color: #fff;
+          color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap;
+          text-overflow: ellipsis; padding: 6px 0;
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
-          margin-left: -14px; padding: 0 20px; user-select: none;
+          margin-left: -14px; user-select: none;
         }
         .lsb-step:first-child {
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
