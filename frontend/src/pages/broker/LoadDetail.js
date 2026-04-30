@@ -268,21 +268,21 @@ function LoadStatusBar({ status }) {
   ];
   const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
   return (
-    <>
+    <div style={{ padding: '16px 24px 0' }}>
       <style>{`
         .lsb { display: flex; width: 100%; }
         .lsb-step {
           flex: 1; display: flex; align-items: center; justify-content: center;
-          height: 44px; font-size: 0.8125rem; font-weight: 700; color: #fff;
-          clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%, 20px 50%);
-          margin-left: -20px; padding: 0 28px; user-select: none;
+          height: 36px; font-size: 0.75rem; font-weight: 700; color: #fff;
+          clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+          margin-left: -14px; padding: 0 20px; user-select: none;
         }
         .lsb-step:first-child {
-          clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
+          clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
           margin-left: 0;
         }
         .lsb-step:last-child {
-          clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 20px 50%);
+          clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%);
         }
       `}</style>
       <div className="lsb">
@@ -290,14 +290,14 @@ function LoadStatusBar({ status }) {
           <div key={step.label} className="lsb-step" style={{
             backgroundColor: step.bg,
             zIndex: STEPS.length - i,
-            opacity: i > activeIdx ? 0.55 : 1,
+            opacity: i > activeIdx ? 0.45 : 1,
             textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
           }}>
             {step.label}
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
