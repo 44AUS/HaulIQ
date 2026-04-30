@@ -198,7 +198,7 @@ function LoadStatusBar({ status }) {
   return (
     <div style={{ marginBottom: 8 }}>
       <style>{`
-        .lsb { display: flex; width: 100%; gap: 4px; }
+        .lsb { display: flex; width: 100%; gap: 2px; }
         .lsb-wrap { flex: 1; }
         .lsb-wrap:first-child { border-radius: 8px 0 0 8px; overflow: hidden; }
         .lsb-wrap:last-child  { border-radius: 0 8px 8px 0; overflow: hidden; }
