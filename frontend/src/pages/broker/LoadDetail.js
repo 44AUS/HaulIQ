@@ -408,6 +408,8 @@ export default function BrokerLoadDetail() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
+      <LoadStatusBar status={bookingStatus} />
+
       {/* Full-bleed map */}
       <div style={{ overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} carrierLocation={carrierLocation} />
@@ -422,8 +424,6 @@ export default function BrokerLoadDetail() {
           </button>
         </div>
       </div>
-
-      <LoadStatusBar status={bookingStatus} />
 
       {/* Two-column content */}
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>

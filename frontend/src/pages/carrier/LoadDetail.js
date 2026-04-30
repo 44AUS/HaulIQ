@@ -312,6 +312,8 @@ export default function LoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <LoadStatusBar status={activeBookingStatus} />
+
       <div style={{ overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} />
         <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
@@ -323,8 +325,6 @@ export default function LoadDetail() {
           </button>
         </div>
       </div>
-
-      <LoadStatusBar status={activeBookingStatus} />
 
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         {/* LEFT */}
