@@ -196,7 +196,7 @@ function LoadStatusBar({ status }) {
   ];
   const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
   return (
-    <div style={{ padding: '16px 24px 0' }}>
+    <div style={{ marginBottom: 8 }}>
       <style>{`
         .lsb { display: flex; width: 100%; gap: 4px; }
         .lsb-step {
@@ -312,8 +312,6 @@ export default function LoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <LoadStatusBar status={activeBookingStatus} />
-
       <div style={{ overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} />
         <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
@@ -561,10 +559,13 @@ export default function LoadDetail() {
   );
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
-      {activeTab === 'overview'  && OverviewTab}
-      {activeTab === 'payments'  && PaymentsTab}
-      {activeTab === 'documents' && DocumentsTab}
+    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      {activeTab === 'overview' && <LoadStatusBar status={activeBookingStatus} />}
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
+        {activeTab === 'overview'  && OverviewTab}
+        {activeTab === 'payments'  && PaymentsTab}
+        {activeTab === 'documents' && DocumentsTab}
+      </div>
     </div>
   );
 }

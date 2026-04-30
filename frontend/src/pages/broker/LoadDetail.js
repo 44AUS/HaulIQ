@@ -268,7 +268,7 @@ function LoadStatusBar({ status }) {
   ];
   const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
   return (
-    <div style={{ padding: '16px 24px 0' }}>
+    <div style={{ marginBottom: 8 }}>
       <style>{`
         .lsb { display: flex; width: 100%; gap: 4px; }
         .lsb-step {
@@ -406,9 +406,9 @@ export default function BrokerLoadDetail() {
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-
+    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       <LoadStatusBar status={bookingStatus} />
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
       {/* Full-bleed map */}
       <div style={{ overflow: 'hidden', position: 'relative' }}>
@@ -660,6 +660,7 @@ export default function BrokerLoadDetail() {
           </div>
         </IonModal>
       )}
+      </div>
     </div>
   );
 }
