@@ -271,29 +271,34 @@ function LoadStatusBar({ status }) {
     <div style={{ marginBottom: 8 }}>
       <style>{`
         .lsb { display: flex; width: 100%; gap: 4px; }
+        .lsb-wrap { flex: 1; }
+        .lsb-wrap:first-child { border-radius: 8px 0 0 8px; overflow: hidden; }
+        .lsb-wrap:last-child  { border-radius: 0 8px 8px 0; overflow: hidden; }
         .lsb-step {
-          flex: 1; display: flex; align-items: center; justify-content: center;
+          display: flex; align-items: center; justify-content: center; width: 100%;
           color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap;
           text-overflow: ellipsis; padding: 6px 0;
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
           user-select: none;
         }
-        .lsb-step:first-child {
+        .lsb-wrap:first-child .lsb-step {
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
         }
-        .lsb-step:last-child {
+        .lsb-wrap:last-child .lsb-step {
           clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%);
         }
       `}</style>
       <div className="lsb">
         {STEPS.map((step, i) => (
-          <div key={step.label} className="lsb-step" style={{
-            backgroundColor: step.bg,
-            zIndex: STEPS.length - i,
-            opacity: i > activeIdx ? 0.45 : 1,
-            textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
-          }}>
-            {step.label}
+          <div key={step.label} className="lsb-wrap">
+            <div className="lsb-step" style={{
+              backgroundColor: step.bg,
+              zIndex: STEPS.length - i,
+              opacity: i > activeIdx ? 0.45 : 1,
+              textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+            }}>
+              {step.label}
+            </div>
           </div>
         ))}
       </div>
