@@ -270,7 +270,7 @@ export default function LoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ margin: '-24px -24px 24px', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} />
         <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
           <button
@@ -282,7 +282,7 @@ export default function LoadDetail() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         {/* LEFT */}
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
           <LoadStepper load={load} bookingStatus={activeBookingStatus} />
@@ -469,7 +469,7 @@ export default function LoadDetail() {
 
   // ── Tab: Payments ────────────────────────────────────────────────────────────
   const PaymentsTab = (
-    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start', padding: 24 }}>
       <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
         <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 16 }}>Profit Breakdown</span>
         {[
@@ -498,7 +498,7 @@ export default function LoadDetail() {
 
   // ── Tab: Documents ───────────────────────────────────────────────────────────
   const DocumentsTab = (
-    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start', padding: 24 }}>
       <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <IonIcon name="document-text-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 16 }} />
@@ -517,7 +517,7 @@ export default function LoadDetail() {
   );
 
   return (
-    <div>
+    <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
       {activeTab === 'overview'  && OverviewTab}
       {activeTab === 'payments'  && PaymentsTab}
       {activeTab === 'documents' && DocumentsTab}

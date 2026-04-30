@@ -103,7 +103,7 @@ export default function DriverLoadDetail() {
   const payCfg = PAY_STATUS[booking.driver_pay_status] || PAY_STATUS.unpaid;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 20, padding: 24 }}>
       <button onClick={() => navigate('/driver/loads')} style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--ion-color-primary)', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
         <IonIcon name="arrow-back-outline" style={{ fontSize: 16 }} />
         Back to Loads

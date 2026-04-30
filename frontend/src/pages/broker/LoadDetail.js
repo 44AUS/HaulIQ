@@ -364,10 +364,10 @@ export default function BrokerLoadDetail() {
   const pendingBids = bids.filter(b => b.status === 'pending');
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
       {/* Full-bleed map */}
-      <div style={{ margin: '-16px -16px 24px', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ overflow: 'hidden', position: 'relative' }}>
         <LoadHeroMap load={load} carrierLocation={carrierLocation} />
 
         {/* Floating back button */}
@@ -382,7 +382,7 @@ export default function BrokerLoadDetail() {
       </div>
 
       {/* Two-column content */}
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
 
         {/* LEFT: Trip info */}
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, maxWidth: '100%' }}>
