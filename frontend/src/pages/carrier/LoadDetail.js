@@ -187,6 +187,48 @@ const BID_STATUS = {
   pending:  { label: 'Bid Pending',        bg: 'rgba(237,108,2,0.12)',  color: '#ed6c02',  border: '#ed6c02' },
 };
 
+function LoadStatusBar({ status }) {
+  const STEPS = [
+    { label: 'Quote',       bg: '#9E9E9E' },
+    { label: 'Scheduled',   bg: '#1976D2' },
+    { label: 'In Progress', bg: '#FDD835' },
+    { label: 'Completed',   bg: '#1B5E20' },
+  ];
+  const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
+  return (
+    <>
+      <style>{`
+        .lsb { display: flex; width: 100%; }
+        .lsb-step {
+          flex: 1; display: flex; align-items: center; justify-content: center;
+          height: 44px; font-size: 0.8125rem; font-weight: 700; color: #fff;
+          clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%, 20px 50%);
+          margin-left: -20px; padding: 0 28px; user-select: none;
+        }
+        .lsb-step:first-child {
+          clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
+          margin-left: 0;
+        }
+        .lsb-step:last-child {
+          clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%, 20px 50%);
+        }
+      `}</style>
+      <div className="lsb">
+        {STEPS.map((step, i) => (
+          <div key={step.label} className="lsb-step" style={{
+            backgroundColor: step.bg,
+            zIndex: STEPS.length - i,
+            opacity: i > activeIdx ? 0.55 : 1,
+            textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+          }}>
+            {step.label}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export default function LoadDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -281,6 +323,8 @@ export default function LoadDetail() {
           </button>
         </div>
       </div>
+
+      <LoadStatusBar status={activeBookingStatus} />
 
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         {/* LEFT */}
