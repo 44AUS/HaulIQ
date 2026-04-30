@@ -210,7 +210,7 @@ function LoadStatusBar({ status }) {
           clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
         }
         .lsb-step:last-child {
-          clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%);
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%);
         }
       `}</style>
       <div className="lsb">
