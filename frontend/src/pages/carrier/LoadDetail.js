@@ -196,7 +196,7 @@ function LoadStatusBar({ status }) {
   ];
   const activeIdx = { pending: 0, instant_booked: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
   return (
-    <div style={{ marginBottom: 8, borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
+    <div style={{ marginBottom: 8, borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden', backgroundColor: 'transparent' }}>
       <style>{`
         .lsb { display: flex; width: 100%; gap: 0.2px; }
         .lsb-wrap { flex: 1; }
