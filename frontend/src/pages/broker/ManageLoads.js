@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { IonSpinner, IonModal } from '@ionic/react';
 import { loadsApi } from '../../services/api';
-import { adaptLoadList } from '../../services/adapters';
+import { adaptLoadList, loadSlug } from '../../services/adapters';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { getDrivingMilesByCoords, getDrivingMiles } from '../../services/routing';
 import IonIcon from '../../components/IonIcon';
@@ -378,7 +378,7 @@ export default function ManageLoads() {
                     </td>
                     <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
                       <Link
-                        to={`/broker/loads/${load._raw.id}`}
+                        to={`/broker/loads/${load._raw.id}/${loadSlug(load.origin, load.dest)}`}
                         state={{ from: 'Manage Loads' }}
                         style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-color-primary)', textDecoration: 'none' }}
                       >

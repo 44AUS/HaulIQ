@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { IonSpinner } from '@ionic/react';
 import { bookingsApi } from '../../services/api';
+import { loadSlug } from '../../services/adapters';
 import DispatcherTable from '../../components/broker/DispatcherTable';
 import DispatchModal from '../../components/broker/DispatchModal';
 import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from '@react-google-maps/api';
@@ -88,7 +89,7 @@ function BrokerLoadCard({ load }) {
   const loadId = load.load_id || load.id;
 
   return (
-    <Link to={`/broker/loads/${loadId}`} state={{ from: 'Loads in Progress' }} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+    <Link to={`/broker/loads/${loadId}/${loadSlug(load.origin, load.destination)}`} state={{ from: 'Loads in Progress' }} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div style={{ ...cardStyle, padding: 16, height: '100%', boxSizing: 'border-box', cursor: 'pointer' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
@@ -220,7 +221,7 @@ function TableView({ loads }) {
                     {String(load.id).slice(0, 8).toUpperCase()}
                   </td>
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
-                    <Link to={`/broker/loads/${loadId}`} state={{ from: 'Loads in Progress' }} style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-color-primary)', textDecoration: 'none' }}>
+                    <Link to={`/broker/loads/${loadId}/${loadSlug(load.origin, load.destination)}`} state={{ from: 'Loads in Progress' }} style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-color-primary)', textDecoration: 'none' }}>
                       {load.origin} → {load.destination}
                     </Link>
                   </td>
@@ -367,7 +368,7 @@ function LoadsMap({ loads, stats }) {
                   <span style={{ fontSize: '0.72rem', color: '#6b7280', display: 'block' }}>Carrier: {selectedLoad.carrier_name}</span>
                 )}
                 <Link
-                  to={`/broker/loads/${selectedLoad.load_id || selectedLoad.id}`}
+                  to={`/broker/loads/${selectedLoad.load_id || selectedLoad.id}/${loadSlug(selectedLoad.origin, selectedLoad.destination)}`}
                   state={{ from: 'Loads in Progress' }}
                   style={{ display: 'block', marginTop: 8, padding: '4px 0', textAlign: 'center', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.7rem', color: '#374151', textDecoration: 'none', fontWeight: 600 }}
                 >

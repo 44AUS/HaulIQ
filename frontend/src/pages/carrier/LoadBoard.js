@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
+import { loadSlug } from '../../services/adapters';
 import { adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
 
@@ -101,7 +102,7 @@ function TableView({ loads, equipmentTypes }) {
             const initials = load.broker?.name?.split(' ').map(w => w[0]).join('').slice(0, 2) || '?';
 
             return (
-              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}`, { state: { from: 'Load Board' } })} style={{ cursor: 'pointer', height: 64 }}>
+              <tr key={load.id} onClick={() => navigate(`/carrier/loads/${load.id}/${loadSlug(load.origin, load.dest)}`, { state: { from: 'Load Board' } })} style={{ cursor: 'pointer', height: 64 }}>
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', width: 80 }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', whiteSpace: 'nowrap' }}>{load.posted}</span>
                 </RippleTd>

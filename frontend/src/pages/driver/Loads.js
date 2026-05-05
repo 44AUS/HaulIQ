@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IonSpinner } from '@ionic/react';
 import { driverApi } from '../../services/api';
+import { loadSlug } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
 
 const STATUS_CHIP = {
@@ -66,7 +67,7 @@ export default function DriverLoads() {
             return (
               <div
                 key={load.id}
-                onClick={() => navigate(`/driver/loads/${load.id}`)}
+                onClick={() => navigate(`/driver/loads/${load.id}/${loadSlug(load.origin, load.destination)}`)}
                 style={{ ...cardStyle, padding: 16, cursor: 'pointer' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>

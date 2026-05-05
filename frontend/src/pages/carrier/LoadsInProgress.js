@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IonSpinner } from '@ionic/react';
 import { bookingsApi } from '../../services/api';
+import { loadSlug } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
 
 const STATUS_CONFIG = {
@@ -209,7 +210,7 @@ export default function CarrierLoadsInProgress() {
             <LoadProgressCard
               key={load.id}
               load={load}
-              onClick={() => navigate(`/carrier/active/${load.booking_id}`)}
+              onClick={() => navigate(`/carrier/active/${load.booking_id}/${loadSlug(load.origin, load.destination)}`)}
             />
           ))}
         </div>

@@ -114,6 +114,11 @@ export function adaptHistory(h) {
   };
 }
 
+export function loadSlug(origin, dest) {
+  const s = str => (str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return `${s(origin)}-to-${s(dest)}`;
+}
+
 export function adaptReview(r) {
   return {
     id:              String(r.id),

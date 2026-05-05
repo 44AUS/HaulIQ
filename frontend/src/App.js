@@ -145,6 +145,7 @@ function DriverRoutes() {
           <Route path="dashboard" element={<DriverDashboard />} />
           <Route path="loads" element={<DriverLoads />} />
           <Route path="loads/:bookingId" element={<DriverLoadDetail />} />
+          <Route path="loads/:bookingId/:slug" element={<DriverLoadDetail />} />
           <Route path="earnings" element={<DriverEarnings />} />
           <Route path="messages" element={<Messages />} />
           <Route path="*" element={<Navigate to="dashboard" replace />} />
@@ -163,11 +164,13 @@ function CarrierRoutes() {
           <Route path="dashboard" element={<Navigate to="/carrier/calendar" replace />} />
           <Route path="loads" element={<LoadBoard />} />
           <Route path="loads/:id" element={<LoadDetail />} />
+          <Route path="loads/:id/:slug" element={<LoadDetail />} />
           <Route path="calculator" element={<ProfitCalculator />} />
           <Route path="brain" element={<EarningsBrain />} />
           <Route path="saved" element={<SavedLoads />} />
           <Route path="history" element={<LoadHistory />} />
           <Route path="active/:bookingId" element={<ActiveLoadDetail />} />
+          <Route path="active/:bookingId/:slug" element={<ActiveLoadDetail />} />
           <Route path="loads/:id/bid" element={<PlaceBid />} />
           <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
@@ -199,6 +202,7 @@ function BrokerRoutes() {
           <Route path="post" element={<PostLoad />} />
           <Route path="loads" element={<ManageLoads />} />
           <Route path="loads/:id" element={<BrokerLoadDetail />} />
+          <Route path="loads/:id/:slug" element={<BrokerLoadDetail />} />
           <Route path="templates" element={<LoadTemplates />} />
           <Route path="analytics" element={<BrokerAnalytics />} />
           <Route path="messages" element={<Messages />} />
