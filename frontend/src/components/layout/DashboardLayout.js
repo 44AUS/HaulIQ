@@ -27,6 +27,7 @@ const COMPACT_PADDING_PATHS = [
   '/broker/active', '/carrier/job-manager',
   '/carrier/payments', '/broker/payments',
   '/broker/trucks', '/carrier/equipment',
+  '/carrier/lane-watches',
 ];
 
 // Pages that manage their own scroll — content div must fill full height
