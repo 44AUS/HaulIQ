@@ -535,10 +535,14 @@ export default function LoadManager() {
 
       <IonActionSheet
         mode="ios"
+        translucent={false}
         isOpen={findLoadsSheet}
         onDidDismiss={() => setFindLoadsSheet(false)}
-        header="Find Loads"
         buttons={[
+          {
+            text: 'What are these and how are they different?',
+            cssClass: 'what-are-these-things-btn',
+          },
           {
             text: 'Browse Load Board',
             icon: 'albums-outline',
