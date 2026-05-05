@@ -311,6 +311,7 @@ def broker_active_loads(
 
         result.append({
             "id": str(load.id),
+            "load_number": load.load_number,
             "booking_id": str(booking.id) if booking else None,
             "status": status,
             "load_type": load.load_type.value if load.load_type else None,

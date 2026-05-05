@@ -422,7 +422,7 @@ export default function BookingRequests() {
             return (
               <div key={bid.id} style={{ ...cardStyle, overflow: 'hidden' }}>
                 <Link
-                  to={`/broker/loads/${bid.load_id}${bid.load_origin && bid.load_dest ? '/' + loadSlug(bid.load_origin, bid.load_dest) : ''}`}
+                  to={`/broker/loads/${bid.load_number || bid.load_id}${bid.load_origin && bid.load_dest ? '/' + loadSlug(bid.load_origin, bid.load_dest) : ''}`}
                   state={{ from: 'Booking Requests' }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', backgroundColor: 'var(--ion-color-light)', borderBottom: '1px solid var(--ion-border-color)', textDecoration: 'none' }}
                 >

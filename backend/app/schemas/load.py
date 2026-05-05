@@ -74,6 +74,7 @@ class LoadUpdate(BaseModel):
 
 class LoadOut(BaseModel):
     id: UUID
+    load_number: Optional[int] = None
     origin: str
     origin_state: Optional[str]
     destination: str

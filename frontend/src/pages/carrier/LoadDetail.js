@@ -235,7 +235,7 @@ function LoadStatusBar({ status }) {
 }
 
 export default function LoadDetail() {
-  const { id } = useParams();
+  const { loadNumber } = useParams();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'overview';
 
@@ -251,24 +251,25 @@ export default function LoadDetail() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      loadsApi.get(id).then(adaptLoad),
-      bookingsApi.forLoad(id).catch(() => null),
-      bidsApi.my().catch(() => []),
-    ])
-      .then(([adapted, bk, allBids]) => {
+    loadsApi.getByNumber(loadNumber)
+      .then(raw => {
+        const adapted = adaptLoad(raw);
         setLoad(adapted);
         setSaved(adapted?.saved || false);
-        setBookingData(bk);
-        if (bk?.booking?.status) setBookingStatus(bk.booking.status);
-        setMyBid(allBids.find(b => String(b.load_id) === String(adapted._raw.id)) || null);
-        instantBookApi.check(adapted._raw.id)
-          .then(res => setCanInstantBook(res.eligible === true))
-          .catch(() => setCanInstantBook(false));
+        const uuid = adapted._raw.id;
+        instantBookApi.check(uuid).then(res => setCanInstantBook(res.eligible === true)).catch(() => setCanInstantBook(false));
+        return Promise.all([
+          bookingsApi.forLoad(uuid).catch(() => null),
+          bidsApi.my().catch(() => []),
+        ]).then(([bk, allBids]) => {
+          setBookingData(bk);
+          if (bk?.booking?.status) setBookingStatus(bk.booking.status);
+          setMyBid(allBids.find(b => String(b.load_id) === String(uuid)) || null);
+        });
       })
       .catch(() => setLoad(null))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [loadNumber]);
 
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}>

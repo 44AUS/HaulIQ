@@ -308,7 +308,7 @@ function LoadStatusBar({ status }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function BrokerLoadDetail() {
-  const { id } = useParams();
+  const { loadNumber } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const fromLabel = state?.from || 'Back';
@@ -325,19 +325,22 @@ export default function BrokerLoadDetail() {
   const [templateSaved, setTemplateSaved]   = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      loadsApi.get(id).then(adaptLoad),
-      bidsApi.forLoad(id).catch(() => []),
-      bookingsApi.forLoad(id).catch(() => null),
-    ])
-      .then(([l, b, bk]) => {
-        setLoad(l);
-        setBids(Array.isArray(b) ? b : []);
-        setBooking(bk);
+    loadsApi.getByNumber(loadNumber)
+      .then(raw => {
+        const adapted = adaptLoad(raw);
+        setLoad(adapted);
+        const uuid = adapted._raw.id;
+        return Promise.all([
+          bidsApi.forLoad(uuid).catch(() => []),
+          bookingsApi.forLoad(uuid).catch(() => null),
+        ]).then(([b, bk]) => {
+          setBids(Array.isArray(b) ? b : []);
+          setBooking(bk);
+        });
       })
       .catch(() => setError('Load not found'))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [loadNumber]);
 
   const handleAcceptBid = (bidId) => {
     setActionLoading(bidId);
@@ -444,7 +447,7 @@ export default function BrokerLoadDetail() {
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
               <div>
                 <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 2 }}>
-                  Load #{load.id.slice(0, 8).toUpperCase()}
+                  Load #{load.loadNumber || load.id.slice(0, 8).toUpperCase()}
                   {booking && <> · Carrier: <strong>{booking.carrier_name}</strong>{booking.carrier_mc ? ` (MC-${booking.carrier_mc})` : ''}</>}
                 </span>
                 <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'block' }}>{load.origin} → {load.dest}</span>
@@ -621,7 +624,7 @@ export default function BrokerLoadDetail() {
                 <IonIcon name="document-text-outline" style={{ color: 'var(--ion-color-primary)' }} />
                 <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Documents & Load Messages</span>
               </div>
-              <DocumentPanel loadId={id} />
+              <DocumentPanel loadId={load._raw.id} />
             </div>
           </div>
 

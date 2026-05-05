@@ -378,7 +378,7 @@ export default function ManageLoads() {
                     </td>
                     <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
                       <Link
-                        to={`/broker/loads/${load._raw.id}/${loadSlug(load.origin, load.dest)}`}
+                        to={`/broker/loads/${load.loadNumber || load._raw.id}/${loadSlug(load.origin, load.dest)}`}
                         state={{ from: 'Manage Loads' }}
                         style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-color-primary)', textDecoration: 'none' }}
                       >

@@ -10,7 +10,7 @@ const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'v
 const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
 export default function PlaceBid() {
-  const { id } = useParams();
+  const { loadNumber } = useParams();
   const navigate = useNavigate();
 
   const [load, setLoad]           = useState(null);
@@ -23,19 +23,19 @@ export default function PlaceBid() {
   const [existingBid, setExistingBid] = useState(null);
 
   useEffect(() => {
-    loadsApi.get(id)
+    loadsApi.getByNumber(loadNumber)
       .then(data => {
-        setLoad(adaptLoad(data));
+        const adapted = adaptLoad(data);
+        setLoad(adapted);
         setAmount(String(data.rate || ''));
-        return bidsApi.my();
-      })
-      .then(bids => {
-        const existing = bids.find(b => String(b.load_id) === String(id));
-        if (existing) setExistingBid(existing);
+        return bidsApi.my().then(bids => {
+          const existing = bids.find(b => String(b.load_id) === String(adapted._raw.id));
+          if (existing) setExistingBid(existing);
+        });
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [loadNumber]);
 
   const parsed  = parseFloat(amount);
   const valid   = !isNaN(parsed) && parsed > 0;

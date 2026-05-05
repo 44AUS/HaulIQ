@@ -56,6 +56,7 @@ export function adaptLoad(l) {
   if (!l) return null;
   return {
     id:           String(l.id),
+    loadNumber:   l.load_number || null,
     broker:       adaptBroker(l.broker),
     type:         LOAD_TYPE_LABEL[l.load_type] || l.load_type,
     weight:       l.weight_lbs ? `${Number(l.weight_lbs).toLocaleString()} lbs` : null,

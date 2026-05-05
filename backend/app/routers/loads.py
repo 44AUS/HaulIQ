@@ -283,6 +283,39 @@ def lane_rate_intel(
         }
 
 
+# ─── GET /api/loads/n/{load_number} ───────────────────────────────────────────
+@router.get("/n/{load_number}", response_model=LoadOut, summary="Get full load details by load number")
+def get_load_by_number(
+    load_number: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    load = (
+        db.query(Load)
+        .options(joinedload(Load.broker))
+        .filter(Load.load_number == load_number)
+        .first()
+    )
+    if not load:
+        raise HTTPException(status_code=404, detail="Load not found")
+
+    is_poster = (load.broker_user_id and str(current_user.id) == str(load.broker_user_id))
+    if not is_poster:
+        already_viewed = db.query(LoadView).filter(
+            LoadView.load_id == load.id,
+            LoadView.viewer_id == current_user.id,
+        ).first()
+        if not already_viewed:
+            db.add(LoadView(load_id=load.id, viewer_id=current_user.id))
+            load.view_count = (load.view_count or 0) + 1
+    db.commit()
+
+    enriched = _enrich_load(load)
+    _stamp_saved([enriched], current_user.id, db)
+    _mask_addresses(enriched, current_user, db)
+    return enriched
+
+
 # ─── GET /api/loads/{id} ───────────────────────────────────────────────────────
 @router.get("/{load_id}", response_model=LoadOut, summary="Get full load details")
 def get_load(

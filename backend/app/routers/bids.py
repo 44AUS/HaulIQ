@@ -33,6 +33,7 @@ class BidOut(BaseModel):
     carrier_id: UUID
     carrier_name: Optional[str] = None
     carrier_mc: Optional[str] = None
+    load_number: Optional[int] = None
     load_origin: Optional[str] = None
     load_dest: Optional[str] = None
     load_rate: Optional[float] = None
@@ -110,6 +111,7 @@ def bids_on_my_loads(
             carrier_id=bid.carrier_id,
             carrier_name=carrier.company or carrier.name if carrier else None,
             carrier_mc=carrier.mc_number if carrier else None,
+            load_number=load.load_number if load else None,
             load_origin=load.origin if load else None,
             load_dest=load.destination if load else None,
             load_rate=load.rate if load else None,

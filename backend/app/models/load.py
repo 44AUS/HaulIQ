@@ -44,6 +44,7 @@ class Load(Base):
     __tablename__ = "loads"
 
     id               = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    load_number      = Column(Integer, nullable=True, unique=True, index=True)
     broker_id        = Column(UUID(as_uuid=True), ForeignKey("brokers.id"), nullable=False, index=True)
     broker_user_id   = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
 
