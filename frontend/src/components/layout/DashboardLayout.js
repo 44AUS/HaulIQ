@@ -39,7 +39,11 @@ const FULL_HEIGHT_PATHS = [
   '/carrier/lane-watches',
 ];
 
-const isLoadDetail      = (p) => /^\/carrier\/loads\/[^/]+$/.test(p) || /^\/carrier\/active\/[^/]+$/.test(p);
+const isLoadDetail      = (p) =>
+  /^\/carrier\/loads\/[^/]+(\/[^/]+)?$/.test(p) ||
+  /^\/carrier\/active\/[^/]+(\/[^/]+)?$/.test(p) ||
+  /^\/broker\/loads\/[^/]+(\/[^/]+)?$/.test(p) ||
+  /^\/driver\/loads\/[^/]+(\/[^/]+)?$/.test(p);
 const isCarrierProfile  = (p) => /^\/c\/[^/]+$/.test(p);
 const isBrokerProfile   = (p) => /^\/b\/[^/]+$/.test(p);
 
