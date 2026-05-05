@@ -29,6 +29,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Find Loads action sheet ──────────────────────────────────────────────── */
+.find-loads-sheet {
+  --background: var(--ion-card-background);
+  --button-background: var(--ion-card-background);
+  --button-color: var(--ion-text-color);
+  --color: var(--ion-text-color);
+}
+.find-loads-sheet .action-sheet-group-cancel .action-sheet-button {
+  background: var(--ion-card-background) !important;
+  color: var(--ion-text-color) !important;
+}
+
 /* ── Interactive element hover feedback ───────────────────────────────────── */
 
 /* Clickable table rows — background tint (no inline bg to fight) */

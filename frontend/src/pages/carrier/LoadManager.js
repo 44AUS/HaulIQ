@@ -536,6 +536,7 @@ export default function LoadManager() {
       <IonActionSheet
         mode="ios"
         translucent={false}
+        cssClass="find-loads-sheet"
         isOpen={findLoadsSheet}
         onDidDismiss={() => setFindLoadsSheet(false)}
         buttons={[
