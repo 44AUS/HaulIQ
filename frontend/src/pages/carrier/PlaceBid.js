@@ -73,7 +73,7 @@ export default function PlaceBid() {
   return (
     <div style={{ maxWidth: 640, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <button
-        onClick={() => navigate(`/carrier/loads/${id}/${loadSlug(load.origin, load.dest)}`)}
+        onClick={() => navigate(`/carrier/loads/${loadNumber}/${loadSlug(load.origin, load.dest)}`)}
         style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ion-color-primary)', fontSize: '0.875rem', fontFamily: 'inherit', alignSelf: 'flex-start', padding: 0 }}
       >
         <IonIcon name="arrow-back-outline" style={{ fontSize: 16 }} /> Back to Load
@@ -143,7 +143,7 @@ export default function PlaceBid() {
             You'll be notified when they respond.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <Link to={`/carrier/loads/${id}/${loadSlug(load.origin, load.dest)}`} style={{ padding: '8px 16px', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
+            <Link to={`/carrier/loads/${loadNumber}/${loadSlug(load.origin, load.dest)}`} style={{ padding: '8px 16px', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 500 }}>
               Back to Load
             </Link>
             <Link to="/carrier/loads" style={{ padding: '8px 16px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', borderRadius: 6, textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>
@@ -213,7 +213,7 @@ export default function PlaceBid() {
             <div style={{ display: 'flex', gap: 12 }}>
               <button
                 type="button"
-                onClick={() => navigate(`/carrier/loads/${id}/${loadSlug(load.origin, load.dest)}`)}
+                onClick={() => navigate(`/carrier/loads/${loadNumber}/${loadSlug(load.origin, load.dest)}`)}
                 style={{ flex: 1, padding: '12px', border: '1px solid var(--ion-border-color)', borderRadius: 6, background: 'none', cursor: 'pointer', fontSize: '1rem', fontFamily: 'inherit', color: 'var(--ion-text-color)' }}
               >
                 Cancel

@@ -470,7 +470,7 @@ export default function LoadDetail() {
                       )}
                     </div>
                   ) : (
-                    <Link to={`/carrier/loads/${id}/bid`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, color: 'var(--ion-color-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '1rem' }}>
+                    <Link to={`/carrier/loads/${loadNumber}/bid`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, color: 'var(--ion-color-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '1rem' }}>
                       <IonIcon name="cash-outline" style={{ fontSize: 18 }} /> Place Bid / Counter Offer
                     </Link>
                   )}
@@ -552,7 +552,7 @@ export default function LoadDetail() {
           <IonIcon name="document-text-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 16 }} />
           <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)' }}>Documents</span>
         </div>
-        <DocumentPanel loadId={id} />
+        <DocumentPanel loadId={load._raw.id} />
       </div>
       {booking && (
         <div style={{ ...cardStyle, flex: '0 0 360px', padding: 20 }}>
