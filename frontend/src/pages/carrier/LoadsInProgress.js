@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonButton, IonActionSheet } from '@ionic/react';
 import { bookingsApi } from '../../services/api';
 import { loadSlug } from '../../services/adapters';
+import { useThemeMode } from '../../context/ThemeContext';
 import IonIcon from '../../components/IonIcon';
 
 const STATUS_CONFIG = {
@@ -152,8 +153,10 @@ function LoadProgressCard({ load, onClick }) {
 
 export default function CarrierLoadsInProgress() {
   const navigate = useNavigate();
+  const { brandColor } = useThemeMode();
   const [loads, setLoads]   = useState([]);
   const [loading, setLoading] = useState(true);
+  const [findLoadsSheet, setFindLoadsSheet] = useState(false);
 
   useEffect(() => {
     bookingsApi.inProgress()
@@ -167,6 +170,7 @@ export default function CarrierLoadsInProgress() {
   const quotedCount    = loads.filter(l => l.status === 'quoted').length;
 
   return (
+    <>
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <IonIcon name="analytics-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 26 }} />
@@ -215,6 +219,27 @@ export default function CarrierLoadsInProgress() {
           ))}
         </div>
       )}
+
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 0', flexShrink: 0 }}>
+        <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon slot="start" name="add-outline" /> Find
+        </IonButton>
+      </div>
     </div>
+
+    <IonActionSheet
+      mode="ios"
+      translucent={false}
+      cssClass="find-loads-sheet"
+      isOpen={findLoadsSheet}
+      onDidDismiss={() => setFindLoadsSheet(false)}
+      buttons={[
+        { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
+        { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+        { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
+      ]}
+    />
+    </>
   );
 }

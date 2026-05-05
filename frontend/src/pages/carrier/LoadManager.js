@@ -529,7 +529,7 @@ export default function LoadManager() {
       {/* Find Loads button */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
         <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
-          <IonIcon slot="start" name="search-outline" /> Find Loads
+          <IonIcon slot="start" name="add-outline" /> Find
         </IonButton>
       </div>
 

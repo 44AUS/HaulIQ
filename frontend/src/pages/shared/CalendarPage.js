@@ -655,31 +655,22 @@ export default function CalendarPage() {
       {user?.role === 'carrier' && (
         <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
           <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': primary, '--background-activated': primary, '--background-hover': primary, '--border-color': primary, '--box-shadow': '0 6px 20px rgba(0,0,0,0.3)' }}>
-            <IonIcon slot="start" name="search-outline" /> Find Loads
+            <IonIcon slot="start" name="add-outline" /> Find
           </IonButton>
         </div>
       )}
 
       <IonActionSheet
+        mode="ios"
+        translucent={false}
+        cssClass="find-loads-sheet"
         isOpen={findLoadsSheet}
         onDidDismiss={() => setFindLoadsSheet(false)}
-        header="Find Loads"
         buttons={[
-          {
-            text: 'Browse Load Board',
-            icon: 'albums-outline',
-            handler: () => navigate('/carrier/loads'),
-          },
-          {
-            text: 'Lane Watches',
-            icon: 'eye-outline',
-            handler: () => navigate('/carrier/lane-watches'),
-          },
-          {
-            text: 'Cancel',
-            role: 'cancel',
-            icon: 'close-outline',
-          },
+          { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+          { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
+          { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+          { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
         ]}
       />
     </div>

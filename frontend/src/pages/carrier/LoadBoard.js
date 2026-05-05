@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect, IonActionSheet } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { loadSlug, adaptLoadList } from '../../services/adapters';
@@ -316,6 +316,7 @@ export default function LoadBoard() {
   const [activeTab, setActiveTab]     = useState('all');
   const [filterOpen, setFilterOpen]   = useState(false);
   const [spinning, setSpinning]       = useState(false);
+  const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const autoTimer = useRef(null);
 
   const setPF = (key, val) => setPF_state(f => ({ ...f, [key]: val }));
@@ -467,7 +468,27 @@ export default function LoadBoard() {
         onClear={() => { setPF_state(INIT); fetchLoads(INIT); setFilterOpen(false); }}
         equipmentTypes={equipmentTypes}
       />
+
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
+        <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon slot="start" name="add-outline" /> Find
+        </IonButton>
+      </div>
     </div>
+
+    <IonActionSheet
+      mode="ios"
+      translucent={false}
+      cssClass="find-loads-sheet"
+      isOpen={findLoadsSheet}
+      onDidDismiss={() => setFindLoadsSheet(false)}
+      buttons={[
+        { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
+        { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+        { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
+      ]}
+    />
     <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </>
   );

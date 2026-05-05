@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect } from '@ionic/react';
+import { useNavigate } from 'react-router-dom';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect, IonActionSheet } from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -164,12 +165,14 @@ const laneLabel = (w) => {
 
 export default function LaneWatches() {
   const { brandColor } = useThemeMode();
+  const navigate = useNavigate();
   const [watches,        setWatches]        = useState([]);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
   const [activeTab,      setActiveTab]      = useState('all');
   const [drawerOpen,     setDrawerOpen]     = useState(false);
+  const [findLoadsSheet, setFindLoadsSheet] = useState(false);
 
   const fetchData = (showSpinner = false) => {
     if (showSpinner) setSpinning(true); else setLoading(true);
@@ -350,6 +353,12 @@ export default function LaneWatches() {
         </div>
 
       </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
+        <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
+          <IonIcon slot="start" name="add-outline" /> Find
+        </IonButton>
+      </div>
     </div>
 
     <AddWatchDrawer
@@ -357,6 +366,20 @@ export default function LaneWatches() {
       onClose={() => setDrawerOpen(false)}
       onSaved={w => setWatches(prev => [w, ...prev])}
       equipmentTypes={equipmentTypes}
+    />
+
+    <IonActionSheet
+      mode="ios"
+      translucent={false}
+      cssClass="find-loads-sheet"
+      isOpen={findLoadsSheet}
+      onDidDismiss={() => setFindLoadsSheet(false)}
+      buttons={[
+        { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
+        { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+        { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
+      ]}
     />
 
     <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
