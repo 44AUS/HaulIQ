@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
-import { loadSlug } from '../../services/adapters';
-import { adaptLoadList } from '../../services/adapters';
+import { loadSlug, adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
 
 const SORT_OPTIONS = [

@@ -283,19 +283,33 @@ def lane_rate_intel(
         }
 
 
-# ─── GET /api/loads/n/{load_number} ───────────────────────────────────────────
-@router.get("/n/{load_number}", response_model=LoadOut, summary="Get full load details by load number")
+# ─── GET /api/loads/n/{identifier} ────────────────────────────────────────────
+@router.get("/n/{identifier}", response_model=LoadOut, summary="Get load by number or UUID")
 def get_load_by_number(
-    load_number: int,
+    identifier: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    load = (
-        db.query(Load)
-        .options(joinedload(Load.broker))
-        .filter(Load.load_number == load_number)
-        .first()
-    )
+    load = None
+    try:
+        load = (
+            db.query(Load)
+            .options(joinedload(Load.broker))
+            .filter(Load.load_number == int(identifier))
+            .first()
+        )
+    except (ValueError, TypeError):
+        pass
+    if not load:
+        try:
+            load = (
+                db.query(Load)
+                .options(joinedload(Load.broker))
+                .filter(Load.id == UUID(identifier))
+                .first()
+            )
+        except (ValueError, AttributeError):
+            pass
     if not load:
         raise HTTPException(status_code=404, detail="Load not found")
 
