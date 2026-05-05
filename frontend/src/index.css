@@ -40,6 +40,10 @@
   background: var(--ion-card-background) !important;
   color: var(--ion-text-color) !important;
 }
+.find-loads-sheet .what-are-these-things-btn {
+  background: var(--ion-background-color) !important;
+  color: var(--ion-color-medium) !important;
+}
 
 /* ── Interactive element hover feedback ───────────────────────────────────── */
 
