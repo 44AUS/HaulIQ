@@ -43,6 +43,7 @@
 .find-loads-sheet .what-are-these-things-btn {
   background: var(--ion-background-color) !important;
   color: var(--ion-color-medium) !important;
+  font-size: 13px !important;
 }
 
 /* ── Interactive element hover feedback ───────────────────────────────────── */
