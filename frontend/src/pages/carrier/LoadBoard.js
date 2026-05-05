@@ -307,6 +307,7 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
 
 export default function LoadBoard() {
   const { brandColor } = useThemeMode();
+  const navigate = useNavigate();
   const [pf, setPF_state]             = useState(INIT);
   const [appliedFilters, setAppliedFilters] = useState(INIT);
   const [loads, setLoads]             = useState([]);
