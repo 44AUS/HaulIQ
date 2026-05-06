@@ -189,7 +189,6 @@ function TableView({ loads, equipmentTypes }) {
 }
 
 function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTypes }) {
-  const { brandColor } = useThemeMode();
   return createPortal(
     <>
       {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}

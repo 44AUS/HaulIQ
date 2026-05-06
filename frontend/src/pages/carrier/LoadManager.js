@@ -82,7 +82,6 @@ function TmsProgress({ tmsStatus }) {
 }
 
 function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
-  const { brandColor } = useThemeMode();
   return createPortal(
     <>
       {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
