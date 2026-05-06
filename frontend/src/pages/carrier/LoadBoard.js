@@ -228,19 +228,9 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
           {/* Equipment Types */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Equipment Types</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {equipmentTypes.map(t => (
-                <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: '0.875rem', color: 'var(--ion-text-color)' }}>
-                  <input
-                    type="checkbox"
-                    checked={pf.equipTypes.includes(t.name)}
-                    onChange={e => setPF('equipTypes', e.target.checked ? [...pf.equipTypes, t.name] : pf.equipTypes.filter(x => x !== t.name))}
-                    style={{ width: 14, height: 14 }}
-                  />
-                  {t.name}
-                </label>
-              ))}
-            </div>
+            <IonSelect fill="outline" style={ionOutline} multiple value={pf.equipTypes} onIonChange={e => setPF('equipTypes', e.detail.value)} placeholder="All types">
+              {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+            </IonSelect>
           </div>
 
           {/* Load Size */}
