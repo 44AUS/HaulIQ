@@ -558,14 +558,19 @@ export default function LoadManager() {
             cssClass: 'what-are-these-things-btn',
           },
           {
+            text: 'Post a Truck',
+            icon: 'add-circle-outline',
+            handler: () => navigate('/carrier/equipment'),
+          },
+          {
+            text: 'Add Lane Watch',
+            icon: 'eye-outline',
+            handler: () => navigate('/carrier/lane-watches'),
+          },
+          {
             text: 'Browse Load Board',
             icon: 'albums-outline',
             handler: () => navigate('/carrier/loads'),
-          },
-          {
-            text: 'Lane Watches',
-            icon: 'eye-outline',
-            handler: () => navigate('/carrier/lane-watches'),
           },
           {
             text: 'Cancel',

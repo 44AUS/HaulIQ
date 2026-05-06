@@ -409,6 +409,8 @@ export default function LaneWatches() {
       onDidDismiss={() => setFindLoadsSheet(false)}
       buttons={[
         { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => navigate('/carrier/equipment') },
         { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => openModal() },
         { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
         { text: 'Cancel', role: 'cancel', icon: 'close-outline' },

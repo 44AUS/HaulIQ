@@ -397,8 +397,8 @@ export default function Equipment() {
         buttons={[
           { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
           { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => openCreate() },
+          { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
           { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
-          { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
           { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
         ]}
       />
