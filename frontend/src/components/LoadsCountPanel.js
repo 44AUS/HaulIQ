@@ -50,10 +50,8 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
           <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '85%', opacity: 0.15, pointerEvents: 'none', userSelect: 'none' }} />
           <div style={{ position: 'relative', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ textAlign: 'center', flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ background: '#0033a0', color: '#fff', fontWeight: 900, fontSize: 13, padding: '2px 6px', borderRadius: 2, letterSpacing: '0.1em' }}>DAT</span>
-                <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--ion-text-color)' }}>National Loads Count</span>
-              </div>
+              <img src="/urload-logo.png" alt="UrLoad" style={{ height: 36, objectFit: 'contain', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
+              <span style={{ display: 'block', fontWeight: 800, fontSize: '1rem', color: 'var(--ion-text-color)', marginBottom: 2 }}>National Loads Count</span>
               <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Where the Loads Are</p>
             </div>
             <IonButton fill="clear" color="medium" size="small" onClick={onClose} style={{ position: 'absolute', top: 8, right: 4 }}>
