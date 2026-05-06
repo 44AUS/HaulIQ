@@ -474,10 +474,10 @@ export default function LoadManager() {
 
                         <RippleTd style={{ ...tdStyle, padding: '0 12px', whiteSpace: 'nowrap' }}>
                           {item.rate
-                            ? <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#2e7d32', display: 'block' }}>${Number(item.rate).toLocaleString()}</span>
+                            ? <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--ion-color-success)', display: 'block' }}>${Number(item.rate).toLocaleString()}</span>
                             : <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>—</span>}
                           {item.net != null && (
-                            <span style={{ fontSize: '0.75rem', color: item.net >= 0 ? '#2e7d32' : '#d32f2f', display: 'block' }}>
+                            <span style={{ fontSize: '0.75rem', color: item.net >= 0 ? 'var(--ion-color-success)' : '#d32f2f', display: 'block' }}>
                               Net {item.net >= 0 ? '+' : ''}${Number(item.net).toLocaleString()}
                             </span>
                           )}
