@@ -44,7 +44,6 @@ const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color
 function RippleTd({ style, children, ...props }) {
   return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
 }
-const ionOutline = { '--highlight-color-focused': 'var(--ion-color-success)' };
 const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 
 function TableView({ loads, equipmentTypes }) {
