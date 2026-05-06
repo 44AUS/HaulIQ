@@ -46,6 +46,13 @@
   font-size: 13px !important;
 }
 
+/* ── Filter drawer inputs (outline style) ────────────────────────────────── */
+.filter-drawer input:not([type="checkbox"]):focus,
+.filter-drawer select:focus {
+  border-color: var(--ion-color-success) !important;
+  box-shadow: 0 0 0 1px var(--ion-color-success) !important;
+}
+
 /* ── Equipment modal address inputs ──────────────────────────────────────── */
 .eq-address-wrapper input {
   background-color: transparent !important;

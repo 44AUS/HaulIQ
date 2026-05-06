@@ -212,11 +212,11 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
   );
 }
 
-function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onClear, isDark }) {
+function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
   return (
     <>
       {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 199 }} />}
-      <div style={{ position: 'fixed', top: 0, right: open ? 0 : -280, bottom: 0, width: 280, zIndex: 200, backgroundColor: isDark ? '#1a1a1a' : '#fff', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', transition: 'right 0.25s ease', display: 'flex', flexDirection: 'column' }}>
+      <div className="filter-drawer" style={{ position: 'fixed', top: 0, right: open ? 0 : -280, bottom: 0, width: 280, zIndex: 200, backgroundColor: 'var(--ion-card-background)', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', transition: 'right 0.25s ease', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 10 }}>
@@ -649,7 +649,6 @@ export default function CalendarPage() {
         onChange={(k, v) => setFilters(f => ({ ...f, [k]: v }))}
         onApply={() => { setAppliedFilters({ ...filters }); setFilterOpen(false); }}
         onClear={() => { setFilters({ status: 'All' }); setAppliedFilters({ status: 'All' }); setFilterOpen(false); }}
-        isDark={isDark}
       />
 
       {user?.role === 'carrier' && (
