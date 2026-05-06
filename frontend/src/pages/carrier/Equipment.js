@@ -587,9 +587,11 @@ export default function Equipment() {
             </div>
           </div>
 
-          <IonInput fill="outline" label="Rate Expectation ($/mile)" labelPlacement="stacked" type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" helperText="Leave blank to show as negotiable to brokers" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
-
-          <IonTextarea fill="outline" label="Notes" labelPlacement="stacked" rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Details</span>
+            <IonInput fill="outline" label="Rate Expectation ($/mile)" labelPlacement="stacked" type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" helperText="Leave blank to show as negotiable to brokers" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
+            <IonTextarea fill="outline" label="Notes" labelPlacement="stacked" rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
+          </div>
 
         </div>
       </IonContent>
