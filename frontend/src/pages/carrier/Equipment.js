@@ -502,6 +502,7 @@ export default function Equipment() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px' }}>
 
           <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Truck Info</span>
             <IonSelect
               fill="outline"
               label="Equipment Class *"
