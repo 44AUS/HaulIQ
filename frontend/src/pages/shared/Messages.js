@@ -237,7 +237,6 @@ export default function Messages() {
   const { user } = useAuth();
   const { mode } = useThemeMode();
   const isDark = mode === 'dark';
-  const btnTextColor = '#ffffff';
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
