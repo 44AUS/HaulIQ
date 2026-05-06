@@ -203,25 +203,37 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
 
         <div style={{ overflowY: 'auto', padding: '4px 0' }}>
           {/* Origin */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Origin</span>
-            <IonInput fill="outline" style={{ ...ionOutline, marginBottom: 8 }} placeholder="e.g. Chicago, IL" value={pf.origin} onIonInput={e => setPF('origin', e.detail.value)} clearInput>
-              <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
-            </IonInput>
-            <IonSelect fill="outline" style={ionOutline} value={pf.originDeadhead} onIonChange={e => setPF('originDeadhead', e.detail.value)}>
-              {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
-            </IonSelect>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Origin</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput placeholder="e.g. Chicago, IL" value={pf.origin} onIonInput={e => setPF('origin', e.detail.value)} clearInput>
+                  <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
+                </IonInput>
+              </IonItem>
+              <IonItem>
+                <IonSelect aria-label="Origin deadhead" value={pf.originDeadhead} onIonChange={e => setPF('originDeadhead', e.detail.value)}>
+                  {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+                </IonSelect>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Destination */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Destination</span>
-            <IonInput fill="outline" style={{ ...ionOutline, marginBottom: 8 }} placeholder="e.g. Atlanta, GA" value={pf.dest} onIonInput={e => setPF('dest', e.detail.value)} clearInput>
-              <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
-            </IonInput>
-            <IonSelect fill="outline" style={ionOutline} value={pf.destDeadhead} onIonChange={e => setPF('destDeadhead', e.detail.value)}>
-              {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
-            </IonSelect>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Destination</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput placeholder="e.g. Atlanta, GA" value={pf.dest} onIonInput={e => setPF('dest', e.detail.value)} clearInput>
+                  <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
+                </IonInput>
+              </IonItem>
+              <IonItem>
+                <IonSelect aria-label="Destination deadhead" value={pf.destDeadhead} onIonChange={e => setPF('destDeadhead', e.detail.value)}>
+                  {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+                </IonSelect>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Equipment Types */}
@@ -237,13 +249,17 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           </div>
 
           {/* Load Size */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Load Size</span>
-            <IonSelect fill="outline" style={ionOutline} value={pf.loadSize} onIonChange={e => setPF('loadSize', e.detail.value)}>
-              <IonSelectOption value="">Full &amp; Partial</IonSelectOption>
-              <IonSelectOption value="full">Full Truckload (FTL)</IonSelectOption>
-              <IonSelectOption value="partial">Partial Truckload (LTL)</IonSelectOption>
-            </IonSelect>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Load Size</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonSelect aria-label="Load Size" value={pf.loadSize} onIonChange={e => setPF('loadSize', e.detail.value)}>
+                  <IonSelectOption value="">Full &amp; Partial</IonSelectOption>
+                  <IonSelectOption value="full">Full Truckload (FTL)</IonSelectOption>
+                  <IonSelectOption value="partial">Partial Truckload (LTL)</IonSelectOption>
+                </IonSelect>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Max Weight */}
@@ -277,11 +293,15 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           </div>
 
           {/* Sort By */}
-          <div style={{ padding: '10px 20px' }}>
-            <span style={sectionLabel}>Sort By</span>
-            <IonSelect fill="outline" style={ionOutline} value={pf.sort} onIonChange={e => setPF('sort', e.detail.value)}>
-              {SORT_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
-            </IonSelect>
+          <div>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Sort By</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonSelect aria-label="Sort By" value={pf.sort} onIonChange={e => setPF('sort', e.detail.value)}>
+                  {SORT_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+                </IonSelect>
+              </IonItem>
+            </IonList>
           </div>
         </div>
       </div>
