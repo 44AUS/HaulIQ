@@ -46,6 +46,18 @@
   font-size: 13px !important;
 }
 
+/* ── Equipment modal address inputs ──────────────────────────────────────── */
+.eq-address-wrapper input {
+  border-radius: 4px !important;
+  padding: 13px 16px !important;
+  font-size: 1rem !important;
+  transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+.eq-address-wrapper input:focus {
+  border-color: var(--ion-color-success) !important;
+  box-shadow: 0 0 0 1px var(--ion-color-success) !important;
+}
+
 /* ── Interactive element hover feedback ───────────────────────────────────── */
 
 /* Clickable table rows — background tint (no inline bg to fight) */

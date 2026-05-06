@@ -508,6 +508,7 @@ export default function Equipment() {
             value={form.equipment_class || ''}
             onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
             placeholder="Select class"
+            style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
           >
             {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
           </IonSelect>
@@ -521,18 +522,19 @@ export default function Equipment() {
               onIonChange={setField('equipment_type')}
               placeholder={form.equipment_class ? 'Select type' : 'Select a class first'}
               disabled={!form.equipment_class}
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
             >
               {(equipmentClasses.find(c => c.name === form.equipment_class)?.equipment_types || [])
                 .map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
             </IonSelect>
           </div>
 
-          <IonInput fill="outline" label="Trailer Length (ft)" labelPlacement="stacked" type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" />
+          <IonInput fill="outline" label="Trailer Length (ft)" labelPlacement="stacked" type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
 
-          <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" />
+          <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
 
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Current Location *</span>
+          <div className="eq-address-wrapper">
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Current Location *</span>
             <AddressAutocomplete
               placeholder="e.g. Dallas, TX"
               value={form.current_location}
@@ -540,8 +542,8 @@ export default function Equipment() {
             />
           </div>
 
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Preferred Origin</span>
+          <div className="eq-address-wrapper">
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Origin</span>
             <AddressAutocomplete
               placeholder="e.g. Chicago, IL"
               value={form.preferred_origin}
@@ -549,8 +551,8 @@ export default function Equipment() {
             />
           </div>
 
-          <div>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Preferred Destination</span>
+          <div className="eq-address-wrapper">
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Destination</span>
             <AddressAutocomplete
               placeholder="e.g. Atlanta, GA"
               value={form.preferred_destination}
@@ -574,9 +576,9 @@ export default function Equipment() {
             </div>
           </div>
 
-          <IonInput fill="outline" label="Rate Expectation ($/mile)" labelPlacement="stacked" type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" helperText="Leave blank to show as negotiable to brokers" />
+          <IonInput fill="outline" label="Rate Expectation ($/mile)" labelPlacement="stacked" type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" helperText="Leave blank to show as negotiable to brokers" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
 
-          <IonTextarea fill="outline" label="Notes" labelPlacement="stacked" rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow />
+          <IonTextarea fill="outline" label="Notes" labelPlacement="stacked" rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
 
         </div>
       </IonContent>
