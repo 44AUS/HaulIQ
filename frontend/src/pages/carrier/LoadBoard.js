@@ -446,8 +446,10 @@ export default function LoadBoard() {
                     <button
                       key={tab.key}
                       onClick={() => setActiveTab(tab.key)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', height: 46, border: 'none', borderBottom: active ? '2px solid var(--ion-text-color)' : '2px solid transparent', background: 'none', cursor: 'pointer', whiteSpace: 'nowrap', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', color: active ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', flexShrink: 0, fontFamily: 'inherit' }}
+                      className="ion-activatable"
+                      style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', height: 46, border: 'none', borderBottom: active ? '2px solid var(--ion-text-color)' : '2px solid transparent', background: 'none', cursor: 'pointer', whiteSpace: 'nowrap', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', color: active ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', flexShrink: 0, fontFamily: 'inherit' }}
                     >
+                      <IonRippleEffect />
                       {tab.label}
                       <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
                     </button>
