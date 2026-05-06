@@ -536,31 +536,35 @@ export default function Equipment() {
             <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
           </div>
 
-          <div className="eq-address-wrapper">
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Current Location *</span>
-            <AddressAutocomplete
-              placeholder="e.g. Dallas, TX"
-              value={form.current_location}
-              onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
-            />
-          </div>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Location</span>
 
-          <div className="eq-address-wrapper">
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Origin</span>
-            <AddressAutocomplete
-              placeholder="e.g. Chicago, IL"
-              value={form.preferred_origin}
-              onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_origin: cityState || address || '' }))}
-            />
-          </div>
+            <div className="eq-address-wrapper">
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Current Location *</span>
+              <AddressAutocomplete
+                placeholder="e.g. Dallas, TX"
+                value={form.current_location}
+                onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
+              />
+            </div>
 
-          <div className="eq-address-wrapper">
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Destination</span>
-            <AddressAutocomplete
-              placeholder="e.g. Atlanta, GA"
-              value={form.preferred_destination}
-              onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_destination: cityState || address || '' }))}
-            />
+            <div className="eq-address-wrapper">
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Origin</span>
+              <AddressAutocomplete
+                placeholder="e.g. Chicago, IL"
+                value={form.preferred_origin}
+                onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_origin: cityState || address || '' }))}
+              />
+            </div>
+
+            <div className="eq-address-wrapper">
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Preferred Destination</span>
+              <AddressAutocomplete
+                placeholder="e.g. Atlanta, GA"
+                value={form.preferred_destination}
+                onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_destination: cityState || address || '' }))}
+              />
+            </div>
           </div>
 
           <div onClick={() => openDatePicker('from')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '10px 14px' }}>
