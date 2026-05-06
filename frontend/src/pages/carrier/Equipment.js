@@ -567,19 +567,23 @@ export default function Equipment() {
             </div>
           </div>
 
-          <div onClick={() => openDatePicker('from')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '10px 14px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available From *</span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '1rem', color: form.available_from ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_from)}</span>
-              <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
-            </div>
-          </div>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Schedule</span>
 
-          <div onClick={() => openDatePicker('to')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '10px 14px' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available To *</span>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '1rem', color: form.available_to ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_to)}</span>
-              <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+            <div onClick={() => openDatePicker('from')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 4, padding: '10px 16px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available From *</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '1rem', color: form.available_from ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_from)}</span>
+                <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+              </div>
+            </div>
+
+            <div onClick={() => openDatePicker('to')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 4, padding: '10px 16px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available To *</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '1rem', color: form.available_to ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_to)}</span>
+                <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+              </div>
             </div>
           </div>
 
