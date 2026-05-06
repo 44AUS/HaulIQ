@@ -574,6 +574,9 @@ export default function CalendarPage() {
             <IonButton size="small" fill="solid" onClick={() => setFilterOpen(true)} style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)', flexShrink: 0 }}>
               <IonIcon slot="start" name="funnel-outline" /> Filter
             </IonButton>
+            <IonButton fill="solid" size="small" color="medium" disabled style={{ '--opacity': 1, cursor: 'default', flexShrink: 0 }}>
+              {filteredEvents.length} Loads
+            </IonButton>
           </div>
         </div>
 

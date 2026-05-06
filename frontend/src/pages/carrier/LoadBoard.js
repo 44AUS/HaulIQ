@@ -424,6 +424,9 @@ export default function LoadBoard() {
           <IonButton id="lb-filter-btn" fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={() => setFilterOpen(true)}>
             <IonIcon slot="start" name="funnel-outline" /> Filter
           </IonButton>
+          <IonButton fill="solid" size="small" color="medium" disabled style={{ '--opacity': 1, cursor: 'default' }}>
+            {loading ? '—' : tabLoads.length} Loads
+          </IonButton>
         </div>
 
         {/* Tab bar */}
