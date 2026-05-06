@@ -94,18 +94,22 @@ body.dark {
 
 /* ── IonSelect / IonAlert dark mode overlays ── */
 body.dark ion-alert {
-  --background: var(--ion-card-background);
-  --color: var(--ion-text-color);
+  /* Re-declare Ionic globals directly on the element so the shadow DOM sees them */
+  --ion-text-color:         #ffffff;
+  --ion-text-color-rgb:     255, 255, 255;
+  --ion-background-color:   #1e1e1e;
+  --background:             #1e1e1e;
+  --color:                  #ffffff;
 }
 
 body.dark ion-alert::part(container) {
-  background: var(--ion-card-background);
-  color: var(--ion-text-color);
+  background: #1e1e1e;
+  color: #ffffff;
 }
 
 body.dark ion-alert::part(message),
 body.dark ion-alert::part(title) {
-  color: var(--ion-text-color);
+  color: #ffffff;
 }
 
 body.dark ion-alert::part(button) {
@@ -114,12 +118,14 @@ body.dark ion-alert::part(button) {
 
 /* IonSelect popover interface (desktop) */
 body.dark ion-select-popover {
-  --background: var(--ion-card-background);
+  --ion-text-color:       #ffffff;
+  --ion-background-color: #1e1e1e;
+  --background:           #1e1e1e;
 }
 
 body.dark ion-select-popover ion-item {
-  --background: var(--ion-card-background);
-  --color: var(--ion-text-color);
+  --background: #1e1e1e;
+  --color:      #ffffff;
 }
 
 /* ── Global resets for Ionic in a web context ── */
