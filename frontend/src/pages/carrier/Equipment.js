@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useThemeMode } from '../../context/ThemeContext';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
@@ -63,6 +63,7 @@ const emptyForm = () => ({
 export default function Equipment() {
   const { brandColor } = useThemeMode();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [posts,          setPosts]          = useState([]);
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
@@ -121,6 +122,14 @@ export default function Equipment() {
     setEditPost(null); setIsRepost(false);
     setForm(emptyForm()); setError(''); setDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'post') {
+      openCreate();
+      setSearchParams({}, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openEdit = (post) => {
     setEditPost(post); setIsRepost(false);
@@ -397,7 +406,7 @@ export default function Equipment() {
         buttons={[
           { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
           { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => openCreate() },
-          { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+          { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches?action=add') },
           { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
           { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
         ]}

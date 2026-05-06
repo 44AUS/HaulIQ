@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons,
   IonContent, IonInput, IonSelect, IonSelectOption,
@@ -50,6 +50,7 @@ const laneLabel = (w) => {
 export default function LaneWatches() {
   const { brandColor } = useThemeMode();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [watches,        setWatches]        = useState([]);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [loading,        setLoading]        = useState(true);
@@ -81,6 +82,14 @@ export default function LaneWatches() {
   useEffect(() => { const h = () => setIsMobile(window.innerWidth < 640); window.addEventListener('resize', h); return () => window.removeEventListener('resize', h); }, []);
 
   const openModal = () => { setForm(EMPTY_FORM); setError(null); setModalOpen(true); };
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'add') {
+      openModal();
+      setSearchParams({}, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCreate = () => {
     setSaving(true);
@@ -410,7 +419,7 @@ export default function LaneWatches() {
       buttons={[
         { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
         { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
-        { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => navigate('/carrier/equipment') },
+        { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => navigate('/carrier/equipment?action=post') },
         { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => openModal() },
         { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
         { text: 'Cancel', role: 'cancel', icon: 'close-outline' },

@@ -221,7 +221,7 @@ function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onCle
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
-            <IonButton size="small" onClick={onApply} style={{ '--background': 'var(--ion-color-primary)' }}>APPLY</IonButton>
+            <IonButton size="small" color="success" onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
@@ -667,8 +667,8 @@ export default function CalendarPage() {
         onDidDismiss={() => setFindLoadsSheet(false)}
         buttons={[
           { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
-          { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => navigate('/carrier/equipment') },
-          { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
+          { text: 'Post a Truck', icon: 'add-circle-outline', handler: () => navigate('/carrier/equipment?action=post') },
+          { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches?action=add') },
           { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
           { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
         ]}

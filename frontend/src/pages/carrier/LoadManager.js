@@ -91,7 +91,7 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 12 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
-            <IonButton size="small" onClick={onApply} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>APPLY</IonButton>
+            <IonButton size="small" color="success" onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
@@ -560,12 +560,12 @@ export default function LoadManager() {
           {
             text: 'Post a Truck',
             icon: 'add-circle-outline',
-            handler: () => navigate('/carrier/equipment'),
+            handler: () => navigate('/carrier/equipment?action=post'),
           },
           {
             text: 'Add Lane Watch',
             icon: 'eye-outline',
-            handler: () => navigate('/carrier/lane-watches'),
+            handler: () => navigate('/carrier/lane-watches?action=add'),
           },
           {
             text: 'Browse Load Board',
