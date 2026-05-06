@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonLabel, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { loadSlug, adaptLoadList } from '../../services/adapters';
@@ -438,25 +438,26 @@ export default function LoadBoard() {
               </IonPopover>
             </>
           ) : (
-            <div style={{ flex: 1, overflowX: 'auto', display: 'flex', alignItems: 'stretch', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
-              <div style={{ display: 'flex', alignItems: 'stretch', flexShrink: 0, minWidth: 'max-content' }}>
-                {TABS.map(tab => {
-                  const active = tab.key === activeTab;
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => setActiveTab(tab.key)}
-                      className="ion-activatable"
-                      style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', height: 46, border: 'none', borderBottom: active ? '2px solid var(--ion-text-color)' : '2px solid transparent', background: 'none', cursor: 'pointer', whiteSpace: 'nowrap', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', color: active ? 'var(--ion-text-color)' : 'var(--ion-color-medium)', flexShrink: 0, fontFamily: 'inherit' }}
-                    >
-                      <IonRippleEffect />
-                      {tab.label}
-                      <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <IonSegment
+              scrollable={true}
+              value={activeTab}
+              onIonChange={e => setActiveTab(String(e.detail.value))}
+              style={{ '--background': 'transparent', flex: 1 }}
+            >
+              {TABS.map(tab => (
+                <IonSegmentButton
+                  key={tab.key}
+                  value={tab.key}
+                  layout="label-only"
+                  style={{ '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--indicator-color': 'var(--ion-text-color)', '--border-radius': '0', '--padding-top': '0', '--padding-bottom': '0', minHeight: 46, flexShrink: 0 }}
+                >
+                  <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+                    {tab.label}
+                    <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
+                  </IonLabel>
+                </IonSegmentButton>
+              ))}
+            </IonSegment>
           )}
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12, flexShrink: 0 }}>
             <IonButton fill="clear" shape="round" onClick={refresh} title="Refresh">
