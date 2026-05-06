@@ -10,6 +10,7 @@ import { useAuth } from '../../context/AuthContext';
 import { calendarApi, driversApi } from '../../services/api';
 import { IonButton, IonActionSheet, IonPopover, IonList, IonItem, IonLabel, IonCheckbox, IonAvatar, IonSegment, IonSegmentButton } from '@ionic/react';
 import IonIcon from '../../components/IonIcon';
+import LoadsCountPanel from '../../components/LoadsCountPanel';
 
 const GMAPS_LIBS = ['places'];
 const locales = { 'en-US': enUS };
@@ -460,6 +461,7 @@ export default function CalendarPage() {
   const [drivers, setDrivers]     = useState([]);
   const [selectedDrivers, setSelectedDrivers] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [loadsCountOpen, setLoadsCountOpen] = useState(false);
   const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const [filters, setFilters]     = useState({ status: 'All' });
   const [appliedFilters, setAppliedFilters] = useState({ status: 'All' });
@@ -574,8 +576,8 @@ export default function CalendarPage() {
             <IonButton size="small" fill="solid" onClick={() => setFilterOpen(true)} style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)', flexShrink: 0 }}>
               <IonIcon slot="start" name="funnel-outline" /> Filter
             </IonButton>
-            <IonButton fill="solid" size="small" color="medium" disabled style={{ '--opacity': 1, cursor: 'default', flexShrink: 0 }}>
-              {filteredEvents.length} Loads
+            <IonButton fill="solid" size="small" color="medium" onClick={() => setLoadsCountOpen(true)} style={{ flexShrink: 0 }}>
+              Loads Count
             </IonButton>
           </div>
         </div>
@@ -653,6 +655,7 @@ export default function CalendarPage() {
         onApply={() => { setAppliedFilters({ ...filters }); setFilterOpen(false); }}
         onClear={() => { setFilters({ status: 'All' }); setAppliedFilters({ status: 'All' }); setFilterOpen(false); }}
       />
+      <LoadsCountPanel isOpen={loadsCountOpen} onClose={() => setLoadsCountOpen(false)} loads={filteredEvents} />
 
       {user?.role === 'carrier' && (
         <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>

@@ -5,6 +5,7 @@ import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { loadSlug, adaptLoadList } from '../../services/adapters';
 import IonIcon from '../../components/IonIcon';
+import LoadsCountPanel from '../../components/LoadsCountPanel';
 
 const SORT_OPTIONS = [
   { value: 'profit', label: 'Highest Net Profit' },
@@ -332,7 +333,8 @@ export default function LoadBoard() {
   const [apiError, setApiError]       = useState(null);
   const [equipmentTypes, setEquipmentTypes] = useState([]);
   const [activeTab, setActiveTab]     = useState('all');
-  const [filterOpen, setFilterOpen]   = useState(false);
+  const [filterOpen, setFilterOpen]     = useState(false);
+  const [loadsCountOpen, setLoadsCountOpen] = useState(false);
   const [spinning, setSpinning]       = useState(false);
   const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const autoTimer = useRef(null);
@@ -424,8 +426,8 @@ export default function LoadBoard() {
           <IonButton id="lb-filter-btn" fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={() => setFilterOpen(true)}>
             <IonIcon slot="start" name="funnel-outline" /> Filter
           </IonButton>
-          <IonButton fill="solid" size="small" color="medium" disabled style={{ '--opacity': 1, cursor: 'default' }}>
-            {loading ? '—' : tabLoads.length} Loads
+          <IonButton fill="solid" size="small" color="medium" onClick={() => setLoadsCountOpen(true)}>
+            Loads Count
           </IonButton>
         </div>
 
@@ -522,6 +524,7 @@ export default function LoadBoard() {
         onClear={() => { setPF_state(INIT); fetchLoads(INIT); setFilterOpen(false); }}
         equipmentTypes={equipmentTypes}
       />
+      <LoadsCountPanel isOpen={loadsCountOpen} onClose={() => setLoadsCountOpen(false)} loads={loads} />
 
       <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0', flexShrink: 0 }}>
         <IonButton onClick={() => setFindLoadsSheet(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor, '--box-shadow': '0 4px 16px rgba(0,0,0,0.22)' }}>
