@@ -847,7 +847,7 @@ export default function Messages() {
                 <div style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
                   {activeConvo.load_id
                     ? `Load #${activeConvo.load_id.slice(0, 8).toUpperCase()}`
-                    : getPresenceInfo(activeConvo.other_last_active_at)?.label || (otherParty?.role || '')}
+                    : getPresenceInfo(activeConvo.other_last_active_at)?.label || ''}
                 </div>
               </div>}
 
