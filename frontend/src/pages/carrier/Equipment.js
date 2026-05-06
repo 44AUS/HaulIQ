@@ -476,7 +476,7 @@ export default function Equipment() {
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
           <IonButtons slot="start">
-            <IonButton fill="clear" shape="round" onClick={() => setDialogOpen(false)}>
+            <IonButton fill="clear" shape="round" onClick={() => setDialogOpen(false)} style={{ '--color': 'var(--ion-text-color)' }}>
               <IonIcon slot="icon-only" name="close-outline" />
             </IonButton>
           </IonButtons>
