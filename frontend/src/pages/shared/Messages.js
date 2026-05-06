@@ -1054,15 +1054,14 @@ export default function Messages() {
                   <IonIcon slot="icon-only" name="image-outline" />
                 </IonButton>
                 <IonButton
-                  color="success"
                   size="small"
                   onClick={handleSend}
                   disabled={(!input.trim() && pendingImages.length === 0) || activeConvo.is_blocked_by_me || uploadingImages}
-                  style={{ '--border-radius': '8px', '--color': btnTextColor, fontWeight: 700, letterSpacing: '0.05em' }}
+                  style={{ '--border-radius': '8px', '--background': '#2dd36f', '--color': '#fff', fontWeight: 700, letterSpacing: '0.05em' }}
                 >
                   {uploadingImages
-                    ? <IonSpinner slot="start" name="crescent" style={{ width: 14, height: 14, color: btnTextColor }} />
-                    : <IonIcon slot="start" name="send-outline" style={{ color: btnTextColor }} />
+                    ? <IonSpinner slot="start" name="crescent" style={{ width: 14, height: 14, color: '#fff', marginInlineEnd: 6 }} />
+                    : <IonIcon slot="start" name="send-outline" style={{ color: '#fff', marginInlineEnd: 6 }} />
                   }
                   SEND
                 </IonButton>
