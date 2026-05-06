@@ -87,9 +87,7 @@ export default function CarrierPayments() {
     return c;
   }, [payments]);
 
-  const pending = payments.filter(p => p.status === 'pending' || p.status === 'escrowed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
-  const paid    = payments.filter(p => p.status === 'released').reduce((s, p) => s + (p.carrier_amount || 0), 0);
-  const pastDue = payments.filter(p => p.status === 'failed').reduce((s, p) => s + (p.carrier_amount || 0), 0);
+
 
   return (
     <>
