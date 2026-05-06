@@ -1,7 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem } from '@ionic/react';
+import {
+  IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons,
+  IonContent, IonInput, IonSelect, IonSelectOption,
+  IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton,
+  IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem,
+} from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -31,131 +35,11 @@ const tdStyle = { padding: '10px 12px', fontSize: '0.875rem', color: 'var(--ion-
 function RippleTd({ style, children, ...props }) {
   return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
 }
-const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
-const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
-const labelStyle = { fontSize: '0.72rem', color: 'var(--ion-color-medium)', fontWeight: 600, display: 'block', marginBottom: 4 };
 
 const STATUS_CHIP = {
   active: { label: 'Active', ionColor: 'success' },
   paused: { label: 'Paused', ionColor: 'medium'  },
 };
-
-function AddWatchDrawer({ open, onClose, onSaved, equipmentTypes }) {
-  const { brandColor } = useThemeMode();
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const handleCreate = () => {
-    setSaving(true);
-    setError(null);
-    laneWatchesApi.create({
-      origin_city:    form.origin_city.trim() || null,
-      origin_state:   form.origin_state || null,
-      dest_city:      form.dest_city.trim() || null,
-      dest_state:     form.dest_state || null,
-      equipment_type: form.equipment_type || null,
-      min_rate:       form.min_rate ? parseFloat(form.min_rate) : null,
-      min_rpm:        form.min_rpm  ? parseFloat(form.min_rpm)  : null,
-    })
-      .then(w => { onSaved(w); setForm(EMPTY_FORM); onClose(); })
-      .catch(err => setError(err.message))
-      .finally(() => setSaving(false));
-  };
-
-  return createPortal(
-    <>
-      {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
-      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 340, backgroundColor: 'var(--ion-card-background)', zIndex: 1201, transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>New Lane Watch</span>
-          <IonButton fill="clear" shape="round" onClick={onClose}>
-            <IonIcon slot="icon-only" name="close-outline" />
-          </IonButton>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Origin</span>
-            <div style={{ marginBottom: 8 }}>
-              <label style={labelStyle}>City</label>
-              <input style={inputStyle} value={form.origin_city} onChange={e => set('origin_city', e.target.value)} placeholder="e.g. Chicago" />
-              <span style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)', marginTop: 3, display: 'block' }}>Leave blank to match any city</span>
-            </div>
-            <div>
-              <label style={labelStyle}>State</label>
-              <select style={inputStyle} value={form.origin_state} onChange={e => set('origin_state', e.target.value)}>
-                <option value="">Any</option>
-                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Destination</span>
-            <div style={{ marginBottom: 8 }}>
-              <label style={labelStyle}>City</label>
-              <input style={inputStyle} value={form.dest_city} onChange={e => set('dest_city', e.target.value)} placeholder="e.g. Atlanta" />
-              <span style={{ fontSize: '0.68rem', color: 'var(--ion-color-medium)', marginTop: 3, display: 'block' }}>Leave blank to match any city</span>
-            </div>
-            <div>
-              <label style={labelStyle}>State</label>
-              <select style={inputStyle} value={form.dest_state} onChange={e => set('dest_state', e.target.value)}>
-                <option value="">Any</option>
-                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Filters (optional)</span>
-            <div style={{ marginBottom: 8 }}>
-              <label style={labelStyle}>Equipment Type</label>
-              <select style={inputStyle} value={form.equipment_type} onChange={e => set('equipment_type', e.target.value)}>
-                <option value="">Any</option>
-                {equipmentTypes.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-              </select>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Min Rate</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>$</span>
-                  <input style={{ ...inputStyle, paddingLeft: 22 }} type="number" value={form.min_rate} onChange={e => set('min_rate', e.target.value)} placeholder="2000" />
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Min RPM</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>$</span>
-                  <input style={{ ...inputStyle, paddingLeft: 22, paddingRight: 30 }} type="number" value={form.min_rpm} onChange={e => set('min_rpm', e.target.value)} placeholder="2.50" />
-                  <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.68rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>/mi</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div style={{ margin: '12px 20px', padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>
-              {error}
-            </div>
-          )}
-        </div>
-
-        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--ion-border-color)', display: 'flex', gap: 8, justifyContent: 'flex-end', flexShrink: 0 }}>
-          <IonButton fill="outline" onClick={onClose}>Cancel</IonButton>
-          <IonButton onClick={handleCreate} disabled={saving} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>
-            {saving && <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} />}
-            Save Watch
-          </IonButton>
-        </div>
-      </div>
-    </>,
-    document.body
-  );
-}
 
 const laneLabel = (w) => {
   const from = [w.origin_city, w.origin_state].filter(Boolean).join(', ') || 'Anywhere';
@@ -171,10 +55,16 @@ export default function LaneWatches() {
   const [loading,        setLoading]        = useState(true);
   const [spinning,       setSpinning]       = useState(false);
   const [activeTab,      setActiveTab]      = useState('all');
-  const [drawerOpen,     setDrawerOpen]     = useState(false);
+  const [modalOpen,      setModalOpen]      = useState(false);
   const [findLoadsSheet, setFindLoadsSheet] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   const [tabDropdownOpen, setTabDropdownOpen] = useState(false);
+
+  const [form,   setForm]   = useState(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState(null);
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const fetchData = (showSpinner = false) => {
     if (showSpinner) setSpinning(true); else setLoading(true);
@@ -189,6 +79,25 @@ export default function LaneWatches() {
 
   useEffect(() => { fetchData(); }, []);
   useEffect(() => { const h = () => setIsMobile(window.innerWidth < 640); window.addEventListener('resize', h); return () => window.removeEventListener('resize', h); }, []);
+
+  const openModal = () => { setForm(EMPTY_FORM); setError(null); setModalOpen(true); };
+
+  const handleCreate = () => {
+    setSaving(true);
+    setError(null);
+    laneWatchesApi.create({
+      origin_city:    form.origin_city.trim() || null,
+      origin_state:   form.origin_state || null,
+      dest_city:      form.dest_city.trim() || null,
+      dest_state:     form.dest_state || null,
+      equipment_type: form.equipment_type || null,
+      min_rate:       form.min_rate ? parseFloat(form.min_rate) : null,
+      min_rpm:        form.min_rpm  ? parseFloat(form.min_rpm)  : null,
+    })
+      .then(w => { setWatches(prev => [w, ...prev]); setModalOpen(false); })
+      .catch(err => setError(err.message))
+      .finally(() => setSaving(false));
+  };
 
   const handleToggle = (id, active) => {
     laneWatchesApi.update(id, { active })
@@ -227,10 +136,6 @@ export default function LaneWatches() {
               {loading ? 'Loading…' : `${watches.length} watch${watches.length !== 1 ? 'es' : ''} · get notified when matching loads are posted`}
             </p>
           </div>
-          <IonButton onClick={() => setDrawerOpen(true)} style={{ '--background': brandColor, '--background-activated': brandColor, '--background-hover': brandColor, '--border-color': brandColor }}>
-            <IonIcon slot="start" name="add-outline" />
-            Add Watch
-          </IonButton>
         </div>
 
         {/* Tab bar */}
@@ -282,7 +187,7 @@ export default function LaneWatches() {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 8 }}>
               <IonIcon name="notifications-outline" style={{ fontSize: 40, color: 'var(--ion-color-medium)' }} />
               <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>
-                {watches.length === 0 ? 'No lane watches yet — click Add Watch to get started.' : 'No watches in this category.'}
+                {watches.length === 0 ? 'No lane watches yet — use Find to add one.' : 'No watches in this category.'}
               </span>
             </div>
           ) : (
@@ -304,7 +209,6 @@ export default function LaneWatches() {
                     const barColor = w.active ? '#2dd36f' : '#757575';
                     return (
                       <tr key={w.id} style={{ height: 64 }}>
-                        {/* Lane — accent bar */}
                         <RippleTd style={{ ...tdStyle, position: 'relative', paddingLeft: 20, minWidth: 200 }}>
                           <div style={{ position: 'absolute', left: 0, top: '18%', bottom: '18%', width: 3, backgroundColor: barColor }} />
                           <div style={{ display: 'flex', alignItems: 'stretch', gap: 8 }}>
@@ -327,7 +231,7 @@ export default function LaneWatches() {
                         </RippleTd>
 
                         <RippleTd style={{ ...tdStyle, minWidth: 100 }}>
-                          <span style={{ fontWeight: 600, color: w.min_rate ? '#2e7d32' : 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
+                          <span style={{ fontWeight: 600, color: w.min_rate ? 'var(--ion-color-success)' : 'var(--ion-color-medium)', fontSize: '0.875rem' }}>
                             {w.min_rate ? `$${Number(w.min_rate).toLocaleString()}` : '—'}
                           </span>
                         </RippleTd>
@@ -374,12 +278,128 @@ export default function LaneWatches() {
       </div>
     </div>
 
-    <AddWatchDrawer
-      open={drawerOpen}
-      onClose={() => setDrawerOpen(false)}
-      onSaved={w => setWatches(prev => [w, ...prev])}
-      equipmentTypes={equipmentTypes}
-    />
+    {/* Add Lane Watch Modal */}
+    <IonModal isOpen={modalOpen} onDidDismiss={() => setModalOpen(false)} className="lane-watch-modal">
+      <IonHeader>
+        <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
+          <IonButtons slot="start">
+            <IonButton fill="clear" shape="round" onClick={() => setModalOpen(false)}>
+              <IonIcon slot="icon-only" name="close-outline" style={{ color: 'var(--ion-text-color)' }} />
+            </IonButton>
+          </IonButtons>
+          <IonTitle style={{ fontWeight: 700 }}>New Lane Watch</IonTitle>
+          <IonButtons slot="end">
+            <IonButton fill="clear" shape="round" onClick={handleCreate} disabled={saving} style={{ opacity: saving ? 0.6 : 1 }}>
+              {saving
+                ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: 'var(--ion-color-success)' }} />
+                : <IonIcon slot="icon-only" name="checkmark-outline" style={{ color: 'var(--ion-color-success)' }} />}
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent>
+        {error && (
+          <div style={{ margin: '12px 16px 0', padding: '10px 14px', backgroundColor: 'rgba(211,47,47,0.08)', border: '1px solid rgba(211,47,47,0.3)', borderRadius: 6, color: '#d32f2f', fontSize: '0.875rem' }}>{error}</div>
+        )}
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: 16 }}>
+
+          {/* Lane card */}
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Lane</span>
+
+            <IonInput
+              fill="outline"
+              label="Origin City"
+              labelPlacement="stacked"
+              value={form.origin_city}
+              onIonInput={e => set('origin_city', e.detail.value ?? '')}
+              placeholder="e.g. Chicago"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            />
+            <IonSelect
+              fill="outline"
+              label="Origin State"
+              labelPlacement="stacked"
+              value={form.origin_state}
+              onIonChange={e => set('origin_state', e.detail.value)}
+              placeholder="Any"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            >
+              <IonSelectOption value="">Any</IonSelectOption>
+              {US_STATES.map(s => <IonSelectOption key={s} value={s}>{s}</IonSelectOption>)}
+            </IonSelect>
+
+            <IonInput
+              fill="outline"
+              label="Destination City"
+              labelPlacement="stacked"
+              value={form.dest_city}
+              onIonInput={e => set('dest_city', e.detail.value ?? '')}
+              placeholder="e.g. Atlanta"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            />
+            <IonSelect
+              fill="outline"
+              label="Destination State"
+              labelPlacement="stacked"
+              value={form.dest_state}
+              onIonChange={e => set('dest_state', e.detail.value)}
+              placeholder="Any"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            >
+              <IonSelectOption value="">Any</IonSelectOption>
+              {US_STATES.map(s => <IonSelectOption key={s} value={s}>{s}</IonSelectOption>)}
+            </IonSelect>
+          </div>
+
+          {/* Filters card */}
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Filters</span>
+
+            <IonSelect
+              fill="outline"
+              label="Equipment Type"
+              labelPlacement="stacked"
+              value={form.equipment_type}
+              onIonChange={e => set('equipment_type', e.detail.value)}
+              placeholder="Any"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            >
+              <IonSelectOption value="">Any</IonSelectOption>
+              {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+            </IonSelect>
+
+            <IonInput
+              fill="outline"
+              label="Min Rate ($)"
+              labelPlacement="stacked"
+              type="number"
+              min={0}
+              value={form.min_rate}
+              onIonInput={e => set('min_rate', e.detail.value ?? '')}
+              placeholder="e.g. 2000"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            />
+
+            <IonInput
+              fill="outline"
+              label="Min RPM ($/mile)"
+              labelPlacement="stacked"
+              type="number"
+              min={0}
+              step={0.01}
+              value={form.min_rpm}
+              onIonInput={e => set('min_rpm', e.detail.value ?? '')}
+              placeholder="e.g. 2.50"
+              style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+            />
+          </div>
+
+        </div>
+      </IonContent>
+    </IonModal>
 
     <IonActionSheet
       mode="ios"
@@ -389,13 +409,19 @@ export default function LaneWatches() {
       onDidDismiss={() => setFindLoadsSheet(false)}
       buttons={[
         { text: 'What are these and how are they different?', cssClass: 'what-are-these-things-btn' },
+        { text: 'Add Lane Watch', icon: 'eye-outline', handler: () => openModal() },
         { text: 'Browse Load Board', icon: 'albums-outline', handler: () => navigate('/carrier/loads') },
-        { text: 'Lane Watches', icon: 'eye-outline', handler: () => navigate('/carrier/lane-watches') },
         { text: 'Cancel', role: 'cancel', icon: 'close-outline' },
       ]}
     />
 
-    <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    <style>{`
+      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .lane-watch-modal { --border-radius: 0px; }
+      @media (min-width: 768px) {
+        .lane-watch-modal { --width: 560px; --max-height: 90vh; }
+      }
+    `}</style>
     </>
   );
 }
