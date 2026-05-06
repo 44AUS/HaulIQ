@@ -225,11 +225,15 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           </div>
 
           {/* Equipment Types */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Equipment Types</span>
-            <IonSelect fill="outline" style={ionOutline} multiple value={pf.equipTypes} onIonChange={e => setPF('equipTypes', e.detail.value)} placeholder="All types">
-              {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
-            </IonSelect>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Equipment Types</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonSelect aria-label="Equipment Types" placeholder="All types" multiple={true} value={pf.equipTypes} onIonChange={e => setPF('equipTypes', e.detail.value)}>
+                  {equipmentTypes.map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+                </IonSelect>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Load Size */}
