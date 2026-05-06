@@ -191,7 +191,7 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
   return (
     <IonPopover trigger={triggerId} isOpen={isOpen} onDidDismiss={onClose}
       side="bottom" alignment="end"
-      style={{ '--width': '300px', '--max-height': '80vh' }}>
+      style={{ '--width': '360px', '--max-height': '80vh' }}>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
           <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Filter</span>
