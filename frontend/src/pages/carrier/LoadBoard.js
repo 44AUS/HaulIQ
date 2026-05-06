@@ -63,7 +63,7 @@ function TableView({ loads, equipmentTypes }) {
   const abbrMap = {};
   equipmentTypes.forEach(t => { abbrMap[t.name] = t.abbreviation || t.name.slice(0, 3).toUpperCase(); });
 
-  const PROFIT_BAR = { green: '#2dd36f', yellow: '#ffce00', red: '#eb445a' };
+  const PROFIT_BAR = { green: 'var(--ion-color-success)', yellow: '#ffce00', red: '#eb445a' };
 
   if (!loads.length) return null;
   return (
@@ -130,7 +130,7 @@ function TableView({ loads, equipmentTypes }) {
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>${load.rate?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap', color: 'var(--ion-color-success)' }}>${load.rate?.toLocaleString()}</span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>${load.ratePerMile}/mi</span>
                 </RippleTd>
 
