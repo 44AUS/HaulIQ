@@ -102,18 +102,6 @@ export default function CarrierPayments() {
             <h2 style={{ margin: '0 0 2px', fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-text-color)', letterSpacing: '-0.01em' }}>Payments</h2>
             <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--ion-color-medium)' }}>Freight payments for your completed loads</p>
           </div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            {[
-              { label: 'Awaiting', value: fmt(pending), color: '#ffce00' },
-              { label: 'Paid Out', value: fmt(paid),    color: '#2dd36f' },
-              { label: 'Past Due', value: fmt(pastDue), color: '#eb445a' },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'var(--ion-color-light)', borderRadius: 8, padding: '6px 16px', minWidth: 80 }}>
-                <span style={{ fontSize: '0.95rem', fontWeight: 800, color }}>{value}</span>
-                <span style={{ fontSize: '0.62rem', color: 'var(--ion-color-medium)', fontWeight: 600, letterSpacing: '0.04em' }}>{label.toUpperCase()}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Tab bar */}
