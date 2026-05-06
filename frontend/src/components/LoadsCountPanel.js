@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { IonButton } from '@ionic/react';
 import IonIcon from './IonIcon';
-import mapVectorSrc from '../assets/map_vector.svg';
+import mapBgSrc from '../assets/map-background.png';
 
 function extractState(location) {
   if (!location) return null;
@@ -47,7 +47,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         {/* Header */}
         <div style={{ position: 'relative', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', minHeight: 110 }}>
           {/* Map background */}
-          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.13, pointerEvents: 'none', userSelect: 'none' }} />
+          <img src={mapBgSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.13, pointerEvents: 'none', userSelect: 'none' }} />
           <div style={{ position: 'relative', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ textAlign: 'center', flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
