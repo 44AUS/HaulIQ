@@ -501,37 +501,39 @@ export default function Equipment() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px' }}>
 
-          <IonSelect
-            fill="outline"
-            label="Equipment Class *"
-            labelPlacement="stacked"
-            value={form.equipment_class || ''}
-            onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
-            placeholder="Select class"
-            style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
-          >
-            {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
-          </IonSelect>
-
-          <div style={{ opacity: form.equipment_class ? 1 : 0.4, pointerEvents: form.equipment_class ? 'auto' : 'none' }}>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IonSelect
               fill="outline"
-              label="Equipment Type *"
+              label="Equipment Class *"
               labelPlacement="stacked"
-              value={form.equipment_type || ''}
-              onIonChange={setField('equipment_type')}
-              placeholder={form.equipment_class ? 'Select type' : 'Select a class first'}
-              disabled={!form.equipment_class}
+              value={form.equipment_class || ''}
+              onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
+              placeholder="Select class"
               style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
             >
-              {(equipmentClasses.find(c => c.name === form.equipment_class)?.equipment_types || [])
-                .map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+              {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
             </IonSelect>
+
+            <div style={{ opacity: form.equipment_class ? 1 : 0.4, pointerEvents: form.equipment_class ? 'auto' : 'none' }}>
+              <IonSelect
+                fill="outline"
+                label="Equipment Type *"
+                labelPlacement="stacked"
+                value={form.equipment_type || ''}
+                onIonChange={setField('equipment_type')}
+                placeholder={form.equipment_class ? 'Select type' : 'Select a class first'}
+                disabled={!form.equipment_class}
+                style={{ '--highlight-color-focused': 'var(--ion-color-success)' }}
+              >
+                {(equipmentClasses.find(c => c.name === form.equipment_class)?.equipment_types || [])
+                  .map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
+              </IonSelect>
+            </div>
+
+            <IonInput fill="outline" label="Trailer Length (ft)" labelPlacement="stacked" type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
+
+            <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
           </div>
-
-          <IonInput fill="outline" label="Trailer Length (ft)" labelPlacement="stacked" type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
-
-          <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" style={{ '--highlight-color-focused': 'var(--ion-color-success)' }} />
 
           <div className="eq-address-wrapper">
             <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 6 }}>Current Location *</span>
