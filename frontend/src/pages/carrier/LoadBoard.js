@@ -292,12 +292,16 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           </div>
 
           {/* Pickup Date */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Pickup Date</span>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={pf.dateFrom} onIonChange={e => setPF('dateFrom', e.detail.value)} />
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={pf.dateTo} onIonChange={e => setPF('dateTo', e.detail.value)} />
-            </div>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Pickup Date</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput type="date" value={pf.dateFrom} onIonChange={e => setPF('dateFrom', e.detail.value)} label="From" labelPlacement="stacked" />
+              </IonItem>
+              <IonItem>
+                <IonInput type="date" value={pf.dateTo} onIonChange={e => setPF('dateTo', e.detail.value)} label="To" labelPlacement="stacked" />
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Sort By */}
