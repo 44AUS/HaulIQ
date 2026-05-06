@@ -455,7 +455,7 @@ export default function Equipment() {
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       .equipment-post-modal { --border-radius: 0px; }
       @media (min-width: 768px) {
-        .equipment-post-modal { --width: 680px; --max-height: 90vh; }
+        .equipment-post-modal { --width: 600px; --max-height: 90vh; }
       }
       .date-picker-modal { --border-radius: 0px; }
       @media (min-width: 768px) {
