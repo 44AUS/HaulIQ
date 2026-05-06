@@ -51,7 +51,6 @@ const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color
 function RippleTd({ style, children, ...props }) {
   return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
 }
-const ionOutline = { '--highlight-color-focused': 'var(--ion-color-success)' };
 
 const TMS_STEPS  = ['dispatched', 'picked_up', 'in_transit', 'delivered', 'pod_received'];
 const TMS_LABELS = ['Dispatched', 'Picked Up', 'In Transit', 'Delivered', 'POD Received'];
@@ -95,20 +94,28 @@ function FilterDrawer({ triggerId, isOpen, onClose, filters, onChange, onApply, 
         </div>
         <div style={{ overflowY: 'auto', padding: '4px 0' }}>
           {FILTER_FIELDS.map(field => (
-            <div key={field.key} style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
-              <span style={{ display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{field.label}</span>
-              <IonSelect fill="outline" style={ionOutline} value={filters[field.key] || ''} onIonChange={e => onChange(field.key, e.detail.value)}>
-                <IonSelectOption value="">{field.label}</IonSelectOption>
-                {field.options.map(opt => <IonSelectOption key={opt} value={opt}>{opt}</IonSelectOption>)}
-              </IonSelect>
+            <div key={field.key} style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+              <span style={{ display: 'block', padding: '10px 16px 0', color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{field.label}</span>
+              <IonList lines="none" style={{ padding: 0 }}>
+                <IonItem>
+                  <IonSelect aria-label={field.label} value={filters[field.key] || ''} onIonChange={e => onChange(field.key, e.detail.value)}>
+                    <IonSelectOption value="">{field.label}</IonSelectOption>
+                    {field.options.map(opt => <IonSelectOption key={opt} value={opt}>{opt}</IonSelectOption>)}
+                  </IonSelect>
+                </IonItem>
+              </IonList>
             </div>
           ))}
-          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={{ display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Date Range</span>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={filters.date_from || ''} onIonChange={e => onChange('date_from', e.detail.value)} />
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={filters.date_to || ''} onIonChange={e => onChange('date_to', e.detail.value)} />
-            </div>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ display: 'block', padding: '10px 16px 0', color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Date Range</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput type="date" value={filters.date_from || ''} onIonChange={e => onChange('date_from', e.detail.value)} label="From" labelPlacement="stacked" />
+              </IonItem>
+              <IonItem>
+                <IonInput type="date" value={filters.date_to || ''} onIonChange={e => onChange('date_to', e.detail.value)} label="To" labelPlacement="stacked" />
+              </IonItem>
+            </IonList>
           </div>
         </div>
       </div>
