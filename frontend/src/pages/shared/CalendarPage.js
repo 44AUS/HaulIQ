@@ -573,12 +573,14 @@ export default function CalendarPage() {
               </IonSegment>
             </div>
 
-            <IonButton size="small" fill="solid" onClick={() => setFilterOpen(true)} style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)', flexShrink: 0 }}>
-              <IonIcon slot="start" name="funnel-outline" /> Filter
-            </IonButton>
-            <IonButton fill="solid" size="small" color="medium" onClick={() => setLoadsCountOpen(true)} style={{ flexShrink: 0 }}>
-              Loads Count
-            </IonButton>
+            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+              <IonButton size="small" fill="solid" onClick={() => setFilterOpen(true)} style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }}>
+                <IonIcon slot="start" name="funnel-outline" /> Filter
+              </IonButton>
+              <IonButton fill="solid" size="small" color="medium" onClick={() => setLoadsCountOpen(true)}>
+                Loads Count
+              </IonButton>
+            </div>
           </div>
         </div>
 
