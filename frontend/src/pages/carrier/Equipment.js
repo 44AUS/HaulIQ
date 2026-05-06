@@ -501,7 +501,7 @@ export default function Equipment() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px' }}>
 
-          <div style={{ backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8, padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <IonSelect
               fill="outline"
               label="Equipment Class *"
