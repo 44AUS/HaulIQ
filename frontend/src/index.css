@@ -61,6 +61,14 @@
   box-shadow: 0 0 0 1px var(--ion-color-success) !important;
 }
 
+/* ── IonSegment scrollbar suppression ────────────────────────────────────── */
+ion-segment {
+  scrollbar-width: none;
+}
+ion-segment::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Interactive element hover feedback ───────────────────────────────────── */
 
 /* Clickable table rows — background tint (no inline bg to fight) */

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect, IonActionSheet } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem } from '@ionic/react';
 import { laneWatchesApi, equipmentTypesApi } from '../../services/api';
 import IonIcon from '../../components/IonIcon';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -173,6 +173,8 @@ export default function LaneWatches() {
   const [activeTab,      setActiveTab]      = useState('all');
   const [drawerOpen,     setDrawerOpen]     = useState(false);
   const [findLoadsSheet, setFindLoadsSheet] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [tabDropdownOpen, setTabDropdownOpen] = useState(false);
 
   const fetchData = (showSpinner = false) => {
     if (showSpinner) setSpinning(true); else setLoading(true);
@@ -186,6 +188,7 @@ export default function LaneWatches() {
   };
 
   useEffect(() => { fetchData(); }, []);
+  useEffect(() => { const h = () => setIsMobile(window.innerWidth < 640); window.addEventListener('resize', h); return () => window.removeEventListener('resize', h); }, []);
 
   const handleToggle = (id, active) => {
     laneWatchesApi.update(id, { active })
@@ -232,28 +235,38 @@ export default function LaneWatches() {
 
         {/* Tab bar */}
         <div style={{ display: 'flex', alignItems: 'stretch', backgroundColor: 'var(--ion-card-background)', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <IonSegment
-            value={activeTab}
-            onIonChange={e => setActiveTab(String(e.detail.value))}
-            style={{ '--background': 'transparent', flex: '0 0 auto' }}
-          >
-            {TABS.map(tab => (
-              <IonSegmentButton
-                key={tab.key}
-                value={tab.key}
-                layout="label-only"
-                style={{ '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--indicator-color': 'var(--ion-text-color)', '--border-radius': '0', '--padding-top': '0', '--padding-bottom': '0', minHeight: 46, flexShrink: 0 }}
-              >
-                <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, letterSpacing: '0.08em' }}>
-                  {tab.label}
-                  <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
-                </IonLabel>
-              </IonSegmentButton>
-            ))}
-          </IonSegment>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12 }}>
-            <IonButton fill="clear" shape="round" onClick={() => fetchData(true)} title="Refresh">
+          {isMobile ? (
+            <>
+              <div id="lw-tab-dropdown-trigger" onClick={() => setTabDropdownOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '0 16px', height: 46, cursor: 'pointer', flex: 1 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', color: 'var(--ion-text-color)' }}>{TABS.find(t => t.key === activeTab)?.label}</span>
+                <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[activeTab] ?? 0}</span>
+                <IonIcon name="chevron-down-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)', marginLeft: 2 }} />
+              </div>
+              <IonPopover isOpen={tabDropdownOpen} onDidDismiss={() => setTabDropdownOpen(false)} trigger="lw-tab-dropdown-trigger" style={{ '--width': '200px', '--border-radius': '10px' }}>
+                <IonList lines="none">
+                  {TABS.map(tab => (
+                    <IonItem key={tab.key} button detail={false} onClick={() => { setActiveTab(tab.key); setTabDropdownOpen(false); }} style={{ '--background': tab.key === activeTab ? 'var(--ion-color-step-100)' : 'transparent', '--padding-start': '16px', '--padding-end': '16px' }}>
+                      <IonLabel style={{ fontSize: '0.875rem', fontWeight: tab.key === activeTab ? 700 : 500 }}>{tab.label}</IonLabel>
+                      <span slot="end" style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
+                    </IonItem>
+                  ))}
+                </IonList>
+              </IonPopover>
+            </>
+          ) : (
+            <IonSegment scrollable={true} value={activeTab} onIonChange={e => setActiveTab(String(e.detail.value))} style={{ '--background': 'transparent', flex: 1 }}>
+              {TABS.map(tab => (
+                <IonSegmentButton key={tab.key} value={tab.key} layout="label-only" style={{ '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--indicator-color': 'var(--ion-text-color)', '--border-radius': '0', '--padding-top': '0', '--padding-bottom': '0', minHeight: 46, flexShrink: 0 }}>
+                  <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+                    {tab.label}
+                    <span style={{ backgroundColor: 'var(--ion-background-color)', borderRadius: 4, padding: '1px 5px', fontSize: '0.65rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{tabCounts[tab.key] ?? 0}</span>
+                  </IonLabel>
+                </IonSegmentButton>
+              ))}
+            </IonSegment>
+          )}
+          <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12, flexShrink: 0 }}>
+            <IonButton fill="clear" shape="round" color="medium" onClick={() => fetchData(true)} title="Refresh">
               <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IonButton>
           </div>

@@ -460,7 +460,7 @@ export default function LoadBoard() {
             </IonSegment>
           )}
           <div style={{ display: 'flex', alignItems: 'center', paddingRight: 12, flexShrink: 0 }}>
-            <IonButton fill="clear" shape="round" onClick={refresh} title="Refresh">
+            <IonButton fill="clear" shape="round" color="medium" onClick={refresh} title="Refresh">
               <IonIcon slot="icon-only" name="refresh-outline" style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }} />
             </IonButton>
           </div>
