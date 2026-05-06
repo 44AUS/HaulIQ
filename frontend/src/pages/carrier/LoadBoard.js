@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
@@ -188,21 +187,21 @@ function TableView({ loads, equipmentTypes }) {
   );
 }
 
-function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTypes }) {
-  return createPortal(
-    <>
-      {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
-      <div className="filter-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 300, backgroundColor: 'var(--ion-card-background)', zIndex: 1201, transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.2)' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
-          <div style={{ display: 'flex', gap: 12 }}>
+function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear, equipmentTypes }) {
+  return (
+    <IonPopover trigger={triggerId} isOpen={isOpen} onDidDismiss={onClose}
+      side="bottom" alignment="end"
+      style={{ '--width': '300px', '--max-height': '80vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Filter</span>
+          <div style={{ display: 'flex', gap: 8 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
             <IonButton size="small" color="success" style={{ '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
+        <div style={{ overflowY: 'auto', padding: '4px 0' }}>
           {/* Origin */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Origin</span>
@@ -282,8 +281,7 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
           </div>
         </div>
       </div>
-    </>,
-    document.body
+    </IonPopover>
   );
 }
 
@@ -388,7 +386,7 @@ export default function LoadBoard() {
               {loading ? 'Loading…' : `${tabLoads.length} loads available`}
             </p>
           </div>
-          <IonButton fill="solid" size="small" color="dark" onClick={() => setFilterOpen(true)}>
+          <IonButton id="lb-filter-btn" fill="solid" size="small" color="dark" onClick={() => setFilterOpen(true)}>
             <IonIcon slot="start" name="funnel-outline" /> Filter
           </IonButton>
         </div>
@@ -477,7 +475,8 @@ export default function LoadBoard() {
       </div>
 
       <FilterDrawer
-        open={filterOpen}
+        triggerId="lb-filter-btn"
+        isOpen={filterOpen}
         onClose={() => setFilterOpen(false)}
         pf={pf}
         setPF={setPF}

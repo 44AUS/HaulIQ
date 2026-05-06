@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, Fragment } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonBadge, IonButton, IonCheckbox, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
 import { bookingsApi, loadsApi } from '../../services/api';
@@ -81,21 +80,22 @@ function TmsProgress({ tmsStatus }) {
   );
 }
 
-function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
-  return createPortal(
-    <>
-      {open && <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1200 }} />}
-      <div className="filter-drawer" style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 300, backgroundColor: 'var(--ion-card-background)', zIndex: 1201, transform: open ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.25s ease', display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
-          <div style={{ display: 'flex', gap: 12 }}>
+function FilterDrawer({ triggerId, isOpen, onClose, filters, onChange, onApply, onClear }) {
+  return (
+    <IonPopover trigger={triggerId} isOpen={isOpen} onDidDismiss={onClose}
+      side="bottom" alignment="end"
+      style={{ '--width': '300px', '--max-height': '80vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+          <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Filter</span>
+          <div style={{ display: 'flex', gap: 8 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
             <IonButton size="small" color="success" style={{ '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
-        <div style={{ flex: 1, overflowY: 'auto', padding: '4px 0' }}>
+        <div style={{ overflowY: 'auto', padding: '4px 0' }}>
           {FILTER_FIELDS.map(field => (
-            <div key={field.key} style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+            <div key={field.key} style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
               <span style={{ display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{field.label}</span>
               <IonSelect fill="outline" style={ionOutline} value={filters[field.key] || ''} onIonChange={e => onChange(field.key, e.detail.value)}>
                 <IonSelectOption value="">{field.label}</IonSelectOption>
@@ -103,7 +103,7 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
               </IonSelect>
             </div>
           ))}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={{ display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Date Range</span>
             <div style={{ display: 'flex', gap: 8 }}>
               <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={filters.date_from || ''} onIonChange={e => onChange('date_from', e.detail.value)} />
@@ -112,8 +112,7 @@ function FilterDrawer({ open, onClose, filters, onChange, onApply, onClear }) {
           </div>
         </div>
       </div>
-    </>,
-    document.body
+    </IonPopover>
   );
 }
 
@@ -324,7 +323,7 @@ export default function LoadManager() {
           <IonButton fill="clear" size="small" onClick={() => setShowProgress(v => !v)} style={{ '--color': showProgress ? (brandColor || 'var(--ion-color-primary)') : 'var(--ion-color-medium)' }}>
             <span style={{ fontSize: 14, marginRight: 4 }}>≡</span> {showProgress ? 'Hide Progress' : 'Show Progress'}
           </IonButton>
-          <IonButton fill="solid" size="small" color="dark" onClick={() => setFilterOpen(true)}>
+          <IonButton id="lm-filter-btn" fill="solid" size="small" color="dark" onClick={() => setFilterOpen(true)}>
             <IonIcon slot="start" name="funnel-outline" /> Filter
           </IonButton>
           <IonButton fill="outline" size="small" onClick={handleExport}>
@@ -582,7 +581,8 @@ export default function LoadManager() {
     </div>
 
     <FilterDrawer
-      open={filterOpen}
+      triggerId="lm-filter-btn"
+      isOpen={filterOpen}
       onClose={() => setFilterOpen(false)}
       filters={filters}
       onChange={(key, val) => setFilters(f => ({ ...f, [key]: val }))}
