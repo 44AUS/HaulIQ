@@ -263,24 +263,32 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           </div>
 
           {/* Max Weight */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Max Weight</span>
-            <IonInput fill="outline" style={ionOutline} type="number" min={0} placeholder="45000" value={pf.maxWeight} onIonInput={e => setPF('maxWeight', e.detail.value)}>
-              <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>lbs</span>
-            </IonInput>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Max Weight</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput type="number" min={0} placeholder="45000" value={pf.maxWeight} onIonInput={e => setPF('maxWeight', e.detail.value)}>
+                  <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>lbs</span>
+                </IonInput>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Trailer Length */}
-          <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
-            <span style={sectionLabel}>Trailer Length</span>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="number" min={0} placeholder="Min" value={pf.minLength} onIonInput={e => setPF('minLength', e.detail.value)}>
-                <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
-              </IonInput>
-              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="number" min={0} placeholder="Max" value={pf.maxLength} onIonInput={e => setPF('maxLength', e.detail.value)}>
-                <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
-              </IonInput>
-            </div>
+          <div style={{ borderBottom: '1px solid var(--ion-border-color)' }}>
+            <span style={{ ...sectionLabel, display: 'block', padding: '10px 16px 0' }}>Trailer Length</span>
+            <IonList lines="none" style={{ padding: 0 }}>
+              <IonItem>
+                <IonInput type="number" min={0} placeholder="Min" value={pf.minLength} onIonInput={e => setPF('minLength', e.detail.value)}>
+                  <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
+                </IonInput>
+              </IonItem>
+              <IonItem>
+                <IonInput type="number" min={0} placeholder="Max" value={pf.maxLength} onIonInput={e => setPF('maxLength', e.detail.value)}>
+                  <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
+                </IonInput>
+              </IonItem>
+            </IonList>
           </div>
 
           {/* Pickup Date */}
