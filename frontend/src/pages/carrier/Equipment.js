@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useThemeMode } from '../../context/ThemeContext';
 import {
   IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-  IonContent, IonFooter, IonList, IonItem, IonLabel, IonInput, IonSelect,
-  IonSelectOption, IonTextarea, IonNote, IonDatetime, IonSegment, IonSegmentButton, IonBadge, IonActionSheet,
+  IonContent, IonFooter, IonLabel, IonInput, IonSelect,
+  IonSelectOption, IonTextarea, IonDatetime, IonSegment, IonSegmentButton, IonBadge, IonActionSheet,
 } from '@ionic/react';
 import AddressAutocomplete from '../../components/shared/AddressAutocomplete';
 import { truckPostsApi, equipmentClassesApi } from '../../services/api';
@@ -499,21 +499,24 @@ export default function Equipment() {
           </div>
         )}
 
-        <IonList inset>
-          <IonItem>
-            <IonLabel position="stacked">Equipment Class <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <IonSelect
-              value={form.equipment_class || ''}
-              onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
-              placeholder="Select class"
-            >
-              {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
-            </IonSelect>
-          </IonItem>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, padding: '16px' }}>
 
-          <IonItem style={{ opacity: form.equipment_class ? 1 : 0.4, pointerEvents: form.equipment_class ? 'auto' : 'none' }}>
-            <IonLabel position="stacked">Equipment Type <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+          <IonSelect
+            fill="outline"
+            label="Equipment Class *"
+            labelPlacement="stacked"
+            value={form.equipment_class || ''}
+            onIonChange={e => setForm(f => ({ ...f, equipment_class: e.detail.value, equipment_type: '' }))}
+            placeholder="Select class"
+          >
+            {equipmentClasses.map(c => <IonSelectOption key={c.id} value={c.name}>{c.name}</IonSelectOption>)}
+          </IonSelect>
+
+          <div style={{ opacity: form.equipment_class ? 1 : 0.4, pointerEvents: form.equipment_class ? 'auto' : 'none' }}>
             <IonSelect
+              fill="outline"
+              label="Equipment Type *"
+              labelPlacement="stacked"
               value={form.equipment_type || ''}
               onIonChange={setField('equipment_type')}
               placeholder={form.equipment_class ? 'Select type' : 'Select a class first'}
@@ -522,85 +525,60 @@ export default function Equipment() {
               {(equipmentClasses.find(c => c.name === form.equipment_class)?.equipment_types || [])
                 .map(t => <IonSelectOption key={t.id} value={t.name}>{t.name}</IonSelectOption>)}
             </IonSelect>
-          </IonItem>
+          </div>
 
-          <IonItem>
-            <IonLabel position="stacked">Trailer Length (ft)</IonLabel>
-            <IonInput type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" />
-          </IonItem>
+          <IonInput fill="outline" label="Trailer Length (ft)" labelPlacement="stacked" type="number" min={0} value={form.trailer_length} onIonChange={setField('trailer_length')} placeholder="e.g. 53" />
 
-          <IonItem>
-            <IonLabel position="stacked">Weight Capacity (lbs)</IonLabel>
-            <IonInput type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" />
-          </IonItem>
-        </IonList>
+          <IonInput fill="outline" label="Weight Capacity (lbs)" labelPlacement="stacked" type="number" min={0} value={form.weight_capacity} onIonChange={setField('weight_capacity')} placeholder="e.g. 45000" />
 
-        <IonList inset>
-          <IonItem>
-            <IonLabel position="stacked">Current Location <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
+          <div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Current Location *</span>
             <AddressAutocomplete
               placeholder="e.g. Dallas, TX"
               value={form.current_location}
               onChange={({ cityState, address }) => setForm(f => ({ ...f, current_location: cityState || address || '' }))}
-              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
             />
-          </IonItem>
+          </div>
 
-          <IonItem>
-            <IonLabel position="stacked">Preferred Origin</IonLabel>
+          <div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Preferred Origin</span>
             <AddressAutocomplete
               placeholder="e.g. Chicago, IL"
               value={form.preferred_origin}
               onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_origin: cityState || address || '' }))}
-              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
             />
-          </IonItem>
+          </div>
 
-          <IonItem>
-            <IonLabel position="stacked">Preferred Destination</IonLabel>
+          <div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Preferred Destination</span>
             <AddressAutocomplete
               placeholder="e.g. Atlanta, GA"
               value={form.preferred_destination}
               onChange={({ cityState, address }) => setForm(f => ({ ...f, preferred_destination: cityState || address || '' }))}
-              style={{ border: 'none', borderRadius: 0, backgroundColor: 'transparent', padding: '10px 0', fontSize: '1rem' }}
             />
-          </IonItem>
-        </IonList>
+          </div>
 
-        <IonList inset>
-          <IonItem button detail={false} onClick={() => openDatePicker('from')}>
-            <IonLabel position="stacked">Available From <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
-              <span style={{ fontSize: '1rem', color: form.available_from ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
-                {fmtDateTime(form.available_from)}
-              </span>
+          <div onClick={() => openDatePicker('from')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '10px 14px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available From *</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1rem', color: form.available_from ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_from)}</span>
               <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
             </div>
-          </IonItem>
+          </div>
 
-          <IonItem button detail={false} onClick={() => openDatePicker('to')}>
-            <IonLabel position="stacked">Available To <span style={{ color: '#d32f2f' }}>*</span></IonLabel>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px 0' }}>
-              <span style={{ fontSize: '1rem', color: form.available_to ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>
-                {fmtDateTime(form.available_to)}
-              </span>
+          <div onClick={() => openDatePicker('to')} style={{ cursor: 'pointer', border: '1px solid var(--ion-border-color)', borderRadius: 6, padding: '10px 14px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', fontWeight: 500, display: 'block', marginBottom: 4 }}>Available To *</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1rem', color: form.available_to ? 'var(--ion-text-color)' : 'var(--ion-color-medium)' }}>{fmtDateTime(form.available_to)}</span>
               <IonIcon name="calendar-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
             </div>
-          </IonItem>
-        </IonList>
+          </div>
 
-        <IonList inset>
-          <IonItem>
-            <IonLabel position="stacked">Rate Expectation ($/mile)</IonLabel>
-            <IonInput type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" />
-            <IonNote slot="helper">Leave blank to show as negotiable to brokers</IonNote>
-          </IonItem>
+          <IonInput fill="outline" label="Rate Expectation ($/mile)" labelPlacement="stacked" type="number" min={0} step={0.01} value={form.rate_expectation} onIonChange={setField('rate_expectation')} placeholder="Optional — leave blank if negotiable" helperText="Leave blank to show as negotiable to brokers" />
 
-          <IonItem>
-            <IonLabel position="stacked">Notes</IonLabel>
-            <IonTextarea rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow />
-          </IonItem>
-        </IonList>
+          <IonTextarea fill="outline" label="Notes" labelPlacement="stacked" rows={3} value={form.notes} onIonChange={setField('notes')} placeholder="Any additional details…" autoGrow />
+
+        </div>
       </IonContent>
 
     </IonModal>
