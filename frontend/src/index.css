@@ -48,7 +48,10 @@
 
 /* ── Equipment modal address inputs ──────────────────────────────────────── */
 .eq-address-wrapper input {
+  background-color: transparent !important;
+  border: 1px solid var(--ion-border-color) !important;
   border-radius: 4px !important;
+  color: var(--ion-text-color) !important;
   padding: 13px 16px !important;
   font-size: 1rem !important;
   transition: border-color 0.15s, box-shadow 0.15s !important;
