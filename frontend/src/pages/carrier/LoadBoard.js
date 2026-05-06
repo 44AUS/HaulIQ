@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem } from '@ionic/react';
+import { IonSpinner, IonSegment, IonSegmentButton, IonLabel, IonButton, IonRippleEffect, IonActionSheet, IonPopover, IonList, IonItem, IonInput, IonSelect, IonSelectOption } from '@ionic/react';
 import { useThemeMode } from '../../context/ThemeContext';
 import { loadsApi, equipmentTypesApi } from '../../services/api';
 import { loadSlug, adaptLoadList } from '../../services/adapters';
@@ -45,7 +45,7 @@ const tdStyle = { padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color
 function RippleTd({ style, children, ...props }) {
   return <td className="ion-activatable" style={{ ...style, position: 'relative', overflow: 'hidden' }} {...props}><IonRippleEffect />{children}</td>;
 }
-const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'transparent', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
+const ionOutline = { '--highlight-color-focused': 'var(--ion-color-success)' };
 const sectionLabel = { display: 'block', marginBottom: 6, color: 'var(--ion-color-medium)', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' };
 
 function TableView({ loads, equipmentTypes }) {
@@ -206,27 +206,23 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
           {/* Origin */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Origin</span>
-            <div style={{ position: 'relative', marginBottom: 8 }}>
-              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><IonIcon name="search-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)' }} /></span>
-              <input style={{ ...inputStyle, paddingLeft: 32, paddingRight: pf.origin ? 32 : 12 }} placeholder="e.g. Chicago, IL" value={pf.origin} onChange={e => setPF('origin', e.target.value)} />
-              {pf.origin && <button onClick={() => setPF('origin', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 12, color: 'var(--ion-color-medium)' }} /></button>}
-            </div>
-            <select style={inputStyle} value={pf.originDeadhead} onChange={e => setPF('originDeadhead', e.target.value)}>
-              {DEADHEAD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            <IonInput fill="outline" style={{ ...ionOutline, marginBottom: 8 }} placeholder="e.g. Chicago, IL" value={pf.origin} onIonInput={e => setPF('origin', e.detail.value)} clearInput>
+              <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
+            </IonInput>
+            <IonSelect fill="outline" style={ionOutline} value={pf.originDeadhead} onIonChange={e => setPF('originDeadhead', e.detail.value)}>
+              {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+            </IonSelect>
           </div>
 
           {/* Destination */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Destination</span>
-            <div style={{ position: 'relative', marginBottom: 8 }}>
-              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><IonIcon name="search-outline" style={{ fontSize: 14, color: 'var(--ion-color-medium)' }} /></span>
-              <input style={{ ...inputStyle, paddingLeft: 32, paddingRight: pf.dest ? 32 : 12 }} placeholder="e.g. Atlanta, GA" value={pf.dest} onChange={e => setPF('dest', e.target.value)} />
-              {pf.dest && <button onClick={() => setPF('dest', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, display: 'flex' }}><IonIcon name="close-outline" style={{ fontSize: 12, color: 'var(--ion-color-medium)' }} /></button>}
-            </div>
-            <select style={inputStyle} value={pf.destDeadhead} onChange={e => setPF('destDeadhead', e.target.value)}>
-              {DEADHEAD_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            <IonInput fill="outline" style={{ ...ionOutline, marginBottom: 8 }} placeholder="e.g. Atlanta, GA" value={pf.dest} onIonInput={e => setPF('dest', e.detail.value)} clearInput>
+              <IonIcon slot="start" name="search-outline" style={{ fontSize: 14 }} />
+            </IonInput>
+            <IonSelect fill="outline" style={ionOutline} value={pf.destDeadhead} onIonChange={e => setPF('destDeadhead', e.detail.value)}>
+              {DEADHEAD_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+            </IonSelect>
           </div>
 
           {/* Equipment Types */}
@@ -250,34 +246,31 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
           {/* Load Size */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Load Size</span>
-            <select style={inputStyle} value={pf.loadSize} onChange={e => setPF('loadSize', e.target.value)}>
-              <option value="">Full &amp; Partial</option>
-              <option value="full">Full Truckload (FTL)</option>
-              <option value="partial">Partial Truckload (LTL)</option>
-            </select>
+            <IonSelect fill="outline" style={ionOutline} value={pf.loadSize} onIonChange={e => setPF('loadSize', e.detail.value)}>
+              <IonSelectOption value="">Full &amp; Partial</IonSelectOption>
+              <IonSelectOption value="full">Full Truckload (FTL)</IonSelectOption>
+              <IonSelectOption value="partial">Partial Truckload (LTL)</IonSelectOption>
+            </IonSelect>
           </div>
 
           {/* Max Weight */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Max Weight</span>
-            <div style={{ position: 'relative' }}>
-              <input style={{ ...inputStyle, paddingRight: 36 }} type="number" min={0} placeholder="45000" value={pf.maxWeight} onChange={e => setPF('maxWeight', e.target.value)} />
-              <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>lbs</span>
-            </div>
+            <IonInput fill="outline" style={ionOutline} type="number" min={0} placeholder="45000" value={pf.maxWeight} onIonInput={e => setPF('maxWeight', e.detail.value)}>
+              <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>lbs</span>
+            </IonInput>
           </div>
 
           {/* Trailer Length */}
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Trailer Length</span>
             <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <input style={{ ...inputStyle, paddingRight: 28 }} type="number" min={0} placeholder="Min" value={pf.minLength} onChange={e => setPF('minLength', e.target.value)} />
-                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>ft</span>
-              </div>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <input style={{ ...inputStyle, paddingRight: 28 }} type="number" min={0} placeholder="Max" value={pf.maxLength} onChange={e => setPF('maxLength', e.target.value)} />
-                <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: '0.72rem', color: 'var(--ion-color-medium)', pointerEvents: 'none' }}>ft</span>
-              </div>
+              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="number" min={0} placeholder="Min" value={pf.minLength} onIonInput={e => setPF('minLength', e.detail.value)}>
+                <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
+              </IonInput>
+              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="number" min={0} placeholder="Max" value={pf.maxLength} onIonInput={e => setPF('maxLength', e.detail.value)}>
+                <span slot="end" style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>ft</span>
+              </IonInput>
             </div>
           </div>
 
@@ -285,17 +278,17 @@ function FilterDrawer({ open, onClose, pf, setPF, onApply, onClear, equipmentTyp
           <div style={{ padding: '10px 20px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={sectionLabel}>Pickup Date</span>
             <div style={{ display: 'flex', gap: 8 }}>
-              <input style={{ ...inputStyle, flex: 1, fontSize: 12 }} type="date" value={pf.dateFrom} onChange={e => setPF('dateFrom', e.target.value)} />
-              <input style={{ ...inputStyle, flex: 1, fontSize: 12 }} type="date" value={pf.dateTo} onChange={e => setPF('dateTo', e.target.value)} />
+              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={pf.dateFrom} onIonChange={e => setPF('dateFrom', e.detail.value)} />
+              <IonInput fill="outline" style={{ ...ionOutline, flex: 1 }} type="date" value={pf.dateTo} onIonChange={e => setPF('dateTo', e.detail.value)} />
             </div>
           </div>
 
           {/* Sort By */}
           <div style={{ padding: '10px 20px' }}>
             <span style={sectionLabel}>Sort By</span>
-            <select style={inputStyle} value={pf.sort} onChange={e => setPF('sort', e.target.value)}>
-              {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            <IonSelect fill="outline" style={ionOutline} value={pf.sort} onIonChange={e => setPF('sort', e.detail.value)}>
+              {SORT_OPTIONS.map(o => <IonSelectOption key={o.value} value={o.value}>{o.label}</IonSelectOption>)}
+            </IonSelect>
           </div>
         </div>
       </div>
