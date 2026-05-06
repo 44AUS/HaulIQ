@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { IonButton } from '@ionic/react';
 import IonIcon from './IonIcon';
+import mapVectorSrc from '../assets/map_vector.svg';
 
 function extractState(location) {
   if (!location) return null;
@@ -44,16 +45,18 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         boxShadow: '-4px 0 24px rgba(0,0,0,0.2)',
       }}>
         {/* Header */}
-        <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                <span style={{ background: '#0033a0', color: '#fff', fontWeight: 900, fontSize: 12, padding: '1px 5px', borderRadius: 2, letterSpacing: '0.08em' }}>DAT</span>
-                <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>National Loads Count</span>
+        <div style={{ position: 'relative', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', minHeight: 110 }}>
+          {/* Map background */}
+          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.13, pointerEvents: 'none', userSelect: 'none' }} />
+          <div style={{ position: 'relative', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div style={{ textAlign: 'center', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ background: '#0033a0', color: '#fff', fontWeight: 900, fontSize: 13, padding: '2px 6px', borderRadius: 2, letterSpacing: '0.1em' }}>DAT</span>
+                <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--ion-text-color)' }}>National Loads Count</span>
               </div>
               <p style={{ margin: 0, fontSize: '0.72rem', color: 'var(--ion-color-medium)' }}>Where the Loads Are</p>
             </div>
-            <IonButton fill="clear" color="medium" size="small" onClick={onClose}>
+            <IonButton fill="clear" color="medium" size="small" onClick={onClose} style={{ position: 'absolute', top: 8, right: 4 }}>
               <IonIcon slot="icon-only" name="close-outline" />
             </IonButton>
           </div>
