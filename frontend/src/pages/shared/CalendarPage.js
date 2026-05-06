@@ -171,7 +171,7 @@ function AssignedDropdown({ drivers, selectedDrivers, onApply }) {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--ion-border-color)' }}>
             <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ion-text-color)' }}>Assigned</span>
-            <IonButton size="small" color="success" style={{ '--color': '#fff' }} onClick={() => { onApply(pending); setOpen(false); }}>APPLY</IonButton>
+            <IonButton size="small" style={{ '--background': '#2dd36f', '--color': '#fff' }} onClick={() => { onApply(pending); setOpen(false); }}>APPLY</IonButton>
           </div>
 
           {/* All option */}
@@ -221,7 +221,7 @@ function CalendarFilterDrawer({ open, onClose, filters, onChange, onApply, onCle
           <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 10 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
-            <IonButton size="small" color="success" style={{ '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
+            <IonButton size="small" style={{ '--background': '#2dd36f', '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
         <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>

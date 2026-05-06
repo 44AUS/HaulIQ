@@ -197,7 +197,7 @@ function FilterDrawer({ triggerId, isOpen, onClose, pf, setPF, onApply, onClear,
           <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--ion-text-color)' }}>Filter</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <IonButton fill="clear" color="danger" size="small" onClick={onClear}>CLEAR</IonButton>
-            <IonButton size="small" color="success" style={{ '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
+            <IonButton size="small" style={{ '--background': '#2dd36f', '--color': '#fff' }} onClick={onApply}>APPLY</IonButton>
           </div>
         </div>
 
