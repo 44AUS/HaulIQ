@@ -679,13 +679,17 @@ export default function Messages() {
                 style={{ '--background': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', minHeight: 36, width: '100%' }}>
                 <IonSegmentButton value="main"
                   style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
-                  <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>
+                  <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>
+                    <IonIcon name="people-outline" style={{ fontSize: 15 }} />
                     {user?.role === 'carrier' ? 'Brokers' : 'Carriers'}
                   </IonLabel>
                 </IonSegmentButton>
                 <IonSegmentButton value="employees"
                   style={{ '--indicator-color': 'var(--ion-card-background)', '--color': 'var(--ion-color-medium)', '--color-checked': 'var(--ion-text-color)', '--border-radius': '8px', '--indicator-box-shadow': '0 1px 4px rgba(0,0,0,0.15)', minHeight: 30 }}>
-                  <IonLabel style={{ fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>Employees</IonLabel>
+                  <IonLabel style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.8rem', fontWeight: 600, margin: '4px 0' }}>
+                    <IonIcon name="people-circle-outline" style={{ fontSize: 15 }} />
+                    Employees
+                  </IonLabel>
                 </IonSegmentButton>
               </IonSegment>
             </div>
