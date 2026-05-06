@@ -526,6 +526,7 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
             {/* Desktop nav */}
             {!isMobile && (
               <IonSegment
+                scrollable={true}
                 value={activeNavItem?.path ?? ''}
                 onIonChange={e => { if (e.detail.value) navigate(String(e.detail.value)); }}
                 style={{
@@ -535,8 +536,6 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
                   opacity: searchOpen ? 0 : 1,
                   transition: 'opacity 0.18s',
                   pointerEvents: searchOpen ? 'none' : 'auto',
-                  overflowX: 'auto',
-                  scrollbarWidth: 'none',
                   flexShrink: 1,
                 }}
               >
