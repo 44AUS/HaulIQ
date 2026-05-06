@@ -476,14 +476,14 @@ export default function Equipment() {
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--ion-card-background)', '--color': 'var(--ion-text-color)' }}>
           <IonButtons slot="start">
-            <IonButton fill="clear" shape="round" onClick={() => setDialogOpen(false)} style={{ '--color': 'var(--ion-text-color)' }}>
-              <IonIcon slot="icon-only" name="close-outline" />
+            <IonButton fill="clear" shape="round" onClick={() => setDialogOpen(false)}>
+              <IonIcon slot="icon-only" name="close-outline" style={{ color: 'var(--ion-text-color)' }} />
             </IonButton>
           </IonButtons>
           <IonTitle style={{ fontWeight: 700 }}>{isRepost ? 'Repost Truck' : editPost ? 'Edit Truck Posting' : 'Post a Truck'}</IonTitle>
           <IonButtons slot="end">
-            <IonButton fill="clear" shape="round" onClick={handleSave} disabled={saving} style={{ '--color': 'var(--ion-color-success)', opacity: saving ? 0.6 : 1 }}>
-              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: 'var(--ion-color-success)' }} /> : <IonIcon slot="icon-only" name="checkmark-outline" />}
+            <IonButton fill="clear" shape="round" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.6 : 1 }}>
+              {saving ? <IonSpinner name="crescent" style={{ width: 20, height: 20, color: 'var(--ion-color-success)' }} /> : <IonIcon slot="icon-only" name="checkmark-outline" style={{ color: 'var(--ion-color-success)' }} />}
             </IonButton>
           </IonButtons>
         </IonToolbar>
