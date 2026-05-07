@@ -519,51 +519,6 @@ export default function ActiveLoadDetail() {
 
         {/* Right column */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
-          {/* Load Status card */}
-          <div style={{ ...cardStyle, padding: 20 }}>
-            <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 16 }}>Load Status</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {booking.status === 'pending' && (
-                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(237,108,2,0.08)', border: '1px solid rgba(237,108,2,0.3)', borderRadius: 6 }}>
-                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#ed6c02' }}>Awaiting Broker Approval</p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#ed6c02' }}>The broker hasn't confirmed your booking yet.</p>
-                </div>
-              )}
-              {booking.status === 'approved' && (
-                <button onClick={handlePickup} disabled={actionLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', backgroundColor: 'var(--ion-color-primary)', color: '#fff', border: 'none', borderRadius: 6, cursor: actionLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '1rem', opacity: actionLoading ? 0.7 : 1 }}>
-                  {actionLoading ? <IonSpinner name="crescent" style={{ width: 16, height: 16, color: '#fff' }} /> : <IonIcon name="navigate-outline" style={{ fontSize: 16 }} />}
-                  Confirm Pickup — Mark as In Transit
-                </button>
-              )}
-              {booking.status === 'in_transit' && (
-                <button onClick={handleDeliver} disabled={actionLoading} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px', backgroundColor: '#2e7d32', color: '#fff', border: 'none', borderRadius: 6, cursor: actionLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 600, fontSize: '1rem', opacity: actionLoading ? 0.7 : 1 }}>
-                  {actionLoading ? <IonSpinner name="crescent" style={{ width: 16, height: 16, color: '#fff' }} /> : <IonIcon name="flag-outline" style={{ fontSize: 16 }} />}
-                  Confirm Delivery — Mark as Delivered
-                </button>
-              )}
-              {booking.status === 'completed' && (
-                <div style={{ padding: '12px 14px', backgroundColor: 'rgba(46,125,50,0.08)', border: '1px solid rgba(46,125,50,0.3)', borderRadius: 6 }}>
-                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.875rem', color: '#2e7d32' }}>Load Delivered</p>
-                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#2e7d32' }}>This load has been completed.</p>
-                </div>
-              )}
-              {load?.broker_user_id && (
-                <Link to={`/carrier/messages?userId=${load.broker_user_id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px', border: '1px solid var(--ion-color-primary)', borderRadius: 6, color: 'var(--ion-color-primary)', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>
-                  <IonIcon name="chatbubble-outline" style={{ fontSize: 16 }} /> Message Broker
-                </Link>
-              )}
-              {load?.broker_name && (
-                <div style={{ paddingTop: 8 }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block', marginBottom: 4 }}>Broker</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--ion-text-color)', display: 'block' }}>{load.broker_name}</span>
-                  {load.broker_mc && <span style={{ fontSize: '0.72rem', color: 'var(--ion-color-medium)', display: 'block' }}>MC# {load.broker_mc}</span>}
-                  {load.broker_email && <a href={`mailto:${load.broker_email}`} style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, color: 'var(--ion-color-primary)', fontSize: '0.875rem', textDecoration: 'none' }}><IonIcon name="mail-outline" style={{ fontSize: 14 }} />{load.broker_email}</a>}
-                  {load.broker_phone && <a href={`tel:${load.broker_phone}`} style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, color: 'var(--ion-color-primary)', fontSize: '0.875rem', textDecoration: 'none' }}><IonIcon name="call-outline" style={{ fontSize: 14 }} />{load.broker_phone}</a>}
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Check call log */}
           {booking.status !== 'pending' && (
             <div style={{ ...cardStyle, padding: 20 }}>
