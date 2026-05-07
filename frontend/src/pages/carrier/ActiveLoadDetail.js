@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonAlert, IonButton, IonSpinner } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
@@ -173,7 +173,7 @@ function TmsStepper({ tmsStep }) {
   );
 }
 
-function LoadStatusBar({ status }) {
+function LoadStatusBar({ status, onClickCompleted }) {
   const STEPS = [
     { label: 'Quote',       bg: '#9E9E9E' },
     { label: 'Scheduled',   bg: '#1976D2' },
@@ -203,18 +203,27 @@ function LoadStatusBar({ status }) {
         }
       `}</style>
       <div className="lsb">
-        {STEPS.map((step, i) => (
-          <div key={step.label} className="lsb-wrap">
-            <div className="lsb-step" style={{
-              backgroundColor: step.bg,
-              zIndex: STEPS.length - i,
-              opacity: i > activeIdx ? 0.45 : 1,
-              textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
-            }}>
-              {step.label}
+        {STEPS.map((step, i) => {
+          const isCompleted = step.label === 'Completed';
+          const clickable = isCompleted && onClickCompleted;
+          return (
+            <div key={step.label} className="lsb-wrap">
+              <div
+                className="lsb-step"
+                onClick={clickable ? onClickCompleted : undefined}
+                style={{
+                  backgroundColor: step.bg,
+                  zIndex: STEPS.length - i,
+                  opacity: i > activeIdx ? 0.45 : 1,
+                  textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+                  cursor: clickable ? 'pointer' : 'default',
+                }}
+              >
+                {step.label}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -257,6 +266,7 @@ export default function ActiveLoadDetail() {
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showDeliverAlert, setShowDeliverAlert] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [checkCalls, setCheckCalls]       = useState([]);
   const [callNote, setCallNote]           = useState('');
@@ -565,16 +575,45 @@ export default function ActiveLoadDetail() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-      {activeTab === 'overview' && <LoadStatusBar status={booking.status} />}
+      {activeTab === 'overview' && (
+        <LoadStatusBar
+          status={booking.status}
+          onClickCompleted={booking.status === 'in_transit' ? () => setShowDeliverAlert(true) : undefined}
+        />
+      )}
+      <IonAlert
+        isOpen={showDeliverAlert}
+        onDidDismiss={() => setShowDeliverAlert(false)}
+        header="Change Status"
+        message="Would you like to manually change the status from in progress to completed?"
+        buttons={[
+          { text: 'No', role: 'cancel' },
+          { text: 'Yes', handler: () => handleDeliver() },
+        ]}
+      />
       {activeTab === 'overview' && booking.status === 'in_transit' && (
-        <button
-          onClick={handleDeliver}
+        <IonButton
+          expand="block"
           disabled={actionLoading}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '8px 0', backgroundColor: '#2dd36f', color: '#fff', border: 'none', borderRadius: 6, cursor: actionLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: '0.875rem', marginTop: 6, marginBottom: 8, opacity: actionLoading ? 0.7 : 1 }}
+          onClick={handleDeliver}
+          style={{
+            '--background': '#2dd36f',
+            '--background-activated': '#28c264',
+            '--color': '#fff',
+            '--margin-start': '0',
+            '--margin-end': '0',
+            '--border-radius': '6px',
+            '--padding-top': '10px',
+            '--padding-bottom': '10px',
+            marginTop: 6,
+            marginBottom: 8,
+            fontWeight: 700,
+            fontSize: '0.875rem',
+          }}
         >
-          <IonIcon name="checkbox-outline" style={{ fontSize: 16, color: '#fff' }} />
-          {actionLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} /> : 'Confirm Delivery'}
-        </button>
+          <IonIcon slot="start" name="checkbox-outline" />
+          {actionLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : 'Confirm Delivery'}
+        </IonButton>
       )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
