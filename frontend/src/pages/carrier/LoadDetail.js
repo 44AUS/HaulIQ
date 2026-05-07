@@ -586,6 +586,49 @@ export default function LoadDetail() {
           </IonList>
         </div>
       )}
+      {activeTab === 'overview' && (
+        <div style={{ marginBottom: 8, backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Load Items</div>
+          <IonList lines="full" style={{ padding: 0, margin: 0, '--ion-item-background': 'transparent', '--background': 'transparent' }}>
+            {(load.origin && load.dest) && (
+              <IonItem>
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Lane</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{load.origin} → {load.dest}</IonLabel>
+              </IonItem>
+            )}
+            {load.ratePerMile > 0 && (
+              <IonItem>
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Per Mile</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>${Number(load.ratePerMile).toFixed(2)}</IonLabel>
+              </IonItem>
+            )}
+            {load.miles && (
+              <IonItem>
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Miles</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{Number(load.miles).toLocaleString()}</IonLabel>
+              </IonItem>
+            )}
+            {load.weight && (
+              <IonItem>
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Weight</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{load.weight}</IonLabel>
+              </IonItem>
+            )}
+            {load.pickup && (
+              <IonItem>
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Pickup Date</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{load.pickup}</IonLabel>
+              </IonItem>
+            )}
+            {load.delivery && (
+              <IonItem lines="none">
+                <IonLabel><span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)' }}>Delivery Date</span></IonLabel>
+                <IonLabel slot="end" style={{ textAlign: 'right', fontWeight: 600, fontSize: '0.875rem' }}>{load.delivery}</IonLabel>
+              </IonItem>
+            )}
+          </IonList>
+        </div>
+      )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
         {activeTab === 'payments'  && PaymentsTab}
