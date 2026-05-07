@@ -13,38 +13,37 @@ export default function LoadItemsCard({ load, isRaw = false }) {
 
   if (!load) return null;
 
-  const lane       = isRaw
-    ? (load.origin && load.destination ? `${load.origin} → ${load.destination}` : null)
-    : (load.origin && load.dest        ? `${load.origin} → ${load.dest}`        : null);
+  const originCity = load.origin || null;
+  const destCity   = isRaw ? (load.destination || null) : (load.dest || null);
   const perMile    = isRaw ? load.rate_per_mile  : load.ratePerMile;
-  const miles      = isRaw ? load.miles          : load.miles;
+  const miles      = load.miles;
   const weight     = isRaw
     ? (load.weight_lbs ? `${Number(load.weight_lbs).toLocaleString()} lbs` : null)
     : load.weight;
-  const pickupDate = isRaw ? fmt(load.pickup_date)  : load.pickup;
+  const pickupDate = isRaw ? fmt(load.pickup_date)   : load.pickup;
   const delivDate  = isRaw ? fmt(load.delivery_date) : load.delivery;
 
+  const hasLane = originCity || destCity;
+
   const cols = [
-    { label: 'Lane',          value: lane },
-    { label: 'Per Mile',      value: perMile  ? `$${Number(perMile).toFixed(2)}`      : null },
-    { label: 'Miles',         value: miles    ? Number(miles).toLocaleString()         : null },
+    { label: 'Lane',          key: 'lane',   show: hasLane },
+    { label: 'Per Mile',      value: perMile  ? `$${Number(perMile).toFixed(2)}`  : null },
+    { label: 'Miles',         value: miles    ? Number(miles).toLocaleString()    : null },
     { label: 'Weight',        value: weight },
     { label: 'Pickup Date',   value: pickupDate },
     { label: 'Delivery Date', value: delivDate },
-  ].filter(c => c.value);
+  ].filter(c => c.key === 'lane' ? c.show : c.value);
 
   if (cols.length === 0) return null;
 
   const thStyle = {
-    padding: '8px 16px', textAlign: 'left',
-    fontSize: '0.7rem', fontWeight: 700, color: 'var(--ion-color-medium)',
-    letterSpacing: '0.07em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-    borderTop: '1px solid var(--ion-border-color)',
+    padding: '10px 12px', textAlign: 'left',
+    fontSize: '0.72rem', fontWeight: 400, color: 'var(--ion-color-medium)',
+    backgroundColor: 'var(--ion-background-color)', whiteSpace: 'nowrap',
   };
-  const tdStyle = {
-    padding: '12px 16px', fontWeight: 600, fontSize: '0.875rem',
-    color: 'var(--ion-text-color)', whiteSpace: 'nowrap',
-    borderTop: '1px solid var(--ion-border-color)',
+  const tdBase = {
+    padding: 0, fontSize: '0.875rem', color: 'var(--ion-text-color)',
+    borderBottom: '1px solid var(--ion-border-color)', height: 64, verticalAlign: 'middle',
   };
 
   return (
@@ -68,7 +67,30 @@ export default function LoadItemsCard({ load, isRaw = false }) {
             </thead>
             <tbody>
               <tr>
-                {cols.map(c => <td key={c.label} style={tdStyle}>{c.value}</td>)}
+                {cols.map(c => {
+                  if (c.key === 'lane') {
+                    return (
+                      <td key="lane" style={{ ...tdBase, paddingLeft: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'stretch', gap: 8, paddingLeft: 12 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 2, paddingBottom: 2 }}>
+                            <IonIcon name="ellipse" style={{ fontSize: 8, color: 'var(--ion-color-primary)', flexShrink: 0 }} />
+                            <div style={{ width: 1.5, flex: 1, backgroundColor: 'var(--ion-border-color)', margin: '2px 0' }} />
+                            <IonIcon name="square-outline" style={{ fontSize: 8, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <span style={{ fontSize: '0.75rem', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{originCity || '—'}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{destCity || '—'}</span>
+                          </div>
+                        </div>
+                      </td>
+                    );
+                  }
+                  return (
+                    <td key={c.label} style={{ ...tdBase, padding: '0 12px', whiteSpace: 'nowrap' }}>
+                      {c.value}
+                    </td>
+                  );
+                })}
               </tr>
             </tbody>
           </table>
