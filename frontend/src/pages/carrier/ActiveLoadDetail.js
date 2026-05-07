@@ -173,6 +173,53 @@ function TmsStepper({ tmsStep }) {
   );
 }
 
+function LoadStatusBar({ status }) {
+  const STEPS = [
+    { label: 'Quote',       bg: '#9E9E9E' },
+    { label: 'Scheduled',   bg: '#1976D2' },
+    { label: 'In Progress', bg: '#FDD835' },
+    { label: 'Completed',   bg: '#4CAF50' },
+  ];
+  const activeIdx = { pending: 0, approved: 1, in_transit: 2, completed: 3 }[status] ?? 0;
+  return (
+    <div style={{ marginBottom: 8, borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
+      <style>{`
+        .lsb { display: flex; width: 100%; gap: 0.2px; }
+        .lsb-wrap { flex: 1; }
+        .lsb-wrap:first-child { border-radius: 8px 0 0 8px; overflow: hidden; }
+        .lsb-wrap:last-child  { border-radius: 0 8px 8px 0; overflow: hidden; }
+        .lsb-step {
+          display: flex; align-items: center; justify-content: center; width: 100%;
+          color: #fff; font-size: 13px; font-weight: 700; white-space: nowrap;
+          text-overflow: ellipsis; padding: 6px 0;
+          clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+          user-select: none;
+        }
+        .lsb-wrap:first-child .lsb-step {
+          clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+        }
+        .lsb-wrap:last-child .lsb-step {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%);
+        }
+      `}</style>
+      <div className="lsb">
+        {STEPS.map((step, i) => (
+          <div key={step.label} className="lsb-wrap">
+            <div className="lsb-step" style={{
+              backgroundColor: step.bg,
+              zIndex: STEPS.length - i,
+              opacity: i > activeIdx ? 0.45 : 1,
+              textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
+            }}>
+              {step.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const PAYMENT_STATUS = {
   pending:  { label: 'Payment Pending', bg: 'var(--ion-color-light)',            color: 'var(--ion-color-medium)' },
   escrowed: { label: 'In Escrow',       bg: 'rgba(2,136,209,0.12)',              color: '#0288d1' },
@@ -518,6 +565,7 @@ export default function ActiveLoadDetail() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      {activeTab === 'overview' && <LoadStatusBar status={booking.status} />}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
         {activeTab === 'payments'  && PaymentsTab}
