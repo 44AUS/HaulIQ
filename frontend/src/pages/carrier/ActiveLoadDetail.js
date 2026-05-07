@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { IonSpinner } from '@ionic/react';
+import { IonSpinner, IonButton } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
@@ -566,6 +566,12 @@ export default function ActiveLoadDetail() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       {activeTab === 'overview' && <LoadStatusBar status={booking.status} />}
+      {activeTab === 'overview' && booking.status === 'in_transit' && (
+        <IonButton expand="block" color="success" size="small" disabled={actionLoading} onClick={handleDeliver} style={{ margin: '0 0 8px' }}>
+          <IonIcon slot="start" name="checkbox-outline" />
+          {actionLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : 'Confirm Delivery'}
+        </IonButton>
+      )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
         {activeTab === 'payments'  && PaymentsTab}
