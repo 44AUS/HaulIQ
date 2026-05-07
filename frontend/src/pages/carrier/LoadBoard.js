@@ -425,7 +425,7 @@ export default function LoadBoard() {
           </div>
           <div style={{ display: 'flex', gap: 4 }}>
             <IonButton id="lb-filter-btn" fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={() => setFilterOpen(true)}>
-              <IonIcon slot="start" name="funnel-outline" /> Filter
+              <IonIcon slot="start" name="funnel-outline" style={{ marginInlineEnd: 6 }} /> Filter
             </IonButton>
             <IonButton fill="solid" size="small" color="medium" onClick={() => setLoadsCountOpen(true)}>
               Loads Count

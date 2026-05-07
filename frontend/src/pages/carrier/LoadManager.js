@@ -331,7 +331,7 @@ export default function LoadManager() {
             <span style={{ fontSize: 14, marginRight: 4 }}>≡</span> {showProgress ? 'Hide Progress' : 'Show Progress'}
           </IonButton>
           <IonButton id="lm-filter-btn" fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={() => setFilterOpen(true)}>
-            <IonIcon slot="start" name="funnel-outline" /> Filter
+            <IonIcon slot="start" name="funnel-outline" style={{ marginInlineEnd: 6 }} /> Filter
           </IonButton>
           <IonButton fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={handleExport}>
             <IonIcon slot="start" name="download-outline" /> Export
