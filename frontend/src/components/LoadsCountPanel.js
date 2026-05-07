@@ -47,7 +47,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         {/* Header */}
         <div style={{ position: 'relative', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', minHeight: 110 }}>
           {/* Map vector */}
-          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: '85%', opacity: 0.15, pointerEvents: 'none', userSelect: 'none' }} />
+          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.15, pointerEvents: 'none', userSelect: 'none' }} />
           <div style={{ position: 'relative', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ textAlign: 'center', flex: 1 }}>
               <img src="/urload-logo.png" alt="UrLoad" style={{ height: 36, objectFit: 'contain', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
@@ -61,7 +61,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         </div>
 
         {/* Column headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', padding: '8px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', padding: '8px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, backgroundColor: 'var(--ion-background-color)' }}>
           <span style={colHeader}>ST</span>
           <span style={colHeader}>LOADS IN</span>
           <span style={{ ...colHeader, textAlign: 'right' }}>LOADS OUT</span>
