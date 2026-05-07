@@ -129,7 +129,7 @@ function TableView({ loads, equipmentTypes }) {
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
-                  <span style={{ fontSize: '0.875rem', display: 'block', whiteSpace: 'nowrap', color: 'var(--ion-color-success)' }}>${load.rate?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap', color: 'var(--ion-color-success)' }}>${load.rate?.toLocaleString()}</span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>${load.ratePerMile}/mi</span>
                 </RippleTd>
 
@@ -167,7 +167,7 @@ function TableView({ loads, equipmentTypes }) {
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
-                  <span style={{ fontSize: '0.875rem', whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, width: 60, paddingRight: 6 }} onClick={e => e.stopPropagation()}>
