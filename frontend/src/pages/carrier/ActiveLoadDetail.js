@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { IonAlert, IonButton, IonSpinner } from '@ionic/react';
-import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, useJsApiLoader } from '@react-google-maps/api';
+import { Geolocation } from '@capacitor/geolocation';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
 import DocumentPanel from '../../components/documents/DocumentPanel';
@@ -24,7 +25,87 @@ const B_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="4
 const cardStyle = { backgroundColor: 'var(--ion-card-background)', border: '1px solid var(--ion-border-color)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' };
 const inputStyle = { width: '100%', boxSizing: 'border-box', backgroundColor: 'var(--ion-input-background, rgba(0,0,0,0.04))', border: '1px solid var(--ion-border-color)', borderRadius: 6, color: 'var(--ion-text-color)', fontSize: '0.875rem', padding: '8px 12px', outline: 'none', fontFamily: 'inherit' };
 
-function LoadHeroMap({ origin, dest }) {
+function useLiveLocation(enabled) {
+  const [location, setLocation] = useState(null);
+  const watchIdRef = useRef(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+
+    async function start() {
+      try {
+        await Geolocation.requestPermissions();
+        watchIdRef.current = await Geolocation.watchPosition(
+          { enableHighAccuracy: true, timeout: 15000 },
+          (pos) => {
+            if (!cancelled && pos?.coords) {
+              setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            }
+          }
+        );
+      } catch {
+        // permission denied or geolocation unavailable
+      }
+    }
+
+    start();
+    return () => {
+      cancelled = true;
+      if (watchIdRef.current != null) {
+        Geolocation.clearWatch({ id: watchIdRef.current });
+        watchIdRef.current = null;
+      }
+    };
+  }, [enabled]);
+
+  return location;
+}
+
+function LiveDot({ liveLocation }) {
+  const [label, setLabel] = useState(null);
+  const [showLabel, setShowLabel] = useState(false);
+
+  const handleClick = useCallback((e) => {
+    e.stopPropagation();
+    if (showLabel) { setShowLabel(false); return; }
+    if (!window.google || !liveLocation) return;
+    new window.google.maps.Geocoder().geocode({ location: liveLocation }, (results, status) => {
+      if (status === 'OK' && results?.length) {
+        const comps = results[0].address_components;
+        const city  = comps.find(c => c.types.includes('locality'))?.short_name || '';
+        const state = comps.find(c => c.types.includes('administrative_area_level_1'))?.short_name || '';
+        setLabel([city, state].filter(Boolean).join(', ') || results[0].formatted_address);
+      }
+    });
+    setShowLabel(true);
+  }, [liveLocation, showLabel]);
+
+  return (
+    <div
+      onClick={handleClick}
+      style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', width: 0, height: 0 }}
+    >
+      <style>{`
+        @keyframes livePulse {
+          0%   { transform: scale(1);   opacity: 0.75; }
+          80%  { transform: scale(2.8); opacity: 0; }
+          100% { transform: scale(2.8); opacity: 0; }
+        }
+      `}</style>
+      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.4)', animation: 'livePulse 1.8s ease-out infinite', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.25)', animation: 'livePulse 1.8s ease-out infinite 0.65s', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: -8, left: -8, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#3b82f6', border: '3px solid #fff', boxShadow: '0 0 12px rgba(59,130,246,0.85)', pointerEvents: 'none' }} />
+      {showLabel && label && (
+        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '5px 10px', backgroundColor: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.5)', color: '#e2e8f0', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em', pointerEvents: 'none' }}>
+          {label}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LoadHeroMap({ origin, dest, liveLocation }) {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '', libraries: LIBRARIES });
   const [directions, setDirections] = useState(null);
   const mapRef = useRef(null);
@@ -65,6 +146,11 @@ function LoadHeroMap({ origin, dest }) {
         {directions && <DirectionsRenderer directions={directions} options={{ suppressMarkers: true, polylineOptions: { strokeColor: '#22c55e', strokeWeight: 4, strokeOpacity: 0.9 } }} />}
         {directions && <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} />}
         {directions && <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} />}
+        {liveLocation && (
+          <OverlayViewF position={liveLocation} mapPaneName={OVERLAY_MOUSE_TARGET}>
+            <LiveDot liveLocation={liveLocation} />
+          </OverlayViewF>
+        )}
       </GoogleMap>
       <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
         <div style={{ padding: '6px 12px', backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 6 }}>
@@ -273,6 +359,7 @@ export default function ActiveLoadDetail() {
   const [addingCall, setAddingCall]       = useState(false);
   const callsEndRef = useRef(null);
 
+  const liveLocation = useLiveLocation(booking?.status === 'in_transit');
   const load    = booking?.load;
   const tmsStep = booking?.tms_status ? TMS_VALUES.indexOf(booking.tms_status) : -1;
 
@@ -332,7 +419,7 @@ export default function ActiveLoadDetail() {
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ overflow: 'hidden', position: 'relative' }}>
         {load?.origin && load?.destination
-          ? <LoadHeroMap origin={load.origin} dest={load.destination} />
+          ? <LoadHeroMap origin={load.origin} dest={load.destination} liveLocation={liveLocation} />
           : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
         }
       </div>
