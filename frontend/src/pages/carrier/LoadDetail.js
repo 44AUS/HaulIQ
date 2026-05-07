@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { IonSpinner, IonRippleEffect } from '@ionic/react';
+import { IonAvatar, IonItem, IonLabel, IonList, IonSpinner } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { loadsApi, messagesApi, bidsApi, bookingsApi, instantBookApi } from '../../services/api';
 import { adaptLoad } from '../../services/adapters';
@@ -569,26 +569,21 @@ export default function LoadDetail() {
         </div>
       )}
       {activeTab === 'overview' && load?.broker?.user_id && (
-        <div style={{ marginBottom: 8 }}>
-          <Link to={`/b/${load.broker.user_id}`} style={{ textDecoration: 'none' }}>
-            <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Broker</div>
-              <div className="ion-activatable" style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', cursor: 'pointer', transition: 'background-color 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(var(--ion-color-primary-rgb),0.06)'}
-                onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {load.broker.logo
-                    ? <img src={load.broker.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker.name || 'B')[0].toUpperCase()}</span>
-                  }
-                </div>
-                <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{load.broker.name}</span>
-                <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
-                <IonRippleEffect />
-              </div>
-            </div>
-          </Link>
+        <div style={{ marginBottom: 8, backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Broker</div>
+          <IonList lines="none" style={{ padding: 0, margin: 0, '--ion-item-background': 'transparent', '--background': 'transparent' }}>
+            <IonItem button detail routerLink={`/b/${load.broker.user_id}`}>
+              <IonAvatar slot="start">
+                {load.broker.logo
+                  ? <img src={load.broker.logo} alt="" />
+                  : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker.name || 'B')[0].toUpperCase()}</span>
+                    </div>
+                }
+              </IonAvatar>
+              <IonLabel style={{ fontWeight: 600 }}>{load.broker.name}</IonLabel>
+            </IonItem>
+          </IonList>
         </div>
       )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>

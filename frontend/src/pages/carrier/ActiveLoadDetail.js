@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { IonAlert, IonButton, IonRippleEffect, IonSpinner } from '@ionic/react';
+import { IonAlert, IonAvatar, IonButton, IonItem, IonLabel, IonList, IonSpinner } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_LAYER, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { Geolocation } from '@capacitor/geolocation';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
@@ -630,34 +630,6 @@ export default function ActiveLoadDetail() {
           onClickInProgress={booking.status === 'completed'  ? () => setShowRevertAlert(true)  : undefined}
         />
       )}
-      {activeTab === 'overview' && (
-        <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', marginBottom: 8 }}>
-          {load?.origin && load?.destination
-            ? <LoadHeroMap origin={load.origin} dest={load.destination} liveLocation={liveLocation} />
-            : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
-          }
-        </div>
-      )}
-      <IonAlert
-        isOpen={showDeliverAlert}
-        onDidDismiss={() => setShowDeliverAlert(false)}
-        header="Change Status"
-        message="Would you like to manually change the status from in progress to completed?"
-        buttons={[
-          { text: 'No', role: 'cancel' },
-          { text: 'Yes', handler: () => handleDeliver() },
-        ]}
-      />
-      <IonAlert
-        isOpen={showRevertAlert}
-        onDidDismiss={() => setShowRevertAlert(false)}
-        header="Change Status"
-        message="Would you like to manually change the status from completed to in progress?"
-        buttons={[
-          { text: 'No', role: 'cancel' },
-          { text: 'Yes', handler: () => handleRevertTransit() },
-        ]}
-      />
       {activeTab === 'overview' && booking.status === 'in_transit' && (
         <div style={{ marginTop: 6, marginBottom: 8 }}>
           <IonButton
@@ -687,28 +659,50 @@ export default function ActiveLoadDetail() {
           </IonButton>
         </div>
       )}
+      <IonAlert
+        isOpen={showDeliverAlert}
+        onDidDismiss={() => setShowDeliverAlert(false)}
+        header="Change Status"
+        message="Would you like to manually change the status from in progress to completed?"
+        buttons={[
+          { text: 'No', role: 'cancel' },
+          { text: 'Yes', handler: () => handleDeliver() },
+        ]}
+      />
+      <IonAlert
+        isOpen={showRevertAlert}
+        onDidDismiss={() => setShowRevertAlert(false)}
+        header="Change Status"
+        message="Would you like to manually change the status from completed to in progress?"
+        buttons={[
+          { text: 'No', role: 'cancel' },
+          { text: 'Yes', handler: () => handleRevertTransit() },
+        ]}
+      />
+      {activeTab === 'overview' && (
+        <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', marginBottom: 8 }}>
+          {load?.origin && load?.destination
+            ? <LoadHeroMap origin={load.origin} dest={load.destination} liveLocation={liveLocation} />
+            : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
+          }
+        </div>
+      )}
       {activeTab === 'overview' && load?.broker_user_id && (
-        <div style={{ marginBottom: 8 }}>
-          <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Broker</div>
-            <div
-              className="ion-activatable"
-              onClick={() => navigate(`/b/${load.broker_user_id}`)}
-              style={{ position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', cursor: 'pointer', transition: 'background-color 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(var(--ion-color-primary-rgb),0.06)'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-            >
-              <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ marginBottom: 8, backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Broker</div>
+          <IonList lines="none" style={{ padding: 0, margin: 0, '--ion-item-background': 'transparent', '--background': 'transparent' }}>
+            <IonItem button detail onClick={() => navigate(`/b/${load.broker_user_id}`)}>
+              <IonAvatar slot="start">
                 {load.broker_logo
-                  ? <img src={load.broker_logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker_name || 'B')[0].toUpperCase()}</span>
+                  ? <img src={load.broker_logo} alt="" />
+                  : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker_name || 'B')[0].toUpperCase()}</span>
+                    </div>
                 }
-              </div>
-              <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{load.broker_name}</span>
-              <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
-              <IonRippleEffect />
-            </div>
-          </div>
+              </IonAvatar>
+              <IonLabel style={{ fontWeight: 600 }}>{load.broker_name}</IonLabel>
+            </IonItem>
+          </IonList>
         </div>
       )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
