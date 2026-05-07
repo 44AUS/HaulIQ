@@ -246,9 +246,12 @@ export default function Sidebar({ onNavigate, onClose }) {
             style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', cursor: 'pointer', borderBottom: `1px solid ${divColor}` }}
           >
             <IonAvatar style={{ width: 40, height: 40, flexShrink: 0 }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: isDark ? '#444' : '#d0d0d0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isDark ? '#fff' : '#333', fontSize: '1rem', fontWeight: 600 }}>
-                {(user.company || user.name)?.charAt(0)?.toUpperCase()}
-              </div>
+              {user.logo_url
+                ? <img src={user.logo_url} alt={user.company || user.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                : <div style={{ width: '100%', height: '100%', borderRadius: '50%', backgroundColor: isDark ? '#444' : '#d0d0d0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isDark ? '#fff' : '#333', fontSize: '1rem', fontWeight: 600 }}>
+                    {(user.company || user.name)?.charAt(0)?.toUpperCase()}
+                  </div>
+              }
             </IonAvatar>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.68rem', color: subColor, lineHeight: 1.2, marginBottom: 1 }}>Business</div>
