@@ -333,7 +333,7 @@ export default function LoadManager() {
           <IonButton id="lm-filter-btn" fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={() => setFilterOpen(true)}>
             <IonIcon slot="start" name="funnel-outline" /> Filter
           </IonButton>
-          <IonButton fill="outline" size="small" onClick={handleExport}>
+          <IonButton fill="solid" size="small" style={{ '--background': 'var(--ion-background-color)', '--color': 'var(--ion-text-color)' }} onClick={handleExport}>
             <IonIcon slot="start" name="download-outline" /> Export
           </IonButton>
         </div>
