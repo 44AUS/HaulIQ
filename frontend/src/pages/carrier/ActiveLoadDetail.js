@@ -84,10 +84,7 @@ function LiveDot({ liveLocation }) {
   }, [liveLocation, showLabel]);
 
   return (
-    <div
-      onClick={handleClick}
-      style={{ position: 'absolute', transform: 'translate(-50%, -50%)', cursor: 'pointer', width: 0, height: 0 }}
-    >
+    <div style={{ position: 'absolute', transform: 'translate(-50%, -50%)', width: 0, height: 0 }}>
       <style>{`
         @keyframes livePulse {
           0%   { transform: scale(1);   opacity: 0.75; }
@@ -95,11 +92,14 @@ function LiveDot({ liveLocation }) {
           100% { transform: scale(2.8); opacity: 0; }
         }
       `}</style>
+      {/* Visual rings — pointer-events off so the hitbox below captures clicks */}
       <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.4)', animation: 'livePulse 1.8s ease-out infinite', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.25)', animation: 'livePulse 1.8s ease-out infinite 0.65s', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', top: -8, left: -8, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#3b82f6', border: '3px solid #fff', boxShadow: '0 0 12px rgba(59,130,246,0.85)', pointerEvents: 'none' }} />
+      {/* Transparent click hitbox centered over the dot */}
+      <div onClick={handleClick} style={{ position: 'absolute', top: -20, left: -20, width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', zIndex: 10 }} />
       {showLabel && label && (
-        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '5px 10px', backgroundColor: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.5)', color: '#e2e8f0', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em', pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '5px 10px', backgroundColor: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.5)', color: '#e2e8f0', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em', pointerEvents: 'none' }}>
           {label}
         </div>
       )}
