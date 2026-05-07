@@ -501,6 +501,7 @@ def get_booking(
             "broker_phone": broker_phone,
             "broker_email": broker_email,
             "broker_user_id": str(load.broker_user_id) if load.broker_user_id else None,
+            "broker_logo": (broker_user.avatar_url if broker_user else None) if load.broker else None,
         } if load else None,
         "carrier_name": (carrier.company or carrier.name) if carrier else None,
     }
