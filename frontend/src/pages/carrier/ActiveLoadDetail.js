@@ -273,13 +273,13 @@ export default function ActiveLoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: 24, overflow: 'hidden', borderRadius: '6px 6px 0 0', position: 'relative' }}>
+      <div style={{ overflow: 'hidden', position: 'relative' }}>
         {load?.origin && load?.destination
           ? <LoadHeroMap origin={load.origin} dest={load.destination} />
           : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
         }
       </div>
-      <div style={{ padding: '0 24px 24px', display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
           <BookingStepper status={booking.status} />
           <div style={{ borderTop: '1px solid var(--ion-border-color)', margin: '16px 0' }} />
@@ -517,8 +517,8 @@ export default function ActiveLoadDetail() {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
-      <div style={{ flex: 1, overflow: 'auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+    <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
         {activeTab === 'payments'  && PaymentsTab}
         {activeTab === 'documents' && DocumentsTab}
