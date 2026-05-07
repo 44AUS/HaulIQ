@@ -82,7 +82,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
             const inPct    = total > 0 ? (row.in  / total) * 100 : 0;
             const outPct   = total > 0 ? (row.out / total) * 100 : 0;
             return (
-              <div key={row.st} style={{ display: 'grid', gridTemplateColumns: '36px 32px 1fr 32px', gap: 6, padding: '7px 16px', borderBottom: '1px solid var(--ion-border-color)', alignItems: 'center' }}>
+              <div key={row.st} style={{ display: 'grid', gridTemplateColumns: '36px 32px 1fr 32px', gap: 6, padding: '7px 16px', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>{row.st}</span>
                 <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ion-color-primary)' }}>{row.in}</span>
 
