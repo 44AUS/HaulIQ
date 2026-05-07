@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { IonPage, IonContent } from '@ionic/react';
 import { useJsApiLoader, Autocomplete as GAutocomplete } from '@react-google-maps/api';
 import {
   Brain, TrendingUp, Zap, ArrowRight,
@@ -899,7 +900,9 @@ export default function Landing() {
   const open = () => setShowWaitlist(true);
 
   return (
-    <div style={{ background: '#080c10', minHeight: '100vh', fontFamily: 'Mont, "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
+    <IonPage>
+    <IonContent style={{ '--background': '#080c10' }}>
+    <div style={{ fontFamily: 'Mont, "Helvetica Neue", Helvetica, Arial, sans-serif' }}>
       <Navbar />
       <Hero onWaitlist={open} />
       <WaveTransition />
@@ -956,5 +959,7 @@ export default function Landing() {
       <Footer />
       {showWaitlist && <WaitlistModal onClose={() => setShowWaitlist(false)} />}
     </div>
+    </IonContent>
+    </IonPage>
   );
 }
