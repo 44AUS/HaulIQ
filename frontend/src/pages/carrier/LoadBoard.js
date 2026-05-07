@@ -109,10 +109,10 @@ function TableView({ loads, equipmentTypes }) {
                   {load.broker ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: 'var(--ion-color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#fff' }}>{initials}</span>
+                        <span style={{ fontSize: '0.55rem', color: '#fff' }}>{initials}</span>
                       </div>
                       <div style={{ minWidth: 0 }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ion-text-color)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>{load.broker.name}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--ion-text-color)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3 }}>{load.broker.name}</span>
                         {load.broker.rating > 0 && (
                           <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <IonIcon name="star" style={{ fontSize: 9, color: '#ed6c02' }} />
@@ -125,16 +125,16 @@ function TableView({ loads, equipmentTypes }) {
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.pickup}</span>
+                  <span style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.pickup}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 80 }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap', color: 'var(--ion-color-success)' }}>${load.rate?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.875rem', display: 'block', whiteSpace: 'nowrap', color: 'var(--ion-color-success)' }}>${load.rate?.toLocaleString()}</span>
                   <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>${load.ratePerMile}/mi</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.miles} mi</span>
+                  <span style={{ fontSize: '0.875rem', whiteSpace: 'nowrap' }}>{load.miles} mi</span>
                 </RippleTd>
 
                 {/* Lane — accent bar */}
@@ -147,27 +147,27 @@ function TableView({ loads, equipmentTypes }) {
                       <IonIcon name="square-outline" style={{ fontSize: 8, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
                     </div>
                     <div style={{ minWidth: 0 }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{originCity}</span>
+                      <span style={{ fontSize: '0.75rem', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{originCity}</span>
                       <span style={{ fontSize: '0.75rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.6 }}>{destCity}</span>
                     </div>
                   </div>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 70 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.deadhead > 0 ? `${load.deadhead} mi` : '—'}</span>
+                  <span style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.deadhead > 0 ? `${load.deadhead} mi` : '—'}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, whiteSpace: 'nowrap' }}>{load.delivery}</span>
+                  <span style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}>{load.delivery}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', whiteSpace: 'nowrap' }}>{abbr}</span>
+                  <span style={{ fontSize: '0.75rem', display: 'block', whiteSpace: 'nowrap' }}>{abbr}</span>
                   <span style={{ fontSize: '0.6rem', color: 'var(--ion-color-medium)', display: 'block', whiteSpace: 'nowrap' }}>{equipParts.slice(1).join(' · ')}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, padding: '0 12px', minWidth: 90 }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
+                  <span style={{ fontSize: '0.875rem', whiteSpace: 'nowrap', color: netColor }}>${load.netProfit?.toLocaleString()}</span>
                 </RippleTd>
 
                 <RippleTd style={{ ...tdStyle, width: 60, paddingRight: 6 }} onClick={e => e.stopPropagation()}>
