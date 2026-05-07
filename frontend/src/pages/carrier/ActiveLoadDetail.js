@@ -34,8 +34,10 @@ function useLiveLocation(enabled) {
     let cancelled = false;
 
     async function start() {
+      // requestPermissions throws "not implemented" on web — ignore and proceed
+      try { await Geolocation.requestPermissions(); } catch {}
+
       try {
-        await Geolocation.requestPermissions();
         watchIdRef.current = await Geolocation.watchPosition(
           { enableHighAccuracy: true, timeout: 15000 },
           (pos) => {
@@ -45,7 +47,7 @@ function useLiveLocation(enabled) {
           }
         );
       } catch {
-        // permission denied or geolocation unavailable
+        // geolocation unavailable or denied on this device
       }
     }
 
