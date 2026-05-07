@@ -99,6 +99,7 @@ export const bookingsApi = {
   get:           (id)       => request(`/api/bookings/${id}`),
   pickup:        (id)       => request(`/api/bookings/${id}/pickup`, { method: 'PATCH' }),
   deliver:       (id)       => request(`/api/bookings/${id}/deliver`, { method: 'PATCH' }),
+  revertTransit: (id)       => request(`/api/bookings/${id}/revert-transit`, { method: 'PATCH' }),
   review:        (id, data) => request(`/api/bookings/${id}/review`, { method: 'PATCH', body: JSON.stringify(data) }),
   my:            ()         => request('/api/bookings/my'),
   pending:       ()         => request('/api/bookings/pending'),

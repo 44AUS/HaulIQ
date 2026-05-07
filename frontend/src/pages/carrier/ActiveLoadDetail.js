@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { IonAlert, IonButton, IonSpinner } from '@ionic/react';
-import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { Geolocation } from '@capacitor/geolocation';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
@@ -64,27 +64,9 @@ function useLiveLocation(enabled) {
   return location;
 }
 
-function LiveDot({ liveLocation }) {
-  const [label, setLabel] = useState(null);
-  const [showLabel, setShowLabel] = useState(false);
-
-  const handleClick = useCallback((e) => {
-    e.stopPropagation();
-    if (showLabel) { setShowLabel(false); return; }
-    if (!window.google || !liveLocation) return;
-    new window.google.maps.Geocoder().geocode({ location: liveLocation }, (results, status) => {
-      if (status === 'OK' && results?.length) {
-        const comps = results[0].address_components;
-        const city  = comps.find(c => c.types.includes('locality'))?.short_name || '';
-        const state = comps.find(c => c.types.includes('administrative_area_level_1'))?.short_name || '';
-        setLabel([city, state].filter(Boolean).join(', ') || results[0].formatted_address);
-      }
-    });
-    setShowLabel(true);
-  }, [liveLocation, showLabel]);
-
+function PulseRings() {
   return (
-    <div style={{ position: 'absolute', transform: 'translate(-50%, -50%)', width: 0, height: 0 }}>
+    <div style={{ position: 'absolute', transform: 'translate(-50%, -50%)', width: 0, height: 0, pointerEvents: 'none' }}>
       <style>{`
         @keyframes livePulse {
           0%   { transform: scale(1);   opacity: 0.75; }
@@ -92,17 +74,8 @@ function LiveDot({ liveLocation }) {
           100% { transform: scale(2.8); opacity: 0; }
         }
       `}</style>
-      {/* Visual rings — pointer-events off so the hitbox below captures clicks */}
-      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.4)', animation: 'livePulse 1.8s ease-out infinite', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.25)', animation: 'livePulse 1.8s ease-out infinite 0.65s', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: -8, left: -8, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#3b82f6', border: '3px solid #fff', boxShadow: '0 0 12px rgba(59,130,246,0.85)', pointerEvents: 'none' }} />
-      {/* Transparent click hitbox centered over the dot */}
-      <div onClick={handleClick} style={{ position: 'absolute', top: -20, left: -20, width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', zIndex: 10 }} />
-      {showLabel && label && (
-        <div style={{ position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap', padding: '5px 10px', backgroundColor: 'rgba(15,23,42,0.92)', backdropFilter: 'blur(8px)', borderRadius: 6, border: '1px solid rgba(59,130,246,0.5)', color: '#e2e8f0', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.02em', pointerEvents: 'none' }}>
-          {label}
-        </div>
-      )}
+      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.4)', animation: 'livePulse 1.8s ease-out infinite' }} />
+      <div style={{ position: 'absolute', top: -16, left: -16, width: 32, height: 32, borderRadius: '50%', backgroundColor: 'rgba(59,130,246,0.25)', animation: 'livePulse 1.8s ease-out infinite 0.65s' }} />
     </div>
   );
 }
@@ -110,6 +83,8 @@ function LiveDot({ liveLocation }) {
 function LoadHeroMap({ origin, dest, liveLocation }) {
   const { isLoaded } = useJsApiLoader({ googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY || '', libraries: LIBRARIES });
   const [directions, setDirections] = useState(null);
+  const [liveLabel, setLiveLabel]   = useState(null);
+  const [showInfo, setShowInfo]     = useState(false);
   const mapRef = useRef(null);
   const onMapLoad = useCallback((map) => { mapRef.current = map; }, []);
 
@@ -133,8 +108,28 @@ function LoadHeroMap({ origin, dest, liveLocation }) {
     );
   }, [isLoaded, origin, dest]);
 
-  const aIcon = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(A_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
-  const bIcon = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(B_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
+  const aIcon    = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(A_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
+  const bIcon    = isLoaded ? { url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(B_ICON_SVG)}`, scaledSize: new window.google.maps.Size(32, 40), anchor: new window.google.maps.Point(16, 40) } : undefined;
+  const liveIcon = isLoaded ? {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#3b82f6" stroke="white" stroke-width="3"/></svg>')}`,
+    scaledSize: new window.google.maps.Size(20, 20),
+    anchor:     new window.google.maps.Point(10, 10),
+  } : undefined;
+
+  const handleLiveClick = useCallback(() => {
+    if (!window.google || !liveLocation) return;
+    if (showInfo) { setShowInfo(false); return; }
+    if (liveLabel) { setShowInfo(true); return; }
+    new window.google.maps.Geocoder().geocode({ location: liveLocation }, (results, status) => {
+      if (status === 'OK' && results?.length) {
+        const comps = results[0].address_components;
+        const city  = comps.find(c => c.types.includes('locality'))?.short_name || '';
+        const state = comps.find(c => c.types.includes('administrative_area_level_1'))?.short_name || '';
+        setLiveLabel([city, state].filter(Boolean).join(', ') || results[0].formatted_address);
+      }
+    });
+    setShowInfo(true);
+  }, [liveLocation, liveLabel, showInfo]);
 
   if (!isLoaded) return (
     <div style={{ height: 420, backgroundColor: '#e8eaf0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -150,8 +145,18 @@ function LoadHeroMap({ origin, dest, liveLocation }) {
         {directions && <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} />}
         {liveLocation && (
           <OverlayViewF position={liveLocation} mapPaneName={OVERLAY_MOUSE_TARGET}>
-            <LiveDot liveLocation={liveLocation} />
+            <PulseRings />
           </OverlayViewF>
+        )}
+        {liveLocation && (
+          <Marker position={liveLocation} icon={liveIcon} onClick={handleLiveClick} />
+        )}
+        {liveLocation && showInfo && liveLabel && (
+          <InfoWindowF position={liveLocation} onCloseClick={() => setShowInfo(false)}>
+            <div style={{ padding: '2px 4px', fontWeight: 600, fontSize: '0.8rem', color: '#0f172a' }}>
+              {liveLabel}
+            </div>
+          </InfoWindowF>
         )}
       </GoogleMap>
       <div style={{ position: 'absolute', bottom: 12, left: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', pointerEvents: 'none' }}>
@@ -261,7 +266,7 @@ function TmsStepper({ tmsStep }) {
   );
 }
 
-function LoadStatusBar({ status, onClickCompleted }) {
+function LoadStatusBar({ status, onClickCompleted, onClickInProgress }) {
   const STEPS = [
     { label: 'Quote',       bg: '#9E9E9E' },
     { label: 'Scheduled',   bg: '#1976D2' },
@@ -292,19 +297,22 @@ function LoadStatusBar({ status, onClickCompleted }) {
       `}</style>
       <div className="lsb">
         {STEPS.map((step, i) => {
-          const isCompleted = step.label === 'Completed';
-          const clickable = isCompleted && onClickCompleted;
+          const isCompleted   = step.label === 'Completed';
+          const isInProgress  = step.label === 'In Progress';
+          const handler = isCompleted && onClickCompleted ? onClickCompleted
+                        : isInProgress && onClickInProgress ? onClickInProgress
+                        : undefined;
           return (
             <div key={step.label} className="lsb-wrap">
               <div
                 className="lsb-step"
-                onClick={clickable ? onClickCompleted : undefined}
+                onClick={handler}
                 style={{
                   backgroundColor: step.bg,
                   zIndex: STEPS.length - i,
                   opacity: i > activeIdx ? 0.45 : 1,
                   textShadow: step.bg === '#FDD835' ? '0 1px 2px rgba(0,0,0,0.4)' : 'none',
-                  cursor: clickable ? 'pointer' : 'default',
+                  cursor: handler ? 'pointer' : 'default',
                 }}
               >
                 {step.label}
@@ -355,6 +363,7 @@ export default function ActiveLoadDetail() {
   const [error, setError]                 = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDeliverAlert, setShowDeliverAlert] = useState(false);
+  const [showRevertAlert,  setShowRevertAlert]  = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [checkCalls, setCheckCalls]       = useState([]);
   const [callNote, setCallNote]           = useState('');
@@ -385,6 +394,12 @@ export default function ActiveLoadDetail() {
   const handleDeliver = async () => {
     setActionLoading(true);
     try { await bookingsApi.deliver(bookingId); setBooking(b => ({ ...b, status: 'completed' })); }
+    catch (e) { alert(e.message); } finally { setActionLoading(false); }
+  };
+
+  const handleRevertTransit = async () => {
+    setActionLoading(true);
+    try { await bookingsApi.revertTransit(bookingId); setBooking(b => ({ ...b, status: 'in_transit' })); }
     catch (e) { alert(e.message); } finally { setActionLoading(false); }
   };
 
@@ -668,6 +683,7 @@ export default function ActiveLoadDetail() {
         <LoadStatusBar
           status={booking.status}
           onClickCompleted={booking.status === 'in_transit' ? () => setShowDeliverAlert(true) : undefined}
+          onClickInProgress={booking.status === 'completed'  ? () => setShowRevertAlert(true)  : undefined}
         />
       )}
       <IonAlert
@@ -678,6 +694,16 @@ export default function ActiveLoadDetail() {
         buttons={[
           { text: 'No', role: 'cancel' },
           { text: 'Yes', handler: () => handleDeliver() },
+        ]}
+      />
+      <IonAlert
+        isOpen={showRevertAlert}
+        onDidDismiss={() => setShowRevertAlert(false)}
+        header="Change Status"
+        message="Would you like to manually change the status from completed to in progress?"
+        buttons={[
+          { text: 'No', role: 'cancel' },
+          { text: 'Yes', handler: () => handleRevertTransit() },
         ]}
       />
       {activeTab === 'overview' && booking.status === 'in_transit' && (

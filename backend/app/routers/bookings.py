@@ -616,6 +616,24 @@ def confirm_delivery(
     return {"status": booking.status}
 
 
+@router.patch("/{booking_id}/revert-transit", summary="Carrier: revert completed booking back to in transit")
+def revert_to_transit(
+    booking_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_carrier),
+):
+    booking = db.query(Booking).filter(
+        Booking.id == booking_id,
+        Booking.carrier_id == current_user.id,
+        Booking.status == BookingStatus.completed,
+    ).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found or not in completed state")
+    booking.status = BookingStatus.in_transit
+    db.commit()
+    return {"status": booking.status}
+
+
 @router.patch("/{booking_id}/review", response_model=BookingOut)
 def review_booking(
     booking_id: UUID,
