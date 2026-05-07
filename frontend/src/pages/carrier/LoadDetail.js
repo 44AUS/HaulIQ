@@ -318,19 +318,6 @@ export default function LoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ overflow: 'hidden', position: 'relative' }}>
-        <LoadHeroMap load={load} />
-        <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
-          <button
-            onClick={() => { loadsApi.toggleSave(load._raw.id).catch(() => {}); setSaved(s => !s); }}
-            style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: saved ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }}
-          >
-            <IonIcon name={saved ? 'bookmark' : 'bookmark-outline'} style={{ fontSize: 18 }} />
-          </button>
-        </div>
-      </div>
-
-
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         {/* LEFT */}
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
@@ -568,6 +555,19 @@ export default function LoadDetail() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       {activeTab === 'overview' && <LoadStatusBar status={activeBookingStatus} />}
+      {activeTab === 'overview' && (
+        <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', marginBottom: 8, position: 'relative' }}>
+          <LoadHeroMap load={load} />
+          <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 10 }}>
+            <button
+              onClick={() => { loadsApi.toggleSave(load._raw.id).catch(() => {}); setSaved(s => !s); }}
+              style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: saved ? 'var(--ion-color-primary)' : 'var(--ion-color-medium)' }}
+            >
+              <IonIcon name={saved ? 'bookmark' : 'bookmark-outline'} style={{ fontSize: 18 }} />
+            </button>
+          </div>
+        </div>
+      )}
       {activeTab === 'overview' && load?.broker?.user_id && (
         <div style={{ marginBottom: 8 }}>
           <Link to={`/b/${load.broker.user_id}`} style={{ textDecoration: 'none' }}>

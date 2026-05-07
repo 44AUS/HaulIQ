@@ -429,14 +429,6 @@ export default function ActiveLoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ overflow: 'hidden', position: 'relative' }}>
-        {load?.origin && load?.destination
-          ? <LoadHeroMap origin={load.origin} dest={load.destination} liveLocation={liveLocation} />
-          : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
-        }
-      </div>
-
-
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
           <BookingStepper status={booking.status} />
@@ -637,6 +629,14 @@ export default function ActiveLoadDetail() {
           onClickCompleted={booking.status === 'in_transit' ? () => setShowDeliverAlert(true) : undefined}
           onClickInProgress={booking.status === 'completed'  ? () => setShowRevertAlert(true)  : undefined}
         />
+      )}
+      {activeTab === 'overview' && (
+        <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)', marginBottom: 8 }}>
+          {load?.origin && load?.destination
+            ? <LoadHeroMap origin={load.origin} dest={load.destination} liveLocation={liveLocation} />
+            : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
+          }
+        </div>
       )}
       <IonAlert
         isOpen={showDeliverAlert}
