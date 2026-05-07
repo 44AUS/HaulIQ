@@ -379,7 +379,22 @@ export default function TopBar({ onToggleSidebar, immersiveMode }) {
   // ── Immersive mode ──────────────────────────────────────────────────────────
   if (immersiveMode) {
     const config    = IMMERSIVE_CONFIG[immersiveMode];
-    const displayTitle = immersiveMode === 'profile' && user?.name ? user.name
+
+    const slugToRoute = (slug) => {
+      if (!slug) return null;
+      const [from, to] = slug.split('-to-');
+      if (!from || !to) return null;
+      const fmt = part => part.split('-').map((w, i, arr) =>
+        i === arr.length - 1 && w.length === 2 ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)
+      ).join(' ');
+      return `${fmt(from)} → ${fmt(to)}`;
+    };
+    const pathSlug     = location.pathname.split('/').filter(Boolean)[3] || null;
+    const routeTitle   = immersiveMode === 'load_detail' ? slugToRoute(pathSlug) : null;
+
+    const displayTitle = routeTitle
+                       ? routeTitle
+                       : immersiveMode === 'profile' && user?.name ? user.name
                        : immersiveMode === 'business' && user?.company ? user.company
                        : config.title;
     const hasTabs   = config.tabs.length > 0;
