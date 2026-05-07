@@ -164,3 +164,19 @@ ion-list {
 ::-webkit-scrollbar-track   { background: transparent; }
 ::-webkit-scrollbar-thumb   { background: var(--ion-color-step-200); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ion-color-step-300); }
+
+/* Topbar nav segment scrollbar: visible on desktop, hidden on mobile */
+ion-header ion-segment {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.35) transparent;
+}
+ion-header ion-segment::-webkit-scrollbar        { height: 3px; }
+ion-header ion-segment::-webkit-scrollbar-track  { background: transparent; }
+ion-header ion-segment::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.35); border-radius: 2px; }
+
+@media (max-width: 959px) {
+  ion-header ion-segment {
+    scrollbar-width: none;
+  }
+  ion-header ion-segment::-webkit-scrollbar { display: none; }
+}
