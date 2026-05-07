@@ -21,6 +21,7 @@ const CARRIER_NAV = [
   { icon: 'layers-outline',     label: 'Loads',        path: '/carrier/job-manager' },
   { icon: 'cash-outline',       label: 'Payments',     path: '/carrier/payments' },
   { icon: 'bus-outline',        label: 'My Equipment', path: '/carrier/equipment' },
+  { icon: 'map-outline',        label: 'Map',          path: '/carrier/map' },
   { icon: 'eye-outline',        label: 'Lane Watch',   path: '/carrier/lane-watches' },
 ];
 const BROKER_NAV = [

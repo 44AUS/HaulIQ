@@ -39,6 +39,7 @@ import ActiveLoadDetail from './pages/carrier/ActiveLoadDetail';
 import PlaceBid from './pages/carrier/PlaceBid';
 import CarrierPayments from './pages/carrier/Payments';
 import Equipment from './pages/carrier/Equipment';
+import MapPage from './pages/carrier/MapPage';
 import LaneWatches from './pages/carrier/LaneWatches';
 import Drivers from './pages/carrier/Drivers';
 import LoadManager from './pages/carrier/LoadManager';
@@ -175,6 +176,7 @@ function CarrierRoutes() {
           <Route path="payments" element={<CarrierPayments />} />
           <Route path="analytics" element={<CarrierAnalytics />} />
           <Route path="equipment" element={<Equipment />} />
+          <Route path="map" element={<MapPage />} />
           <Route path="lane-watches" element={<LaneWatches />} />
           <Route path="drivers" element={<Drivers />} />
           <Route path="job-manager" element={<LoadManager />} />
