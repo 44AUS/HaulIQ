@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { IonAlert, IonButton, IonSpinner } from '@ionic/react';
 import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_LAYER, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { Geolocation } from '@capacitor/geolocation';
@@ -385,11 +385,6 @@ export default function ActiveLoadDetail() {
 
   useEffect(() => { callsEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [checkCalls]);
 
-  const handlePickup = async () => {
-    setActionLoading(true);
-    try { await bookingsApi.pickup(bookingId); setBooking(b => ({ ...b, status: 'in_transit' })); }
-    catch (e) { alert(e.message); } finally { setActionLoading(false); }
-  };
 
   const handleDeliver = async () => {
     setActionLoading(true);
