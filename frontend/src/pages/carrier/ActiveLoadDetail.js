@@ -273,13 +273,13 @@ export default function ActiveLoadDetail() {
   // ── Tab: Overview ────────────────────────────────────────────────────────────
   const OverviewTab = (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ margin: '-24px -24px 24px', overflow: 'hidden', position: 'relative' }}>
+      <div style={{ marginBottom: 24, overflow: 'hidden', borderRadius: '6px 6px 0 0', position: 'relative' }}>
         {load?.origin && load?.destination
           ? <LoadHeroMap origin={load.origin} dest={load.destination} />
           : <div style={{ height: 420, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IonIcon name="car-sport-outline" style={{ fontSize: 48, color: 'var(--ion-color-medium)' }} /></div>
         }
       </div>
-      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ padding: '0 24px 24px', display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ ...cardStyle, flex: '0 0 550px', minWidth: 0, padding: 20 }}>
           <BookingStepper status={booking.status} />
           <div style={{ borderTop: '1px solid var(--ion-border-color)', margin: '16px 0' }} />
@@ -456,7 +456,7 @@ export default function ActiveLoadDetail() {
 
   // ── Tab: Payments ────────────────────────────────────────────────────────────
   const PaymentsTab = (
-    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <div style={{ padding: 24, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
       <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
         <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--ion-text-color)', display: 'block', marginBottom: 16 }}>Profit Breakdown</span>
         {[
@@ -498,7 +498,7 @@ export default function ActiveLoadDetail() {
 
   // ── Tab: Documents ───────────────────────────────────────────────────────────
   const DocumentsTab = (
-    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+    <div style={{ padding: 24, display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
       <div style={{ ...cardStyle, flex: 1, padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <IonIcon name="chatbox-outline" style={{ color: 'var(--ion-color-primary)', fontSize: 16 }} />
@@ -517,10 +517,12 @@ export default function ActiveLoadDetail() {
   );
 
   return (
-    <div>
-      {activeTab === 'overview'  && OverviewTab}
-      {activeTab === 'payments'  && PaymentsTab}
-      {activeTab === 'documents' && DocumentsTab}
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '4px 6px' }}>
+      <div style={{ flex: 1, overflow: 'auto', backgroundColor: 'var(--ion-card-background)', borderRadius: 6, boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+        {activeTab === 'overview'  && OverviewTab}
+        {activeTab === 'payments'  && PaymentsTab}
+        {activeTab === 'documents' && DocumentsTab}
+      </div>
     </div>
   );
 }
