@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { IonButton } from '@ionic/react';
 import IonIcon from './IonIcon';
+import { useThemeMode } from '../context/ThemeContext';
 import mapVectorSrc from '../assets/map_vector.svg';
 
 function extractState(location) {
@@ -15,6 +16,7 @@ function extractState(location) {
 const colHeader = { fontSize: '0.6rem', fontWeight: 700, color: 'var(--ion-color-medium)', letterSpacing: '0.1em', textTransform: 'uppercase' };
 
 export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
+  const { mode } = useThemeMode();
   const rows = useMemo(() => {
     const map = {};
     const bump = (key, field) => {
@@ -47,7 +49,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         {/* Header */}
         <div style={{ position: 'relative', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, overflow: 'hidden', minHeight: 110 }}>
           {/* Map vector */}
-          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.15, pointerEvents: 'none', userSelect: 'none' }} />
+          <img src={mapVectorSrc} alt="" aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', opacity: 0.15, pointerEvents: 'none', userSelect: 'none', filter: mode === 'dark' ? 'none' : 'invert(1)' }} />
           <div style={{ position: 'relative', padding: '14px 16px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ textAlign: 'center', flex: 1 }}>
               <img src="/urload-logo.png" alt="UrLoad" style={{ height: 36, objectFit: 'contain', marginBottom: 6, display: 'block', margin: '0 auto 6px' }} />
