@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { IonAlert, IonButton, IonSpinner } from '@ionic/react';
-import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_MOUSE_TARGET, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, DirectionsRenderer, Marker, OverlayViewF, OVERLAY_LAYER, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { Geolocation } from '@capacitor/geolocation';
 import { bookingsApi, freightPaymentsApi } from '../../services/api';
 import RateConSignature from '../../components/shared/RateConSignature';
@@ -144,7 +144,7 @@ function LoadHeroMap({ origin, dest, liveLocation }) {
         {directions && <Marker position={directions.routes[0].legs[0].start_location} icon={aIcon} />}
         {directions && <Marker position={directions.routes[0].legs[0].end_location} icon={bIcon} />}
         {liveLocation && (
-          <OverlayViewF position={liveLocation} mapPaneName={OVERLAY_MOUSE_TARGET}>
+          <OverlayViewF position={liveLocation} mapPaneName={OVERLAY_LAYER}>
             <PulseRings />
           </OverlayViewF>
         )}
