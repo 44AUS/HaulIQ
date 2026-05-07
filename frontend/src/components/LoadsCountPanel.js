@@ -33,7 +33,7 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
       .map(([st, c]) => ({ st, in: c.in, out: c.out }));
   }, [loads]);
 
-  const maxVal = Math.max(...rows.map(r => Math.max(r.in, r.out)), 1);
+  const maxTotal = Math.max(...rows.map(r => r.in + r.out), 1);
 
   return createPortal(
     <>
@@ -63,10 +63,11 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
         </div>
 
         {/* Column headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', padding: '8px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, backgroundColor: 'var(--ion-background-color)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '36px 32px 1fr 32px', padding: '8px 16px', borderBottom: '1px solid var(--ion-border-color)', flexShrink: 0, backgroundColor: 'var(--ion-background-color)' }}>
           <span style={colHeader}>ST</span>
-          <span style={colHeader}>LOADS IN</span>
-          <span style={{ ...colHeader, textAlign: 'right' }}>LOADS OUT</span>
+          <span style={colHeader}>IN</span>
+          <span style={{ ...colHeader, textAlign: 'center' }}>LOADS</span>
+          <span style={{ ...colHeader, textAlign: 'right' }}>OUT</span>
         </div>
 
         {/* Rows */}
@@ -75,27 +76,28 @@ export default function LoadsCountPanel({ isOpen, onClose, loads = [] }) {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
               <span style={{ fontSize: '0.875rem', color: 'var(--ion-color-medium)' }}>No load data available</span>
             </div>
-          ) : rows.map(row => (
-            <div key={row.st} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr', gap: 6, padding: '7px 16px', borderBottom: '1px solid var(--ion-border-color)', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>{row.st}</span>
+          ) : rows.map(row => {
+            const total    = row.in + row.out;
+            const barWidth = (total / maxTotal) * 100;
+            const inPct    = total > 0 ? (row.in  / total) * 100 : 0;
+            const outPct   = total > 0 ? (row.out / total) * 100 : 0;
+            return (
+              <div key={row.st} style={{ display: 'grid', gridTemplateColumns: '36px 32px 1fr 32px', gap: 6, padding: '7px 16px', borderBottom: '1px solid var(--ion-border-color)', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ion-text-color)' }}>{row.st}</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ion-color-primary)' }}>{row.in}</span>
 
-              {/* Loads In */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#4a90d9', minWidth: 32, textAlign: 'right' }}>{row.in}</span>
-                <div style={{ flex: 1, height: 10, backgroundColor: 'rgba(74,144,217,0.18)', borderRadius: 2, overflow: 'hidden' }}>
-                  <div style={{ width: `${(row.in / maxVal) * 100}%`, height: '100%', backgroundColor: '#0033a0', borderRadius: 2 }} />
+                {/* Single stacked bar: dark = in, light = out */}
+                <div style={{ height: 10, backgroundColor: 'rgba(var(--ion-color-primary-rgb),0.12)', borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{ width: `${barWidth}%`, height: '100%', display: 'flex' }}>
+                    <div style={{ width: `${inPct}%`, height: '100%', backgroundColor: 'var(--ion-color-primary)' }} />
+                    <div style={{ width: `${outPct}%`, height: '100%', backgroundColor: 'rgba(var(--ion-color-primary-rgb),0.35)' }} />
+                  </div>
                 </div>
-              </div>
 
-              {/* Loads Out */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end' }}>
-                <div style={{ flex: 1, height: 10, backgroundColor: 'rgba(74,144,217,0.18)', borderRadius: 2, overflow: 'hidden', transform: 'scaleX(-1)' }}>
-                  <div style={{ width: `${(row.out / maxVal) * 100}%`, height: '100%', backgroundColor: '#0033a0', borderRadius: 2 }} />
-                </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#4a90d9', minWidth: 32 }}>{row.out}</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ion-color-primary)', textAlign: 'right' }}>{row.out}</span>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </>,
