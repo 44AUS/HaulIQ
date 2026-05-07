@@ -15,6 +15,7 @@ export default function LoadItemsCard({ load, isRaw = false }) {
 
   const originCity = load.origin || null;
   const destCity   = isRaw ? (load.destination || null) : (load.dest || null);
+  const rate       = load.rate;
   const perMile    = isRaw ? load.rate_per_mile  : load.ratePerMile;
   const miles      = load.miles;
   const weight     = isRaw
@@ -27,7 +28,8 @@ export default function LoadItemsCard({ load, isRaw = false }) {
 
   const cols = [
     { label: 'Lane',          key: 'lane',   show: hasLane },
-    { label: 'Per Mile',      value: perMile  ? `$${Number(perMile).toFixed(2)}`  : null },
+    { label: 'Rate',          value: rate     ? `$${Number(rate).toLocaleString()}` : null },
+    { label: 'Per Mile',      value: perMile  ? `$${Number(perMile).toFixed(2)}`    : null },
     { label: 'Miles',         value: miles    ? Number(miles).toLocaleString()    : null },
     { label: 'Weight',        value: weight },
     { label: 'Pickup Date',   value: pickupDate },
