@@ -330,25 +330,6 @@ export default function LoadDetail() {
         </div>
       </div>
 
-      {load.broker?.user_id && (
-        <div style={{ padding: '16px 24px 0' }}>
-          <Link to={`/b/${load.broker.user_id}`} style={{ textDecoration: 'none' }}>
-            <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, border: '1px solid var(--ion-border-color)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }}>
-              <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {load.broker.logo
-                  ? <img src={load.broker.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker.name || 'B')[0].toUpperCase()}</span>
-                }
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--ion-color-medium)', marginBottom: 2 }}>Broker</span>
-                <span style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--ion-text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{load.broker.name}</span>
-              </div>
-              <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)', flexShrink: 0 }} />
-            </div>
-          </Link>
-        </div>
-      )}
 
       <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap', padding: 24 }}>
         {/* LEFT */}
@@ -587,6 +568,25 @@ export default function LoadDetail() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       {activeTab === 'overview' && <LoadStatusBar status={activeBookingStatus} />}
+      {activeTab === 'overview' && load?.broker?.user_id && (
+        <div style={{ marginBottom: 8 }}>
+          <Link to={`/b/${load.broker.user_id}`} style={{ textDecoration: 'none' }}>
+            <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--ion-text-color)', padding: '14px 20px 12px' }}>Broker</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', borderTop: '1px solid var(--ion-border-color)', cursor: 'pointer' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--ion-color-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {load.broker.logo
+                    ? <img src={load.broker.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <span style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--ion-color-medium)' }}>{(load.broker.name || 'B')[0].toUpperCase()}</span>
+                  }
+                </div>
+                <span style={{ flex: 1, fontSize: '0.9rem', fontWeight: 600, color: 'var(--ion-text-color)' }}>{load.broker.name}</span>
+                <IonIcon name="chevron-forward-outline" style={{ fontSize: 18, color: 'var(--ion-color-medium)' }} />
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
         {activeTab === 'overview'  && OverviewTab}
         {activeTab === 'payments'  && PaymentsTab}
