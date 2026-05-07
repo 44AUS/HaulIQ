@@ -567,9 +567,9 @@ export default function ActiveLoadDetail() {
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       {activeTab === 'overview' && <LoadStatusBar status={booking.status} />}
       {activeTab === 'overview' && booking.status === 'in_transit' && (
-        <IonButton expand="block" color="success" size="small" disabled={actionLoading} onClick={handleDeliver} style={{ margin: '0 0 8px' }}>
-          <IonIcon slot="start" name="checkbox-outline" />
-          {actionLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14 }} /> : 'Confirm Delivery'}
+        <IonButton expand="block" color="success" size="small" disabled={actionLoading} onClick={handleDeliver} className="ion-no-margin" style={{ '--color': '#fff', marginTop: 6, marginBottom: 8 }}>
+          <IonIcon slot="start" name="checkbox-outline" style={{ marginInlineEnd: 6 }} />
+          {actionLoading ? <IonSpinner name="crescent" style={{ width: 14, height: 14, color: '#fff' }} /> : 'Confirm Delivery'}
         </IonButton>
       )}
       <div style={{ backgroundColor: 'var(--ion-card-background)', borderRadius: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
