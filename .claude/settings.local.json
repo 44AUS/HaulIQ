@@ -25,7 +25,24 @@
       "Bash(grep -v \"^[^:]+:[0-9]+:\\\\s*//\")",
       "Bash(grep -E \"^\\(Box|Button|Card|Dialog|Drawer|Table|TextField|Chip|Paper|Modal|Menu|List|Typography|AppBar|Tooltip|IconButton|MenuItem|Select|Badge|Popover|Avatar|Divider|CircularProgress|LinearProgress|Snackbar|Alert|Tab|Tabs|Switch|Radio|Checkbox|FormControl|FormLabel|InputLabel|Grid|Stack|Container|CssBaseline|ListItem|ListItemButton|ListItemIcon|ListItemText|TableBody|TableCell|TableContainer|TableHead|TableRow|FormHelperText|OutlinedInput|Input|InputAdornment|Collapse\\)$\")",
       "Bash(npx cap *)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(xargs grep *)",
+      "Bash(git revert *)",
+      "Bash(git -C /c/Users/austi/Desktop/HaulIQ add frontend/src/pages/shared/CalendarPage.js)",
+      "Bash(git -C /c/Users/austi/Desktop/HaulIQ commit -m ' *)",
+      "Bash(git -C /c/Users/austi/Desktop/HaulIQ push origin main)",
+      "Bash(alembic upgrade *)",
+      "Bash(python -m alembic upgrade head)",
+      "Bash(where python *)",
+      "Bash(pip show *)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" status)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" diff)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" add frontend/src/index.css)",
+      "Bash(git -C C:/Users/austi/Desktop/HaulIQ commit -m ' *)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" push origin main)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" add frontend/src/pages/carrier/LoadManager.js frontend/src/pages/shared/CalendarPage.js frontend/src/pages/carrier/LoadBoard.js frontend/src/pages/carrier/LaneWatches.js frontend/src/pages/carrier/Payments.js frontend/src/pages/carrier/Equipment.js frontend/src/pages/carrier/LoadsInProgress.js)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" add frontend/src/pages/carrier/LoadBoard.js)",
+      "Bash(git -C \"C:/Users/austi/Desktop/HaulIQ\" add frontend/src/pages/carrier/Equipment.js)"
     ]
   }
 }
